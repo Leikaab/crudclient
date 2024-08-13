@@ -8,3 +8,8 @@
 #poetry run pre-commit install -t pre-commit
 #poetry run pre-commit install -t pre-push
 
+if ! command -v poetry &> /dev/null
+then
+    echo "Poetry could not be found"
+    exit
+fi
