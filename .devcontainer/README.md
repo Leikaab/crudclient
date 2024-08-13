@@ -2,7 +2,7 @@
 
 This DevContainer setup is designed to facilitate a streamlined Python development environment using Visual Studio Code (VSCode) and Docker. Below you will find a detailed explanation of the configurations and instructions to get started.
 
-The DevContainer setup is now tested using a github actions workflow on latest macos, ubuntu and windows.
+The DevContainer setup is now tested using a github actions workflow on latest macos, ubuntu and windows. Currently we are having problems TESTING on macos/window, but it runs fine.
 
 [![Test DevContainer Build](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml)
 
