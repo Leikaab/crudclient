@@ -24,7 +24,17 @@
 			]
 		}
 	},
-	"forwardPorts": [],
+	"forwardPorts": [
+		5051 // forward custom liveserver port for coverage
+	],
+
+	"portsAttributes": {
+		"5051":{
+			"label": "Coverage - Live Server",
+			"onAutoForward": "notify"
+		}
+	},
+	"postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh; sh -c ./.devcontainer/postCreateCommand.sh",
 	"remoteUser": "vscode"
 }
 
