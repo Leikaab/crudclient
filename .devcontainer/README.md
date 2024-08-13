@@ -63,12 +63,12 @@ This script is executed after the container is created. It currently includes co
 ### 1. Open in VSCode
 
 - Ensure you have the Docker and Remote - Containers extensions installed in VSCode.
-- Open the project folder in VSCode. You should be prompted to open the folder in a DevContainer. If not, press F1 and select **Remote-Containers: Reopen in Container**.
+- Open the project folder in VSCode. You should be prompted to open the folder in a DevContainer. If not, press <kbd>F1</kbd> and select **Remote-Containers: Reopen in Container**.
 
 ### 2. Modifying the Container
 
 - To make changes to the container (e.g., installing new tools), update the relevant files (`Dockerfile`, `devcontainer.json`, `settings.json`).
-- After making changes, rebuild the container by pressing F1 and selecting **Remote-Containers: Rebuild Container**.
+- After making changes, rebuild the container by pressing <kbd>F1</kbd> and selecting **Remote-Containers: Rebuild Container**.
 
 ### 3. Port Forwarding
 
