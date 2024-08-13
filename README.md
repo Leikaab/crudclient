@@ -1,5 +1,10 @@
 # Create base client model for restful libraries
 
+## Quicklinks
+
+[![Open in Remote - Containers](https://img.shields.io/static/v1?label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Leikaab/crudclient)
+
+
 
 <details>
   <summary>Project Overview</summary>
@@ -102,5 +107,41 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
+<details>
+  <summary>Poetry Usage</summary>
+
+  ## Poetry Usage
+
+  This project leverages Poetry as the primary tool for dependency management, packaging, versioning, and general project configuration. Poetry is a powerful tool that simplifies the entire lifecycle of a Python project, from development to distribution.
+
+  ### Package Management
+
+  Poetry is configured to handle all aspects of package management for this project. It allows you to define dependencies clearly in the `pyproject.toml` file, ensuring that the correct versions of each package are used. Poetry's dependency resolver manages compatibility between packages and installs them in a reproducible environment.
+
+  Poetry handles:
+  
+  - **Dependency Resolution**: Ensuring that all dependencies and their sub-dependencies are compatible and correctly installed.
+  - **Package Installation**: Installing all required dependencies as defined in the `pyproject.toml` file, ensuring consistency across different environments.
+
+  ### Publishing to PyPI
+  
+   We use Poetryto publish packages to PyPI through our CI/CD pipeline with GitHub actions / workflows.
+   These workflows automate the process of building, packaging, and publishing the package to PyPI, ensuring that the deployment process is consistent and error-free. See chapter CD/CI for more information.
+
+  ### Versioning
+
+  Poetry is used to manage the versioning of the project. Version numbers are specified in the `pyproject.toml` file and can be automatically updated as part of the release process. We follow semantic versioning practices, where version numbers indicate the nature of changes (major, minor, patch) and help maintain backward compatibility.
+
+  ### Other Uses of Poetry
+
+  - **Script Management**: Poetry allows us to define custom scripts that can be run within the project, streamlining repetitive tasks and ensuring consistency across environments.
+  
+  - **Development Dependencies**: Poetry distinguishes between production and development dependencies, ensuring that only the necessary packages are included in the final distribution, keeping it lightweight and efficient.
+
+  - **Environment Configuration**: Although Poetry typically creates a virtual environment (`venv`) for each project, in this setup, we have configured Poetry to avoid creating virtual environments due to our use of development containers. This ensures that dependencies are installed directly into the container environment, simplifying the setup and avoiding potential conflicts.
+
+  This configuration is particularly beneficial in a devcontainer environment, where the container itself acts as the isolated development environment, eliminating the need for a separate virtual environment.
+
+</details>
 
 add `[skip ci]` to commit message to not run github actions for testing
