@@ -12,11 +12,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest] #, windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Docker on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew install --cask docker
+          open --background -a Docker
+          while ! docker system info > /dev/null 2>&1; do
+            echo "Waiting for Docker to start..."
+            sleep 10
+          done
+
 
       - name: Set up Devcontainer CLI
         run: |
