@@ -202,3 +202,26 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 </details>
 
 
+## Logging
+
+```python
+
+import logging
+# Use the API library
+from crudclient import API
+
+# Configure logging for the application
+logging.basicConfig(level=logging.DEBUG)
+
+# Configure specific logging for the crudclient library
+logging.getLogger('crudclient').setLevel(logging.INFO)
+
+# Or you could configure at a module level if needed
+logging.getLogger('crudclient.api').setLevel(logging.WARNING)
+
+# Example usage of the library
+with api as active_api:
+    resource = active_api.use_custom_resource(MyCrudResource)
+    # Interact with the resourc
+
+```
