@@ -1,9 +1,12 @@
 # Create base client model for restful libraries
 
-## Quicklinks
+## Badges and quicklinks
 
 [![Open in Remote - Containers](https://img.shields.io/static/v1?label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Leikaab/crudclient)
 
+[![Test DevContainer Build](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml)
+
+[![Run Tests](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml)
 
 
 <details>
