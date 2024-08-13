@@ -18,13 +18,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build DevContainer
+      - name: Set up Devcontainer CLI
         run: |
-          docker build .devcontainer/ -f .devcontainer/Dockerfile --platform linux/amd64 --tag devcontainer-test:${{ matrix.os }}
+          npm install -g @devcontainers/cli
 
-      - name: Run DevContainer
+      - name: Build and Test DevContainer
         run: |
-          docker run --rm devcontainer-test:${{ matrix.os }} sleep 5
+          devcontainer up --workspace-folder . --skip-post-create
+
+      - name: Validate DevContainer
+        run: |
+          devcontainer exec --workspace-folder . /usr/local/py-utils/bin/poetry --version
