@@ -8,6 +8,8 @@
 
 [![Run Tests](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml)
 
+[![Publish to PyPI](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml)
+
 [![Dependabot Updates](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates)
 
 <details>
