@@ -82,27 +82,3 @@ This script is executed after the container is created. It currently includes co
 ### 5. Post Create Commands
 
 - Modify the `postCreateCommand.sh` script to perform additional setup tasks after the container is built. Uncomment the existing commands if needed or add your own.
-
-
-
-
-
-
-
-
-
-
-
-
-> **Note:** This container runs as a non-root user with sudo access by default. Comment out `"remoteUser": "vscode"` in `.devcontainer/devcontainer.json` if you'd prefer to run as root.
-
-
-4. **Rebuild or update your container**
-
-   You may want to make changes to your container, such as installing a different version of a software or forwarding a new port. You'll rebuild your container for your changes to take effect. 
-
-   **Open browser automatically:** As an example change, let's update the `portsAttributes` in the `.devcontainer/devcontainer.json` file to open a browser when our port is automatically forwarded.
-   
-   - Open the `.devcontainer/devcontainer.json` file.
-   - Modify the `"onAutoForward"` attribute in your `portsAttributes` from `"notify"` to `"openBrowser"`.
-   - Press <kbd>F1</kbd> and select the **Remote-Containers: Rebuild Container** command so the modifications are picked up.  
