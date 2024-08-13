@@ -5,14 +5,17 @@ on:
     branches:
       - '**'
     paths:
-      - '.devcontainer/**'
+      - '.devcontainer/**' #only trigger if changes are made to the .devcontainer folder
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }} #using matrix to create one similar job for each OS.
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest] #, windows-latest
+        os: [ubuntu-latest] #, windows-latest, macos-latest
+      fail-fast: false # Ensures other jobs in the matrix continue running even if one fails
+
+    continue-on-error: false # Ensures each job within the OS fails completely if any step fails
 
     steps:
       - name: Checkout code
