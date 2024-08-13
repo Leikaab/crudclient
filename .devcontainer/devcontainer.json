@@ -3,6 +3,22 @@
 	"name": "Python 3",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
-	"workspaceFolder": "/workspace"
+	"workspaceFolder": "/workspace",
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {
+			"ppa": true,
+			"version": "os-provided"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": "./settings.json",
+			"extensions": [
+				"ms-python.python"
+			]
+		}
+	},
+	"forwardPorts": [],
+	"remoteUser": "vscode"
 }
 
