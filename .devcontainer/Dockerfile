@@ -13,8 +13,11 @@ RUN pipx install poetry
 # Set the PATH environment variable
 ENV PATH="/root/.local/bin:$PATH"
 
-# Set up Poetry
+# Disable poetry from creating virtual environments globally
 RUN poetry config virtualenvs.create false
+
+# Verify the poetry configuration
+#RUN poetry config --list | grep virtualenvs.create
 
 # Copy the pyproject.toml and poetry.lock files to the container
 COPY pyproject.toml poetry.lock ./

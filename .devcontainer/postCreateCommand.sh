@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Reload the shell environment
+. ~/.bashrc
+
 # setup local git user for the container, commented out for now
 #git config --global user.email "nordavindltd@gmail.com"
 #git config --global user.name "leikaab"
@@ -8,8 +11,37 @@
 #poetry run pre-commit install -t pre-commit
 #poetry run pre-commit install -t pre-push
 
-if ! command -v poetry &> /dev/null
+# Wait until poetry is available
+for i in {1..5}; do
+    if command -v poetry &> /dev/null
+    then
+        echo "Poetry found"
+        break
+    else
+        echo "Waiting for Poetry to be available..."
+        sleep 2
+    fi
+done
+
+
+echo "Checking poetry by direct invocation:"
+if /usr/local/py-utils/bin/poetry --version &> /dev/null
 then
+    echo "Poetry is available and working"
+    poetry config virtualenvs.create false --local
+else
     echo "Poetry could not be found"
-    exit
 fi
+
+# Loop through all items in the /workspace directory
+for item in /workspace/*; do
+    # Check if the item is the .git directory
+    if [ "$(basename "$item")" != ".git" ]; then
+        # Change ownership of the item (file or directory)
+        chown -R vscode:vscode "$item"
+    fi
+done
+
+
+# Configure Git to Trust the Directory
+#git config --global --add safe.directory /workspace
