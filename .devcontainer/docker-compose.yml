@@ -17,5 +17,6 @@ services:
     # Uncomment the next line to use a non-root user for all processes.
     # user: vscode
 
-    env_file:
-      - ../.env
+    # Commented out the env file so it does not crash the container build, if not present
+    #env_file:
+    #  - ../.env
