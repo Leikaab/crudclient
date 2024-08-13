@@ -32,6 +32,8 @@ repos:
         entry: poetry run flake8
         types: [python]
         exclude: setup.py
+        args:
+          - "--max-line-length=120"
 
       - id: mypy
         name: mypy

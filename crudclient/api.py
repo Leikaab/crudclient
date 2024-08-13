@@ -43,11 +43,7 @@ from typing import Optional, Type
 
 from .client import Client, ClientConfig
 from .crud import Crud
-from .exceptions import (
-    ClientInitializationError,
-    InvalidClientConfigError,
-    InvalidClientError,
-)
+from .exceptions import ClientInitializationError, InvalidClientError
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -67,6 +63,29 @@ class API(ABC):
     """
 
     client_class: Optional[Type[Client]] = None
+
+    def _assert_client(
+        self, varname: str, Instance: Client | ClientConfig | None, Class: Type[Client] | Type[ClientConfig]
+    ) -> None:
+        """
+        Asserts that the provided `Instance` is an instance of the specified `Class` or `None`.
+        Args:
+            varname (str): The name of the variable being asserted.
+            Instance (Client | ClientConfig | None): The instance to be checked.
+            Class (Type[Client] | Type[ClientConfig]): The expected class type.
+        Raises:
+            InvalidClientError: If the `Instance` is not an instance of the specified `Class` or `None`.
+        """
+
+        if not (Instance is None or isinstance(Instance, Class)):
+            logger.error(
+                f"Invalid {varname} provided: expected {
+                    Class.__name__} or None, got {type(Instance).__name__}."
+            )
+            raise InvalidClientError(
+                client=Instance,
+                message=f"{varname} must be an instance of {Class.__name__} or None.",
+            )
 
     def __init__(
         self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, *args, **kwargs
@@ -90,24 +109,11 @@ class API(ABC):
         """
         logger.debug(f"Initializing API class with client: {client}, client_config: {client_config}")
 
-        # Check if client is a valid Client object
-        if not (client is None or isinstance(client, Client)):
-            logger.error(f"Invalid client provided: expected Client or None, got {type(client).__name__}.")
-            raise InvalidClientError(
-                f"client must be an instance of Client or None, got {
-                    type(client).__name__} instead."
-            )
+        # Check if client is a valid Client object or None
+        self._assert_client("client", client, Client)
 
-        # Check if client_config is a valid ClientConfig object
-        if not (client_config is None or isinstance(client_config, ClientConfig)):
-            logger.error(
-                f"Invalid client_config provided: expected ClientConfig or None, got {
-                    type(client_config).__name__}."
-            )
-            raise InvalidClientConfigError(
-                f"client_config must be a ClientConfig or None, got {
-                    type(client_config).__name__} instead."
-            )
+        # Check if client_config is a valid ClientConfig object or None
+        self._assert_client("client_config", client_config, ClientConfig)
 
         # Store the client and client configuration
         self.client: Optional[Client] = client
