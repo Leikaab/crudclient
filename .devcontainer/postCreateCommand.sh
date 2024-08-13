@@ -8,7 +8,7 @@
 #git config --global user.name "leikaab"
 
 # set up pre-commit hooks, commented out for now
-#poetry run pre-commit install -t pre-commit
+poetry run pre-commit install -t pre-commit
 #poetry run pre-commit install -t pre-push
 
 # Wait until poetry is available
