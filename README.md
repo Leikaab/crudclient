@@ -150,4 +150,55 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
-add `[skip ci]` to commit message to not run github actions for testing
+<details>
+  <summary>CI/CD with GitHub Workflows</summary>
+
+  ## CI/CD with GitHub Workflows
+
+  This project utilizes GitHub Actions to automate continuous integration and continuous deployment (CI/CD) processes. The workflows are designed to ensure code quality, test the development environment, and automatically publish the package to PyPI upon successful testing.
+
+  ### Test Workflow (`tests.yml`)
+
+  The `tests.yml` workflow is responsible for running the project's test suite across multiple operating systems (Ubuntu, Windows, and macOS) whenever code is pushed to the repository. This workflow ensures that the codebase is robust and compatible across different environments.
+
+  Key steps in this workflow include:
+  - **Checkout Code**: Retrieves the latest code from the repository.
+  - **Set up Python**: Configures the appropriate Python environment.
+  - **Install Dependencies**: Installs the project's dependencies using Poetry.
+  - **Run Linting and Formatting Checks**: Uses `isort`, `black`, `flake8`, and `mypy` to enforce code quality.
+  - **Run Tests**: Executes the test suite with `pytest` and checks for 100% code coverage.
+
+  This workflow is triggered on every push to the repository, ensuring continuous verification of the code's integrity.
+
+  > Add `[skip ci]` to commit message to not run github actions for testing
+
+  ### Publish Workflow (`publish.yml`)
+
+  The `publish.yml` workflow automates the process of publishing the package to PyPI. This workflow is triggered only after the `tests.yml` workflow completes successfully, ensuring that only thoroughly tested code is released.
+
+  Key steps in this workflow include:
+  - **Checkout Code**: Retrieves the full history of the repository, which is necessary for versioning.
+  - **Set up Python**: Configures the appropriate Python environment.
+  - **Install Dependencies**: Installs the necessary dependencies without development dependencies.
+  - **Version Check**: Compares the current version in `pyproject.toml` with the latest Git tag to determine if a new version should be published.
+  - **Publish to PyPI**: Publishes the package to PyPI using Poetry, making it available for installation via `pip`.
+  - **Create New Tag**: If a new version is published, the workflow automatically tags the release in the GitHub repository.
+
+  This workflow ensures that the package is consistently versioned and available to the public after passing all tests. The workflow only runs if code is pushed to main, and is not touched by versioning that are done in the branches.
+
+  ### DevContainer Test Workflow (`test_devcontainer.yml`)
+
+  The `test_devcontainer.yml` workflow is designed to verify the development container setup, ensuring that other developers can seamlessly use the devcontainer environment.
+
+  Key steps in this workflow include:
+  - **Checkout Code**: Retrieves the latest code from the repository.
+  - **Set up Docker (for macOS)**: Ensures Docker is running on macOS systems.
+  - **Set up Devcontainer CLI**: Installs the DevContainer CLI to interact with the development container.
+  - **Build and Test DevContainer**: Builds the development container and runs basic tests to verify the setup.
+  - **Validate DevContainer**: Ensures that critical tools like Poetry are correctly installed and configured within the container.
+
+  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions enviroments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be rapported in the issues section on github.
+
+</details>
+
+
