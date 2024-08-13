@@ -22,11 +22,11 @@ The DevContainer setup is now tested using a github actions workflow on latest u
 - **Docker Compose File**: `"dockerComposeFile": "docker-compose.yml"` - Indicates the use of Docker Compose for setting up services.
 - **Service**: `"service": "app"` - Specifies the service defined in the `docker-compose.yml` to be used.
 - **Workspace Folder**: `"workspaceFolder": "/workspace"` - The folder inside the container where your project files will be located.
-- **Features**: 
+- **Features**:
   - **Git**: Uses the `ghcr.io/devcontainers/features/git:1` feature with the PPA version of Git.
 - **Customizations**:
   - **VSCode Settings**: Includes the settings from `settings.json` for Python linting, formatting, and testing.
-  - **Extensions**: 
+  - **Extensions**:
     - Python support (`ms-python.python`, `ms-python.vscode-pylance`)
     - GitHub integration (`vscode-github-actions`, `vscode-pull-request-github`, `GitHub.copilot`, `GitHub.copilot-chat`)
 - **Port Forwarding**:

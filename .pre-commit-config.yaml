@@ -1,5 +1,12 @@
 # See https://pre-commit.com/ for usage and config
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: trailing-whitespace
+        name: Remove trailing whitespace
+        stages: [commit]
+
   - repo: local
     hooks:
       - id: isort
