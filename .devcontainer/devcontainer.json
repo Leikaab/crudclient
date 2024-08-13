@@ -14,7 +14,13 @@
 		"vscode": {
 			"settings": "./settings.json",
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"github.vscode-github-actions",
+				"me-dutour-mathieu.vscode-github-actions",
+				"GitHub.vscode-pull-request-github",
+				"GitHub.copilot",
+				"GitHub.copilot-chat"
 			]
 		}
 	},
