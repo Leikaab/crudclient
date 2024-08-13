@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: crudclient",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/crudclient",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+        {
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "pytest",
+            "args": [
+                "-s",
+                "--disable-warnings"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
