@@ -2,14 +2,17 @@
 
 ## Badges and quicklinks
 
+### Open project for development in container
 [![Open in Remote - Containers](https://img.shields.io/static/v1?label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Leikaab/crudclient)
 
+### Status of project
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/crudclient)
+![PyPI - Version](https://img.shields.io/pypi/v/crudclient)
+
+### Status of testing
 [![Test DevContainer Build](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml)
-
 [![Run Tests](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/tests.yml)
-
 [![Publish to PyPI](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml)
-
 [![Dependabot Updates](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates)
 
 <details>
@@ -201,7 +204,16 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
+<details>
+  <summary>Non-functional plans and useful links</summary>
 
+  ## Bagdes for project
+
+  - https://pypi.org/project/pybadges/
+  - https://github.com/badges/shields
+  - https://shields.io/badges/dynamic-toml-badge
+
+</details>
 ## Logging
 
 ```python
