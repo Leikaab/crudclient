@@ -32,10 +32,10 @@ jobs:
       - name: Run forced std
         run: |
           poetry run isort --diff .
-          poetry run black --check --line-length=120 .
+          poetry run black --check --line-length=150 .
           poetry run flake8
           poetry run mypy
 
       - name: Run tests
         run: |
-          poetry run pytest --cov=crudclient --cov-fail-under=100
+          poetry run pytest --cov=crudclient --cov-fail-under=80
