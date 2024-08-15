@@ -5,7 +5,7 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 
 
-class TestClientConfig(ClientConfig):
+class MockClientConfig(ClientConfig):
     def __init__(self):
         self.base_url = "https://api.example.com"
         self.headers = {"Authorization": "Bearer token"}
@@ -18,7 +18,7 @@ class TestClient:
     @pytest.fixture
     def client(self):
         # Create a mock config for the client
-        config = TestClientConfig()
+        config = MockClientConfig()
         return Client(config)
 
     @pytest.fixture
