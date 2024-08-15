@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.1.3"
+version = "0.2.0"
 description = ""
 authors = ["leikaab <nordavindltd@gmail.com>"]
 license = "MIT"
