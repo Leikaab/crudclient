@@ -65,9 +65,7 @@ class API(ABC):
 
     client_class: Optional[Type[Client]] = None
 
-    def _assert_client(
-        self, varname: str, Instance: Client | ClientConfig | None, Class: Type[Client] | Type[ClientConfig]
-    ) -> None:
+    def _assert_client(self, varname: str, Instance: Client | ClientConfig | None, Class: Type[Client] | Type[ClientConfig]) -> None:
         """
         Asserts that the provided `Instance` is an instance of the specified `Class` or `None`.
         Args:
@@ -83,9 +81,7 @@ class API(ABC):
         except TypeError as e:
             raise InvalidClientError(message=str(e))
 
-    def __init__(
-        self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, *args, **kwargs
-    ) -> None:
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs) -> None:
         """
         Initializes the API class.
 
@@ -115,8 +111,7 @@ class API(ABC):
         self.client: Optional[Client] = client
         self.client_config: Optional[ClientConfig] = client_config
 
-        # Store other args/kwargs for potential use in API subclass
-        self.api_args = args
+        # Store other kwargs for potential use in API subclass
         self.api_kwargs = kwargs
 
         # Initialize the client if it is not provided
@@ -145,7 +140,7 @@ class API(ABC):
         @raises ClientInitializationError: If the client could not be initialized due to missing `client_class` or other issues.
         """
 
-        logger.debug("Initializing client.")
+        logger.debug("Doing typechecks before initializing client.")
 
         # check if client_class is defined
         if not self.client_class:
@@ -156,6 +151,8 @@ class API(ABC):
         if not self.client_config:
             logger.error("client_config is not defined. Cannot initialize the client.")
             raise ClientInitializationError("Cannot initialize client because client_config is not set.")
+
+        logger.debug(f"Initializing API class with client class {self.client_class.__name__}, using client_config: {self.client_config}")
 
         try:
             self.client = self.client_class(config=self.client_config)
@@ -233,5 +230,7 @@ class API(ABC):
         @return: An instance of the specified resource class, initialized with the provided arguments.
         @rtype: Crud
         """
+
+        assert self.client is not None, "Client must be initialized before using custom resources."
         logger.debug(f"Using custom resource: {resource_class.__name__} with args: {args} and kwargs: {kwargs}")
         return resource_class(self.client, *args, **kwargs)
