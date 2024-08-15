@@ -9,9 +9,9 @@ from crudclient.crud import Crud
 from crudclient.exceptions import ClientInitializationError, InvalidClientError
 
 
-class MockCrud(Crud):
-    def __init__(self, client):
-        super().__init__(client, "/test")
+class MockCrud(Crud[dict]):
+    _resource_path = "test"
+    _datamodel = None
 
 
 class MockAPI(API):
@@ -29,6 +29,17 @@ class TestAPI:
     @pytest.fixture
     def requests_mocker(self):
         with requests_mock.Mocker() as m:
+
+            original_register_uri = m.register_uri
+
+            def custom_register_uri(method, url, **kwargs):
+                # Ensure the Content-Type header is set to application/json
+                headers = kwargs.get("headers", {})
+                headers["Content-Type"] = "application/json"
+                kwargs["headers"] = headers
+                original_register_uri(method, url, **kwargs)
+
+            m.register_uri = custom_register_uri
             yield m
 
     def test_init_with_client(self, mock_client_config):
@@ -78,11 +89,11 @@ class TestAPI:
 
     def test_context_manager(self, mock_client_config, requests_mocker):
         # Test the context manager functionality
-        requests_mocker.get("https://api.example.com/test", json={"status": "success"})
+        requests_mocker.get("https://api.example.com/test", json={"data": [1, 2, 3]})
         with MockAPI(client_config=mock_client_config) as api:
             assert isinstance(api, MockAPI)
             response = api.test_resource.list()
-            assert response == '{"status": "success"}'
+            assert response == [1, 2, 3]
 
     def test_close(self, mock_client_config):
         # Test the close method
@@ -96,9 +107,9 @@ class TestAPI:
         custom_resource = api.use_custom_resource(MockCrud)
         assert isinstance(custom_resource, MockCrud)
 
-        requests_mocker.get("https://api.example.com/test", json={"status": "custom"})
+        requests_mocker.get("https://api.example.com/test", json={"data": [1, 2, 3]})
         response = custom_resource.list()
-        assert response == '{"status": "custom"}'
+        assert response == [1, 2, 3]
 
     @patch("crudclient.api.logger")
     def test_logging(self, mock_logger, mock_client_config):
@@ -145,23 +156,23 @@ class TestAPI:
 
         # Test list operation
         requests_mocker.get("https://api.example.com/test", json={"items": [1, 2, 3]})
-        assert api.test_resource.list() == '{"items": [1, 2, 3]}'
+        assert api.test_resource.list() == [1, 2, 3]
 
         # Test create operation
         requests_mocker.post("https://api.example.com/test", json={"id": 4})
-        assert api.test_resource.create({"name": "test"}) == '{"id": 4}'
+        assert api.test_resource.create({"name": "test"}) == {"id": 4}
 
         # Test get operation
         requests_mocker.get("https://api.example.com/test/4", json={"id": 4, "name": "test"})
-        assert api.test_resource.get("4") == '{"id": 4, "name": "test"}'
+        assert api.test_resource.read("4") == {"id": 4, "name": "test"}
 
         # Test update operation
         requests_mocker.put("https://api.example.com/test/4", json={"id": 4, "name": "updated"})
-        assert api.test_resource.update("4", {"name": "updated"}) == '{"id": 4, "name": "updated"}'
+        assert api.test_resource.update("4", {"name": "updated"}) == {"id": 4, "name": "updated"}
 
         # Test delete operation
         requests_mocker.delete("https://api.example.com/test/4", json={"status": "deleted"})
-        assert api.test_resource.delete("4") == '{"status": "deleted"}'
+        assert api.test_resource.destroy("4") is None
 
     def test_custom_action(self, mock_client_config, requests_mocker):
         # Test custom action on a resource
@@ -169,4 +180,4 @@ class TestAPI:
 
         requests_mocker.post("https://api.example.com/test/4/activate", json={"status": "activated"})
         response = api.test_resource.custom_action("activate", resource_id="4")
-        assert response == '{"status": "activated"}'
+        assert response == {"status": "activated"}
