@@ -27,6 +27,7 @@ pycodestyle = "*"
 pydocstyle = "*"
 pylint = "*"
 pre-commit = "*"
+types-requests = "*"
 
 
 [build-system]

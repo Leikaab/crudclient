@@ -44,6 +44,7 @@ from typing import Optional, Type
 from .client import Client, ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
+from .runtime_type_checkers import _assert_type
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -77,15 +78,10 @@ class API(ABC):
             InvalidClientError: If the `Instance` is not an instance of the specified `Class` or `None`.
         """
 
-        if not (Instance is None or isinstance(Instance, Class)):
-            logger.error(
-                f"Invalid {varname} provided: expected {
-                    Class.__name__} or None, got {type(Instance).__name__}."
-            )
-            raise InvalidClientError(
-                client=Instance,
-                message=f"{varname} must be an instance of {Class.__name__} or None.",
-            )
+        try:
+            _assert_type(varname, Instance, Class, logger, optional=True)
+        except TypeError as e:
+            raise InvalidClientError(message=str(e))
 
     def __init__(
         self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, *args, **kwargs
@@ -156,8 +152,13 @@ class API(ABC):
             logger.error("client_class is not defined. Cannot initialize the client.")
             raise ClientInitializationError("Cannot initialize client because client_class is not set.")
 
+        # check if client_config is defined
+        if not self.client_config:
+            logger.error("client_config is not defined. Cannot initialize the client.")
+            raise ClientInitializationError("Cannot initialize client because client_config is not set.")
+
         try:
-            self.client = self.client_class(**self.client_config)
+            self.client = self.client_class(config=self.client_config)
         except Exception as e:
             logger.exception("Failed to initialize the client.")
             raise ClientInitializationError("Failed to initialize the client.") from e
