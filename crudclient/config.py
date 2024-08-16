@@ -4,14 +4,20 @@ from urllib.parse import urljoin
 
 class ClientConfig:
     """
-    Configuration class for Client.
+    Configuration class for the Client.
 
     Attributes:
-        base_url (str): The base URL of the API.
-        api_key (Optional[str]): The API key for authentication.
-        headers (Optional[Dict[str, str]]): Additional headers to include in every request.
-        timeout (Optional[float]): Timeout for requests in seconds.
-        retries (Optional[int]): Number of retries for failed requests.
+        hostname (Optional[str]): The hostname of the API.
+        version (Optional[str]): The version of the API.
+        api_key (Optional[str]): The API key to use for authentication.
+        headers (Optional[Dict[str, str]]): Additional headers to include in the requests.
+        timeout (Optional[float]): The timeout duration for requests.
+        retries (Optional[int]): The number of retries to attempt for requests.
+
+    Methods:
+        base_url: Returns the base URL for the API.
+        auth: Returns the authentication, standard is Bearer token. Overwrite this method if needed.
+        __init__: Initializes the ClientConfig object with the provided values.
     """
 
     hostname: Optional[str] = None
