@@ -30,9 +30,10 @@ class Crud(Generic[T]):
         self.parent = parent
 
         # Remove methods that are not allowed
-        for method in ["list", "create", "read", "update", "partial_update", "destroy"]:
-            if method not in self._methods:
-                setattr(self, method, None)
+        if self._methods != ["*"]:
+            for method in ["list", "create", "read", "update", "partial_update", "destroy"]:
+                if method not in self._methods:
+                    setattr(self, method, None)
 
     def _get_endpoint(self, *args: Optional[str]) -> str:
         """
