@@ -62,6 +62,9 @@ def api():
 def test_api_configuration(api):
     assert api.client.base_url == "https://api.test.oneflow.com/v1/"
     assert api.client.config.api_key == os.getenv("ONEFLOW_API_KEY")
+    assert os.getenv("ONEFLOW_API_KEY") != ""
+    assert os.getenv("ONEFLOW_USER_EMAIL") != ""
+    assert api.client.config.headers == {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL")}
 
 
 def test_list_users(api):

@@ -3,9 +3,11 @@
 # Reload the shell environment
 . ~/.bashrc
 
-# setup local git user for the container, commented out for now
-#git config --global user.email "nordavindltd@gmail.com"
-#git config --global user.name "leikaab"
+# Check if the .env file exists
+if [ -f .env ]; then
+    # Export the variables from .env
+    export $(grep -v '^#' .env | xargs)
+fi
 
 # set up pre-commit hooks, commented out for now
 poetry run pre-commit install -t pre-commit
@@ -41,7 +43,3 @@ for item in /workspace/*; do
         chown -R vscode:vscode "$item"
     fi
 done
-
-
-# Configure Git to Trust the Directory
-#git config --global --add safe.directory /workspace

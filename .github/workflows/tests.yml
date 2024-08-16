@@ -37,5 +37,8 @@ jobs:
           poetry run mypy
 
       - name: Run tests
+        env:
+          ONEFLOW_API_KEY: ${{ secrets.ONEFLOW_API_KEY }}
+          ONEFLOW_USER_EMAIL: ${{ secrets.ONEFLOW_USER_EMAIL }}
         run: |
           poetry run pytest --cov=crudclient --cov-fail-under=80
