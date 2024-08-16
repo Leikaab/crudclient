@@ -1,11 +1,22 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.3.1"
-description = ""
+version = "0.3.2"
+description = "A flexible CRUD client for RESTful APIs"
 authors = ["leikaab <nordavindltd@gmail.com>"]
-license = "MIT"
+license = "LGPL-3.0-or-later"
 readme = "README.md"
-exclude = ["crudclient/**/tests/*"]
+homepage = "https://github.com/Leikaab/crudclient"
+repository = "https://github.com/Leikaab/crudclient"
+documentation = "https://github.com/Leikaab/crudclient#readme"
+keywords = ["crud", "api", "client", "rest"]
+classifiers = [
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -36,3 +47,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/yourusername/crudclient/issues"
