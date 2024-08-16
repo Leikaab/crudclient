@@ -15,12 +15,13 @@
 [![Publish to PyPI](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/publish.yml)
 [![Dependabot Updates](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/dependabot/dependabot-updates)
 
-<details>
-  <summary>Project Overview</summary>
 
-  ## Project Overview
+## Project Overview
 
   This project is a foundational framework designed to streamline the creation of API clients and CRUD (Create, Read, Update, Delete) classes. It is intended to be a reusable package that can be implemented in various projects, providing a consistent and DRY (Don't Repeat Yourself) approach to coding.
+
+<details>
+  <summary>Project details</summary>
 
   ### Key Features
 
@@ -34,13 +35,39 @@
 
 </details>
 
+## Logging
+
+The library has standard logging that can be hooked into using get.logger
 
 <details>
-  <summary>Using Dev Containers</summary>
+  <summary>Code example</summary>
+
+```python
+
+import logging
+# Use the API library
+from crudclient import API
+
+# Configure logging for the application
+logging.basicConfig(level=logging.DEBUG)
+
+# Configure specific logging for the crudclient library
+logging.getLogger('crudclient').setLevel(logging.INFO)
+
+# Or you could configure at a module level if needed
+logging.getLogger('crudclient.api').setLevel(logging.WARNING)
+
+```
+
+</details>
+
 
 ## Project uses devcontainers
+This project is set up using devcontainers for easy developement across enviroments and hardware.
 
-### Run project locally via dev-containers
+### How to run project locally via dev-containers
+<details>
+  <summary>Set up project</summary>
 
 A **development container** is a running [Docker](https://www.docker.com) container with a well-defined tool/runtime stack and its prerequisites.
 
@@ -49,9 +76,12 @@ A **development container** is a running [Docker](https://www.docker.com) contai
 If you already have VS Code and Docker installed, you can click the badge above to automatically install the Remote - Containers extension if needed, clone the source code into a container volume, and spin up a dev container for use.
 
 If this is your first time using a development container, please ensure your system meets the prerequisites (i.e. have Docker installed) in the [getting started steps](https://aka.ms/vscode-remote/containers/getting-started).
+</details>
 
 ### Test out project
 
+<details>
+  <summary>Details after setup</summary>
 Once you have this project opened, you'll be able to work with it like you would locally.
 
 Note that ha bounch of key extentions are allready installed + there is local project settings set up in the background, even though there is no settings.json file. These settings are made to match with developmental team standards.
@@ -60,10 +90,13 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
+## Testing and Coverage
+
+This project employs `pytest` for local testing and cd/ci, and also coverage to push to main and for new versions.
+
 <details>
   <summary>Testing and Coverage</summary>
 
-  ## Testing and Coverage
 
   This project employs `pytest` as the primary testing framework to ensure the reliability and correctness of the codebase. `pytest` is configured to run comprehensive tests across the project, providing detailed feedback on the results, including which tests pass or fail, and offering powerful tools like fixtures and parameterization to create flexible and scalable tests.
 
@@ -87,12 +120,12 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
-<details>
-  <summary>Pre-Commit and Pre-Push Hooks</summary>
-
-  ## Pre-Commit and Pre-Push Hooks
+## Pre-Commit and Pre-Push Hooks
 
   This project integrates pre-commit and pre-push hooks to ensure that code quality is maintained and that all changes meet the project's standards before they are committed or pushed to the repository. These hooks are configured using the `.pre-commit-config.yaml` file, which specifies the various tools and checks that are automatically run at different stages of the Git workflow.
+
+<details>
+  <summary>Details on hook rules</summary>
 
   ### Pre-Commit Hooks
 
@@ -114,14 +147,14 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
-</details>
+</details
+
+## Poetry
+
+  This project leverages Poetry as the primary tool for dependency management, packaging, versioning, and general project configuration. Poetry is a powerful tool that simplifies the entire lifecycle of a Python project, from development to distribution.
 
 <details>
   <summary>Poetry Usage</summary>
-
-  ## Poetry Usage
-
-  This project leverages Poetry as the primary tool for dependency management, packaging, versioning, and general project configuration. Poetry is a powerful tool that simplifies the entire lifecycle of a Python project, from development to distribution.
 
   ### Package Management
 
@@ -153,12 +186,12 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
-<details>
-  <summary>CI/CD with GitHub Workflows</summary>
-
-  ## CI/CD with GitHub Workflows
+## CI/CD
 
   This project utilizes GitHub Actions to automate continuous integration and continuous deployment (CI/CD) processes. The workflows are designed to ensure code quality, test the development environment, and automatically publish the package to PyPI upon successful testing.
+
+<details>
+  <summary>Different CI/CD with GitHub Workflows</summary>
 
   ### Test Workflow (`tests.yml`)
 
@@ -204,36 +237,15 @@ Note that ha bounch of key extentions are allready installed + there is local pr
 
 </details>
 
+## Other
+
 <details>
   <summary>Non-functional plans and useful links</summary>
 
-  ## Bagdes for project
+  ### Bagdes for project
 
   - https://pypi.org/project/pybadges/
   - https://github.com/badges/shields
   - https://shields.io/badges/dynamic-toml-badge
 
 </details>
-## Logging
-
-```python
-
-import logging
-# Use the API library
-from crudclient import API
-
-# Configure logging for the application
-logging.basicConfig(level=logging.DEBUG)
-
-# Configure specific logging for the crudclient library
-logging.getLogger('crudclient').setLevel(logging.INFO)
-
-# Or you could configure at a module level if needed
-logging.getLogger('crudclient.api').setLevel(logging.WARNING)
-
-# Example usage of the library
-with api as active_api:
-    resource = active_api.use_custom_resource(MyCrudResource)
-    # Interact with the resourc
-
-```
