@@ -1,4 +1,5 @@
 from typing import Generic, List, Optional, Type, TypeVar, Union, cast
+from urllib.parse import urljoin
 
 from .client import Client
 from .models import ApiResponse
@@ -33,16 +34,19 @@ class Crud(Generic[T]):
             if method not in self._methods:
                 setattr(self, method, None)
 
-    def _get_full_endpoint(self, *args: str) -> str:
+    def _get_endpoint(self, *args: Optional[str]) -> str:
         """
-        Construct the full endpoint URL.
+        Construct the endpoint path.
 
         :param args: Variable number of path segments (e.g., resource IDs, actions)
-        :return: The full endpoint URL
+        :return: The endpoint path
         """
+        path_segments = [self._resource_path] + [seg for seg in args if seg is not None]
+
         if self.parent:
-            return self.parent._get_full_endpoint(self._resource_path, *args)
-        return "/" + "/".join([self._resource_path] + list(args))
+            path_segments = [self.parent._get_endpoint()] + path_segments
+
+        return urljoin("/", "/".join(segment.strip("/") for segment in path_segments if segment))
 
     def _validate_response(self, data: RawResponse) -> JSONDict | JSONList:
         """
@@ -51,10 +55,8 @@ class Crud(Generic[T]):
         :param data: The API response data
         :return: The validated data
         """
-        if isinstance(data, bytes):
-            raise ValueError(f"Unexpected bytes response: {data!r}")
-        if isinstance(data, str):
-            raise ValueError(f"Unexpected string response: {data!r}")
+        if isinstance(data, (bytes, str)):
+            raise ValueError(f"Unexpected {type(data)} response: {data!r}")
         return data
 
     def _convert_to_model(self, data: RawResponse) -> T | JSONDict:
@@ -64,16 +66,12 @@ class Crud(Generic[T]):
         :param data: The API response data
         :return: An instance of the datamodel or a Dict
         """
-
         validated_data = self._validate_response(data)
 
         if not isinstance(validated_data, dict):
-            raise ValueError(f"Unexpected response type: {type(data)!r}")
+            raise ValueError(f"Unexpected response type: {type(validated_data)}")
 
-        if not self._datamodel:
-            return validated_data
-
-        return self._datamodel(**validated_data)
+        return self._datamodel(**validated_data) if self._datamodel else validated_data
 
     def _convert_to_list_model(self, data: JSONList) -> List[T] | JSONList:
         """
@@ -82,17 +80,21 @@ class Crud(Generic[T]):
         :param data: The API response data
         :return: A list of instances of the datamodel or a Dict
         """
-
         if not self._datamodel:
             return data
 
         if isinstance(data, list):
             return [self._datamodel(**item) for item in data]
-        else:
-            raise ValueError(f"Unexpected response type: {type(data)!r}")
+
+        raise ValueError(f"Unexpected response type: {type(data)}")
 
     def _validate_list_return(self, data: RawResponse) -> JSONList | List[T] | ApiResponse:
-        """ """
+        """
+        Validate and convert the list response data.
+
+        :param data: The API response data
+        :return: Validated and converted list data
+        """
 
         validated_data: JSONList | JSONDict = self._validate_response(data)
 
@@ -109,8 +111,8 @@ class Crud(Generic[T]):
 
         if isinstance(validated_data, list):
             return cast(JSONList | List[T], self._convert_to_list_model(validated_data))
-        else:
-            raise ValueError(f"Unexpected response format: {validated_data}")
+
+        raise ValueError(f"Unexpected response format: {validated_data}")
 
     def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> JSONList | List[T] | ApiResponse:
         """
@@ -120,7 +122,7 @@ class Crud(Generic[T]):
         :param params: Optional query parameters
         :return: List of resources
         """
-        endpoint = self._get_full_endpoint() if not parent_id else self._get_full_endpoint(parent_id)
+        endpoint = self._get_endpoint(parent_id)
         response = self.client.get(endpoint, params=params)
         return self._validate_list_return(response)
 
@@ -132,7 +134,7 @@ class Crud(Generic[T]):
         :param parent_id: ID of the parent resource for nested resources
         :return: The created resource
         """
-        endpoint = self._get_full_endpoint() if not parent_id else self._get_full_endpoint(parent_id)
+        endpoint = self._get_endpoint(parent_id)
         response = self.client.post(endpoint, json=data)
         return self._convert_to_model(response)
 
@@ -144,7 +146,7 @@ class Crud(Generic[T]):
         :param parent_id: ID of the parent resource for nested resources
         :return: The retrieved resource
         """
-        endpoint = self._get_full_endpoint(resource_id) if not parent_id else self._get_full_endpoint(parent_id, resource_id)
+        endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.get(endpoint)
         return self._convert_to_model(response)
 
@@ -157,7 +159,7 @@ class Crud(Generic[T]):
         :param parent_id: ID of the parent resource for nested resources
         :return: The updated resource
         """
-        endpoint = self._get_full_endpoint(resource_id) if not parent_id else self._get_full_endpoint(parent_id, resource_id)
+        endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.put(endpoint, json=data)
         return self._convert_to_model(response)
 
@@ -170,7 +172,7 @@ class Crud(Generic[T]):
         :param parent_id: ID of the parent resource for nested resources
         :return: The updated resource
         """
-        endpoint = self._get_full_endpoint(resource_id) if not parent_id else self._get_full_endpoint(parent_id, resource_id)
+        endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.patch(endpoint, json=data)
         return self._convert_to_model(response)
 
@@ -182,7 +184,7 @@ class Crud(Generic[T]):
         :param parent_id: ID of the parent resource for nested resources
         :return: None
         """
-        endpoint = self._get_full_endpoint(resource_id) if not parent_id else self._get_full_endpoint(parent_id, resource_id)
+        endpoint = self._get_endpoint(parent_id, resource_id)
         self.client.delete(endpoint)
 
     def custom_action(
@@ -205,16 +207,14 @@ class Crud(Generic[T]):
         :param params: Optional query parameters
         :return: The API response
         """
-        endpoint_parts = [parent_id] if parent_id else []
+        endpoint = self._get_endpoint(parent_id, resource_id, action)
+
         kwargs = {}
         if params:
             kwargs["params"] = params
         if data:
             kwargs["json"] = data
-        if resource_id:
-            endpoint_parts.append(resource_id)
-        endpoint_parts.append(action)
-        endpoint = self._get_full_endpoint(*endpoint_parts)
+
         response = getattr(self.client, method.lower())(endpoint, **kwargs)
         try:
             return self._convert_to_model(response)
