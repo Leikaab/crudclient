@@ -20,7 +20,11 @@ def _assert_type(varname: str, Instance: Any, Class: Any, logger: Logger, option
         return
 
     if not isinstance(Instance, Class):
-        message = f"Invalid {varname} provided: expected {Class.__name__}"
+        if isinstance(Class, tuple):
+            expected_classes = " or ".join([cls.__name__ for cls in Class])
+        else:
+            expected_classes = Class.__name__
+        message = f"Invalid {varname} provided: expected {expected_classes}"
         if optional:
             message += " or None"
         message += f", got {type(Instance).__name__}."
