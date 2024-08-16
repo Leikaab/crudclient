@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional
+from urllib.parse import urljoin
 
 
 class ClientConfig:
@@ -13,21 +14,29 @@ class ClientConfig:
         retries (Optional[int]): Number of retries for failed requests.
     """
 
-    base_url: Optional[str] = None
+    hostname: Optional[str] = None
+    version: Optional[str] = None
     api_key: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
     timeout: Optional[float] = 10.0
     retries: Optional[int] = 3
 
+    @property
+    def base_url(self) -> str:
+        assert self.hostname, "Hostname is required!"
+        return urljoin(self.hostname, self.version)
+
     def __init__(
         self,
-        base_url: Optional[str] = None,
+        hostname: Optional[str] = None,
+        version: Optional[str] = None,
         api_key: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
         timeout: Optional[float] = None,
         retries: Optional[int] = None,
     ) -> None:
-        self.base_url = base_url or self.base_url
+        self.hostname = hostname or self.hostname
+        self.version = version or self.version
         self.api_key = api_key or self.api_key
         self.headers = headers or self.headers or {}
         self.timeout = timeout or self.timeout

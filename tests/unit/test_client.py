@@ -2,23 +2,20 @@ import pytest
 import requests_mock
 
 from crudclient.client import Client
-from crudclient.config import ClientConfig
+
+from .test_config import MockClientConfig
 
 
-class MockClientConfig(ClientConfig):
-    def __init__(self):
-        self.base_url = "https://api.example.com"
-        self.headers = {"Authorization": "Bearer token"}
-        self.api_key = "mykey"
-        self.retries = 3
-        self.timeout = 5
+class MockClientConfig2(MockClientConfig):
+    headers = {"Authorization": "Bearer token"}
+    api_key = "supersecret"
 
 
 class TestClient:
     @pytest.fixture
     def client(self):
         # Create a mock config for the client
-        config = MockClientConfig()
+        config = MockClientConfig2()
         return Client(config)
 
     @pytest.fixture

@@ -6,6 +6,11 @@ from crudclient.crud import Crud
 from crudclient.types import JSONDict
 
 
+class PlaceholderConfig(ClientConfig):
+    hostname: str = "https://jsonplaceholder.typicode.com"
+    version: str = ""
+
+
 class PostsCrud(Crud[JSONDict]):
     _resource_path = "posts"
 
@@ -24,7 +29,7 @@ class JsonplaceholderAPI(API):
 
 @pytest.fixture
 def api():
-    config = ClientConfig(base_url="https://jsonplaceholder.typicode.com")
+    config = PlaceholderConfig()
     return JsonplaceholderAPI(client_config=config)
 
 

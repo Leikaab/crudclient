@@ -8,6 +8,8 @@ from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
 from crudclient.exceptions import ClientInitializationError, InvalidClientError
 
+from .test_config import MockClientConfig
+
 
 class MockCrud(Crud[dict]):
     _resource_path = "test"
@@ -24,7 +26,7 @@ class MockAPI(API):
 class TestAPI:
     @pytest.fixture
     def mock_client_config(self):
-        return ClientConfig(base_url="https://api.example.com", api_key="test_key")
+        return MockClientConfig()
 
     @pytest.fixture
     def requests_mocker(self):
@@ -41,6 +43,12 @@ class TestAPI:
 
             m.register_uri = custom_register_uri
             yield m
+
+    @pytest.fixture
+    def standard_data(self):
+        full_url = "https://api.example.com/v1/test"
+        hostname = "https://api.example.com"
+        return {"full_url": full_url, "hostname": hostname}
 
     def test_init_with_client(self, mock_client_config):
         # Test initializing API with an existing client
@@ -76,7 +84,7 @@ class TestAPI:
         api = MockAPI(client_config=mock_client_config)
         assert isinstance(api.client, Client)
 
-    def test_initialize_client_failure(self):
+    def test_initialize_client_failure(self, standard_data):
         # Test client initialization failure
         class FailingAPI(API):
             client_class = None
@@ -85,11 +93,11 @@ class TestAPI:
                 pass
 
         with pytest.raises(ClientInitializationError):
-            FailingAPI(client_config=ClientConfig(base_url="https://api.example.com"))
+            FailingAPI(client_config=ClientConfig(hostname=standard_data.get("hostname")))
 
-    def test_context_manager(self, mock_client_config, requests_mocker):
+    def test_context_manager(self, mock_client_config, requests_mocker, standard_data):
         # Test the context manager functionality
-        requests_mocker.get("https://api.example.com/test", json={"data": [1, 2, 3]})
+        requests_mocker.get(standard_data.get("full_url"), json={"data": [1, 2, 3]})
         with MockAPI(client_config=mock_client_config) as api:
             assert isinstance(api, MockAPI)
             response = api.test_resource.list()
@@ -101,13 +109,13 @@ class TestAPI:
         api.close()
         assert api.client is None
 
-    def test_use_custom_resource(self, mock_client_config, requests_mocker):
+    def test_use_custom_resource(self, mock_client_config, requests_mocker, standard_data):
         # Test using a custom resource
         api = MockAPI(client_config=mock_client_config)
         custom_resource = api.use_custom_resource(MockCrud)
         assert isinstance(custom_resource, MockCrud)
 
-        requests_mocker.get("https://api.example.com/test", json={"data": [1, 2, 3]})
+        requests_mocker.get(standard_data.get("full_url"), json={"data": [1, 2, 3]})
         response = custom_resource.list()
         assert response == [1, 2, 3]
 
@@ -136,11 +144,11 @@ class TestAPI:
                 pass
 
         with pytest.raises(ClientInitializationError):
-            ErrorAPI(client_config=ClientConfig(base_url="https://api.example.com"))
+            ErrorAPI(client_config=ClientConfig(hostname="https://api.example.com"))
 
-    def test_exit_with_exception(self, mock_client_config, requests_mocker):
+    def test_exit_with_exception(self, mock_client_config, requests_mocker, standard_data):
         # Test that exceptions are properly propagated when using the context manager
-        requests_mocker.get("https://api.example.com/test", json={"status": "success"})
+        requests_mocker.get(standard_data.get("full_url"), json={"status": "success"})
 
         def raise_exception():
             with MockAPI(client_config=mock_client_config) as api:
@@ -150,34 +158,36 @@ class TestAPI:
         with pytest.raises(ValueError):
             raise_exception()
 
-    def test_crud_operations(self, mock_client_config, requests_mocker):
+    def test_crud_operations(self, mock_client_config, requests_mocker, standard_data):
         # Test that CRUD operations work correctly through the API
         api = MockAPI(client_config=mock_client_config)
 
+        hostname = standard_data.get("full_url")
+
         # Test list operation
-        requests_mocker.get("https://api.example.com/test", json={"items": [1, 2, 3]})
+        requests_mocker.get(hostname, json={"items": [1, 2, 3]})
         assert api.test_resource.list() == [1, 2, 3]
 
         # Test create operation
-        requests_mocker.post("https://api.example.com/test", json={"id": 4})
+        requests_mocker.post(hostname, json={"id": 4})
         assert api.test_resource.create({"name": "test"}) == {"id": 4}
 
         # Test get operation
-        requests_mocker.get("https://api.example.com/test/4", json={"id": 4, "name": "test"})
+        requests_mocker.get(f"{hostname}/4", json={"id": 4, "name": "test"})
         assert api.test_resource.read("4") == {"id": 4, "name": "test"}
 
         # Test update operation
-        requests_mocker.put("https://api.example.com/test/4", json={"id": 4, "name": "updated"})
+        requests_mocker.put(f"{hostname}/4", json={"id": 4, "name": "updated"})
         assert api.test_resource.update("4", {"name": "updated"}) == {"id": 4, "name": "updated"}
 
         # Test delete operation
-        requests_mocker.delete("https://api.example.com/test/4", json={"status": "deleted"})
+        requests_mocker.delete(f"{hostname}/4", json={"status": "deleted"})
         assert api.test_resource.destroy("4") is None
 
-    def test_custom_action(self, mock_client_config, requests_mocker):
+    def test_custom_action(self, mock_client_config, requests_mocker, standard_data):
         # Test custom action on a resource
         api = MockAPI(client_config=mock_client_config)
 
-        requests_mocker.post("https://api.example.com/test/4/activate", json={"status": "activated"})
+        requests_mocker.post(f"{standard_data.get('full_url')}/4/activate", json={"status": "activated"})
         response = api.test_resource.custom_action("activate", resource_id="4")
         assert response == {"status": "activated"}

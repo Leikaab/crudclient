@@ -3,16 +3,25 @@ import pytest  # noqa F401
 from crudclient.config import ClientConfig
 
 
+class MockClientConfig(ClientConfig):
+    hostname = "https://api.example.com"
+    version = "v1"
+    api_key = "mykey"
+    headers = {}
+    retries = 3
+    timeout = 5
+
+
 class TestClientConfig:
     @pytest.fixture
     def config(self):
-        return ClientConfig(base_url="https://api.example.com", api_key="secret_key")
+        return MockClientConfig()
 
     def test_config_initialization(self, config):
-        assert config.base_url == "https://api.example.com"
-        assert config.api_key == "secret_key"
+        assert config.base_url == "https://api.example.com/v1"
+        assert config.api_key == "mykey"
         assert config.headers == {}
-        assert config.timeout == 10.0
+        assert config.timeout == 5
         assert config.retries == 3
 
     def test_config_auth(self, config):

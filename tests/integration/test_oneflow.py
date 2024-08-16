@@ -27,7 +27,8 @@ class UsersResponse(ApiResponse[User]):
 
 
 class OneflowConfig(ClientConfig):
-    base_url: str = "https://api.test.oneflow.com/v1/"
+    hostname: str = "https://api.test.oneflow.com"
+    version: str = "v1"
     api_key: str = os.getenv("ONEFLOW_API_KEY", "")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
     timeout: Optional[float] = 10.0
@@ -60,7 +61,7 @@ def api():
 
 
 def test_api_configuration(api):
-    assert api.client.base_url == "https://api.test.oneflow.com/v1/"
+    assert api.client.base_url == "https://api.test.oneflow.com/v1"
     assert api.client.config.api_key == os.getenv("ONEFLOW_API_KEY")
     assert os.getenv("ONEFLOW_API_KEY") != ""
     assert os.getenv("ONEFLOW_USER_EMAIL") != ""
