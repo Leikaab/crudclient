@@ -15,8 +15,8 @@ class TestClientConfig:
         assert config.timeout == 10.0
         assert config.retries == 3
 
-    def test_config_auth_property(self, config):
-        auth = config.auth
+    def test_config_auth(self, config):
+        auth = config.auth()
         assert isinstance(auth, dict)
         assert auth == {"Authorization": f"Bearer {config.api_key}"}
 

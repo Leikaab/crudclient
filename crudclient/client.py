@@ -38,8 +38,8 @@ class Client:
 
     # Temporary function to do auth setup
     def _setup_auth(self) -> None:
-        if self.config.auth is not None:
-            auth = self.config.auth
+        auth = self.config.auth()
+        if auth is not None:
             if isinstance(auth, dict):
                 self.session.headers.update(auth)
             elif isinstance(auth, tuple) and len(auth) == 2:

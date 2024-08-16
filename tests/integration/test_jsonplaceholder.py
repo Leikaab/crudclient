@@ -14,7 +14,7 @@ class CommentsCrud(Crud[JSONDict]):
     _resource_path = "comments"
 
 
-class TestAPI(API):
+class JsonplaceholderAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
@@ -25,7 +25,7 @@ class TestAPI(API):
 @pytest.fixture
 def api():
     config = ClientConfig(base_url="https://jsonplaceholder.typicode.com")
-    return TestAPI(client_config=config)
+    return JsonplaceholderAPI(client_config=config)
 
 
 def test_list_posts(api):
