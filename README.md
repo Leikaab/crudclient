@@ -35,6 +35,101 @@
 
 </details>
 
+## Usage
+
+
+
+### Response models
+
+<details>
+  <summary>Setting up a custom response model</summary>
+
+```python
+
+from pydantic import BaseModel
+from crudclient.models import ApiResponse
+
+class User(BaseModel):
+
+    id: int
+    name: str
+    email: str
+    is_admin: bool
+
+
+class UsersResponse(ApiResponse[User]):
+    pass
+
+```
+
+</details>
+
+<details>
+  <summary>Using response model to create api</summary>
+
+```python
+
+from crudclient.api import API
+from crudclient.client import Client, ClientConfig
+from crudclient.crud import Crud
+
+from .model import User, UsersResponse
+
+
+class CustomConfig(ClientConfig):
+    base_url: str = "https://api.test.myapi.com/v1/"
+    api_key: str = os.getenv("API_KEY", "")
+    headers: Optional[Dict[str, str]] = {"my-custom-header": "something"}
+    timeout: Optional[float] = 10.0
+    retries: Optional[int] = 3
+
+    def auth(self) -> Dict[str, str]:
+        return {
+            "x-myapi-api-token": self.api_key,
+        }
+
+
+class UsersCrud(Crud[User]):
+    _resource_path = "users"
+    _datamodel = User
+    _api_response_model = UsersResponse
+    allowed_actions = ["list"]
+
+
+class OneflowAPI(API):
+    client_class = Client
+
+    def _register_endpoints(self):
+        self.users = UsersCrud(self.client)
+
+```
+
+</details>
+
+<details>
+  <summary>Using your api</summary>
+
+```python
+from api_example import CustomConfig, OneflowAPI
+
+def main()
+    config = CustomConfig()
+    api = OneflowAPI(client_config=config)
+    users = api.users.list()
+    assert isinstance(users, UsersResponse)
+    assert len(users.data) > 0
+    assert isinstance(users.data[0], User)
+    assert users.data[0].id is not None
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+</details>
+
+
 ## Logging
 
 The library has standard logging that can be hooked into using get.logger
