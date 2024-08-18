@@ -41,6 +41,23 @@ class ClientConfig:
         timeout: Optional[float] = None,
         retries: Optional[int] = None,
     ) -> None:
+        """
+        Initializes the ClientConfig object with the provided values.
+
+        Args:
+            hostname (Optional[str]): The hostname of the API.
+            version (Optional[str]): The version of the API.
+            api_key (Optional[str]): The API key to use for authentication.
+            headers (Optional[Dict[str, str]]): Additional headers to include in the requests.
+            timeout (Optional[float]): The timeout duration for requests.
+            retries (Optional[int]): The number of retries to attempt for requests
+
+        Returns:
+            None
+
+        Raises:
+            None
+        """
         self.hostname = hostname or self.hostname
         self.version = version or self.version
         self.api_key = api_key or self.api_key
@@ -49,4 +66,13 @@ class ClientConfig:
         self.retries = retries or self.retries
 
     def auth(self) -> Dict[str, Any]:
+        """
+        Returns the authentication, standard is Bearer token. Overwrite this method if needed.
+
+        Returns:
+            Dict[str, Any]: The authentication header.
+
+        Raises:
+            None
+        """
         return {"Authorization": f"Bearer {self.api_key}"}
