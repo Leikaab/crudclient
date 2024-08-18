@@ -49,11 +49,21 @@ class Crud(Generic[T]):
     This class provides a generic implementation of common CRUD operations and can be
     easily extended for specific API endpoints.
 
-    :ivar _resource_path: The base path for the resource in the API.
-    :ivar _datamodel: The data model class for the resource.
-    :ivar _methods: List of allowed methods for this resource.
-    :ivar _api_response_model: Custom API response model, if any.
-    :ivar _list_return_keys: Possible keys for list data in API responses.
+    :ivar _resource_path: str The base path for the resource in the API.
+    :ivar _datamodel: Optional[Type[T]] The data model class for the resource.
+    :ivar _methods: List[str] List of allowed methods for this resource.
+    :ivar _api_response_model: Optional[Type[ApiResponse]] Custom API response model, if any.
+    :ivar _list_return_keys: List[str] Possible keys for list data in API responses.
+
+    Methods:
+        __init__: Initialize the CRUD resource.
+        list: Retrieve a list of resources.
+        create: Create a new resource.
+        read: Retrieve a specific resource.
+        update: Update a specific resource.
+        partial_update: Partially update a specific resource.
+        destroy: Delete a specific resource.
+        custom_action: Perform a custom action on the resource.
     """
 
     _resource_path: str = ""
@@ -66,8 +76,8 @@ class Crud(Generic[T]):
         """
         Initialize the CRUD resource.
 
-        :param client: An instance of the API client.
-        :param parent: Optional parent Crud instance for nested resources.
+        :param client: Client An instance of the API client.
+        :param parent: Optional[Crud] Optional parent Crud instance for nested resources.
         """
         self.client = client
         self.parent = parent
@@ -83,7 +93,7 @@ class Crud(Generic[T]):
         Construct the endpoint path.
 
         :param args: Variable number of path segments (e.g., resource IDs, actions).
-        :return: The constructed endpoint path.
+        :return: str The constructed endpoint path.
         """
         path_segments = [self._resource_path] + [seg for seg in args if seg is not None]
 
@@ -96,8 +106,8 @@ class Crud(Generic[T]):
         """
         Validate the API response data.
 
-        :param data: The API response data.
-        :return: The validated data.
+        :param data: RawResponse The API response data.
+        :return: Union[JSONDict, JSONList] The validated data.
         :raises ValueError: If the response is an unexpected type.
         """
         if isinstance(data, (bytes, str)):
@@ -108,8 +118,8 @@ class Crud(Generic[T]):
         """
         Convert the API response to the datamodel type.
 
-        :param data: The API response data.
-        :return: An instance of the datamodel or a dictionary.
+        :param data: RawResponse The API response data.
+        :return: Union[T, JSONDict] An instance of the datamodel or a dictionary.
         :raises ValueError: If the response is an unexpected type.
         """
         validated_data = self._validate_response(data)
@@ -123,8 +133,8 @@ class Crud(Generic[T]):
         """
         Convert the API response to a list of datamodel types.
 
-        :param data: The API response data.
-        :return: A list of instances of the datamodel or the original list.
+        :param data: JSONList The API response data.
+        :return: Union[List[T], JSONList] A list of instances of the datamodel or the original list.
         :raises ValueError: If the response is an unexpected type.
         """
         if not self._datamodel:
@@ -139,8 +149,8 @@ class Crud(Generic[T]):
         """
         Validate and convert the list response data.
 
-        :param data: The API response data.
-        :return: Validated and converted list data.
+        :param data: RawResponse The API response data.
+        :return: Union[JSONList, List[T], ApiResponse] Validated and converted list data.
         :raises ValueError: If the response format is unexpected.
         """
         validated_data: JSONList | JSONDict = self._validate_response(data)
@@ -165,9 +175,9 @@ class Crud(Generic[T]):
         """
         Retrieve a list of resources.
 
-        :param parent_id: ID of the parent resource for nested resources.
-        :param params: Optional query parameters.
-        :return: List of resources.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :param params: Optional[JSONDict] Optional query parameters.
+        :return: Union[JSONList, List[T], ApiResponse] List of resources.
         """
         endpoint = self._get_endpoint(parent_id)
         response = self.client.get(endpoint, params=params)
@@ -177,9 +187,9 @@ class Crud(Generic[T]):
         """
         Create a new resource.
 
-        :param data: The data for the new resource.
-        :param parent_id: ID of the parent resource for nested resources.
-        :return: The created resource.
+        :param data: JSONDict The data for the new resource.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :return: Union[T, JSONDict] The created resource.
         """
         endpoint = self._get_endpoint(parent_id)
         response = self.client.post(endpoint, json=data)
@@ -189,9 +199,9 @@ class Crud(Generic[T]):
         """
         Retrieve a specific resource.
 
-        :param resource_id: The ID of the resource to retrieve.
-        :param parent_id: ID of the parent resource for nested resources.
-        :return: The retrieved resource.
+        :param resource_id: str The ID of the resource to retrieve.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :return: Union[T, JSONDict] The retrieved resource.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.get(endpoint)
@@ -201,10 +211,10 @@ class Crud(Generic[T]):
         """
         Update a specific resource.
 
-        :param resource_id: The ID of the resource to update.
-        :param data: The updated data for the resource.
-        :param parent_id: ID of the parent resource for nested resources.
-        :return: The updated resource.
+        :param resource_id: str The ID of the resource to update.
+        :param data: JSONDict The updated data for the resource.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :return: Union[T, JSONDict] The updated resource.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.put(endpoint, json=data)
@@ -214,10 +224,10 @@ class Crud(Generic[T]):
         """
         Partially update a specific resource.
 
-        :param resource_id: The ID of the resource to update.
-        :param data: The partial updated data for the resource.
-        :param parent_id: ID of the parent resource for nested resources.
-        :return: The updated resource.
+        :param resource_id: str The ID of the resource to update.
+        :param data: JSONDict The partial updated data for the resource.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :return: Union[T, JSONDict] The updated resource.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
         response = self.client.patch(endpoint, json=data)
@@ -227,8 +237,8 @@ class Crud(Generic[T]):
         """
         Delete a specific resource.
 
-        :param resource_id: The ID of the resource to delete.
-        :param parent_id: ID of the parent resource for nested resources.
+        :param resource_id: str The ID of the resource to delete.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
         self.client.delete(endpoint)
@@ -245,13 +255,13 @@ class Crud(Generic[T]):
         """
         Perform a custom action on the resource.
 
-        :param action: The name of the custom action.
-        :param method: The HTTP method to use. Defaults to "post".
-        :param resource_id: Optional resource ID if the action is for a specific resource.
-        :param parent_id: ID of the parent resource for nested resources.
-        :param data: Optional data to send with the request.
-        :param params: Optional query parameters.
-        :return: The API response.
+        :param action: str The name of the custom action.
+        :param method: str The HTTP method to use. Defaults to "post".
+        :param resource_id: Optional[str] Optional resource ID if the action is for a specific resource.
+        :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :param data: Optional[JSONDict] Optional data to send with the request.
+        :param params: Optional[JSONDict] Optional query parameters.
+        :return: Union[T, JSONDict] The API response.
         """
         endpoint = self._get_endpoint(parent_id, resource_id, action)
 

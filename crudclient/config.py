@@ -1,3 +1,15 @@
+"""
+Module `config.py`
+==================
+
+This module defines the ClientConfig class, which is used to configure the Client
+for API interactions. It provides a flexible way to set up authentication, request
+parameters, and other configuration options.
+
+Classes:
+    - ClientConfig: Configuration class for the Client.
+"""
+
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
@@ -6,17 +18,19 @@ class ClientConfig:
     """
     Configuration class for the Client.
 
-    Attributes:
-        hostname (Optional[str]): The hostname of the API.
-        version (Optional[str]): The version of the API.
-        api_key (Optional[str]): The API key to use for authentication.
-        headers (Optional[Dict[str, str]]): Additional headers to include in the requests.
-        timeout (Optional[float]): The timeout duration for requests.
-        retries (Optional[int]): The number of retries to attempt for requests.
+    This class holds the configuration parameters for API client interactions,
+    including authentication details, request settings, and API endpoints.
+
+    :ivar hostname: Optional[str] The hostname of the API.
+    :ivar version: Optional[str] The version of the API.
+    :ivar api_key: Optional[str] The API key to use for authentication.
+    :ivar headers: Optional[Dict[str, str]] Additional headers to include in the requests.
+    :ivar timeout: Optional[float] The timeout duration for requests.
+    :ivar retries: Optional[int] The number of retries to attempt for requests.
 
     Methods:
         base_url: Returns the base URL for the API.
-        auth: Returns the authentication, standard is Bearer token. Overwrite this method if needed.
+        auth: Returns the authentication header.
         __init__: Initializes the ClientConfig object with the provided values.
     """
 
@@ -29,6 +43,12 @@ class ClientConfig:
 
     @property
     def base_url(self) -> str:
+        """
+        Constructs and returns the base URL for the API.
+
+        :return: str The base URL for the API.
+        :raises AssertionError: If the hostname is not set.
+        """
         assert self.hostname, "Hostname is required!"
         return urljoin(self.hostname, self.version)
 
@@ -44,19 +64,13 @@ class ClientConfig:
         """
         Initializes the ClientConfig object with the provided values.
 
-        Args:
-            hostname (Optional[str]): The hostname of the API.
-            version (Optional[str]): The version of the API.
-            api_key (Optional[str]): The API key to use for authentication.
-            headers (Optional[Dict[str, str]]): Additional headers to include in the requests.
-            timeout (Optional[float]): The timeout duration for requests.
-            retries (Optional[int]): The number of retries to attempt for requests
-
-        Returns:
-            None
-
-        Raises:
-            None
+        :param hostname: Optional[str] The hostname of the API.
+        :param version: Optional[str] The version of the API.
+        :param api_key: Optional[str] The API key to use for authentication.
+        :param headers: Optional[Dict[str, str]] Additional headers to include in the requests.
+        :param timeout: Optional[float] The timeout duration for requests.
+        :param retries: Optional[int] The number of retries to attempt for requests.
+        :return: None
         """
         self.hostname = hostname or self.hostname
         self.version = version or self.version
@@ -67,12 +81,11 @@ class ClientConfig:
 
     def auth(self) -> Dict[str, Any]:
         """
-        Returns the authentication, standard is Bearer token. Overwrite this method if needed.
+        Returns the authentication header.
 
-        Returns:
-            Dict[str, Any]: The authentication header.
+        By default, this method returns a Bearer token authentication header.
+        Overwrite this method if a different authentication method is needed.
 
-        Raises:
-            None
+        :return: Dict[str, Any] The authentication header.
         """
         return {"Authorization": f"Bearer {self.api_key}"}
