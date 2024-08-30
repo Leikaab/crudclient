@@ -68,6 +68,7 @@ class Crud(Generic[T]):
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
+    _parent: Optional["Crud"] = None
     _methods: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
     _api_response_model: Optional[Type[ApiResponse]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
@@ -80,7 +81,7 @@ class Crud(Generic[T]):
         :param parent: Optional[Crud] Optional parent Crud instance for nested resources.
         """
         self.client = client
-        self.parent = parent
+        self.parent = parent or self._parent
 
         # Remove methods that are not allowed
         if self._methods != ["*"]:
