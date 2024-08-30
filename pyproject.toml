@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.3.2"
+version = "0.3.3"
 description = "A flexible CRUD client for RESTful APIs"
 authors = ["leikaab <nordavindltd@gmail.com>"]
 license = "LGPL-3.0-or-later"
