@@ -86,7 +86,8 @@ class Crud(Generic[T]):
         :param parent: Optional[Crud] Optional parent Crud instance for nested resources.
         """
         self.client = client
-        self.parent = parent or self._parent
+        if parent:
+            self._parent = parent
 
         # Remove methods that are not allowed
         if self._methods != ["*"]:
@@ -94,21 +95,35 @@ class Crud(Generic[T]):
                 if method not in self._methods:
                     setattr(self, method, None)
 
-    def _get_endpoint(self, *args: Optional[str | int]) -> str:
+    @classmethod
+    def _get_endpoint(cls, *args: Optional[str | int], parent_args: Optional[tuple] = None) -> str:
         """
         Construct the endpoint path.
 
         :param args: Variable number of path segments (e.g., resource IDs, actions).
+        :param parent_args: Optional tuple containing path segments for the parent resource.
         :return: str The constructed endpoint path.
-        :raises TypeError: If arg in args is not None, str, or int.
+        :raises TypeError: If arg in args or parent_args is not None, str, or int.
         """
+        # Validate types of args
         for arg in args:
             _assert_type("arg", arg, (str, int), logger, optional=True)
-        path_segments = [self._resource_path] + [str(seg) for seg in args if seg is not None]
 
-        if self.parent:
-            path_segments = [self.parent._get_endpoint()] + path_segments
+        # If a parent exists, get its endpoint path
+        if cls._parent:
+            if parent_args is None:
+                parent_args = ()
+            parent_path = cls._parent._get_endpoint(*parent_args)
+        else:
+            parent_path = ""
 
+        # Build the current resource path
+        current_path_segments = [cls._resource_path] + [str(seg) for seg in args if seg is not None]
+
+        # Combine the parent path with the current resource path
+        path_segments = [parent_path] + current_path_segments
+
+        # Return the joined path
         return urljoin("/", "/".join(segment.strip("/") for segment in path_segments if segment))
 
     def _validate_response(self, data: RawResponse) -> JSONDict | JSONList:
