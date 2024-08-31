@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, cast
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
-from crudclient.types import JSONDict, JSONList
+from crudclient.types import JSONDict
 
 from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesResponse, User, UsersResponse
 
