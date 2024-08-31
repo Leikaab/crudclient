@@ -1,9 +1,10 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
+from crudclient.types import JSONDict, JSONList
 
 from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesResponse, User, UsersResponse
 
@@ -45,14 +46,19 @@ class OneflowDataFields(Crud[DataField]):
     _methods: List[str] = ["update", "destroy"]
     _parent = OneflowTemplateTypes
 
-    def update(self, data: List[Dict[str, Any]], parent_id: str | None = None) -> DataField | Dict[str, Any]:
+    def update(self, resource_id: str, data: Dict[str, Any], parent_id: str | None = None) -> DataField | JSONDict:
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
-        passable_data = {"data_fields": data}
+        data["custom_id"] = resource_id
+        passable_data = {"data_fields": [data]}
         endpoint = self._get_endpoint(parent_args=(parent_id,))
         response = self.client.put(endpoint, json=passable_data)
-        return [DataField.model_validate(i) for i in response["data_fields"]]
+        response = cast(JSONDict, response)
+        for i in response["data_fields"]:
+            if i["custom_id"] == data["custom_id"]:
+                return DataField.model_validate(i)
+        raise ValueError("Invalid return from api")
 
 
 class OneflowAPI(API):

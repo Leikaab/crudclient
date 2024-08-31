@@ -78,7 +78,6 @@ def test_update_data_field(api):
     template_type_id = api.template_types.read(220129)
     rand = random.randint(1, 1000)
     data = {
-        "custom_id": "employee_name",
         "name": "Employee_name",
         "description": "Name of employee",
         "placeholder": "John Workerson",
@@ -86,13 +85,11 @@ def test_update_data_field(api):
     }
     new_data = data.copy()
     new_data["value"] = f"new value {rand}"
-    changed_data_field = api.data_fields.update(parent_id=template_type_id.id, data=[new_data])
-    assert isinstance(changed_data_field, list)
-    assert isinstance(changed_data_field[0], DataField)
-    assert changed_data_field[0].value == f"new value {rand}"
+    changed_data_field = api.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=new_data)
+    assert isinstance(changed_data_field, DataField)
+    assert changed_data_field.value == f"new value {rand}"
 
-    reverted_data_field = api.data_fields.update(parent_id=template_type_id.id, data=[data])
-    assert isinstance(reverted_data_field, list)
-    assert isinstance(reverted_data_field[0], DataField)
-    assert reverted_data_field[0].value == [data][0]["value"]
+    reverted_data_field = api.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=data)
+    assert isinstance(reverted_data_field, DataField)
+    assert reverted_data_field.value == data["value"]
     return reverted_data_field
