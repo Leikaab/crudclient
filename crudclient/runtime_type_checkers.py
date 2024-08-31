@@ -9,7 +9,7 @@ def _assert_type(varname: str, Instance: Any, Class: Any, logger: Logger, option
     Args:
         varname (str): The name of the variable being asserted, used in error messages.
         Instance (Any): The instance to be checked.
-        Class (Any): The expected class type.
+        Class (Any): The expected class type or tuple of types.
         logger (Logger): The logger to use for error messages.
         optional (bool): Whether the `Instance` can be `None`.
     Raises:

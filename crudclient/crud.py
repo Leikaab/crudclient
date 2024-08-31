@@ -32,12 +32,17 @@ Type Variables:
     - T: The type of the data model used for the resource.
 """
 
+import logging
 from typing import Generic, List, Optional, Type, TypeVar, Union, cast
 from urllib.parse import urljoin
 
 from .client import Client
 from .models import ApiResponse
+from .runtime_type_checkers import _assert_type
 from .types import JSONDict, JSONList, RawResponse
+
+# Get a logger for this module
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -89,14 +94,17 @@ class Crud(Generic[T]):
                 if method not in self._methods:
                     setattr(self, method, None)
 
-    def _get_endpoint(self, *args: Optional[str]) -> str:
+    def _get_endpoint(self, *args: Optional[str | int]) -> str:
         """
         Construct the endpoint path.
 
         :param args: Variable number of path segments (e.g., resource IDs, actions).
         :return: str The constructed endpoint path.
+        :raises TypeError: If arg in args is not None, str, or int.
         """
-        path_segments = [self._resource_path] + [seg for seg in args if seg is not None]
+        for arg in args:
+            _assert_type("arg", arg, (str, int), logger, optional=True)
+        path_segments = [self._resource_path] + [str(seg) for seg in args if seg is not None]
 
         if self.parent:
             path_segments = [self.parent._get_endpoint()] + path_segments
