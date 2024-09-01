@@ -33,7 +33,7 @@ Type Variables:
 """
 
 import logging
-from typing import Generic, List, Optional, Type, TypeVar, Union, cast
+from typing import Generic, List, Optional, Type, TypeVar, cast
 from urllib.parse import urljoin
 
 from .client import Client
@@ -85,6 +85,7 @@ class Crud(Generic[T]):
         :param client: Client An instance of the API client.
         :param parent: Optional[Crud] Optional parent Crud instance for nested resources.
         """
+
         self.client = client
         if parent:
             self._parent = parent
@@ -94,6 +95,14 @@ class Crud(Generic[T]):
             for method in ["list", "create", "read", "update", "partial_update", "destroy"]:
                 if method not in self._methods:
                     setattr(self, method, None)
+
+        logger.debug(
+            (
+                f"Initializing CRUD resource for {self._datamodel.__name__ if self._datamodel else None} "
+                f"with parent: {self._parent.__name__ if self._parent else None} "
+                f"and methods: {self._methods}"
+            )
+        )
 
     @classmethod
     def _get_endpoint(cls, *args: Optional[str | int], parent_args: Optional[tuple] = None) -> str:
@@ -135,7 +144,9 @@ class Crud(Generic[T]):
         :raises ValueError: If the response is an unexpected type.
         """
         if isinstance(data, (bytes, str)):
-            raise ValueError(f"Unexpected {type(data)} response: {data!r}")
+            msg = f"Unexpected response type: {type(data)} response: {data!r}"
+            logger.exception(msg)
+            raise ValueError(msg)
         return data
 
     def _convert_to_model(self, data: RawResponse) -> T | JSONDict:
@@ -275,7 +286,7 @@ class Crud(Generic[T]):
         parent_id: Optional[str] = None,
         data: Optional[JSONDict] = None,
         params: Optional[JSONDict] = None,
-    ) -> Union[T, JSONDict]:
+    ) -> T | JSONDict:
         """
         Perform a custom action on the resource.
 
@@ -285,7 +296,7 @@ class Crud(Generic[T]):
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
         :param data: Optional[JSONDict] Optional data to send with the request.
         :param params: Optional[JSONDict] Optional query parameters.
-        :return: Union[T, JSONDict] The API response.
+        :return: T | JSONDict The API response.
         """
         endpoint = self._get_endpoint(parent_id, resource_id, action)
 
