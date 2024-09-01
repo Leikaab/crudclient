@@ -35,6 +35,7 @@
 		}
 	},
 	"postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh; sh -c ./.devcontainer/postCreateCommand.sh",
+	 "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 	"remoteUser": "vscode"
 }
 

@@ -35,11 +35,4 @@ else
     echo "Poetry could not be found"
 fi
 
-# Loop through all items in the /workspace directory
-for item in /workspace/*; do
-    # Check if the item is the .git directory
-    if [ "$(basename "$item")" != ".git" ]; then
-        # Change ownership of the item (file or directory)
-        chown -R vscode:vscode "$item"
-    fi
-done
+
