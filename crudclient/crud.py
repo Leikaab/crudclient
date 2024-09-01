@@ -105,6 +105,24 @@ class Crud(Generic[T]):
         )
 
     @classmethod
+    def _endpoint_prefix(cls) -> tuple[str] | List[str]:
+        """
+        Construct the endpoint prefix.
+
+        This method can be overridden in subclasses to provide a custom endpoint prefix.
+
+        Example:
+        ```python
+            @classmethod
+            def _endpoint_prefix(cls):
+                return ["companies", "mycompany-ltd"]
+        ```
+
+        :return: List[str] The endpoint prefix segments.
+        """
+        return [""]
+
+    @classmethod
     def _get_endpoint(cls, *args: Optional[str | int], parent_args: Optional[tuple] = None) -> str:
         """
         Construct the endpoint path.
@@ -129,8 +147,12 @@ class Crud(Generic[T]):
         # Build the current resource path
         current_path_segments = [cls._resource_path] + [str(seg) for seg in args if seg is not None]
 
+        # Get the prefix for the endpoint
+        prefix = cls._endpoint_prefix()
+        prefix_segments = [str(seg) for seg in prefix]
+
         # Combine the parent path with the current resource path
-        path_segments = [parent_path] + current_path_segments
+        path_segments = prefix_segments + [parent_path] + current_path_segments
 
         # Return the joined path
         return urljoin("/", "/".join(segment.strip("/") for segment in path_segments if segment))
