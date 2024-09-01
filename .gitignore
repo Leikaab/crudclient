@@ -1,6 +1,10 @@
-# Ignore testing.ipynb file in src directory
-src/testing.ipynb
+# Spesific ingore files
 
+src/testing.ipynb
+logs/
+
+private_notes.txt
+private_notes.md
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,flask,python,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,flask,python,visualstudiocode
@@ -316,8 +320,3 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,flask,python,visualstudiocode
-
-logs/
-
-private_notes.txt
-private_notes.md

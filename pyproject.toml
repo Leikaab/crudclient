@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.4.0"
+version = "0.4.1"
 description = "A flexible CRUD client for RESTful APIs"
 authors = ["leikaab <nordavindltd@gmail.com>"]
 license = "LGPL-3.0-or-later"
@@ -49,4 +49,4 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/yourusername/crudclient/issues"
+"Bug Tracker" = "https://github.com/Leikaab/crudclient/issues"
