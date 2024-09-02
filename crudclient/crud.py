@@ -105,7 +105,7 @@ class Crud(Generic[T]):
         )
 
     @classmethod
-    def _endpoint_prefix(cls) -> tuple[str] | List[str]:
+    def _endpoint_prefix(cls) -> tuple[str | None] | List[str | None]:
         """
         Construct the endpoint prefix.
 
