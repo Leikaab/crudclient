@@ -9,6 +9,14 @@ repos:
 
   - repo: local
     hooks:
+
+      - id: autoflake
+        name: autoflake
+        stages: [commit]
+        language: system
+        entry: poetry run autoflake --remove-all-unused-imports --in-place --recursive
+        types: [python]
+
       - id: isort
         name: isort
         stages: [commit]

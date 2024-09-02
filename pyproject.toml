@@ -28,11 +28,11 @@ pydantic = {version = "^2.8.2", extras = ["email"]}
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 pytest-cov = "*"
-isort = "*"
 requests-mock = "^1.12.1"
-autopep8 = "*"
+
+autoflake = "*"
+isort = "*"
 black = "*"
-yapf = "*"
 bandit = "*"
 flake8 = "*"
 mypy = "*"
@@ -40,7 +40,11 @@ pycodestyle = "*"
 pydocstyle = "*"
 pylint = "*"
 pre-commit = "*"
+
 types-requests = "*"
+
+# autopep8 = "*"
+# yapf = "*"
 
 
 [build-system]

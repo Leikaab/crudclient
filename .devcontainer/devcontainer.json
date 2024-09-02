@@ -20,7 +20,8 @@
 				"me-dutour-mathieu.vscode-github-actions",
 				"GitHub.vscode-pull-request-github",
 				"GitHub.copilot",
-				"GitHub.copilot-chat"
+				"GitHub.copilot-chat",
+				"tamasfe.even-better-toml"
 			]
 		}
 	},
