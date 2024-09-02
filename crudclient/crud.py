@@ -73,12 +73,12 @@ class Crud(Generic[T]):
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
-    _parent: Optional[Type["Crud"]] = None
+    _parent_resource: Optional[Type["Crud"]] = None
     _methods: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
     _api_response_model: Optional[Type[ApiResponse]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
 
-    def __init__(self, client: Client, parent: Optional[Type["Crud"]] = None):
+    def __init__(self, client: Client, parent: Optional["Crud"] = None):
         """
         Initialize the CRUD resource.
 
@@ -87,8 +87,16 @@ class Crud(Generic[T]):
         """
 
         self.client = client
-        if parent:
+        self._parent = None
+
+        # makes parent obligatory if _parent_resource is set, and sets the parent
+        if self._parent_resource is not None:
+            assert isinstance(parent, self._parent_resource), f"Parent must be an instance of {self._parent_resource}"
             self._parent = parent
+
+        # Dissallow parent if _parent_resource is not set
+        else:
+            assert parent is None, "Parent must be None, as _parent_resource is not set"
 
         # Remove methods that are not allowed
         if self._methods != ["*"]:
@@ -99,13 +107,12 @@ class Crud(Generic[T]):
         logger.debug(
             (
                 f"Initializing CRUD resource for {self._datamodel.__name__ if self._datamodel else None} "
-                f"with parent: {self._parent.__name__ if self._parent else None} "
+                f"with parent: {self._parent_resource.__name__ if self._parent_resource else None} "
                 f"and methods: {self._methods}"
             )
         )
 
-    @classmethod
-    def _endpoint_prefix(cls) -> tuple[str | None] | List[str | None]:
+    def _endpoint_prefix(self) -> tuple[str | None] | List[str | None]:
         """
         Construct the endpoint prefix.
 
@@ -114,7 +121,7 @@ class Crud(Generic[T]):
         Example:
         ```python
             @classmethod
-            def _endpoint_prefix(cls):
+            def _endpoint_prefix(self):
                 return ["companies", "mycompany-ltd"]
         ```
 
@@ -122,8 +129,7 @@ class Crud(Generic[T]):
         """
         return [""]
 
-    @classmethod
-    def _get_endpoint(cls, *args: Optional[str | int], parent_args: Optional[tuple] = None) -> str:
+    def _get_endpoint(self, *args: Optional[str | int], parent_args: Optional[tuple] = None) -> str:
         """
         Construct the endpoint path.
 
@@ -137,18 +143,18 @@ class Crud(Generic[T]):
             _assert_type("arg", arg, (str, int), logger, optional=True)
 
         # If a parent exists, get its endpoint path
-        if cls._parent:
+        if self._parent:
             if parent_args is None:
                 parent_args = ()
-            parent_path = cls._parent._get_endpoint(*parent_args)
+            parent_path = self._parent._get_endpoint(*parent_args)
         else:
             parent_path = ""
 
         # Build the current resource path
-        current_path_segments = [cls._resource_path] + [str(seg) for seg in args if seg is not None]
+        current_path_segments = [self._resource_path] + [str(seg) for seg in args if seg is not None]
 
         # Get the prefix for the endpoint
-        prefix = cls._endpoint_prefix()
+        prefix = self._endpoint_prefix()
         prefix_segments = [str(seg) for seg in prefix]
 
         # Combine the parent path with the current resource path
