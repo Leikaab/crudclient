@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
@@ -5,9 +6,9 @@ from crudclient.api import API
 from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
 from crudclient.models import ApiResponse
-from crudclient.types import JSONDict
+from crudclient.types import JSONDict, JSONList, RawResponse
 
-from .models import Company, User
+from .models import Company, Contact, User
 
 T = TypeVar("T")
 
@@ -55,11 +56,15 @@ class FikenCompanies(FikenCrud[Company]):
         return [""]
 
 
-class FikenContacts(FikenCrud[User]):
+class FikenContacts(FikenCrud[Contact]):
     _resource_path = "contacts"
+    _datamodel = Contact
 
-    def _validate_list_return(self, data: Dict[str, Any] | List[Dict[str, Any]] | bytes | str) -> List[Dict[str, Any]] | List[User] | ApiResponse:
-        return cast(List[Dict[str, Any]], data)
+    def _validate_list_return(self, response: RawResponse) -> List[Contact]:
+        with open("contacts.json", "w") as f:
+            json.dump(response, f)
+        return_data = super()._validate_list_return(response)
+        return cast(List[Contact], return_data)
 
 
 class FikenAPI(API):
