@@ -44,7 +44,7 @@ class OneflowDataFields(Crud[DataField]):
     _api_response_model = DataFieldsResponse
 
     _methods: List[str] = ["update", "destroy"]
-    _parent = OneflowTemplateTypes
+    _parent_resource = OneflowTemplateTypes
 
     def update(self, resource_id: str, data: Dict[str, Any], parent_id: str | None = None) -> DataField | JSONDict:
         if parent_id is None:
@@ -67,4 +67,4 @@ class OneflowAPI(API):
     def _register_endpoints(self):
         self.users = UsersCrud(self.client)
         self.template_types = OneflowTemplateTypes(self.client)
-        self.data_fields = OneflowDataFields(self.client)
+        self.data_fields = OneflowDataFields(self.client, parent=self.template_types)

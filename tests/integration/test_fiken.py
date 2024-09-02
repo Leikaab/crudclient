@@ -33,10 +33,8 @@ def test_list_companies(api):
 
 
 def test_list_contacts(api):
-    # does not work
-    return True
-    contacts = api.contacts.bind_company("'fiken-demo-faktisk-plante-as2'").list()
-
+    contacts = api.contacts.bind_company("fiken-demo-faktisk-plante-as2").list()
+    return
     assert isinstance(contacts, list)
     assert len(contacts) > 0
     # assert all(isinstance(contact, User) for contact in contacts)

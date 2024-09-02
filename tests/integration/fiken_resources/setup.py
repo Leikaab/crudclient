@@ -24,9 +24,8 @@ class FikenCrud(Crud[T]):
 
     _company_slug: str | None = None
 
-    @classmethod
-    def _endpoint_prefix(cls) -> tuple[str | None] | list[str | None]:
-        return ["companies", cls._company_slug]
+    def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:
+        return ["companies", self._company_slug]
 
     def bind_company(self, company_slug: str):
         self._company_slug = company_slug
@@ -42,8 +41,7 @@ class FikenUser(FikenCrud[User]):
         response = super().custom_action(action="", method="GET")
         return cast(User, response)
 
-    @classmethod
-    def _endpoint_prefix(cls) -> tuple[str | None] | list[str | None]:
+    def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:
         return [""]
 
 
@@ -53,7 +51,7 @@ class FikenCompanies(FikenCrud[Company]):
     allowed_actions = ["list"]
 
     @classmethod
-    def _endpoint_prefix(cls) -> tuple[str | None] | list[str | None]:
+    def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:
         return [""]
 
 
