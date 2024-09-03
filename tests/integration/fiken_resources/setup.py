@@ -1,12 +1,11 @@
 import json
 import os
-from typing import Any, Dict, List, Optional, Type, TypeVar, cast
+from typing import List, Optional, TypeVar, cast
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
-from crudclient.models import ApiResponse
-from crudclient.types import JSONDict, JSONList, RawResponse
+from crudclient.types import RawResponse
 
 from .models import Company, Contact, User
 
