@@ -41,5 +41,7 @@ jobs:
         env:
           ONEFLOW_API_KEY: ${{ secrets.ONEFLOW_API_KEY }}
           ONEFLOW_USER_EMAIL: ${{ secrets.ONEFLOW_USER_EMAIL }}
+          FIKEN_ACCESS_TOKEN: ${{ secrets.FIKEN_ACCESS_TOKEN }}
+
         run: |
           poetry run pytest --cov=crudclient --cov-fail-under=80
