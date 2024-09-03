@@ -13,7 +13,7 @@ def api():
 
 def test_api_configuration(api):
     assert api.client.base_url == "https://api.fiken.no/api/v2"
-    assert api.client.config.api_key == os.getenv("FIKEN_ACCESS_TOKEN")
+    assert api.client.config.api_key == os.getenv("FIKEN_ACCESS_TOKEN", "")
     assert os.getenv("FIKEN_ACCESS_TOKEN") != ""
 
 
