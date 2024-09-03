@@ -62,4 +62,3 @@ def test_update_data_field(api):
     reverted_data_field = api.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=data)
     assert isinstance(reverted_data_field, DataField)
     assert reverted_data_field.value == data["value"]
-    return reverted_data_field
