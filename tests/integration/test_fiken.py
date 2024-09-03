@@ -15,6 +15,7 @@ def test_api_configuration(api):
     assert api.client.base_url == "https://api.fiken.no/api/v2"
     assert api.client.config.api_key == os.getenv("FIKEN_ACCESS_TOKEN", "")
     assert os.getenv("FIKEN_ACCESS_TOKEN") != ""
+    print(f"Length of FIKEN_ACCESS_TOKEN: {len(os.getenv('FIKEN_ACCESS_TOKEN', ''))}")
 
 
 def test_retrive_user(api):
