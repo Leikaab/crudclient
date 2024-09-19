@@ -33,7 +33,7 @@ Type Variables:
 """
 
 import logging
-from typing import Generic, List, Optional, Type, TypeVar, cast
+from typing import Generic, List, Optional, Protocol, Type, TypeVar, cast
 from urllib.parse import urljoin
 
 from .client import Client
@@ -44,7 +44,12 @@ from .types import JSONDict, JSONList, RawResponse
 # Get a logger for this module
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T")
+
+class ModelDumpable(Protocol):
+    def model_dump(self) -> dict: ...  # noqa: E704
+
+
+T = TypeVar("T", bound=ModelDumpable)
 
 
 class Crud(Generic[T]):
@@ -245,6 +250,7 @@ class Crud(Generic[T]):
             return {}
         if isinstance(data, dict):
             return data
+
         assert self._datamodel is not None, "If Data is not a dict or None, _datamodel must be set"
         assert isinstance(data, self._datamodel), f"Data must be an instance of {self._datamodel}, dict or None"
         assert hasattr(data, "model_dump"), f"{self._datamodel} must have a model_dump method"

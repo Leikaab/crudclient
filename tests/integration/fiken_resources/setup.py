@@ -3,11 +3,11 @@ from typing import Optional, TypeVar, cast
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
-from crudclient.crud import Crud
+from crudclient.crud import Crud, ModelDumpable
 
 from .models import Company, Contact, User
 
-T = TypeVar("T")
+T = TypeVar("T", bound=ModelDumpable)
 
 
 class FikenConfig(ClientConfig):
