@@ -36,7 +36,7 @@ from typing import Any, Dict, Optional
 import requests
 
 from .config import ClientConfig
-from .runtime_type_checkers import _assert_type
+from .runtime_type_checkers import assert_type
 from .types import RawResponseSimple
 
 # Set up logging
@@ -85,7 +85,7 @@ class Client:
         """
 
         # Validate and set up the config
-        _assert_type("config", config, (ClientConfig, dict), logger)
+        assert_type("config", config, (ClientConfig, dict), logger)
         if isinstance(config, dict):
             config = ClientConfig(**config)
 

@@ -11,9 +11,9 @@ T = TypeVar("T")
 
 
 class FikenConfig(ClientConfig):
-    hostname: str = "https://api.fiken.no/api/"
-    version: str = "v2"
-    api_key: str = os.getenv("FIKEN_ACCESS_TOKEN", "")
+    hostname = "https://api.fiken.no/api/"
+    version = "v2"
+    api_key = os.getenv("FIKEN_ACCESS_TOKEN")
     timeout: Optional[float] = 10.0
     retries: Optional[int] = 3
 
@@ -35,7 +35,7 @@ class FikenUser(FikenCrud[User]):
     _datamodel = User
     allowed_actions = ["read"]
 
-    def read(self, *args) -> User:
+    def read(self, *args, **kwargs) -> User:
         response = super().custom_action(action="", method="GET")
         return cast(User, response)
 
@@ -48,7 +48,6 @@ class FikenCompanies(FikenCrud[Company]):
     _datamodel = Company
     allowed_actions = ["list"]
 
-    @classmethod
     def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:
         return [""]
 
@@ -62,6 +61,7 @@ class FikenAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
+        assert self.client is not None, "Client is required!"
         self.user = FikenUser(self.client)
         self.companies = FikenCompanies(self.client)
         self.contacts = FikenContacts(self.client)

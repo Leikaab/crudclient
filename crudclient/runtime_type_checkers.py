@@ -2,7 +2,7 @@ from logging import Logger
 from typing import Any
 
 
-def _assert_type(varname: str, Instance: Any, Class: Any, logger: Logger, optional: bool = False) -> None:
+def assert_type(varname: str, Instance: Any, Class: Any, logger: Logger, optional: bool = False) -> None:
     """
     Asserts that the provided `Instance` is an instance of the specified `Class`.
     If optional=True, it will also accept `None`.

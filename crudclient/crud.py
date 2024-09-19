@@ -38,7 +38,7 @@ from urllib.parse import urljoin
 
 from .client import Client
 from .models import ApiResponse
-from .runtime_type_checkers import _assert_type
+from .runtime_type_checkers import assert_type
 from .types import JSONDict, JSONList, RawResponse
 
 # Get a logger for this module
@@ -140,7 +140,7 @@ class Crud(Generic[T]):
         """
         # Validate types of args
         for arg in args:
-            _assert_type("arg", arg, (str, int), logger, optional=True)
+            assert_type("arg", arg, (str, int), logger, optional=True)
 
         # If a parent exists, get its endpoint path
         if self._parent:
@@ -234,6 +234,23 @@ class Crud(Generic[T]):
 
         raise ValueError(f"Unexpected response format: {validated_data}")
 
+    def _dump_data(self, data: JSONDict | T | None) -> JSONDict:
+        """
+        Dump the data model to a JSON-serializable dictionary.
+
+        :param data: JSONDict | T The data to dump.
+        :return: JSONDict The dumped data.
+        """
+        if data is None:
+            return {}
+        if isinstance(data, dict):
+            return data
+        assert self._datamodel is not None, "If Data is not a dict or None, _datamodel must be set"
+        assert isinstance(data, self._datamodel), f"Data must be an instance of {self._datamodel}, dict or None"
+        assert hasattr(data, "model_dump"), f"{self._datamodel} must have a model_dump method"
+
+        return data.model_dump()
+
     def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> JSONList | List[T] | ApiResponse:
         """
         Retrieve a list of resources.
@@ -246,7 +263,7 @@ class Crud(Generic[T]):
         response = self.client.get(endpoint, params=params)
         return self._validate_list_return(response)
 
-    def create(self, data: JSONDict, parent_id: Optional[str] = None) -> T | JSONDict:
+    def create(self, data: JSONDict | T, parent_id: Optional[str] = None) -> T | JSONDict:
         """
         Create a new resource.
 
@@ -255,7 +272,8 @@ class Crud(Generic[T]):
         :return: Union[T, JSONDict] The created resource.
         """
         endpoint = self._get_endpoint(parent_id)
-        response = self.client.post(endpoint, json=data)
+        converted_data: JSONDict = self._dump_data(data)
+        response = self.client.post(endpoint, json=converted_data)
         return self._convert_to_model(response)
 
     def read(self, resource_id: str, parent_id: Optional[str] = None) -> T | JSONDict:
@@ -270,7 +288,7 @@ class Crud(Generic[T]):
         response = self.client.get(endpoint)
         return self._convert_to_model(response)
 
-    def update(self, resource_id: str, data: JSONDict, parent_id: Optional[str] = None) -> T | JSONDict:
+    def update(self, resource_id: str, data: JSONDict | T, parent_id: Optional[str] = None) -> T | JSONDict:
         """
         Update a specific resource.
 
@@ -280,10 +298,11 @@ class Crud(Generic[T]):
         :return: Union[T, JSONDict] The updated resource.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
-        response = self.client.put(endpoint, json=data)
+        converted_data: JSONDict = self._dump_data(data)
+        response = self.client.put(endpoint, json=converted_data)
         return self._convert_to_model(response)
 
-    def partial_update(self, resource_id: str, data: JSONDict, parent_id: Optional[str] = None) -> T | JSONDict:
+    def partial_update(self, resource_id: str, data: JSONDict | T, parent_id: Optional[str] = None) -> T | JSONDict:
         """
         Partially update a specific resource.
 
@@ -293,7 +312,8 @@ class Crud(Generic[T]):
         :return: Union[T, JSONDict] The updated resource.
         """
         endpoint = self._get_endpoint(parent_id, resource_id)
-        response = self.client.patch(endpoint, json=data)
+        converted_data: JSONDict = self._dump_data(data)
+        response = self.client.patch(endpoint, json=converted_data)
         return self._convert_to_model(response)
 
     def destroy(self, resource_id: str, parent_id: Optional[str] = None) -> None:
@@ -312,7 +332,7 @@ class Crud(Generic[T]):
         method: str = "post",
         resource_id: Optional[str] = None,
         parent_id: Optional[str] = None,
-        data: Optional[JSONDict] = None,
+        data: Optional[JSONDict | T] = None,
         params: Optional[JSONDict] = None,
     ) -> T | JSONDict:
         """
@@ -332,7 +352,8 @@ class Crud(Generic[T]):
         if params:
             kwargs["params"] = params
         if data:
-            kwargs["json"] = data
+            converted_data: JSONDict = self._dump_data(data)
+            kwargs["json"] = converted_data
 
         response = getattr(self.client, method.lower())(endpoint, **kwargs)
         try:

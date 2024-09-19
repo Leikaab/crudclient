@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
@@ -10,16 +10,16 @@ from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesRe
 
 
 class OneflowConfig(ClientConfig):
-    hostname: str = "https://api.test.oneflow.com"
-    version: str = "v1"
-    api_key: str = os.getenv("ONEFLOW_API_KEY", "")
+    hostname = "https://api.test.oneflow.com"
+    version = "v1"
+    api_key = os.getenv("ONEFLOW_API_KEY")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
     timeout: Optional[float] = 10.0
     retries: Optional[int] = 3
 
     def auth(self) -> Dict[str, str]:
         return {
-            "x-oneflow-api-token": self.api_key,
+            "x-oneflow-api-token": self.api_key or "",
         }
 
 
@@ -46,17 +46,19 @@ class OneflowDataFields(Crud[DataField]):
     _methods: List[str] = ["update", "destroy"]
     _parent_resource = OneflowTemplateTypes
 
-    def update(self, resource_id: str, data: Dict[str, Any], parent_id: str | None = None) -> DataField | JSONDict:
+    def update(self, resource_id: str, data: Dict[str, Any] | DataField, parent_id: str | None = None) -> DataField | JSONDict:
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
-        data["custom_id"] = resource_id
-        passable_data = {"data_fields": [data]}
+        converted_data: JSONDict = self._dump_data(data)
+
+        converted_data["custom_id"] = resource_id
+        passable_data = {"data_fields": [converted_data]}
         endpoint = self._get_endpoint(parent_args=(parent_id,))
         response = self.client.put(endpoint, json=passable_data)
-        response = cast(JSONDict, response)
+        assert isinstance(response, dict)
         for i in response["data_fields"]:
-            if i["custom_id"] == data["custom_id"]:
+            if i["custom_id"] == converted_data["custom_id"]:
                 return DataField.model_validate(i)
         raise ValueError("Invalid return from api")
 
@@ -65,6 +67,8 @@ class OneflowAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
+        assert self.client is not None, "Client is not initialized"
+
         self.users = UsersCrud(self.client)
         self.template_types = OneflowTemplateTypes(self.client)
         self.data_fields = OneflowDataFields(self.client, parent=self.template_types)

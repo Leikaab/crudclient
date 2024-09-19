@@ -44,7 +44,7 @@ from typing import Optional, Type
 from .client import Client, ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
-from .runtime_type_checkers import _assert_type
+from .runtime_type_checkers import assert_type
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class API(ABC):
         """
 
         try:
-            _assert_type(varname, Instance, Class, logger, optional=True)
+            assert_type(varname, Instance, Class, logger, optional=True)
         except TypeError as e:
             raise InvalidClientError(message=str(e))
 
@@ -130,7 +130,6 @@ class API(ABC):
         Example:
             self.contacts = Contacts(self.client)
         """
-        pass
 
     def _initialize_client(self) -> None:
         """
