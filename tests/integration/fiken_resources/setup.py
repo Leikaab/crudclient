@@ -36,7 +36,7 @@ class FikenUser(FikenCrud[User]):
     allowed_actions = ["read"]
 
     def read(self, *args, **kwargs) -> User:
-        response = super().custom_action(action="", method="GET")
+        response = super().custom_action(action="", method="get")
         return cast(User, response)
 
     def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:

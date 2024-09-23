@@ -33,7 +33,7 @@ Type Variables:
 """
 
 import logging
-from typing import Generic, List, Optional, Protocol, Type, TypeVar, cast
+from typing import Any, Generic, List, Literal, Optional, Protocol, Type, TypeAlias, TypeVar, cast
 from urllib.parse import urljoin
 
 from .client import Client
@@ -50,6 +50,12 @@ class ModelDumpable(Protocol):
 
 
 T = TypeVar("T", bound=ModelDumpable)
+HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]
+CrudInstance: TypeAlias = "Crud[Any]"
+CrudType: TypeAlias = Type[CrudInstance]
+ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
+ApiResponseType: TypeAlias = Type[ApiResponseInstance]
+PathArgs: TypeAlias = str | int | None
 
 
 class Crud(Generic[T]):
@@ -335,7 +341,7 @@ class Crud(Generic[T]):
     def custom_action(
         self,
         action: str,
-        method: str = "post",
+        method: HttpMethodString = "post",
         resource_id: Optional[str] = None,
         parent_id: Optional[str] = None,
         data: Optional[JSONDict | T] = None,
