@@ -55,10 +55,10 @@ def test_update_data_field(api):
     }
     new_data = data.copy()
     new_data["value"] = f"new value {rand}"
-    changed_data_field = api.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=new_data)
+    changed_data_field = api.template_types.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=new_data)
     assert isinstance(changed_data_field, DataField)
     assert changed_data_field.value == f"new value {rand}"
 
-    reverted_data_field = api.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=data)
+    reverted_data_field = api.template_types.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=data)
     assert isinstance(reverted_data_field, DataField)
     assert reverted_data_field.value == data["value"]

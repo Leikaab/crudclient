@@ -34,6 +34,7 @@ import logging
 from typing import Any, Dict, Optional
 
 import requests
+from requests.adapters import HTTPAdapter
 
 from .config import ClientConfig
 from .runtime_type_checkers import assert_type
@@ -140,8 +141,7 @@ class Client:
         retries = self.config.retries or 3
         timeout = self.config.timeout or 5
 
-        # Create an HTTPAdapter with the specified number of retries
-        adapter = requests.adapters.HTTPAdapter(max_retries=retries)
+        adapter = HTTPAdapter(max_retries=retries)
 
         # Mount the adapter to both 'http://' and 'https://' URLs in the session
         self.session.mount("http://", adapter)

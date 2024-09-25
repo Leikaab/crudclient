@@ -84,9 +84,9 @@ class Crud(Generic[T]):
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
-    _parent_resource: Optional[Type["Crud"]] = None
+    _parent_resource: Optional[CrudType] = None
     _methods: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
-    _api_response_model: Optional[Type[ApiResponse]] = None
+    _api_response_model: Optional[ApiResponseType] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
 
     def __init__(self, client: Client, parent: Optional["Crud"] = None):

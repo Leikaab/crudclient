@@ -35,6 +35,7 @@ class OneflowTemplateTypes(Crud[TemplateType]):
     _datamodel = TemplateType
     _api_response_model = TemplateTypesResponse
     _methods: List[str] = ["list", "read", "create"]
+    data_fields: "OneflowDataFields | None" = None
 
 
 class OneflowDataFields(Crud[DataField]):
@@ -71,4 +72,4 @@ class OneflowAPI(API):
 
         self.users = UsersCrud(self.client)
         self.template_types = OneflowTemplateTypes(self.client)
-        self.data_fields = OneflowDataFields(self.client, parent=self.template_types)
+        self.template_types.data_fields = OneflowDataFields(self.client, parent=self.template_types)
