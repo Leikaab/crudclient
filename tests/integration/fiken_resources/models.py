@@ -44,8 +44,8 @@ class Contact(BaseModel):
     createdDate: date
     lastModifiedDate: date
     name: str
-    customerNumber: int
-    customerAccountCode: str
+    customerNumber: int | None = None
+    customerAccountCode: str | None = None
     customer: bool
     supplier: bool
     contactPerson: List[ContactPerson]
