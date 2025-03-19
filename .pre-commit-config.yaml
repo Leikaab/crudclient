@@ -5,28 +5,28 @@ repos:
     hooks:
       - id: trailing-whitespace
         name: Remove trailing whitespace
-        stages: [commit]
+        stages: [pre-commit]
 
   - repo: local
     hooks:
 
       - id: autoflake
         name: autoflake
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run autoflake --remove-all-unused-imports --in-place --recursive
         types: [python]
 
       - id: isort
         name: isort
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run isort
         types: [python]
 
       - id: black
         name: black
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run black
         types: [python]
@@ -35,7 +35,7 @@ repos:
 
       - id: flake8
         name: flake8
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run flake8
         types: [python]
@@ -45,7 +45,7 @@ repos:
 
       - id: mypy
         name: mypy
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run mypy
         types: [python]
@@ -53,7 +53,7 @@ repos:
 
       - id: pytest
         name: pytest
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         entry: poetry run pytest tests/unit/
         types: [python]
@@ -61,7 +61,7 @@ repos:
 
       - id: pytest-cov
         name: pytest
-        stages: [push]
+        stages: [pre-push]
         language: system
         entry: poetry run pytest tests/unit/ --cov --cov-fail-under=80
         types: [python]

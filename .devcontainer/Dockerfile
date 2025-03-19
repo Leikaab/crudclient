@@ -20,7 +20,7 @@ RUN poetry config virtualenvs.create false
 #RUN poetry config --list | grep virtualenvs.create
 
 # Copy the pyproject.toml and poetry.lock files to the container
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock README.md ./
 
 # Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi --with dev
+RUN poetry install --no-interaction --no-ansi --with dev --no-root
