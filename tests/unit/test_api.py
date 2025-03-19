@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 import requests_mock
+from pydantic import BaseModel
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
@@ -11,7 +12,7 @@ from crudclient.exceptions import ClientInitializationError, InvalidClientError
 from .test_config import MockClientConfig
 
 
-class MockCrud(Crud[dict]):
+class MockCrud(Crud[BaseModel]):
     _resource_path = "test"
     _datamodel = None
 
@@ -20,6 +21,7 @@ class MockAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
+        assert self.client is not None
         self.test_resource = MockCrud(self.client)
 
 
@@ -64,14 +66,14 @@ class TestAPI:
         assert api.client_config == mock_client_config
 
     def test_init_with_invalid_client(self):
-        # Test that an InvalidClientError is raised when an invalid client is provided
+        # Test that an InvalidClientError is raised when an invalid client is provided, e.g. a string, we are ignoring the type check
         with pytest.raises(InvalidClientError):
-            MockAPI(client="invalid_client")
+            MockAPI(client="invalid_client")  # type: ignore
 
     def test_init_with_invalid_client_config(self):
-        # Test that an InvalidClientError is raised when an invalid client config is provided
+        # Test that an InvalidClientError is raised when an invalid client config is provided, e.g. a string, we are ignoring the type check
         with pytest.raises(InvalidClientError):
-            MockAPI(client_config="invalid_config")
+            MockAPI(client_config="invalid_config")  # type: ignore
 
     def test_register_endpoints(self, mock_client_config):
         # Test that endpoints are correctly registered

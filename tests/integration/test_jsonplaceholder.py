@@ -1,9 +1,9 @@
 import pytest
+from pydantic import BaseModel
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
 from crudclient.crud import Crud
-from crudclient.types import JSONDict
 
 
 class PlaceholderConfig(ClientConfig):
@@ -11,11 +11,11 @@ class PlaceholderConfig(ClientConfig):
     version: str = ""
 
 
-class PostsCrud(Crud[JSONDict]):
+class PostsCrud(Crud[BaseModel]):
     _resource_path = "posts"
 
 
-class CommentsCrud(Crud[JSONDict]):
+class CommentsCrud(Crud[BaseModel]):
     _resource_path = "comments"
 
 
@@ -23,6 +23,7 @@ class JsonplaceholderAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
+        assert self.client is not None
         self.posts = PostsCrud(self.client)
         self.comments = CommentsCrud(self.client)
 

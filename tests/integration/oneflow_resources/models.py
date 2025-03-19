@@ -7,7 +7,7 @@ from crudclient.models import ApiResponse, Link
 
 
 class User(BaseModel):
-    links: Dict[str, Link] = Field(None, alias="_links")
+    links: Dict[str, Link] | None = Field(None, alias="_links")
     active: bool
     email: str
     id: int
@@ -40,7 +40,7 @@ class DataFieldsResponse(ApiResponse[DataField]):
 
 
 class TemplateType(BaseModel):
-    links: Dict[str, Link] = Field(None, alias="_links")
+    links: Dict[str, Link] | None = Field(None, alias="_links")
     created_time: datetime
     description: str
     extension_type: str | None
