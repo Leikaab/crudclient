@@ -119,6 +119,7 @@ class Client:
         - None
 
         """
+        self.config.prepare()
         auth = self.config.auth()
         if auth is not None:
             if isinstance(auth, dict):
