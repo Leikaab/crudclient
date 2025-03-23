@@ -186,6 +186,19 @@ class Client:
             return {"data": data}
         return {}
 
+    def _maybe_retry_after_403(self, method: str, url: str, kwargs: dict, response: requests.Response) -> requests.Response:
+        if response.status_code != 403:
+            return response
+
+        if not self.config.should_retry_on_403():
+            return response
+
+        logger.debug("403 Forbidden received. Attempting retry via config handler.")
+        self.config.handle_403_retry(self)
+        self._setup_auth()
+        retry_response = self.session.request(method, url, **kwargs)
+        return retry_response
+
     def _handle_response(self, response: requests.Response) -> RawResponseSimple:
         """
         This function handles the response from the API based on the content type. It checks the 'Content-Type' header in the response and parses the response content accordingly.
@@ -257,6 +270,9 @@ class Client:
 
         logger.debug(f"Making {method} request to {url} with params: {kwargs}")
         response: requests.Response = self.session.request(method, url, **kwargs)
+
+        response = self._maybe_retry_after_403(method, url, kwargs, response)
+
         return self._handle_response(response)
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
