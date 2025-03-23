@@ -32,6 +32,7 @@ jobs:
 
       - name: Run forced std
         run: |
+          poetry run isort --diff .
           poetry run black --check --line-length=150 .
           poetry run flake8
           poetry run mypy

@@ -37,7 +37,6 @@ class ClientConfig:
         retries: Optional[int] = ...,
         auth_type: Optional[Literal["bearer", "basic", "none"]] = ...,
     ) -> None: ...
-
     @property
     def base_url(self) -> str:
         """
