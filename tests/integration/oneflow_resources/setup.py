@@ -14,8 +14,6 @@ class OneflowConfig(ClientConfig):
     version = "v1"
     api_key = os.getenv("ONEFLOW_API_KEY")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
-    timeout: Optional[float] = 10.0
-    retries: Optional[int] = 3
 
     def auth(self) -> Dict[str, str]:
         return {

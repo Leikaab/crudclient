@@ -1,5 +1,5 @@
 import os
-from typing import Optional, TypeVar, cast
+from typing import TypeVar, cast
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
@@ -14,8 +14,6 @@ class FikenConfig(ClientConfig):
     hostname = "https://api.fiken.no/api/"
     version = "v2"
     api_key = os.getenv("FIKEN_ACCESS_TOKEN")
-    timeout: Optional[float] = 10.0
-    retries: Optional[int] = 3
 
 
 class FikenCrud(Crud[T]):
