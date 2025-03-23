@@ -1,6 +1,5 @@
 from typing import Any, Dict, Literal, Optional
 
-
 class ClientConfig:
     """
     Generic configuration class for API clients.
@@ -49,7 +48,6 @@ class ClientConfig:
         retries: Optional[int] = ...,
         auth_type: Optional[Literal["bearer", "basic", "none"]] = ...,
     ) -> None: ...
-
     def __add__(self, other: "ClientConfig") -> "ClientConfig":
         """
         Combines two configuration objects, creating a new instance.
