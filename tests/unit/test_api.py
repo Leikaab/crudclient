@@ -23,7 +23,7 @@ class MockAPI(API):
 
     def _register_endpoints(self):
         assert self.client is not None
-        self.test_resource = MockCrud(self.client)
+        self.test_resource: Crud = MockCrud(self.client)
 
 
 class TestAPI:
@@ -131,7 +131,7 @@ class TestAPI:
     def test_api_args_kwargs(self, mock_client_config):
         # Test that additional args and kwargs are properly stored
         test_kwargs = {"a": "b", "c": "d"}
-        api = MockAPI(client_config=mock_client_config, **test_kwargs)
+        api = MockAPI(client=None, client_config=mock_client_config, **test_kwargs)
         assert api.api_kwargs == test_kwargs
 
     def test_client_initialization_error_handling(self):
@@ -155,7 +155,7 @@ class TestAPI:
 
         def raise_exception():
             with MockAPI(client_config=mock_client_config) as api:
-                api.test_resource.list()  # This should work
+                api.test_resource.list()  # type: ignore
                 raise ValueError("Test exception")
 
         with pytest.raises(ValueError):
