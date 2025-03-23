@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional, Union
+
 import requests
+
 from .config import ClientConfig
 from .types import RawResponseSimple
 

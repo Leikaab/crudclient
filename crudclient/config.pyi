@@ -1,6 +1,5 @@
 from typing import Any, Dict, Literal, Optional
 
-
 class ClientConfig:
     """
     Generic configuration class for API clients.
