@@ -14,6 +14,7 @@ This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
 
+
 class Client:
     """
     Client class for making API requests.
@@ -109,6 +110,7 @@ class Client:
         ...
 
     def _maybe_retry_after_403(self, method: str, url: str, kwargs: dict, response: requests.Response) -> requests.Response: ...
+
     def _handle_response(self, response: requests.Response) -> RawResponseSimple:
         """
         This function handles the response from the API based on the content type. It checks the 'Content-Type' header in the response and parses the response content accordingly.
@@ -134,7 +136,7 @@ class Client:
         """
         ...
 
-    def _request(self, method: str, endpoint: Optional[str] = ..., url: Optional[str] = ..., **kwargs: Any) -> Any:
+    def _request(self, method: str, endpoint: Optional[str] = ..., url: Optional[str] = ..., handle_response: bool = ..., **kwargs: Any) -> Any:
         """
         This function makes a request to the API using the requests session. It constructs the URL for the request based on the endpoint or URL provided. It logs the request details and returns the parsed response from the API.
         Parameters:

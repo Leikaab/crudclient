@@ -156,7 +156,7 @@ class Client:
 
         raise requests.RequestException(f"Request failed with status code {response.status_code}, {error_data}")
 
-    def _request(self, method: str, endpoint: str | None = None, url: str | None = None, **kwargs) -> Any:
+    def _request(self, method: str, endpoint: str | None = None, url: str | None = None, handle_response: bool = True, **kwargs) -> Any:
         if url is None:
             if endpoint is None:
                 raise ValueError("Either 'endpoint' or 'url' must be provided.")
@@ -164,6 +164,9 @@ class Client:
 
         logger.debug(f"Making {method} request to {url} with params: {kwargs}")
         response: requests.Response = self.session.request(method, url, **kwargs)
+
+        if not handle_response:
+            return response
 
         return self._handle_response(response)
 
