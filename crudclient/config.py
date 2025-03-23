@@ -18,8 +18,12 @@ Classes:
     - ClientConfig: Base configuration class for API clients.
 """
 
+import logging
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class ClientConfig:
@@ -52,6 +56,7 @@ class ClientConfig:
     @property
     def base_url(self) -> str:
         if not self.hostname:
+            logger.error("Hostname is required")
             raise ValueError("hostname is required")
         return urljoin(self.hostname, self.version or "")
 
