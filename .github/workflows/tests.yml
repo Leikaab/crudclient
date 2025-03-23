@@ -34,7 +34,7 @@ jobs:
         run: |
           git config --global core.autocrlf input
           poetry run isort --version-number
-          poetry run isort --diff .
+          poetry run isort --settings-path pyproject.toml --diff .
           poetry run black --check --line-length=150 .
           poetry run flake8
           poetry run mypy
