@@ -5,15 +5,14 @@ Module `config.py`
 Defines the `ClientConfig` base class used for configuring API clients.
 
 This module provides a reusable configuration system for HTTP API clients,
-including support for custom base URLs, authentication strategies, request headers,
-timeouts, and retry behavior. The configuration is structured using a dataclass
-to ensure clarity, type safety, and extensibility.
+including support for base URLs, authentication strategies, headers, timeouts,
+and retry logic. Designed for subclassing and reuse across multiple APIs.
 
 Features:
-    - Bearer, Basic, or no authentication support
-    - Customizable headers, timeouts, and retry policy
-    - Extensible via subclassing for token refresh or session logic
-    - Supports dynamic token injection and pre-request preparation hooks
+    - Support for Bearer, Basic, or no authentication
+    - Automatic generation of authentication headers
+    - Pre-request initialization and hook support
+    - Extensible retry logic, including 403-retry fallback for session-based APIs
 
 Classes:
     - ClientConfig: Base configuration class for API clients.
@@ -27,17 +26,19 @@ class ClientConfig:
     """
     Generic configuration class for API clients.
 
-    Provides common settings for hostname, versioning, headers, authentication,
-    retry behavior, and request timeouts. Designed for use across different APIs.
+    Provides common settings for hostname, versioning, authentication,
+    retry behavior, and request timeouts. Designed to be subclassed
+    for specific APIs that require token refresh, session handling, or
+    additional logic.
 
     Attributes:
         hostname (Optional[str]): Base hostname of the API (e.g., "https://api.example.com").
         version (Optional[str]): API version to be appended to the base URL (e.g., "v1").
-        api_key (Optional[str]): Credential used for authentication (token or raw credential).
-        headers (Dict[str, str]): Optional default headers to include in all requests.
-        timeout (float): Timeout in seconds for each request (default: 10.0).
+        api_key (Optional[str]): Credential or token used for authentication.
+        headers (Dict[str, str]): Optional default headers for every request.
+        timeout (float): Timeout for each request in seconds (default: 10.0).
         retries (int): Number of retry attempts for failed requests (default: 3).
-        auth_type (Literal["bearer", "basic", "none"]): Authentication strategy used to format the auth header.
+        auth_type (Literal["bearer", "basic", "none"]): Authentication scheme.
     """
 
     hostname: Optional[str] = None
@@ -85,44 +86,46 @@ class ClientConfig:
         """
         Returns the raw authentication token or credential.
 
-        Override in subclasses to implement custom token logic (e.g. refreshable tokens).
+        Override this in subclasses to implement dynamic or refreshable tokens.
 
         Returns:
-            Optional[str]: Raw token or credential string.
+            Optional[str]: Token or credential used for authentication.
         """
         return self.api_key
 
     def get_auth_header_name(self) -> str:
         """
-        Returns the name of the header used for authentication.
+        Returns the name of the HTTP header used for authentication.
 
-        Override to change the default "Authorization" header (e.g. "X-API-Key").
+        Override if the API uses non-standard auth headers.
 
         Returns:
-            str: Header key for authentication.
+            str: Name of the header (default: "Authorization").
         """
         return "Authorization"
 
     def prepare(self) -> None:
         """
-        Hook for any pre-request setup logic.
+        Hook for pre-request setup logic.
 
-        Override to implement token refresh, credential rotation, or pre-fetch logic.
-        This method is intended to be called once before executing a request.
+        Override in subclasses to implement setup steps such as refreshing tokens,
+        validating credentials, or preparing session context.
+
+        This method is called once at client startup.
         """
 
     def auth(self) -> Dict[str, Any]:
         """
-        Builds and returns the authentication header dictionary.
+        Builds the authentication headers to use in requests.
 
-        Behavior is controlled by the `auth_type` field:
-            - "bearer":     Returns "Authorization: Bearer <token>"
-            - "basic":      Returns "Authorization: Basic <token>"
-            - "none":       Returns an empty dict
-            - other/custom: Returns "Authorization: <raw token>"
+        Behavior depends on `auth_type`:
+            - "bearer": Returns {'Authorization': 'Bearer <token>'}
+            - "basic": Returns {'Authorization': 'Basic <token>'}
+            - "none": Returns {}
+            - other/custom: Returns {'Authorization': <token>}
 
         Returns:
-            Dict[str, Any]: Dictionary of headers to include for authentication.
+            Dict[str, Any]: Headers to include in requests.
         """
         token = self.get_auth_token()
         if not token or self.auth_type == "none":
@@ -136,3 +139,26 @@ class ClientConfig:
             return {header_name: f"Bearer {token}"}
         else:
             return {header_name: token}
+
+    def should_retry_on_403(self) -> bool:
+        """
+        Indicates whether the client should retry once after a 403 Forbidden response.
+
+        Override in subclasses to enable fallback retry logic, typically used in APIs
+        where sessions or tokens may expire and require refresh.
+
+        Returns:
+            bool: True to enable 403 retry, False by default.
+        """
+        return False
+
+    def handle_403_retry(self, client) -> None:
+        """
+        Hook to handle 403 response fallback logic (e.g. token/session refresh).
+
+        Called once when a 403 response is received and `should_retry_on_403()` returns True.
+        The method may update headers, refresh tokens, or mutate session state.
+
+        Args:
+            client: Reference to the API client instance making the request.
+        """
