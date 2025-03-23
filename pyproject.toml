@@ -57,3 +57,13 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
 typeCheckingMode = "basic"
+
+
+[tool.isort]
+skip = ["tests/debug.py", "crudclient/config.pyi", "crudclient/client.pyi"]
+extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*"]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 150
