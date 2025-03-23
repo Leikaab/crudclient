@@ -83,3 +83,22 @@ class ClientConfig:
 
     def handle_403_retry(self, client) -> None:
         pass
+
+    def __add__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        import copy
+
+        new_instance = copy.deepcopy(other)
+
+        if hasattr(self, "headers") and self.headers:
+            new_headers = copy.deepcopy(self.headers or {})
+            new_headers.update(new_instance.headers or {})
+            new_instance.headers = new_headers
+
+        for key, value in self.__dict__.items():
+            if key != "headers" and key not in other.__dict__:
+                setattr(new_instance, key, copy.deepcopy(value))
+
+        return new_instance

@@ -1,5 +1,6 @@
 from typing import Any, Dict, Literal, Optional
 
+
 class ClientConfig:
     """
     Generic configuration class for API clients.
@@ -17,6 +18,17 @@ class ClientConfig:
         timeout (float): Timeout for each request in seconds (default: 10.0).
         retries (int): Number of retry attempts for failed requests (default: 3).
         auth_type (Literal["bearer", "basic", "none"]): Authentication scheme.
+
+    Methods:
+        __init__: Initializes a configuration object with specified parameters.
+        __add__: Combines two configurations into a new instance with merged attributes.
+        base_url: Property that returns the complete base URL for API requests.
+        get_auth_token: Returns the authentication token used for authorization.
+        get_auth_header_name: Returns the header name used for authentication.
+        auth: Builds authentication headers based on auth_type and token.
+        prepare: Hook for pre-request setup logic like refreshing tokens.
+        should_retry_on_403: Indicates whether to retry after a 403 response.
+        handle_403_retry: Hook for handling retry logic after 403 responses.
     """
 
     hostname: Optional[str]
@@ -37,6 +49,32 @@ class ClientConfig:
         retries: Optional[int] = ...,
         auth_type: Optional[Literal["bearer", "basic", "none"]] = ...,
     ) -> None: ...
+
+    def __add__(self, other: "ClientConfig") -> "ClientConfig":
+        """
+        Combines two configuration objects, creating a new instance.
+
+        Creates a deep copy of 'other' and selectively updates it with attributes
+        from 'self' that don't exist in 'other'. Headers are specially handled
+        by merging the two dictionaries, with 'other' values taking precedence.
+
+        This method allows for configuration composition without modifying
+        the original instances.
+
+        Args:
+            other (ClientConfig): The configuration to combine with.
+                Attributes from 'other' take precedence over 'self'.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = base_config + custom_config  # hostname from base, timeout from custom
+        """
+        ...
+
     @property
     def base_url(self) -> str:
         """
