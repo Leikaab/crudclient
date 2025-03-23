@@ -75,3 +75,21 @@ max-line-length = 150
 max-complexity = 18
 select = ["B", "C", "E", "F", "W", "T4"]
 exclude = [".coveragerc"]
+
+[tool.black]
+line-length = 150
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

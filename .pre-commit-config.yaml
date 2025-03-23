@@ -29,7 +29,7 @@ repos:
         stages: [pre-commit]
         language: system
         entry: poetry run black
-        types: [python]
+        types: [python, pyi]
         args:
           - "--line-length=150"
 
