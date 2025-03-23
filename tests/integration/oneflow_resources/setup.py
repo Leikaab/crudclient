@@ -2,7 +2,8 @@ import os
 from typing import Any, Dict, List, Optional
 
 from crudclient.api import API
-from crudclient.client import Client, ClientConfig
+from crudclient.client import Client
+from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 from crudclient.types import JSONDict
 

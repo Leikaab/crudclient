@@ -2,7 +2,8 @@ import pytest
 from pydantic import BaseModel
 
 from crudclient.api import API
-from crudclient.client import Client, ClientConfig
+from crudclient.client import Client
+from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 
 

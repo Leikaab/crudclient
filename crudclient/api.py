@@ -41,7 +41,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Optional, Type
 
-from .client import Client, ClientConfig
+from .client import Client
+from .config import ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
 from .runtime_type_checkers import assert_type

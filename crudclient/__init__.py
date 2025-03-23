@@ -1,5 +1,6 @@
 from .api import API
-from .client import Client, ClientConfig
+from .client import Client
+from .config import ClientConfig
 from .crud import Crud
 from .exceptions import APIError, ClientInitializationError, InvalidClientError
 from .models import ApiResponse
