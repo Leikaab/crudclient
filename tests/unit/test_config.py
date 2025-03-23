@@ -33,3 +33,13 @@ class TestClientConfig:
         config.headers["Accept"] = "application/json"
         assert isinstance(config.headers, dict)
         assert config.headers == {"Accept": "application/json"}
+
+    def test_no_hostname_get(self):
+        config = ClientConfig()
+        with pytest.raises(ValueError):
+            config.base_url
+
+    def test_should_retry_on_403(self):
+        config = ClientConfig()
+        assert not config.should_retry_on_403()
+        assert config.handle_403_retry(None) is None

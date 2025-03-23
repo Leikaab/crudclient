@@ -1,27 +1,15 @@
-import pytest
-import requests_mock
+import pytest  # noqa F401
 
-from crudclient.client import Client
-
-from .test_config import MockClientConfig
+from .test_client_auth import TestClientAuth
 
 
-class MockClientConfig2(MockClientConfig):
-    headers = {"Authorization": "Bearer token"}
-    api_key = "supersecret"
+class TestClient(TestClientAuth):
 
-
-class TestClient:
-    @pytest.fixture
-    def client(self):
-        # Create a mock config for the client
-        config = MockClientConfig2()
-        return Client(config)
-
-    @pytest.fixture
-    def mock_request(self):
-        with requests_mock.Mocker() as m:
-            yield m
+    def test_no_url_get(self, client, mock_request):
+        # Mock the request to the API
+        endpoint = None
+        with pytest.raises(ValueError):
+            client.get(endpoint)
 
     def test_get(self, client, mock_request):
         # Mock the request to the API
