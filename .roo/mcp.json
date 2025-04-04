@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "gh",
+      "args": ["issue", "list", "--repo", "Leikaab/crudclient", "--json", "number,title,body,url"],
+      "env": {
+        "GITHUB_TOKEN": "$GITHUB_TOKEN"
+      },
+      "disabled": false,
+      "alwaysAllow": []
+    }
+  }
+}
