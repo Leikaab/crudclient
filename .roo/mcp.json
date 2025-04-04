@@ -1,11 +1,17 @@
 {
   "mcpServers": {
     "github": {
-      "command": "gh",
-      "args": ["issue", "list", "--repo", "Leikaab/crudclient", "--json", "number,title,body,url"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "GITHUB_TOKEN": "$GITHUB_TOKEN"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "$GITHUB_TOKEN"
       },
+      "disabled": false,
+      "alwaysAllow": []
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-browser"],
       "disabled": false,
       "alwaysAllow": []
     }
