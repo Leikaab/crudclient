@@ -1,4 +1,3 @@
-
 {
 	"name": "Python 3",
 	"dockerComposeFile": "docker-compose.yml",
@@ -32,17 +31,26 @@
 		}
 	},
 	"forwardPorts": [
-		5051 // forward custom liveserver port for coverage
+		5051, // forward custom liveserver port for coverage
+		3000, // MCP browser server port
+		3001  // MCP github server port
 	],
 
 	"portsAttributes": {
-		"5051":{
+		"5051": {
 			"label": "Coverage - Live Server",
+			"onAutoForward": "notify"
+		},
+		"3000": {
+			"label": "MCP Browser Server",
+			"onAutoForward": "notify"
+		},
+		"3001": {
+			"label": "MCP GitHub Server",
 			"onAutoForward": "notify"
 		}
 	},
 	"postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh; sh -c ./.devcontainer/postCreateCommand.sh",
-	 "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x ./.devcontainer/startMcpServers.sh && sh -c ./.devcontainer/startMcpServers.sh",
 	"remoteUser": "vscode"
 }
-

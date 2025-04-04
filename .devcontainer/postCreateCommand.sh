@@ -25,7 +25,6 @@ for i in {1..5}; do
     fi
 done
 
-
 echo "Checking poetry by direct invocation:"
 if /usr/local/py-utils/bin/poetry --version &> /dev/null
 then
@@ -35,4 +34,23 @@ else
     echo "Poetry could not be found"
 fi
 
+# Ensure the .roo directory exists
+mkdir -p .roo
 
+# Make sure the MCP servers script is executable
+chmod +x ./.devcontainer/startMcpServers.sh
+
+# Install MCP server packages globally
+echo "Installing MCP server packages..."
+npm install -g @modelcontextprotocol/server-github @modelcontextprotocol/server-browser
+
+# Verify installations
+echo "Verifying MCP server packages installation..."
+if command -v npx &> /dev/null; then
+    npx --no-install @modelcontextprotocol/server-github --version || echo "GitHub MCP server not properly installed"
+    npx --no-install @modelcontextprotocol/server-browser --version || echo "Browser MCP server not properly installed"
+else
+    echo "Warning: npx command not available, cannot verify MCP server packages"
+fi
+
+echo "Development environment setup complete!"
