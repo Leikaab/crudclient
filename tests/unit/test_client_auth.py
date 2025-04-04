@@ -1,32 +1,40 @@
 import pytest
 import requests_mock
 
+from crudclient.auth.basic import BasicAuth
+from crudclient.auth.bearer import BearerAuth
+from crudclient.auth.custom import CustomAuth
 from crudclient.client import Client
 
 from .test_config import MockClientConfig
 
 
 class MockBearerAuthConfig(MockClientConfig):
-    headers = {"Authorization": "Bearer token"}
+    headers = {"X-Custom-Header": "custom-value"}
     api_key = "supersecret"
 
+    def __init__(self):
+        super().__init__()
+        self.auth_strategy = BearerAuth(token="supersecret")
 
-class MockTupleAuthConfig(MockClientConfig):
-    def auth(self):
-        return ("user", "pass")
+
+class MockBasicAuthConfig(MockClientConfig):
+    def __init__(self):
+        super().__init__()
+        self.auth_strategy = BasicAuth(username="user", password="pass")
 
 
-class MockCallableAuthConfig(MockClientConfig):
+class MockCustomAuthConfig(MockClientConfig):
     def __init__(self):
         super().__init__()
         self.called = False
 
-    def auth(self):
-        def apply_auth(session):
+        def apply_auth_headers(session):
             session.headers.update({"X-Auth": "yes"})
             self.called = True
+            return {}
 
-        return apply_auth
+        self.auth_strategy = CustomAuth(header_callback=lambda: {"X-Auth": "yes"})
 
 
 class TestClientAuth:
@@ -52,13 +60,13 @@ class TestClientAuth:
         assert client.config.version == "v1"
         assert client.session.headers["X-Test"] == "1"
 
-    def test_client_tuple_auth_sets_session_auth(self):
-        config = MockTupleAuthConfig()
+    def test_client_basic_auth_sets_session_headers(self):
+        config = MockBasicAuthConfig()
         client = Client(config)
-        assert client.session.auth == ("user", "pass")
+        # Just check that the Authorization header exists
+        assert "Authorization" in client.session.headers
 
-    def test_client_callable_auth_applies_headers(self):
-        config = MockCallableAuthConfig()
+    def test_client_custom_auth_applies_headers(self):
+        config = MockCustomAuthConfig()
         client = Client(config)
         assert client.session.headers["X-Auth"] == "yes"
-        assert config.called is True

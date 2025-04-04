@@ -103,6 +103,19 @@ Configuration for these tools can be found in `pyproject.toml` and `.flake8`.
 
 - **Mypy:** For static type checking. Configuration is in `mypy.ini`. Type hints should be added for all code, primarily within `.pyi` stub files.
 
+## Authentication Strategies
+
+When contributing to the authentication system, follow these guidelines:
+
+1. **Strategy Pattern:** All authentication strategies must implement the `AuthStrategy` abstract base class defined in `crudclient/auth/base.py`.
+2. **Required Methods:** Each strategy must implement:
+   - `prepare_request_headers()`: Returns a dictionary of headers for authentication.
+   - `prepare_request_params()`: Returns a dictionary of query parameters for authentication.
+3. **Naming Convention:** Name your strategy class with a descriptive suffix followed by `Auth` (e.g., `BearerAuth`, `ApiKeyAuth`).
+4. **Immutability:** Authentication strategies should be immutable after initialization.
+5. **Documentation:** Include comprehensive docstrings explaining the strategy's purpose and usage.
+6. **Testing:** Write unit tests for each new authentication strategy.
+
 ### Pre-Commit Hooks
 
 We use `pre-commit` to automatically run these checks before you commit changes. Ensure it's installed in your environment (it should be in the dev container).

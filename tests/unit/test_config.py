@@ -1,5 +1,6 @@
 import pytest  # noqa F401
 
+from crudclient.auth.bearer import BearerAuth
 from crudclient.config import ClientConfig
 
 
@@ -10,6 +11,12 @@ class MockClientConfig(ClientConfig):
     headers = {}
     retries = 3
     timeout = 5
+
+    def __init__(self):
+        super().__init__()
+        # Set up a BearerAuth strategy with the API key
+        if self.api_key:  # Check if api_key is not None
+            self.auth_strategy = BearerAuth(token=self.api_key)
 
 
 class TestClientConfig:
@@ -25,7 +32,8 @@ class TestClientConfig:
         assert config.retries == 3
 
     def test_config_auth(self, config):
-        auth = config.auth()
+        # Use the new get_auth_headers method
+        auth = config.get_auth_headers()
         assert isinstance(auth, dict)
         assert auth == {"Authorization": f"Bearer {config.api_key}"}
 

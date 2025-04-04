@@ -4,6 +4,7 @@ import requests
 
 from .config import ClientConfig
 from .types import RawResponseSimple
+from .auth.base import AuthStrategy
 
 # filepath: /workspace/crudclient/client.pyi
 """
@@ -13,6 +14,7 @@ Stub file for `client.py`
 This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
+
 
 class Client:
     """
@@ -63,7 +65,7 @@ class Client:
 
     def _setup_auth(self) -> None:
         """
-        This function sets up authentication for the requests session. It retrieves the authentication information from the config and updates the session headers or auth attribute accordingly.
+        This function sets up authentication for the requests session. It retrieves the authentication headers from the config using get_auth_headers() and updates the session headers accordingly.
         Parameters:
         - None
         Returns:
@@ -109,6 +111,7 @@ class Client:
         ...
 
     def _maybe_retry_after_403(self, method: str, url: str, kwargs: dict, response: requests.Response) -> requests.Response: ...
+
     def _handle_response(self, response: requests.Response) -> RawResponseSimple:
         """
         This function handles the response from the API based on the content type. It checks the 'Content-Type' header in the response and parses the response content accordingly.

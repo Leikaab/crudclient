@@ -19,31 +19,35 @@ Classes:
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 from urllib.parse import urljoin
+
+from crudclient.auth.base import AuthStrategy
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 
 class ClientConfig:
-    hostname = None
-    version = None
-    api_key = None
-    headers = None
-    timeout = 10.0
-    retries = 3
-    auth_type = "bearer"
+    hostname: Optional[str] = None
+    version: Optional[str] = None
+    api_key: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+    timeout: float = 10.0
+    retries: int = 3
+    auth_strategy: Optional[AuthStrategy] = None
+    auth_type: str = "bearer"  # For backward compatibility
 
     def __init__(
         self,
-        hostname=None,
-        version=None,
-        api_key=None,
-        headers=None,
-        timeout=None,
-        retries=None,
-        auth_type=None,
+        hostname: Optional[str] = None,
+        version: Optional[str] = None,
+        api_key: Optional[str] = None,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: Optional[float] = None,
+        retries: Optional[int] = None,
+        auth_strategy: Optional[AuthStrategy] = None,
+        auth_type: Optional[str] = None
     ) -> None:
         self.hostname = hostname or self.__class__.hostname
         self.version = version or self.__class__.version
@@ -51,6 +55,7 @@ class ClientConfig:
         self.headers = headers or self.__class__.headers or {}
         self.timeout = timeout if timeout is not None else self.__class__.timeout
         self.retries = retries if retries is not None else self.__class__.retries
+        self.auth_strategy = auth_strategy or self.__class__.auth_strategy
         self.auth_type = auth_type or self.__class__.auth_type
 
     @property
@@ -67,27 +72,79 @@ class ClientConfig:
         return "Authorization"
 
     def prepare(self) -> None:
-        pass
+        """
+        Hook for pre-request setup logic.
 
-    def auth(self) -> Dict[str, Any]:
+        Override in subclasses to implement setup steps such as refreshing tokens,
+        validating credentials, or preparing session context.
+
+        This method is called once at client startup.
+        """
+
+    def get_auth_headers(self) -> Dict[str, str]:
+        """
+        Builds the authentication headers to use in requests.
+
+        If an AuthStrategy is set, uses it to prepare request headers.
+        Otherwise, returns an empty dictionary.
+
+        Returns:
+            Dict[str, str]: Headers to include in requests.
+        """
+        if self.auth_strategy:
+            return self.auth_strategy.prepare_request_headers()
+        return {}
+
+    def auth(self) -> Dict[str, str]:
+        """
+        Legacy method for backward compatibility.
+
+        Returns authentication headers based on the auth_type and token.
+        New code should use the AuthStrategy pattern instead.
+        """
+        # If we have an AuthStrategy, use it
+        if isinstance(self.auth_strategy, AuthStrategy):
+            return self.get_auth_headers()
+
+        # Otherwise, fall back to the old behavior for backward compatibility
         token = self.get_auth_token()
-        if not token or self.auth_type == "none":
+        if not token:
             return {}
 
         header_name = self.get_auth_header_name()
 
-        if self.auth_type == "basic":
+        # Determine auth type from class attributes if available
+        auth_type = getattr(self, "auth_type", "bearer") if hasattr(self, "auth_type") else "bearer"
+
+        if auth_type == "basic":
             return {header_name: f"Basic {token}"}
-        elif self.auth_type == "bearer":
+        elif auth_type == "bearer":
             return {header_name: f"Bearer {token}"}
         else:
             return {header_name: token}
 
     def should_retry_on_403(self) -> bool:
+        """
+        Indicates whether the client should retry once after a 403 Forbidden response.
+
+        Override in subclasses to enable fallback retry logic, typically used in APIs
+        where sessions or tokens may expire and require refresh.
+
+        Returns:
+            bool: True to enable 403 retry, False by default.
+        """
         return False
 
     def handle_403_retry(self, client) -> None:
-        pass
+        """
+        Hook to handle 403 response fallback logic (e.g. token/session refresh).
+
+        Called once when a 403 response is received and `should_retry_on_403()` returns True.
+        The method may update headers, refresh tokens, or mutate session state.
+
+        Args:
+            client: Reference to the API client instance making the request.
+        """
 
     def __add__(self, other):
         if not isinstance(other, self.__class__):

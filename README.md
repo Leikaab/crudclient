@@ -25,7 +25,7 @@
 
   ### Key Features
 
-  - **Authentication**: The framework provides a robust system for handling API authentication, simplifying the integration of secure and efficient authentication methods into your projects.
+  - **Authentication**: The framework provides a robust system for handling API authentication using the Strategy Pattern, simplifying the integration of secure and efficient authentication methods into your projects. See [AUTH_STRATEGIES.md](AUTH_STRATEGIES.md) for details on available authentication strategies.
 
   - **API Construction**: This package offers tools to easily define and structure your API interactions, allowing for dynamic and flexible API client creation that adapts to the specific needs of different projects.
 
@@ -71,6 +71,7 @@ class UsersResponse(ApiResponse[User]):
 
 from crudclient.api import API
 from crudclient.client import Client, ClientConfig
+from crudclient.auth import ApiKeyAuth
 from crudclient.crud import Crud
 
 from .model import User, UsersResponse
@@ -83,10 +84,26 @@ class CustomConfig(ClientConfig):
     timeout: Optional[float] = 10.0
     retries: Optional[int] = 3
 
-    def auth(self) -> Dict[str, str]:
-        return {
-            "x-myapi-api-token": self.api_key,
-        }
+    # Using the new authentication strategy pattern
+    def __init__(
+        self,
+        hostname=None,
+        version=None,
+        api_key=None,
+        headers=None,
+        timeout=None,
+        retries=None,
+    ) -> None:
+        super().__init__(
+            hostname=hostname,
+            version=version,
+            api_key=api_key,
+            headers=headers,
+            timeout=timeout,
+            retries=retries,
+            # Create a custom API key authentication strategy
+            auth=ApiKeyAuth(api_key=api_key, header_name="x-myapi-api-token")
+        )
 
 
 class UsersCrud(Crud[User]):

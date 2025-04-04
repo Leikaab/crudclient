@@ -1,13 +1,19 @@
 import os
 from typing import Any, Dict, List, Optional
 
+from dotenv import load_dotenv
+
 from crudclient.api import API
+from crudclient.auth.custom import ApiKeyAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 from crudclient.types import JSONDict
 
 from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesResponse, User, UsersResponse
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class OneflowConfig(ClientConfig):
@@ -16,10 +22,10 @@ class OneflowConfig(ClientConfig):
     api_key = os.getenv("ONEFLOW_API_KEY")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
 
-    def auth(self) -> Dict[str, str]:
-        return {
-            "x-oneflow-api-token": self.api_key or "",
-        }
+    def __init__(self):
+        super().__init__()
+        if self.api_key:
+            self.auth_strategy = ApiKeyAuth(api_key=self.api_key, header_name="x-oneflow-api-token")
 
 
 class UsersCrud(Crud[User]):

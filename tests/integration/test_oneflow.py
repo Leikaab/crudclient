@@ -14,10 +14,16 @@ def api():
 
 def test_api_configuration(api):
     assert api.client.base_url == "https://api.test.oneflow.com/v1"
-    assert api.client.config.api_key == os.getenv("ONEFLOW_API_KEY")
+    # Check that we have an auth strategy set up
+    assert api.client.config.auth_strategy is not None
+    # Check that the auth strategy is an ApiKeyAuth
+    from crudclient.auth.custom import ApiKeyAuth
+    assert isinstance(api.client.config.auth_strategy, ApiKeyAuth)
+    # Check that the API key is set correctly
+    assert api.client.config.auth_strategy.api_key == os.getenv("ONEFLOW_API_KEY")
     assert os.getenv("ONEFLOW_API_KEY") != ""
     assert os.getenv("ONEFLOW_USER_EMAIL") != ""
-    assert api.client.config.headers == {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL")}
+    assert api.client.config.headers == {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
 
 
 def test_list_users(api):

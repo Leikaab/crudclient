@@ -1,45 +1,98 @@
-# CrudClient Improvement Plan (TODO)
+# CrudClient Improvement Plan
 
-This plan outlines tasks based on project analysis and feedback, prioritized for improving the `crudclient` library.
+This plan integrates suggestions, code analysis findings, and existing improvement items into a cohesive strategy for the `crudclient` library.
 
-## High Priority
+**Phase 1: Core Refactoring & Foundational Improvements**
 
-1.  **Improve Error Handling & Logging:**
-    *   **Enhance Request/Response Logging (`client.py`):**
-        *   Modify `_request` to log request details (method, URL, params, relevant headers, payload snippet) at DEBUG level *before* sending.
-        *   Modify `_request` or `_handle_response` to log response details (status code, relevant headers, body snippet) at DEBUG level *after* receiving.
-        *   Ensure error logs in `_handle_error_response` include request context (method, URL) alongside status code and error data.
-    *   **Preserve Raw Response Data (`client.py`):**
-        *   Review `_handle_response` and `_handle_error_response` to ensure the full `requests.Response` object is accessible internally *before* potential parsing errors or exceptions occur.
-        *   Consider attaching the raw `requests.Response` object to raised exceptions (see below) for deeper debugging capabilities.
-    *   **Refine Exception Hierarchy & Handling:**
-        *   Define a new specific exception, e.g., `CrudClientError(APIError)`, in `exceptions.py` to represent errors originating from this library.
-        *   Modify `_handle_error_response` in `client.py` to catch `requests.HTTPError` and raise the new `CrudClientError`, embedding the original exception and potentially the raw `requests.Response`.
-        *   Review `crud.py` (`custom_action`'s `try/except ValueError`) to ensure `ValueError` during model conversion is either re-raised appropriately (perhaps as a `CrudClientError`) or logged with sufficient detail, rather than silently returning the raw response.
+1.  **Refactor Client & Authentication Logic:**
+    *   **Goal:** Decouple authentication logic, improve modularity, and make it easier for users to add custom authentication methods.
+    *   **Action:** Implement the **Strategy Pattern** for authentication.
+        *   Define a base `AuthStrategy` protocol/abstract class in `crudclient/auth/base.py`.
+        *   Implement concrete strategies: `BearerAuth(AuthStrategy)`, `BasicAuth(AuthStrategy)`, etc., in `crudclient/auth/`.
+        *   Refactor `ClientConfig` to accept an `AuthStrategy` instance instead of handling auth logic directly.
+        *   Refactor `Client._request` (or a dedicated method called by it) to use the configured `AuthStrategy` to prepare the request.
+    *   **Action:** Restructure the `crudclient` directory:
+        ```
+        crudclient/
+            __init__.py
+            client.py      # Core Client, _request logic
+            config.py      # ClientConfig (now simpler, holds AuthStrategy)
+            crud.py
+            api.py
+            models.py
+            exceptions.py
+            types.py
+            auth/          # Authentication strategies
+                __init__.py
+                base.py        # Base AuthStrategy protocol/ABC
+                bearer.py      # Bearer token implementation
+                basic.py       # Basic auth implementation
+                # Potentially others: api_key.py, oauth_helper.py, etc.
+            # Potentially other submodules if needed (e.g., response handling, retry logic)
+        ```
+    *   **Diagram (Illustrative):**
+        ```mermaid
+        graph TD
+            subgraph Client Configuration
+                Config[ClientConfig] -- holds --> AuthStrat[AuthStrategy]
+            end
 
-2.  **Refine Pydantic Response Model Strategy:**
-    *   Investigate and design a more flexible strategy for handling diverse API response structures with Pydantic models within `Crud`.
-    *   Goal: Allow consumer libraries to easily adapt `crudclient` to APIs with varying response formats (e.g., different pagination structures, data nesting).
+            subgraph Authentication Strategies
+                AuthStrat -- implements --> BaseAuth(AuthStrategy Base)
+                BaseAuth <|-- BearerAuth
+                BaseAuth <|-- BasicAuth
+                BaseAuth <|-- CustomAuth
+            end
 
-## Medium Priority
+            subgraph Client Execution
+                Client -- uses --> Config
+                Client -- prepares request using --> AuthStrat
+            end
+        ```
 
-3.  **Update Typing & Stubs:**
-    *   Ensure all necessary type hints and *all* public API docstrings reside exclusively in the `.pyi` files (`client.pyi`, `config.pyi`, etc.), removing any redundant method/function docstrings from `.py` files.
-    *   Investigate and update type hinting syntax to leverage PEP 695 Type Parameter Syntax where applicable.
-    *   Update CI/CD (`tests.yml`) Python matrix to reflect supported versions compatible with PEP 695 (likely removing Python 3.10, 3.11 if focusing on 3.12+ features).
+2.  **Enhance Error Handling & Logging:**
+    *   **Goal:** Provide better debugging information and more specific error types.
+    *   **Action:** Implement enhanced request/response logging in `Client._request` at DEBUG level.
+    *   **Action:** Define `CrudClientError(APIError)` and potentially more specific errors (`AuthenticationError`, `NotFoundError`, `InvalidResponseError`, `ModelConversionError`) in `exceptions.py`.
+    *   **Action:** Refactor `Client._handle_error_response` to raise `CrudClientError`, embedding the original `requests.HTTPError` and the raw `requests.Response`.
+    *   **Action:** Refactor `Crud.custom_action`'s `try/except ValueError` to log details and raise a specific `ModelConversionError` instead of returning the raw response.
 
-4.  **Testing Enhancements:**
-    *   **Integration Tests:** Define specific Pydantic models for API responses in integration tests (e.g., `test_jsonplaceholder.py`) instead of generic `BaseModel` for stricter validation.
-    *   **Error Cases:** Add more tests (unit and/or integration) for specific API error conditions (4xx, 5xx, malformed responses).
-    *   **Downstream Testing:** Investigate strategies to leverage tests from dependent libraries (fikenpy, tripletex, oneflowpy) to validate `crudclient` changes (e.g., dedicated CI workflow, local test harness).
+3.  **Address Core Robustness Issues:**
+    *   **Goal:** Fix potential bugs and improve reliability.
+    *   **Action:** Use `urllib.parse.urljoin` in `Client._request` for safer URL construction.
+    *   **Action:** Use `startswith()` or a proper MIME parser for Content-Type checking in `Client._handle_response`.
+    *   **Action:** Replace runtime `assert` checks in `Crud.__init__` and `Crud._dump_data` with explicit `isinstance` checks raising `TypeError` or `ValueError`.
+    *   **Action:** Ensure `API._initialize_client` is called *before* `_register_endpoints` during initialization.
 
-## Low Priority / Future Work
+**Phase 2: Type Safety & API Refinements**
 
-5.  **Evaluate Pydantic for `ClientConfig`:**
-    *   Carefully assess the feasibility and benefits of using Pydantic for `ClientConfig`, ensuring it doesn't hinder the ease of subclassing required by users.
+4.  **Define Type Safety Strategy:**
+    *   **Goal:** Ensure type correctness both statically and, where critical, at runtime.
+    *   **Action:** Remove `crudclient/runtime_type_checkers.py` and its usages.
+    *   **Action:** Rely primarily on:
+        *   **Comprehensive Static Typing:** Continue using `mypy` and detailed `.pyi` stubs. Enable stricter `mypy` checks progressively.
+        *   **Pydantic Validation:** Leverage Pydantic's validation for data entering/leaving the `Crud` layer via API interactions.
+        *   **Targeted Runtime Checks:** Use explicit `isinstance` checks in critical internal logic or public API entry points where type errors are likely and detrimental.
+    *   **Action (Evaluation):** Evaluate `typeguard` as an *optional* dependency or configuration for users who need stricter runtime guarantees.
 
-6.  **Increase Mypy Strictness:**
-    *   Revisit enabling stricter `mypy` checks after the library stabilizes beyond the alpha stage.
+5.  **Refine API/CRUD Layer:**
+    *   **Goal:** Improve flexibility, readability, and maintainability of the `Crud` and `API` layers.
+    *   **Action:** Design and implement a more flexible strategy for Pydantic response model handling in `Crud`.
+    *   **Action:** Refactor complex `Crud` methods (`_get_endpoint`, `_validate_list_return`) for clarity, potentially using helper methods.
+    *   **Action:** Consider refactoring `Client._prepare_data` to return headers/data instead of modifying session state directly.
+    *   **Action:** Use `typing.overload` for `Client._request` to provide more precise return types based on parameters.
+    *   **Action:** Evaluate `RoleBasedModel` - decide if it belongs in the core `models.py` or should be moved to examples/documentation.
+    *   **Action:** Evaluate `ClientConfig.__add__` - consider replacing with a more explicit `merge_configs` function if the operator overloading is deemed unclear or inefficient.
 
-7.  **Asynchronous Support:**
-    *   Explore adding `asyncio`/`httpx` support for non-blocking API calls.
+**Phase 3: Testing, Documentation & Polish**
+
+6.  **Enhance Testing:**
+    *   **Goal:** Increase confidence in the library's correctness and robustness.
+    *   **Action:** Use specific Pydantic models in integration tests.
+    *   **Action:** Add more tests for error conditions (4xx, 5xx, network errors, malformed responses).
+    *   **Action:** Investigate downstream testing strategies.
+
+7.  **Update Documentation & Stubs:**
+    *   **Goal:** Ensure documentation and type information are accurate and reflect the changes.
+    *   **Action:** Update `ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md` as needed to reflect the new structure, patterns (Strategy), and decisions.
+    *   **Action:** Ensure all public API docstrings are comprehensive and located *only* in `.pyi` files.

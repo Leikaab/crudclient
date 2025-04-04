@@ -1,4 +1,6 @@
 from typing import Any, Dict, Literal, Optional
+from crudclient.auth.base import AuthStrategy
+
 
 class ClientConfig:
     """
@@ -16,7 +18,7 @@ class ClientConfig:
         headers (Dict[str, str]): Optional default headers for every request.
         timeout (float): Timeout for each request in seconds (default: 10.0).
         retries (int): Number of retry attempts for failed requests (default: 3).
-        auth_type (Literal["bearer", "basic", "none"]): Authentication scheme.
+        auth (Optional[AuthStrategy]): Authentication strategy to use.
 
     Methods:
         __init__: Initializes a configuration object with specified parameters.
@@ -24,7 +26,7 @@ class ClientConfig:
         base_url: Property that returns the complete base URL for API requests.
         get_auth_token: Returns the authentication token used for authorization.
         get_auth_header_name: Returns the header name used for authentication.
-        auth: Builds authentication headers based on auth_type and token.
+        get_auth_headers: Builds authentication headers using the configured AuthStrategy.
         prepare: Hook for pre-request setup logic like refreshing tokens.
         should_retry_on_403: Indicates whether to retry after a 403 response.
         handle_403_retry: Hook for handling retry logic after 403 responses.
@@ -36,7 +38,8 @@ class ClientConfig:
     headers: Optional[Dict[str, str]]
     timeout: float
     retries: int
-    auth_type: Literal["bearer", "basic", "none"]
+    auth_strategy: Optional["AuthStrategy"]
+    auth_type: str
 
     def __init__(
         self,
@@ -46,8 +49,10 @@ class ClientConfig:
         headers: Optional[Dict[str, str]] = ...,
         timeout: Optional[float] = ...,
         retries: Optional[int] = ...,
-        auth_type: Optional[Literal["bearer", "basic", "none"]] = ...,
+        auth_strategy: Optional[AuthStrategy] = ...,
+        auth_type: Optional[str] = ...,
     ) -> None: ...
+
     def __add__(self, other: "ClientConfig") -> "ClientConfig":
         """
         Combines two configuration objects, creating a new instance.
@@ -108,15 +113,24 @@ class ClientConfig:
         """
         ...
 
-    def auth(self) -> Dict[str, Any]:
+    def get_auth_headers(self) -> Dict[str, Any]:
         """
         Builds the authentication headers to use in requests.
 
-        Behavior depends on `auth_type`:
-            - "bearer": Returns {'Authorization': 'Bearer <token>'}
-            - "basic": Returns {'Authorization': 'Basic <token>'}
-            - "none": Returns {}
-            - other/custom: Returns {'Authorization': <token>}
+        If an AuthStrategy is set, uses it to prepare request headers.
+        Otherwise, returns an empty dictionary.
+
+        Returns:
+            Dict[str, Any]: Headers to include in requests.
+        """
+        ...
+
+    def auth(self) -> Dict[str, Any]:
+        """
+        Legacy method for backward compatibility.
+
+        Returns authentication headers based on the auth_type and token.
+        New code should use the AuthStrategy pattern instead.
 
         Returns:
             Dict[str, Any]: Headers to include in requests.

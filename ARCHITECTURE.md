@@ -10,8 +10,9 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
 
 1.  **Modularity and Separation of Concerns:**
     *   The library is divided into distinct components with clear responsibilities:
-        *   `config.py` (`ClientConfig`): Handles client configuration (URL, auth, timeouts, retries).
-        *   `client.py` (`Client`): Manages HTTP requests/responses using `requests`, handles authentication logic based on config, implements retries.
+        *   `config.py` (`ClientConfig`): Handles client configuration (URL, timeouts, retries) and holds the authentication strategy.
+        *   `auth/` (Authentication Strategies): Implements the Strategy Pattern for authentication, with different strategies for various authentication methods.
+        *   `client.py` (`Client`): Manages HTTP requests/responses using `requests`, applies authentication using the configured strategy, implements retries.
         *   `crud.py` (`Crud`): Provides a generic abstraction for CRUD operations on API resources, handling endpoint construction and data model conversion (using Pydantic).
         *   `api.py` (`API`): Acts as an entry point, composing the `Client` and registering `Crud` resource endpoints.
         *   `models.py`: Defines base Pydantic models for common API patterns (like `ApiResponse`).
@@ -37,9 +38,14 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
     *   **Black & isort:** Code formatting and import sorting are automated using `Black` and `isort`.
     *   **Flake8:** Linting is performed using `Flake8`.
     *   **Pre-Commit Hooks:** These tools are enforced automatically via pre-commit hooks to ensure consistency before code is committed.
+3.  **Design Patterns:**
+    *   **Strategy Pattern:** Used for authentication mechanisms, allowing different authentication strategies to be interchangeable.
+    *   **Template Method Pattern:** Used in the API class for endpoint registration.
+    *   **Composition over Inheritance:** While inheritance is used for extension, composition is preferred for core functionality (e.g., API composes Client).
 
-3.  **Single Responsibility Principle (SRP):**
+4.  **Single Responsibility Principle (SRP):**
     *   We aim for classes and methods to have a single, well-defined purpose.
+    *   Functionality is organized into logically named files and modules.
     *   Functionality is organized into logically named files.
 
 4.  **Pydantic Integration:**

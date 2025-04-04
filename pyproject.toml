@@ -29,6 +29,7 @@ pydantic = {version = "^2.8.2", extras = ["email"]}
 pytest = "^8.1.1"
 pytest-cov = "*"
 requests-mock = "^1.12.1"
+python-dotenv = "^1.1.0"
 
 autoflake = "*"
 isort = "*"

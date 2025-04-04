@@ -1,12 +1,19 @@
 import os
 from typing import TypeVar, cast
 
+from dotenv import load_dotenv
+
 from crudclient.api import API
+from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud import Crud, ModelDumpable
 
 from .models import Company, Contact, User
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 T = TypeVar("T", bound=ModelDumpable)
 
@@ -15,6 +22,11 @@ class FikenConfig(ClientConfig):
     hostname = "https://api.fiken.no/api/"
     version = "v2"
     api_key = os.getenv("FIKEN_ACCESS_TOKEN")
+
+    def __init__(self):
+        super().__init__()
+        if self.api_key:
+            self.auth_strategy = BearerAuth(token=self.api_key)
 
 
 class FikenCrud(Crud[T]):
