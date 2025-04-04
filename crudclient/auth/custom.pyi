@@ -1,22 +1,21 @@
-from typing import Callable, Dict, Optional
-
-from crudclient.auth.base import AuthStrategy
+from typing import Dict, Callable, Optional
+from .base import AuthStrategy
 
 
 class CustomAuth(AuthStrategy):
     """
-    Authentication strategy for custom authentication methods.
+    Custom authentication strategy.
 
-    This strategy allows for custom authentication logic by providing
-    callback functions for headers and URL parameters.
+    This strategy allows for custom authentication mechanisms by accepting
+    callback functions that provide headers and/or query parameters for
+    authentication. This is useful for complex authentication flows or
+    when you need dynamic authentication logic.
 
     Attributes:
-        header_callback (Callable[[], Dict[str, str]]): A callback function that returns headers.
-        param_callback (Optional[Callable[[], Dict[str, str]]]): A callback function that returns URL parameters.
-
-    Methods:
-        prepare_request_headers: Returns headers from the header_callback.
-        prepare_request_params: Returns URL parameters from the param_callback.
+        header_callback (Callable[[], Dict[str, str]]): A function that returns
+            headers for authentication.
+        param_callback (Optional[Callable[[], Dict[str, str]]]): A function that
+            returns query parameters for authentication.
     """
 
     header_callback: Callable[[], Dict[str, str]]
@@ -31,80 +30,30 @@ class CustomAuth(AuthStrategy):
         Initialize a CustomAuth strategy.
 
         Args:
-            header_callback (Callable[[], Dict[str, str]]): A callback function that returns headers.
-            param_callback (Optional[Callable[[], Dict[str, str]]]): A callback function that returns URL parameters.
+            header_callback (Callable[[], Dict[str, str]]): A function that returns
+                headers for authentication.
+            param_callback (Optional[Callable[[], Dict[str, str]]], optional): A function
+                that returns query parameters for authentication. Defaults to None.
         """
         ...
 
     def prepare_request_headers(self) -> Dict[str, str]:
         """
-        Prepare headers using the header_callback.
+        Prepare headers for custom authentication.
 
         Returns:
-            Dict[str, str]: Headers from the header_callback.
+            Dict[str, str]: A dictionary of headers for authentication,
+                as returned by the header_callback.
         """
         ...
 
     def prepare_request_params(self) -> Dict[str, str]:
         """
-        Prepare URL parameters using the param_callback.
+        Prepare query parameters for custom authentication.
 
         Returns:
-            Dict[str, str]: URL parameters from the param_callback, or an empty dictionary if no callback is provided.
-        """
-        ...
-
-
-class ApiKeyAuth(AuthStrategy):
-    """
-    Authentication strategy for API key authentication.
-
-    This strategy adds an API key to either the headers or URL parameters.
-
-    Attributes:
-        api_key (str): The API key to use for authentication.
-        header_name (Optional[str]): The name of the header to use for the API key.
-        param_name (Optional[str]): The name of the URL parameter to use for the API key.
-
-    Methods:
-        prepare_request_headers: Returns headers with the API key if header_name is provided.
-        prepare_request_params: Returns URL parameters with the API key if param_name is provided.
-    """
-
-    api_key: str
-    header_name: Optional[str]
-    param_name: Optional[str]
-
-    def __init__(
-        self,
-        api_key: str,
-        header_name: Optional[str] = None,
-        param_name: Optional[str] = None
-    ) -> None:
-        """
-        Initialize an ApiKeyAuth strategy.
-
-        Args:
-            api_key (str): The API key to use for authentication.
-            header_name (Optional[str]): The name of the header to use for the API key.
-            param_name (Optional[str]): The name of the URL parameter to use for the API key.
-        """
-        ...
-
-    def prepare_request_headers(self) -> Dict[str, str]:
-        """
-        Prepare headers with the API key if header_name is provided.
-
-        Returns:
-            Dict[str, str]: Headers with the API key, or an empty dictionary if header_name is not provided.
-        """
-        ...
-
-    def prepare_request_params(self) -> Dict[str, str]:
-        """
-        Prepare URL parameters with the API key if param_name is provided.
-
-        Returns:
-            Dict[str, str]: URL parameters with the API key, or an empty dictionary if param_name is not provided.
+            Dict[str, str]: A dictionary of query parameters for authentication,
+                as returned by the param_callback, or an empty dictionary if
+                param_callback is None.
         """
         ...

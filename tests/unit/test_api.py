@@ -22,7 +22,8 @@ class MockAPI(API):
     client_class = Client
 
     def _register_endpoints(self):
-        assert self.client is not None
+        if self.client is None:
+            raise ValueError("Client is required!")
         self.test_resource: Crud = MockCrud(self.client)
 
 

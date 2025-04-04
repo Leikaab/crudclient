@@ -1,22 +1,18 @@
-import base64
-from typing import Dict
-
-from crudclient.auth.base import AuthStrategy
+from typing import Dict, Optional
+from .base import AuthStrategy
 
 
 class BasicAuth(AuthStrategy):
     """
-    Authentication strategy for Basic authentication.
+    Basic authentication strategy.
 
-    This strategy adds an Authorization header with a Basic auth token.
+    This strategy implements HTTP Basic Authentication, which sends credentials
+    as a base64-encoded string in the format "username:password" in the
+    Authorization header.
 
     Attributes:
-        username (str): The username for Basic authentication.
-        password (str): The password for Basic authentication.
-
-    Methods:
-        prepare_request_headers: Returns headers with the Basic auth token.
-        prepare_request_params: Returns an empty dictionary.
+        username (str): The username for authentication.
+        password (str): The password for authentication.
     """
 
     username: str
@@ -27,25 +23,29 @@ class BasicAuth(AuthStrategy):
         Initialize a BasicAuth strategy.
 
         Args:
-            username (str): The username for Basic authentication.
-            password (str): The password for Basic authentication.
+            username (str): The username for authentication.
+            password (str): The password for authentication.
         """
         ...
 
     def prepare_request_headers(self) -> Dict[str, str]:
         """
-        Prepare headers with the Basic auth token.
+        Prepare headers for Basic authentication.
 
         Returns:
-            Dict[str, str]: Headers with the Authorization header set to "Basic {token}".
+            Dict[str, str]: A dictionary containing the Authorization header with
+                the Base64-encoded credentials.
         """
         ...
 
     def prepare_request_params(self) -> Dict[str, str]:
         """
-        Prepare URL parameters for the request.
+        Prepare query parameters for Basic authentication.
+
+        Basic authentication does not use query parameters, so this method
+        returns an empty dictionary.
 
         Returns:
-            Dict[str, str]: An empty dictionary as Basic auth doesn't use URL parameters.
+            Dict[str, str]: An empty dictionary.
         """
         ...

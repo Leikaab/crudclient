@@ -102,12 +102,14 @@ class Crud(Generic[T]):
 
         # makes parent obligatory if _parent_resource is set, and sets the parent
         if self._parent_resource is not None:
-            assert isinstance(parent, self._parent_resource), f"Parent must be an instance of {self._parent_resource}"
+            if not isinstance(parent, self._parent_resource):
+                raise TypeError(f"Parent must be an instance of {self._parent_resource}")
             self._parent = parent
 
-        # Dissallow parent if _parent_resource is not set
+        # Disallow parent if _parent_resource is not set
         else:
-            assert parent is None, "Parent must be None, as _parent_resource is not set"
+            if parent is not None:
+                raise TypeError("Parent must be None, as _parent_resource is not set")
 
         # Remove methods that are not allowed
         if self._methods != ["*"]:
@@ -257,9 +259,12 @@ class Crud(Generic[T]):
         if isinstance(data, dict):
             return data
 
-        assert self._datamodel is not None, "If Data is not a dict or None, _datamodel must be set"
-        assert isinstance(data, self._datamodel), f"Data must be an instance of {self._datamodel}, dict or None"
-        assert hasattr(data, "model_dump"), f"{self._datamodel} must have a model_dump method"
+        if self._datamodel is None:
+            raise ValueError("If Data is not a dict or None, _datamodel must be set")
+        if not isinstance(data, self._datamodel):
+            raise TypeError(f"Data must be an instance of {self._datamodel}, dict or None")
+        if not hasattr(data, "model_dump"):
+            raise ValueError(f"{self._datamodel} must have a model_dump method")
 
         return data.model_dump()
 
@@ -346,7 +351,7 @@ class Crud(Generic[T]):
         parent_id: Optional[str] = None,
         data: Optional[JSONDict | T] = None,
         params: Optional[JSONDict] = None,
-    ) -> T | JSONDict:
+    ) -> T | JSONDict | List[JSONDict]:
         """
         Perform a custom action on the resource.
 
@@ -369,6 +374,11 @@ class Crud(Generic[T]):
 
         response = getattr(self.client, method.lower())(endpoint, **kwargs)
         try:
+            # If the response is a list, return it directly
+            if isinstance(response, list):
+                return response
             return self._convert_to_model(response)
-        except ValueError:
-            return response
+        except ValueError as e:
+            logger.error(f"Failed to convert response to model: {e}")
+            from .exceptions import ModelConversionError
+            raise ModelConversionError(f"Failed to convert response to model: {e}", None) from e

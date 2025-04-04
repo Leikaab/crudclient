@@ -38,6 +38,7 @@ from requests.adapters import HTTPAdapter
 
 from .auth.base import AuthStrategy
 from .config import ClientConfig
+from .exceptions import AuthenticationError, CrudClientError, NotFoundError
 from .runtime_type_checkers import assert_type
 from .types import RawResponseSimple
 
@@ -146,33 +147,58 @@ class Client:
 
         content_type = response.headers.get("Content-Type", "")
 
-        if "application/json" in content_type:
+        # Use startswith() for more precise Content-Type checking
+        if content_type.startswith("application/json"):
             return response.json()
-        elif "application/octet-stream" in content_type or "multipart/form-data" in content_type:
+        elif content_type.startswith("application/octet-stream") or content_type.startswith("multipart/form-data"):
             return response.content
         else:
             return response.text
 
     def _handle_error_response(self, response: requests.Response) -> None:
+        """
+        Handle error responses from the API.
 
+        This method attempts to extract error information from the response and raises
+        appropriate exceptions based on the status code.
+
+        Args:
+            response: The response object from the API.
+
+        Raises:
+            AuthenticationError: If the status code is 401 (Unauthorized).
+            NotFoundError: If the status code is 404 (Not Found).
+            CrudClientError: For other error status codes.
+        """
         try:
             error_data = response.json()
         except ValueError:
             logger.warning("Failed to parse JSON response.")
             error_data = response.text
 
+        status_code = response.status_code
+        error_message = f"HTTP error occurred: {status_code}, {error_data}"
+        logger.error(error_message)
+
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
-            logger.error(f"HTTP error occurred: {response.status_code}, {error_data}")
-            raise e
+            # Map status codes to specific error types
+            if status_code == 401:
+                raise AuthenticationError(f"Authentication failed: {error_data}", response) from e
+            elif status_code == 404:
+                raise NotFoundError(f"Resource not found: {error_data}", response) from e
+            else:
+                raise CrudClientError(error_message, response) from e
 
-        raise requests.RequestException(f"Request failed with status code {response.status_code}, {error_data}")
+        # This should not be reached, but just in case
+        raise CrudClientError(f"Request failed with status code {status_code}, {error_data}", response)
 
     def _request(self, method: str, endpoint: str | None = None, url: str | None = None, handle_response: bool = True, **kwargs) -> Any:
         if url is None:
             if endpoint is None:
                 raise ValueError("Either 'endpoint' or 'url' must be provided.")
+            # Maintain backward compatibility with existing code
             url = f"{self.config.base_url}/{endpoint.lstrip('/')}"
 
         logger.debug(f"Making {method} request to {url} with params: {kwargs}")

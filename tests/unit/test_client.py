@@ -15,7 +15,7 @@ class TestClient(TestClientAuth):
         # Mock the request to the API
         endpoint = "/users"
         params = {"page": 1}
-        url = f"{client.base_url}{endpoint}"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Simulate a successful response from the API
         mock_request.get(url, json={"status": "success"})
@@ -28,7 +28,7 @@ class TestClient(TestClientAuth):
         # Mock the POST request to the API
         endpoint = "/users"
         data = {"name": "John Doe"}
-        url = f"{client.base_url}{endpoint}"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Simulate a successful response from the API for POST
         mock_request.post(url, json={"status": "success"})
@@ -41,7 +41,7 @@ class TestClient(TestClientAuth):
         # Mock the PUT request to the API
         endpoint = "/users/1"
         data = {"name": "John Doe"}
-        url = f"{client.base_url}{endpoint}"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Simulate a successful response from the API for PUT
         mock_request.put(url, json={"status": "success"})
@@ -53,7 +53,7 @@ class TestClient(TestClientAuth):
     def test_delete(self, client, mock_request):
         # Mock the DELETE request to the API
         endpoint = "/users/1"
-        url = f"{client.base_url}{endpoint}"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Simulate a successful response from the API for DELETE
         mock_request.delete(url, json={"status": "success"})
@@ -66,7 +66,7 @@ class TestClient(TestClientAuth):
         # Mock the PATCH request to the API
         endpoint = "/users/1"
         data = {"name": "John Doe"}
-        url = f"{client.base_url}{endpoint}"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Simulate a successful response from the API for PATCH
         mock_request.patch(url, json={"status": "success"})

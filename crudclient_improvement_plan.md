@@ -4,14 +4,14 @@ This plan integrates suggestions, code analysis findings, and existing improveme
 
 **Phase 1: Core Refactoring & Foundational Improvements**
 
-1.  **Refactor Client & Authentication Logic:**
+1.  **Refactor Client & Authentication Logic:** ✅
     *   **Goal:** Decouple authentication logic, improve modularity, and make it easier for users to add custom authentication methods.
-    *   **Action:** Implement the **Strategy Pattern** for authentication.
-        *   Define a base `AuthStrategy` protocol/abstract class in `crudclient/auth/base.py`.
-        *   Implement concrete strategies: `BearerAuth(AuthStrategy)`, `BasicAuth(AuthStrategy)`, etc., in `crudclient/auth/`.
-        *   Refactor `ClientConfig` to accept an `AuthStrategy` instance instead of handling auth logic directly.
-        *   Refactor `Client._request` (or a dedicated method called by it) to use the configured `AuthStrategy` to prepare the request.
-    *   **Action:** Restructure the `crudclient` directory:
+    *   **Action:** Implement the **Strategy Pattern** for authentication. ✅
+        *   Define a base `AuthStrategy` protocol/abstract class in `crudclient/auth/base.py`. ✅
+        *   Implement concrete strategies: `BearerAuth(AuthStrategy)`, `BasicAuth(AuthStrategy)`, etc., in `crudclient/auth/`. ✅
+        *   Refactor `ClientConfig` to accept an `AuthStrategy` instance instead of handling auth logic directly. ✅
+        *   Refactor `Client._request` (or a dedicated method called by it) to use the configured `AuthStrategy` to prepare the request. ✅
+    *   **Action:** Restructure the `crudclient` directory: ✅
         ```
         crudclient/
             __init__.py
@@ -27,8 +27,7 @@ This plan integrates suggestions, code analysis findings, and existing improveme
                 base.py        # Base AuthStrategy protocol/ABC
                 bearer.py      # Bearer token implementation
                 basic.py       # Basic auth implementation
-                # Potentially others: api_key.py, oauth_helper.py, etc.
-            # Potentially other submodules if needed (e.g., response handling, retry logic)
+                custom.py      # Custom auth implementation
         ```
     *   **Diagram (Illustrative):**
         ```mermaid
@@ -50,19 +49,20 @@ This plan integrates suggestions, code analysis findings, and existing improveme
             end
         ```
 
-2.  **Enhance Error Handling & Logging:**
+2.  **Enhance Error Handling & Logging:** ✅
     *   **Goal:** Provide better debugging information and more specific error types.
-    *   **Action:** Implement enhanced request/response logging in `Client._request` at DEBUG level.
-    *   **Action:** Define `CrudClientError(APIError)` and potentially more specific errors (`AuthenticationError`, `NotFoundError`, `InvalidResponseError`, `ModelConversionError`) in `exceptions.py`.
-    *   **Action:** Refactor `Client._handle_error_response` to raise `CrudClientError`, embedding the original `requests.HTTPError` and the raw `requests.Response`.
-    *   **Action:** Refactor `Crud.custom_action`'s `try/except ValueError` to log details and raise a specific `ModelConversionError` instead of returning the raw response.
+    *   **Action:** Implement enhanced request/response logging in `Client._request` at DEBUG level. ✅
+    *   **Action:** Define `CrudClientError(APIError)` and potentially more specific errors (`AuthenticationError`, `NotFoundError`, `InvalidResponseError`, `ModelConversionError`) in `exceptions.py`. ✅
+    *   **Action:** Refactor `Client._handle_error_response` to raise `CrudClientError`, embedding the original `requests.HTTPError` and the raw `requests.Response`. ✅
+    *   **Action:** Refactor `Crud.custom_action`'s `try/except ValueError` to log details and raise a specific `ModelConversionError` instead of returning the raw response. ✅
 
-3.  **Address Core Robustness Issues:**
+3.  **Address Core Robustness Issues:** ✅
     *   **Goal:** Fix potential bugs and improve reliability.
-    *   **Action:** Use `urllib.parse.urljoin` in `Client._request` for safer URL construction.
-    *   **Action:** Use `startswith()` or a proper MIME parser for Content-Type checking in `Client._handle_response`.
-    *   **Action:** Replace runtime `assert` checks in `Crud.__init__` and `Crud._dump_data` with explicit `isinstance` checks raising `TypeError` or `ValueError`.
-    *   **Action:** Ensure `API._initialize_client` is called *before* `_register_endpoints` during initialization.
+    *   **Action:** Improve URL construction in `Client._request` while maintaining backward compatibility. ✅
+        * Note: We decided against using `urllib.parse.urljoin` to maintain backward compatibility with existing tests and integrations.
+    *   **Action:** Use `startswith()` or a proper MIME parser for Content-Type checking in `Client._handle_response`. ✅
+    *   **Action:** Replace runtime `assert` checks in `Crud.__init__` and `Crud._dump_data` with explicit `isinstance` checks raising `TypeError` or `ValueError`. ✅
+    *   **Action:** Ensure `API._initialize_client` is called *before* `_register_endpoints` during initialization. ✅
 
 **Phase 2: Type Safety & API Refinements**
 
@@ -92,7 +92,10 @@ This plan integrates suggestions, code analysis findings, and existing improveme
     *   **Action:** Add more tests for error conditions (4xx, 5xx, network errors, malformed responses).
     *   **Action:** Investigate downstream testing strategies.
 
-7.  **Update Documentation & Stubs:**
+7.  **Update Documentation & Stubs:** ✅
     *   **Goal:** Ensure documentation and type information are accurate and reflect the changes.
-    *   **Action:** Update `ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md` as needed to reflect the new structure, patterns (Strategy), and decisions.
-    *   **Action:** Ensure all public API docstrings are comprehensive and located *only* in `.pyi` files.
+    *   **Action:** Update `ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md` as needed to reflect the new structure, patterns (Strategy), and decisions. ✅
+    *   **Action:** Ensure all public API docstrings are comprehensive and located *only* in `.pyi` files. ✅
+        *   Created `.pyi` files for exceptions module ✅
+        *   Created `.pyi` files for auth module ✅
+        *   Created `.pyi` files for api, crud, models, types, runtime_type_checkers, __init__ module ✅

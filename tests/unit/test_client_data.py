@@ -90,22 +90,29 @@ class TestClient(TestClientAuth):
         assert result == content
 
     def test_handle_error_response_value_error(self, client):
+        from crudclient.exceptions import CrudClientError
+
         response = MagicMock()
         response.json.side_effect = ValueError("Invalid JSON")
         response.text = "raw text error"
         response.status_code = 500
         response.raise_for_status.side_effect = requests.HTTPError("boom")
 
-        with pytest.raises(requests.HTTPError):
+        with pytest.raises(CrudClientError) as excinfo:
             client._handle_error_response(response)
 
+        assert "500" in str(excinfo.value)
+        assert "raw text error" in str(excinfo.value)
+
     def test_handle_error_response_no_http_error(self, client):
+        from crudclient.exceptions import CrudClientError
+
         response = MagicMock()
         response.json.return_value = {"error": "Bad Request"}
         response.status_code = 400
         response.raise_for_status.return_value = None  # No exception
 
-        with pytest.raises(requests.RequestException) as excinfo:
+        with pytest.raises(CrudClientError) as excinfo:
             client._handle_error_response(response)
 
         assert "400" in str(excinfo.value)

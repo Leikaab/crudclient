@@ -1,47 +1,51 @@
-from typing import Dict
-
-from crudclient.auth.base import AuthStrategy
+from typing import Dict, Optional
+from .base import AuthStrategy
 
 
 class BearerAuth(AuthStrategy):
     """
-    Authentication strategy for Bearer token authentication.
+    Bearer token authentication strategy.
 
-    This strategy adds an Authorization header with a Bearer token.
+    This strategy implements the Bearer token authentication scheme, commonly used
+    in OAuth 2.0 and JWT-based APIs. It adds an "Authorization" header with the
+    format "Bearer {token}" to each request.
 
     Attributes:
-        token (str): The Bearer token to use for authentication.
-
-    Methods:
-        prepare_request_headers: Returns headers with the Bearer token.
-        prepare_request_params: Returns an empty dictionary.
+        token (str): The bearer token to use for authentication.
+        header_name (str): The name of the header to use for the token. Defaults to "Authorization".
     """
 
     token: str
+    header_name: str
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str, header_name: str = "Authorization") -> None:
         """
         Initialize a BearerAuth strategy.
 
         Args:
-            token (str): The Bearer token to use for authentication.
+            token (str): The bearer token to use for authentication.
+            header_name (str, optional): The name of the header to use for the token.
+                Defaults to "Authorization".
         """
         ...
 
     def prepare_request_headers(self) -> Dict[str, str]:
         """
-        Prepare headers with the Bearer token.
+        Prepare headers for Bearer token authentication.
 
         Returns:
-            Dict[str, str]: Headers with the Authorization header set to "Bearer {token}".
+            Dict[str, str]: A dictionary containing the Authorization header with the Bearer token.
         """
         ...
 
     def prepare_request_params(self) -> Dict[str, str]:
         """
-        Prepare URL parameters for the request.
+        Prepare query parameters for Bearer token authentication.
+
+        Bearer token authentication does not use query parameters, so this method
+        returns an empty dictionary.
 
         Returns:
-            Dict[str, str]: An empty dictionary as Bearer auth doesn't use URL parameters.
+            Dict[str, str]: An empty dictionary.
         """
         ...

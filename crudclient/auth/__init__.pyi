@@ -1,24 +1,34 @@
-from typing import Literal, Optional, Union
+"""
+Authentication strategies for CrudClient.
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
-from crudclient.auth.custom import ApiKeyAuth, CustomAuth
+This module provides various authentication strategies for use with CrudClient.
+Each strategy implements the AuthStrategy interface defined in base.py.
 
+Available strategies:
+    - BearerAuth: For Bearer token authentication
+    - BasicAuth: For HTTP Basic Authentication
+    - CustomAuth: For custom authentication mechanisms
 
-def create_auth_strategy(
-    auth_type: str,
-    token: Optional[str] = None
-) -> Optional[AuthStrategy]:
-    """
-    Factory function to create an appropriate AuthStrategy based on auth_type.
+Example:
+    ```python
+    from crudclient.auth import BearerAuth
+    from crudclient import ClientConfig, Client
 
-    Args:
-        auth_type: The type of authentication to use. Standard values are "bearer", "basic", and "none".
-                  Any other value will default to "bearer".
-        token: The authentication token to use.
+    # Create a bearer token authentication strategy
+    auth_strategy = BearerAuth(token="your_access_token")
 
-    Returns:
-        An AuthStrategy instance, or None if auth_type is "none" or token is None.
-    """
-    ...
+    # Use it in your client configuration
+    config = ClientConfig(
+        hostname="https://api.example.com",
+        auth=auth_strategy
+    )
+    client = Client(config)
+    ```
+"""
+
+from .base import AuthStrategy, create_auth_strategy
+from .bearer import BearerAuth
+from .basic import BasicAuth
+from .custom import CustomAuth
+
+__all__ = ["AuthStrategy", "BearerAuth", "BasicAuth", "CustomAuth", "create_auth_strategy"]
