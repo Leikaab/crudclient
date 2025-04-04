@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }} #using matrix to create one similar job for each OS.
     strategy:
       matrix:
-        os: [ubuntu-latest] #, windows-latest, macos-latest
+        os: [ubuntu-latest] # dropping testing on win and macOS for now
       fail-fast: false # Ensures other jobs in the matrix continue running even if one fails
 
     continue-on-error: false # Ensures each job within the OS fails completely if any step fails
