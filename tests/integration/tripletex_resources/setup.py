@@ -103,9 +103,13 @@ class TripletexAuthStrategy(AuthStrategy):
     def create_date(self) -> str:
         """
         Create an expiration date for the session token (tomorrow in CET).
+
+        The API expects a full datetime in ISO format, not just a date.
         """
-        tomorrow_cet = (datetime.now(timezone.utc) + timedelta(days=1)).astimezone().date()
-        expiration_str = tomorrow_cet.isoformat()
+        # Create a datetime for tomorrow with time component (end of day)
+        tomorrow_cet = (datetime.now(timezone.utc) + timedelta(days=2)).replace(hour=23, minute=59, second=59)
+        # Format as ISO 8601 with timezone
+        expiration_str = tomorrow_cet.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         logger.debug("Created expiration date: %s", expiration_str)
         return expiration_str
 
@@ -137,6 +141,13 @@ class TripletexAuthStrategy(AuthStrategy):
         logger.debug("Requesting new session token from %s", url)
         try:
             response = requests.put(url, headers={}, params=params, timeout=30)
+            if response.status_code == 422:
+                # Log more details about the 422 error
+                logger.error("422 Unprocessable Entity error: %s", response.text)
+                # Try to get more information from the response
+                error_data = response.json() if response.text else {"error": "No response body"}
+                logger.error("Error details: %s", error_data)
+
             response.raise_for_status()
             data = response.json()
             session_data = TokenSessionResponse.model_validate(data)
@@ -193,10 +204,10 @@ class TripletexTestConfig(TripletexConfig):
     hostname = "https://api-test.tripletex.tech/"
 
     def __init__(self):
-        # Call parent's __init__ first to set up basic config
+        # Call grandparent's __init__ to set up basic config, skipping parent's __init__
         super(ClientConfig, self).__init__()
 
-        # Then override with test-specific values
+        # Use test tokens
         consumer_token = os.getenv("TRIPLETEX_TEST_CONSUMER_TOKEN", "")
         employee_token = os.getenv("TRIPLETEX_TEST_EMPLOYEE_TOKEN", "")
 
