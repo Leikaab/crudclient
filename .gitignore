@@ -3,8 +3,7 @@
 src/testing.ipynb
 logs/
 
-private_notes.txt
-private_notes.md
+private_*.*
 
 /node_modules
 
