@@ -2,18 +2,40 @@
   "mcpServers": {
     "github": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "$GITHUB_TOKEN"
       },
       "disabled": false,
-      "alwaysAllow": []
-    },
-    "browser": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-browser"],
-      "disabled": false,
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "search_repositories",
+        "get_file_contents",
+        "create_issue",
+        "create_branch",
+        "list_commits",
+        "list_issues",
+        "update_issue",
+        "add_issue_comment",
+        "search_code",
+        "search_issues",
+        "search_users",
+        "get_issue",
+        "get_pull_request",
+        "list_pull_requests",
+        "create_pull_request_review",
+        "get_pull_request_files",
+        "get_pull_request_status",
+        "update_pull_request_branch",
+        "get_pull_request_comments",
+        "get_pull_request_reviews",
+        "merge_pull_request",
+        "create_pull_request",
+        "push_files",
+        "create_or_update_file"
+      ]
     }
   }
 }
