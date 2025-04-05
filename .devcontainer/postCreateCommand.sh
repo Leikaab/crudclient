@@ -37,20 +37,14 @@ fi
 # Ensure the .roo directory exists
 mkdir -p .roo
 
-# Make sure the MCP servers script is executable
-chmod +x ./.devcontainer/startMcpServers.sh
+# Make the RooCode setup script executable and run it with sudo
+echo "Setting up RooCode environment..."
+chmod +x ./.devcontainer/setupRooCode.sh
+sudo ./.devcontainer/setupRooCode.sh
 
-# Install MCP server packages globally
-echo "Installing MCP server packages..."
-npm install -g @modelcontextprotocol/server-github @modelcontextprotocol/server-browser
-
-# Verify installations
-echo "Verifying MCP server packages installation..."
-if command -v npx &> /dev/null; then
-    npx --no-install @modelcontextprotocol/server-github --version || echo "GitHub MCP server not properly installed"
-    npx --no-install @modelcontextprotocol/server-browser --version || echo "Browser MCP server not properly installed"
-else
-    echo "Warning: npx command not available, cannot verify MCP server packages"
-fi
+# Install MCP packages
+echo "Installing MCP packages..."
+chmod +x ./.devcontainer/installMcpPackages.sh
+./.devcontainer/installMcpPackages.sh
 
 echo "Development environment setup complete!"

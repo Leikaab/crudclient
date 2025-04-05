@@ -17,10 +17,6 @@ else
     echo "GITHUB_TOKEN not found. GitHub MCP server will not be started."
 fi
 
-# Start the Browser MCP server in the background
-echo "Starting Browser MCP server..."
-npx -y @modelcontextprotocol/server-browser > ./.mcp-logs/browser-server.log 2>&1 &
-echo "Browser MCP server started with PID $!"
 
 # Notify about where to find logs
 echo "MCP servers started. Logs are available in ./.mcp-logs/"

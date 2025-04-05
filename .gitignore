@@ -6,6 +6,8 @@ logs/
 private_notes.txt
 private_notes.md
 
+/node_modules
+
 # Created by https://www.toptal.com/developers/gitignore/api/macos,flask,python,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,flask,python,visualstudiocode
 
