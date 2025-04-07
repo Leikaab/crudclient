@@ -137,14 +137,14 @@ def test_user_service_with_fake():
 ```
 
 ## Test Organization and Structure
+### Modular Test Organization
 
-### Breaking Down Large Test Files
-
-Large test files can become difficult to maintain and understand. Breaking them down into smaller, focused files improves organization and readability.
+As test suites grow larger, organizing them into modules and submodules becomes essential for maintainability and clarity. The recommended approach is to structure tests to mirror the codebase organization, making it easier to locate tests for specific components.
 
 **Recommendations:**
-- Create separate test files for different components or features
-- Group related tests together
+- Organize tests to follow the codebase structure (client, crud, auth, http, response_strategies)
+- Create submodules for specific features within each component
+- Group related tests together in the same module
 - Keep test files small and focused on specific functionality
 - Use descriptive file names that indicate what's being tested
 
@@ -152,38 +152,141 @@ Large test files can become difficult to maintain and understand. Breaking them 
 ```
 tests/
 ├── unit/
-│   ├── services/
-│   │   ├── test_user_service.py
-│   │   ├── test_order_service.py
-│   │   └── test_product_service.py
-│   └── models/
-│       ├── test_user_model.py
-│       ├── test_order_model.py
-│       └── test_product_model.py
+│   ├── client/
+│   │   ├── test_client_base.py
+│   │   ├── test_client_auth.py
+│   │   └── test_client_error_handling.py
+│   ├── crud/
+│   │   ├── test_crud_base.py
+│   │   ├── test_crud_operations.py
+│   │   └── test_response_conversion.py
+│   ├── auth/
+│   │   ├── test_auth_base.py
+│   │   ├── test_auth_bearer.py
+│   │   └── test_auth_custom.py
+│   ├── http/
+│   │   ├── test_http_client.py
+│   │   ├── test_retry_handler.py
+│   │   └── test_error_handler.py
+│   └── response_strategies/
+│       ├── test_default_strategy.py
+│       └── test_path_based_strategy.py
 └── integration/
-    ├── test_user_api.py
-    ├── test_order_api.py
-    └── test_product_api.py
+    ├── jsonplaceholder/
+    │   ├── test_posts.py
+    │   └── test_users.py
+    ├── tripletex/
+    │   ├── test_auth.py
+    │   ├── test_countries.py
+    │   └── test_suppliers.py
+    └── fiken/
+        ├── test_companies.py
+        └── test_invoices.py
 ```
 
-### Creating Shared Test Fixtures and Utilities
+### Parallel Test Execution with pytest-xdist
 
-Shared fixtures and utilities help keep your tests DRY (Don't Repeat Yourself) and consistent.
+For large test suites, running tests in parallel can significantly reduce execution time. pytest-xdist is a plugin that enables parallel test execution across multiple CPU cores.
+
+**Setup:**
+1. Add pytest-xdist to your development dependencies:
+   ```
+   [tool.poetry.group.dev.dependencies]
+   pytest-xdist = "^3.5.0"
+   ```
+
+2. Run tests in parallel using the `-n` flag:
+   ```
+   pytest -n auto  # Automatically use all available CPU cores
+   pytest -n 4     # Use 4 CPU cores
+   ```
+
+**Marking Tests for Parallel or Sequential Execution:**
+
+Some tests, particularly integration tests that modify external resources, should not run in parallel. Use pytest markers to control which tests run in parallel:
+
+```python
+import pytest
+
+# This test can run in parallel
+def test_read_only_operation():
+    # Test implementation...
+    pass
+
+# This test should not run in parallel
+@pytest.mark.no_parallel
+def test_modifies_external_resource():
+    # Test implementation...
+    pass
+```
+
+Configure pytest to respect these markers in your pytest.ini or conftest.py:
+
+```python
+# In conftest.py
+def pytest_xdist_make_scheduler(config, log):
+    from xdist.scheduler import LoadScheduling
+
+    class CustomScheduling(LoadScheduling):
+        def _split_scope(self, nodeid):
+            if "no_parallel" in nodeid:
+                # Run tests marked with no_parallel on the first worker only
+                return "no_parallel"
+            return super()._split_scope(nodeid)
+
+    return CustomScheduling(config, log)
+```
+
+**Benefits of Parallel Testing:**
+- Significantly reduced test execution time
+- Better utilization of system resources
+- Earlier feedback on test failures
+- Improved developer productivity
+
+**Considerations:**
+- Tests must be independent and not share state
+- Tests that modify shared resources should be marked to run sequentially
+- Some fixtures may need to be adjusted to work with parallel execution
+- Database-dependent tests may require isolated databases or transactions
+
+### Creating Modular Test Fixtures and Utilities
+
+As tests are organized into modules and submodules, fixtures should also be organized in a modular way to support this structure. This approach helps keep tests DRY (Don't Repeat Yourself) and ensures that fixtures are available where needed without unnecessary overhead.
 
 **Recommendations:**
-- Create fixtures for common test data
-- Implement utility functions for repetitive test operations
-- Use conftest.py files to share fixtures across multiple test files
+- Create module-specific fixtures in module-level conftest.py files
+- Implement shared fixtures in higher-level conftest.py files
+- Use fixture factories for customizable fixtures
 - Document fixtures and utilities clearly
+- Consider fixture scope (function, class, module, session) for performance optimization
 
-**Example conftest.py:**
+**Example Fixture Organization:**
+
+```
+tests/
+├── conftest.py                # Global fixtures used across all tests
+├── unit/
+│   ├── conftest.py            # Shared fixtures for all unit tests
+│   ├── client/
+│   │   ├── conftest.py        # Fixtures specific to client tests
+│   │   └── test_client.py
+│   └── crud/
+│       ├── conftest.py        # Fixtures specific to crud tests
+│       └── test_crud.py
+└── integration/
+    ├── conftest.py            # Shared fixtures for all integration tests
+    └── tripletex/
+        ├── conftest.py        # Fixtures specific to tripletex tests
+        └── test_tripletex.py
+```
+
+**Example Module-Specific conftest.py:**
 ```python
 import pytest
 from unittest.mock import Mock
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from myapp.models import User
 
 @pytest.fixture
 def mock_client():
@@ -198,27 +301,38 @@ def test_config():
         api_key="test_key"
     )
 
+# Fixture factory for customizable test data
 @pytest.fixture
-def test_user():
-    """Return a test user."""
-    return User(id=1, name="Test User", email="test@example.com")
+def create_test_user():
+    """Factory fixture to create test users with custom attributes."""
+    def _create_user(id=1, name="Test User", email="test@example.com", **kwargs):
+        return {
+            "id": id,
+            "name": name,
+            "email": email,
+            **kwargs
+        }
+    return _create_user
 ```
 
-### Implementing Consistent Patterns
+### Implementing Consistent Patterns for Parallel-Friendly Tests
 
-Consistent patterns for test setup and teardown make tests easier to understand and maintain.
+Consistent patterns for test setup and teardown make tests easier to understand, maintain, and run in parallel. When tests run in parallel, they must be independent and avoid shared state or resources.
 
 **Recommendations:**
 - Use the Arrange-Act-Assert (AAA) pattern for test structure
 - Implement consistent setup and teardown procedures
+- Ensure tests are independent and don't rely on state from other tests
+- Avoid modifying global state or shared resources
 - Use descriptive test names that indicate what's being tested
 - Follow a consistent style for assertions and verifications
+- Use appropriate fixture scopes to optimize performance
 
-**Example AAA Pattern:**
+**Example AAA Pattern with Independence:**
 ```python
-def test_user_service_get_user():
-    # Arrange
-    mock_api = Mock()
+def test_user_service_get_user(mock_api_factory):
+    # Arrange - Each test gets its own isolated mock
+    mock_api = mock_api_factory()
     mock_api.users.read.return_value = User(id=1, name="Test User")
     user_service = UserService(api=mock_api)
 
@@ -230,6 +344,41 @@ def test_user_service_get_user():
     assert user.name == "Test User"
     mock_api.users.read.assert_called_once_with("1")
 ```
+
+**Ensuring Test Independence:**
+
+For tests to run reliably in parallel, they must be independent. Here are strategies to ensure independence:
+
+1. **Isolated Test Data**: Each test should create its own test data or use fixtures that provide isolated data.
+
+2. **Avoid Shared State**: Don't rely on state created by other tests or modify global state.
+
+3. **Use Temporary Directories**: For file operations, use pytest's `tmp_path` fixture:
+   ```python
+   def test_file_operations(tmp_path):
+       file_path = tmp_path / "test_file.txt"
+       # Use file_path for isolated file operations
+   ```
+
+4. **Database Isolation**: Use transaction rollbacks or separate test databases:
+   ```python
+   @pytest.fixture
+   def db_session():
+       connection = engine.connect()
+       transaction = connection.begin()
+       session = Session(bind=connection)
+       yield session
+       session.close()
+       transaction.rollback()
+       connection.close()
+   ```
+
+5. **Mark Resource-Modifying Tests**: Use markers to prevent parallel execution of tests that modify shared resources:
+   ```python
+   @pytest.mark.no_parallel
+   def test_modifies_shared_resource():
+       # Test implementation...
+   ```
 
 ## Mocking Strategies
 
