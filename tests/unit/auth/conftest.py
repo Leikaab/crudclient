@@ -9,6 +9,7 @@ import requests_mock
 
 from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth
+from crudclient.auth.custom import ApiKeyAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
@@ -70,6 +71,28 @@ class MockRefreshableTokenConfig(ClientConfig):
         self.handle_403_retry = MagicMock()
 
 
+class MockApiKeyHeaderConfig(ClientConfig):
+    """Mock config with API Key Header Authentication."""
+    hostname = "https://api.example.com"
+    version = "v1"
+    headers = {}
+
+    def __init__(self):
+        super().__init__()
+        self.auth_strategy = ApiKeyAuth(api_key="valid_api_key", header_name="X-API-Key")
+
+
+class MockApiKeyParamConfig(ClientConfig):
+    """Mock config with API Key Param Authentication."""
+    hostname = "https://api.example.com"
+    version = "v1"
+    headers = {}
+
+    def __init__(self):
+        super().__init__()
+        self.auth_strategy = ApiKeyAuth(api_key="valid_api_key", param_name="api_key")
+
+
 @pytest.fixture
 def basic_auth_client():
     """Create a client with Basic Authentication for testing."""
@@ -86,6 +109,18 @@ def bearer_auth_client():
 def refreshable_token_client():
     """Create a client with a refreshable token for testing."""
     return Client(MockRefreshableTokenConfig())
+
+
+@pytest.fixture
+def apikey_header_client():
+    """Create a client with API Key Header Authentication for testing."""
+    return Client(MockApiKeyHeaderConfig())
+
+
+@pytest.fixture
+def apikey_param_client():
+    """Create a client with API Key Param Authentication for testing."""
+    return Client(MockApiKeyParamConfig())
 
 
 @pytest.fixture

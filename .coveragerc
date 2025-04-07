@@ -1,29 +1,69 @@
+# .coveragerc - Configuration for coverage.py
+# See https://coverage.readthedocs.io/en/latest/config.html
 
 # type: ignore
 [run]
 source = crudclient
+# Enable branch coverage
+branch = True
+# Support parallel test execution
+parallel = true
+concurrency = multiprocessing
 omit =
-        crudclient/__main__.py
+    crudclient / __main__.py
+    # Often just imports, no logic to test
+    * / __init__.py
+    # Typically contain type aliases/definitions, not executable code
+    * / types.py
+    # Often Pydantic models or dataclasses with minimal logic
+    * / models.py
+    # Don't measure coverage of test code itself
+    tests / *
 
 [report]
+# Regexes for lines to exclude from consideration
 exclude_lines =
-    # Have to re-enable the standard pragma
+    # Standard pragma
     pragma: no cover
 
-    # Don't complain about missing debug-only code:
+    # Debugging code
     def __repr__
     if self\.debug
 
-    # Don't complain if tests don't hit defensive assertion code:
+    # Defensive code not meant to be hit in tests
     raise AssertionError
     raise NotImplementedError
 
-    # Don't complain if non-runnable code isn't run:
+    # Non-runnable code blocks
     if 0:
     if __name__ == .__main__.:
 
-    # Don't complain about abstract methods, they aren't run:
+    # Abstract methods, protocols, and stubs
     @(abc\.)?abstractmethod
+    class .*\(Protocol\):
+    ^\s*pass$
+    ^\s*\.\.\.$
+
+    # Type checking blocks
+    if TYPE_CHECKING:
+
+    # Import guards
+    except ImportError:
+
+    # Bare raise in exception handlers
+    ^\s*raise$
+
+# Set precision for coverage percentages
+precision = 2
+
+# Fail if total coverage is below this threshold
+fail_under = 85
+
+# Show missing lines in reports
+show_missing = True
 
 [html]
 directory = coverage_html_report
+
+[xml]
+output = coverage.xml

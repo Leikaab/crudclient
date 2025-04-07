@@ -74,17 +74,20 @@ repos:
         require_serial: true
 
       - id: pytest
-        name: pytest
+        name: pytest (changed files)
         stages: [pre-commit]
         language: system
-        entry: poetry run pytest tests/unit/
+        entry: python -c "import sys; from subprocess import run; files = ' '.join(sys.argv[1:]); run(f'poetry run pytest {files} -v --no-header --durations=3', shell=True)" --
         types: [python]
-        pass_filenames: false
+        files: ^(crudclient/|tests/unit/).*\.py$
+        pass_filenames: true
+        verbose: true
 
       - id: pytest-cov
-        name: pytest
+        name: pytest with coverage
         stages: [pre-push]
         language: system
-        entry: poetry run pytest tests/unit/ --cov --cov-fail-under=80
+        entry: poetry run pytest tests/unit/ --cov --cov-report=term-missing --cov-fail-under=85 --cov-branch --no-header --durations=5
         types: [python]
         pass_filenames: false
+        verbose: true

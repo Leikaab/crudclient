@@ -12,8 +12,17 @@ from crudclient.auth.custom import CustomAuth
 from crudclient.client import Client
 from crudclient.exceptions import AuthenticationError
 
-# Import fixtures from conftest.py
-from .conftest import MockBasicAuthConfig, MockBearerAuthConfig
+# Import fixtures from conftest.py - Ensure all needed fixtures are imported
+from .conftest import (
+    MockBasicAuthConfig,
+    MockBearerAuthConfig,
+    apikey_header_client,  # Added
+    apikey_param_client,  # Added
+    basic_auth_client,
+    bearer_auth_client,
+    mock_request,
+    refreshable_token_client,
+)
 
 
 class TestAuthFailures:
@@ -130,16 +139,96 @@ class TestAuthFailures:
         assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
         assert "Token expired" in str(excinfo.value)
 
+    def test_apikey_header_auth_failure(self, apikey_header_client, mock_request):
+        """Test handling of API Key Header Authentication failures."""
+        # Arrange
+        url = f"{apikey_header_client.base_url}/items"
+        mock_request.get(
+            url,
+            status_code=401,
+            json={"error": "Unauthorized", "message": "Invalid API Key"}
+        )
+
+        # Act
+        with pytest.raises(AuthenticationError) as excinfo:
+            apikey_header_client.get("/items")
+
+        # Assert
+        assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
+        assert "Invalid API Key" in str(excinfo.value)
+        request = mock_request.request_history[0]
+        assert "X-API-Key" in request.headers
+        assert request.headers["X-API-Key"] == "valid_api_key"
+        assert "api_key" not in request.url  # Ensure it wasn't sent as param
+
+    def test_apikey_param_auth_failure(self, apikey_param_client, mock_request):
+        """Test handling of API Key Param Authentication failures."""
+        # Arrange
+        url_pattern = f"{apikey_param_client.base_url}/items?api_key=valid_api_key"
+        mock_request.get(
+            url_pattern,
+            status_code=401,
+            json={"error": "Unauthorized", "message": "Invalid API Key"}
+        )
+
+        # Act
+        with pytest.raises(AuthenticationError) as excinfo:
+            apikey_param_client.get("/items")  # Param should be added automatically
+
+        # Assert
+        assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
+        assert "Invalid API Key" in str(excinfo.value)
+        request = mock_request.request_history[0]
+        assert "X-API-Key" not in request.headers  # Ensure it wasn't sent as header
+        assert "api_key=valid_api_key" in request.url
+
     def test_custom_auth_failure(self, mock_request):
         """Test handling of custom authentication failures."""
         # Arrange
         # Create a custom auth strategy that fails
         def header_callback():
-            # Don't actually set any headers
-            return {}
+            # Simulate a failure during header generation
+            raise ValueError("Failed to generate custom header")
+
+        # Use a base config and add the custom auth
+        config = MockBasicAuthConfig()  # Use any base config
+        config.auth_strategy = CustomAuth(header_callback=header_callback)
+
+        # Act & Assert
+        # The error should occur during client initialization or the first request preparation
+        with pytest.raises(ValueError) as excinfo:
+            # Try creating client or making a request - error is in auth setup
+            client = Client(config)
+            # If client creation doesn't raise, the request prep should
+            client.get("/users")
+
+        assert "Failed to generate custom header" in str(excinfo.value)
+
+    def test_custom_auth_param_callback_failure(self, mock_request):
+        """Test handling of custom authentication failures in param callback."""
+        # Arrange
+        def param_callback():
+            # Simulate a failure during param generation
+            raise ValueError("Failed to generate custom param")
 
         config = MockBasicAuthConfig()
-        config.auth_strategy = CustomAuth(header_callback=header_callback)
+        config.auth_strategy = CustomAuth(header_callback=lambda: {}, param_callback=param_callback)
+
+        # Act & Assert
+        with pytest.raises(ValueError) as excinfo:
+            client = Client(config)
+            client.get("/users")  # Error should happen during request prep
+
+        assert "Failed to generate custom param" in str(excinfo.value)
+
+    def test_custom_auth_api_failure(self, mock_request):
+        """Test handling of API returning 401/403 with CustomAuth."""
+        # Arrange
+        def get_headers():
+            return {"X-Custom": "valid"}
+
+        config = MockBasicAuthConfig()
+        config.auth_strategy = CustomAuth(header_callback=get_headers)
         client = Client(config)
 
         # Mock a 401 response
@@ -147,7 +236,7 @@ class TestAuthFailures:
         mock_request.get(
             url,
             status_code=401,
-            json={"error": "Unauthorized", "message": "No authentication provided"}
+            json={"error": "Unauthorized", "message": "Custom auth failed"}
         )
 
         # Act
@@ -155,9 +244,10 @@ class TestAuthFailures:
             client.get("/users")
 
         # Assert
-        # Check that the exception contains the error details
         assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
-        assert "No authentication provided" in str(excinfo.value)
+        assert "Custom auth failed" in str(excinfo.value)
+        request = mock_request.request_history[0]
+        assert request.headers["X-Custom"] == "valid"
 
     def test_retry_after_auth_failure(self, bearer_auth_client, mock_request):
         """Test retry behavior after authentication failures."""
@@ -212,12 +302,33 @@ class TestAuthFailures:
         config = MockBearerAuthConfig()
 
         # Act & Assert
-        # Creating the client should raise an exception
+        # Creating the client or making a request should raise the exception
         with pytest.raises(Exception) as excinfo:
-            _ = Client(config)
+            client = Client(config)
+            # If client creation doesn't raise, the request prep should
+            client.get("/users")
 
         # Check that the exception contains the error details
         assert "Auth setup failed" in str(excinfo.value)
+
+    def test_auth_param_setup_failure(self, mock_request, mocker):
+        """Test handling of authentication parameter setup failures."""
+        # Arrange
+        # Configure the auth param setup to fail (e.g., in CustomAuth)
+        mock_prepare_params = mocker.patch("crudclient.auth.custom.CustomAuth.prepare_request_params")
+        mock_prepare_params.side_effect = Exception("Auth param setup failed")
+
+        # Create a client with the failing auth
+        config = MockBasicAuthConfig()  # Use any base config
+        config.auth_strategy = CustomAuth(header_callback=lambda: {}, param_callback=lambda: {"key": "value"})  # Dummy callback
+
+        # Act & Assert
+        with pytest.raises(Exception) as excinfo:
+            client = Client(config)
+            client.get("/users")  # Failure happens during request prep
+
+        # Check that the exception contains the error details
+        assert "Auth param setup failed" in str(excinfo.value)
 
     def test_auth_header_overriding(self, bearer_auth_client, mock_request):
         """Test that authentication headers can be overridden."""

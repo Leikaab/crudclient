@@ -190,3 +190,41 @@ class TestClientErrorHandling:
 
         # Check that the exception contains the error details
         assert "422" in str(excinfo.value) or "Validation Error" in str(excinfo.value)
+
+    def test_client_retries_on_403_if_configured(self, client, mock_request, mocker):
+        """Test that the client retries a request on 403 if configured."""
+        # Arrange
+        endpoint = "/protected/resource"
+        url = f"{client.base_url}/{endpoint.lstrip('/')}"
+
+        # Configure client for retry
+        mocker.patch.object(client.config, 'should_retry_on_403', return_value=True)
+        mock_handle_403 = mocker.patch.object(client.config, 'handle_403_retry')
+        mock_setup_auth = mocker.patch.object(client.http_client.session_manager, 'refresh_auth')
+
+        # Mock HTTP responses: first 403, then 200
+        mock_request.get(
+            url,
+            [
+                {"status_code": 403, "json": {"error": "Forbidden - Initial"}},
+                {"status_code": 200, "json": {"status": "success after retry"}},
+            ],
+        )
+
+        # Act
+        response = client.get(endpoint)
+
+        # Assert
+        # 1. Check final response is from the successful retry
+        assert json.loads(response)["status"] == "success after retry"
+
+        # 2. Check config handler was called
+        mock_handle_403.assert_called_once_with(client)
+
+        # 3. Check auth was refreshed
+        mock_setup_auth.assert_called_once()
+
+        # 4. Check two requests were made
+        assert len(mock_request.request_history) == 2
+        assert mock_request.request_history[0].status_code == 403
+        assert mock_request.request_history[1].status_code == 200

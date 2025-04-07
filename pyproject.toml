@@ -48,6 +48,7 @@ types-requests = "*"
 
 # autopep8 = "*"
 # yapf = "*"
+pytest-benchmark = "^5.1.0"
 
 
 [build-system]
