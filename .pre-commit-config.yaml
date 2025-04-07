@@ -9,6 +9,27 @@ repos:
 
   - repo: local
     hooks:
+      - id: check-docstrings
+        name: Check docstrings are only in .pyi files
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_docstrings.py
+        types: [python]
+
+      - id: check-stub-files
+        name: Check .py files have matching .pyi files
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_stub_files.py
+        types: [python]
+        files: ^crudclient/.*\.py$
+
+      - id: check-file-length
+        name: Check .py files are ≤ 300 lines
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_file_length.py
+        types: [python]
 
       - id: autoflake
         name: autoflake
