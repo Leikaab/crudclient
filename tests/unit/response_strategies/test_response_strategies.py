@@ -8,7 +8,7 @@ from crudclient.response_strategies import PathBasedResponseModelStrategy, Respo
 from crudclient.types import JSONDict, JSONList
 
 
-class TestModel(BaseModel):
+class _TestModel(BaseModel):
     id: int
     name: str
 
@@ -16,35 +16,35 @@ class TestModel(BaseModel):
         return {"id": self.id, "name": self.name}
 
 
-class TestApiResponse(ApiResponse[TestModel]):
+class _TestApiResponse(ApiResponse[_TestModel]):
     pass
 
 
-class TestCrud(Crud[TestModel]):
+class _TestCrud(Crud[_TestModel]):
     _resource_path = "test-resources"
-    _datamodel = TestModel
+    _datamodel = _TestModel
 
 
-class TestPathBasedCrud(Crud[TestModel]):
+class _TestPathBasedCrud(Crud[_TestModel]):
     _resource_path = "test-resources"
-    _datamodel = TestModel
+    _datamodel = _TestModel
     _response_model_strategy = PathBasedResponseModelStrategy
     _single_item_path = "data.item"
     _list_item_path = "data.items"
 
 
-class TestCustomStrategy(ResponseModelStrategy[TestModel]):
+class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
     def __init__(
         self,
-        datamodel: Optional[Type[TestModel]] = None,
-        api_response_model: Optional[Type[ApiResponse]] = None,
+        datamodel: Optional[Type[_TestModel]] = None,
+        api_response_model: Optional[Type[_TestApiResponse]] = None,
     ):
         self.datamodel = datamodel
         self.api_response_model = api_response_model
         # Add custom_items to list_return_keys
         self.list_return_keys = ["items", "data", "results", "custom_items"]
 
-    def convert_single(self, data: Union[JSONDict, JSONList, str]) -> Union[TestModel, JSONDict]:
+    def convert_single(self, data: Union[JSONDict, JSONList, str]) -> Union[_TestModel, JSONDict]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
@@ -63,7 +63,7 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
             return self.datamodel(**data)
         return data if isinstance(data, dict) else {}
 
-    def convert_list(self, data: Union[JSONDict, JSONList, str]) -> Union[List[TestModel], JSONList, ApiResponse]:
+    def convert_list(self, data: Union[JSONDict, JSONList, str]) -> Union[List[_TestModel], JSONList, _TestApiResponse]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
@@ -76,10 +76,10 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
         if isinstance(data, dict) and "custom_items" in data:
             items = data["custom_items"]
             if isinstance(items, list) and self.datamodel:
-                return [self.datamodel(**item) for item in items]
+                return [self.datamodel(**item) for item in items]  # type: ignore
             return items if isinstance(items, list) else []
         if isinstance(data, list) and self.datamodel:
-            return [self.datamodel(**item) for item in data]
+            return [self.datamodel(**item) for item in data]  # type: ignore
         if isinstance(data, list):
             return data
         if isinstance(data, dict) and self.api_response_model:
@@ -87,36 +87,36 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
         return [] if not isinstance(data, list) else data
 
 
-class TestCustomCrud(Crud[TestModel]):
+class _TestCustomCrud(Crud[_TestModel]):
     _resource_path = "test-resources"
-    _datamodel = TestModel
+    _datamodel = _TestModel
     _list_return_keys = ["items", "data", "results", "custom_items"]
 
     def __init__(self, client):
         super().__init__(client)
         # Explicitly create and set the custom strategy
-        self._response_strategy = TestCustomStrategy(datamodel=self._datamodel)
+        self._response_strategy = _TestCustomStrategy(datamodel=self._datamodel)
 
 # Using client fixture from conftest.py
 
 
 def test_default_strategy_single_item(client):
     # Arrange
-    crud = TestCrud(client)
+    crud = _TestCrud(client)
     test_data = {"id": 1, "name": "Test Item"}
 
     # Act
     result = crud._convert_to_model(test_data)
 
     # Assert
-    assert isinstance(result, TestModel)
+    assert isinstance(result, _TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_default_strategy_list(client):
     # Arrange
-    crud = TestCrud(client)
+    crud = _TestCrud(client)
     test_data = [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]
 
     # Act
@@ -125,16 +125,16 @@ def test_default_strategy_list(client):
     # Assert
     assert isinstance(result, list)
     assert len(result) == 2
-    assert all(isinstance(item, TestModel) for item in result)
-    assert isinstance(result[0], TestModel)
-    assert isinstance(result[1], TestModel)
+    assert all(isinstance(item, _TestModel) for item in result)
+    assert isinstance(result[0], _TestModel)
+    assert isinstance(result[1], _TestModel)
     assert result[0].id == 1
     assert result[1].id == 2
 
 
 def test_default_strategy_dict_with_data_key(client):
     # Arrange
-    crud = TestCrud(client)
+    crud = _TestCrud(client)
     test_data = {"data": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
 
     # Act
@@ -143,30 +143,30 @@ def test_default_strategy_dict_with_data_key(client):
     # Assert
     assert isinstance(result, list)
     assert len(result) == 2
-    assert all(isinstance(item, TestModel) for item in result)
-    assert isinstance(result[0], TestModel)
-    assert isinstance(result[1], TestModel)
+    assert all(isinstance(item, _TestModel) for item in result)
+    assert isinstance(result[0], _TestModel)
+    assert isinstance(result[1], _TestModel)
     assert result[0].id == 1
     assert result[1].id == 2
 
 
 def test_path_based_strategy_single_item(client):
     # Arrange
-    crud = TestPathBasedCrud(client)
+    crud = _TestPathBasedCrud(client)
     test_data = {"data": {"item": {"id": 1, "name": "Test Item"}}}
 
     # Act
     result = crud._convert_to_model(test_data)
 
     # Assert
-    assert isinstance(result, TestModel)
+    assert isinstance(result, _TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_path_based_strategy_list(client):
     # Arrange
-    crud = TestPathBasedCrud(client)
+    crud = _TestPathBasedCrud(client)
     test_data = {"data": {"items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}}
 
     # Act
@@ -175,30 +175,30 @@ def test_path_based_strategy_list(client):
     # Assert
     assert isinstance(result, list)
     assert len(result) == 2
-    assert all(isinstance(item, TestModel) for item in result)
-    assert isinstance(result[0], TestModel)
-    assert isinstance(result[1], TestModel)
+    assert all(isinstance(item, _TestModel) for item in result)
+    assert isinstance(result[0], _TestModel)
+    assert isinstance(result[1], _TestModel)
     assert result[0].id == 1
     assert result[1].id == 2
 
 
 def test_custom_strategy(client):
     # Arrange
-    crud = TestCustomCrud(client)
+    crud = _TestCustomCrud(client)
     test_data = {"custom_data": {"id": 1, "name": "Test Item"}}
 
     # Act
     result = crud._convert_to_model(test_data)
 
     # Assert
-    assert isinstance(result, TestModel)
+    assert isinstance(result, _TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_custom_strategy_list(client):
     # Arrange
-    crud = TestCustomCrud(client)
+    crud = _TestCustomCrud(client)
     test_data = {"custom_items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
 
     # Act
@@ -207,16 +207,16 @@ def test_custom_strategy_list(client):
     # Assert
     assert isinstance(result, list)
     assert len(result) == 2
-    assert all(isinstance(item, TestModel) for item in result)
-    assert isinstance(result[0], TestModel)
-    assert isinstance(result[1], TestModel)
+    assert all(isinstance(item, _TestModel) for item in result)
+    assert isinstance(result[0], _TestModel)
+    assert isinstance(result[1], _TestModel)
     assert result[0].id == 1
     assert result[1].id == 2
 
 
 def test_fallback_to_original_behavior(client, mocker):
     # Arrange
-    crud = TestCrud(client)
+    crud = _TestCrud(client)
     # Create a strategy that will raise an exception
     mock_strategy = mocker.Mock()
     mock_strategy.convert_single.side_effect = ValueError("Test error")
@@ -227,6 +227,6 @@ def test_fallback_to_original_behavior(client, mocker):
     result = crud._convert_to_model(test_data)
 
     # Assert
-    assert isinstance(result, TestModel)
+    assert isinstance(result, _TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
