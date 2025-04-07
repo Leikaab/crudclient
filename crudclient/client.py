@@ -1,38 +1,5 @@
-"""
-Module `client.py`
-==================
-
-This module defines the Client class, which is responsible for managing HTTP requests to the API.
-The Client class delegates HTTP operations to the HttpClient class, which handles request preparation,
-authentication, response handling, and error handling.
-
-Class `Client`
---------------
-
-The `Client` class provides a flexible way to interact with various API endpoints.
-It includes methods for different HTTP methods (GET, POST, PUT, DELETE, PATCH) and delegates
-the actual HTTP operations to the HttpClient class.
-
-To use the Client:
-    1. Create a ClientConfig object with the necessary configuration.
-    2. Initialize a Client instance with the config.
-    3. Use the Client methods to make API requests.
-
-Example:
-    config = ClientConfig(hostname="https://api.example.com", api_key="your_api_key")
-    client = Client(config)
-    response = client.get("users")
-
-Classes:
-    - Client: Main class for making API requests.
-
-Exceptions:
-    - RequestException: Raised when a request fails.
-    - HTTPError: Raised when an HTTP error occurs.
-"""
-
 import logging
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
 
 import requests
 
@@ -45,17 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class Client:
-    """
-    Client class for making API requests.
-
-    This class delegates HTTP operations to the HttpClient class, which handles
-    request preparation, authentication, response handling, and error handling.
-
-    Attributes:
-        config (ClientConfig): Configuration object for the client.
-        http_client (HttpClient): The HTTP client used for making requests.
-        base_url (str): The base URL for the API.
-    """
 
     def __init__(self, config: Union[ClientConfig, Dict[str, Any]]) -> None:
         # Validate and set up the config
@@ -151,6 +107,16 @@ class Client:
             raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
         return self.http_client.patch(endpoint, data=data, json=json, files=files)
 
+    @overload
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
+                 handle_response: Literal[True] = True, **kwargs: Any) -> RawResponseSimple:
+        ...
+
+    @overload
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
+                 handle_response: Literal[False] = False, **kwargs: Any) -> requests.Response:
+        ...
+
     def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Union[RawResponseSimple, requests.Response]:
         # Runtime type checks
         if not isinstance(method, str):
@@ -204,9 +170,8 @@ class Client:
             headers["Content-Type"] = "application/x-www-form-urlencoded"
             request_kwargs["data"] = data
 
-        # For backward compatibility, update the session headers
-        if headers:
-            self._session.headers.update(headers)
+        # No longer updating session headers directly
+        # The caller is responsible for updating session headers if needed
 
         return headers, request_kwargs
 

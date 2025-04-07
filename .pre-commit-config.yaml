@@ -15,6 +15,7 @@ repos:
         language: system
         entry: python hooks/check_docstrings.py
         types: [python]
+        files: ^crudclient/.*\.py$
 
       - id: check-stub-files
         name: Check .py files have matching .pyi files

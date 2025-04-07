@@ -3,7 +3,8 @@ from typing import List, TypeVar
 from crudclient.api import API
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.crud import Crud, ModelDumpable
+from crudclient.crud import Crud
+from crudclient.response_strategies import ModelDumpable
 
 from .models import Comment, CommentResponse, Post, PostResponse
 

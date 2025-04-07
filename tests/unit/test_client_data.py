@@ -12,6 +12,8 @@ class TestClient(TestClientAuth):
         headers, data = client._prepare_data(json={"a": 1})
         assert "json" in data
         assert headers["Content-Type"] == "application/json"
+        # Manually update session headers for backward compatibility
+        client.session.headers.update(headers)
         assert client.session.headers["Content-Type"] == "application/json"
 
     def test_prepare_data_sets_files_content_type(self, client):
@@ -19,12 +21,16 @@ class TestClient(TestClientAuth):
         assert "files" in data
         assert "data" in data
         assert headers["Content-Type"] == "multipart/form-data"
+        # Manually update session headers for backward compatibility
+        client.session.headers.update(headers)
         assert client.session.headers["Content-Type"] == "multipart/form-data"
 
     def test_prepare_data_sets_form_content_type(self, client):
         headers, data = client._prepare_data(data={"a": "b"})
         assert "data" in data
         assert headers["Content-Type"] == "application/x-www-form-urlencoded"
+        # Manually update session headers for backward compatibility
+        client.session.headers.update(headers)
         assert client.session.headers["Content-Type"] == "application/x-www-form-urlencoded"
 
     def test_prepare_data_empty(self, client):

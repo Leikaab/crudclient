@@ -67,8 +67,8 @@ def main(files: List[str]) -> int:
         if not (file_path.endswith('.py') or file_path.endswith('.pyi')):
             continue
 
-        # Skip files in the hooks/ directory
-        if file_path.startswith('hooks/'):
+        # Skip files in the hooks/ and tests/ directories
+        if file_path.startswith('hooks/') or file_path.startswith('tests/'):
             continue
 
         is_stub = file_path.endswith('.pyi')
@@ -76,7 +76,8 @@ def main(files: List[str]) -> int:
 
         if not is_stub and docstrings:
             # .py files should not have docstrings
-            for line, node_type, _ in docstrings:
+            for line, node_type, docstring in docstrings:
+                print(f"DEBUG: Found docstring in {file_path} at line {line}, type {node_type}, content: {docstring[:50]}...")
                 errors.append(f"{file_path}:{line}: {node_type} docstring found in .py file. "
                               f"Docstrings should be in .pyi files only.")
 

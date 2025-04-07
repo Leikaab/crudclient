@@ -99,8 +99,6 @@ Robustness Fixes: Patched edge cases in URL building, Content-Type parsing, and 
     *   **Action:** Refactor complex `Crud` methods (`_get_endpoint`, `_validate_list_return`) for clarity, potentially using helper methods.
     *   **Action:** Consider refactoring `Client._prepare_data` to return headers/data instead of modifying session state directly.
     *   **Action:** Use `typing.overload` for `Client._request` to provide more precise return types based on parameters.
-    *   **Action:** Evaluate `RoleBasedModel` - decide if it belongs in the core `models.py` or should be moved to examples/documentation.
-    *   **Action:** Evaluate `ClientConfig.__add__` - consider replacing with a more explicit `merge_configs` function if the operator overloading is deemed unclear or inefficient.
 
 **Phase 3: Testing, Documentation & Polish**
 

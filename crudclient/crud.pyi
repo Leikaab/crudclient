@@ -33,7 +33,6 @@ Type Variables:
 """
 
 import logging
-from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Generic, List, Literal, Optional, Protocol, Type, TypeAlias, TypeVar, cast, Tuple, Union
 
 from pydantic import ValidationError as PydanticValidationError
@@ -41,11 +40,14 @@ from pydantic import ValidationError as PydanticValidationError
 from .client import Client
 from .exceptions import ModelConversionError, ValidationError
 from .models import ApiResponse
+from .response_strategies import (
+    DefaultResponseModelStrategy,
+    ModelDumpable,
+    PathBasedResponseModelStrategy,
+    ResponseModelStrategy,
+    ResponseTransformer,
+)
 from .types import JSONDict, JSONList, RawResponse
-
-
-class ModelDumpable(Protocol):
-    def model_dump(self) -> dict: ...
 
 
 T = TypeVar("T", bound=ModelDumpable)
@@ -55,76 +57,6 @@ CrudType: TypeAlias = Type[CrudInstance]
 ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
-ResponseTransformer: TypeAlias = Callable[[Any], Any]
-
-
-class ResponseModelStrategy(ABC, Generic[T]):
-    """
-    Abstract base class for response model conversion strategies.
-
-    This class defines the interface for converting API responses to model instances.
-    Concrete implementations should provide specific conversion logic for different
-    response formats.
-    """
-
-    @abstractmethod
-    def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
-
-    @abstractmethod
-    def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...
-
-
-class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
-    """
-    Default implementation of the response model strategy.
-
-    This strategy implements the original behavior of the Crud class for backward compatibility.
-    """
-
-    datamodel: Optional[Type[T]]
-    api_response_model: Optional[ApiResponseType]
-    list_return_keys: List[str]
-
-    def __init__(
-        self,
-        datamodel: Optional[Type[T]] = None,
-        api_response_model: Optional[ApiResponseType] = None,
-        list_return_keys: List[str] = ["data", "results", "items"]
-    ) -> None: ...
-
-    def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
-
-    def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...
-
-
-class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
-    """
-    A response model strategy that extracts data using path expressions.
-
-    This strategy allows for extracting data from nested structures using dot notation
-    path expressions (e.g., "data.items" to access data["data"]["items"]).
-    """
-
-    datamodel: Optional[Type[T]]
-    api_response_model: Optional[ApiResponseType]
-    single_item_path: Optional[str]
-    list_item_path: Optional[str]
-    pre_transform: Optional[ResponseTransformer]
-
-    def __init__(
-        self,
-        datamodel: Optional[Type[T]] = None,
-        api_response_model: Optional[ApiResponseType] = None,
-        single_item_path: Optional[str] = None,
-        list_item_path: Optional[str] = None,
-        pre_transform: Optional[ResponseTransformer] = None
-    ) -> None: ...
-
-    def _extract_by_path(self, data: Any, path: Optional[str]) -> Any: ...
-
-    def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
-
-    def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...
 
 
 class Crud(Generic[T]):

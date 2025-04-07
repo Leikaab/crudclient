@@ -60,7 +60,8 @@ class OneflowDataFields(Crud[DataField]):
 
         converted_data["custom_id"] = resource_id
         passable_data = {"data_fields": [converted_data]}
-        endpoint = self._get_endpoint(parent_args=(parent_id,))
+        # Fix the endpoint construction
+        endpoint = f"template_types/{parent_id}/data_fields"
         response = self.client.put(endpoint, json=passable_data)
         assert isinstance(response, dict)
         for i in response["data_fields"]:

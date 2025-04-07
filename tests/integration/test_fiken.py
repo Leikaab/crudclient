@@ -48,3 +48,4 @@ def test_list_contacts(api):
     assert isinstance(contacts, list)
     assert len(contacts) > 0
     assert all(isinstance(contact, Contact) for contact in contacts)
+    assert all(isinstance(contact, Contact) for contact in contacts)

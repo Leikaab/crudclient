@@ -4,8 +4,9 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import BaseModel
 
-from crudclient.crud import Crud, PathBasedResponseModelStrategy, ResponseModelStrategy
+from crudclient.crud import Crud
 from crudclient.models import ApiResponse
+from crudclient.response_strategies import PathBasedResponseModelStrategy, ResponseModelStrategy
 from crudclient.types import JSONDict, JSONList
 
 
@@ -42,8 +43,19 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
     ):
         self.datamodel = datamodel
         self.api_response_model = api_response_model
+        # Add custom_items to list_return_keys
+        self.list_return_keys = ["items", "data", "results", "custom_items"]
 
-    def convert_single(self, data: Union[JSONDict, JSONList]) -> Union[TestModel, JSONDict]:
+    def convert_single(self, data: Union[JSONDict, JSONList, str]) -> Union[TestModel, JSONDict]:
+        # Handle string data by trying to parse it as JSON
+        if isinstance(data, str):
+            try:
+                import json
+                parsed_data = json.loads(data)
+                return self.convert_single(parsed_data)
+            except json.JSONDecodeError:
+                return {}
+
         if isinstance(data, dict) and "custom_data" in data:
             item_data = data["custom_data"]
             if self.datamodel and isinstance(item_data, dict):
@@ -53,7 +65,16 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
             return self.datamodel(**data)
         return data if isinstance(data, dict) else {}
 
-    def convert_list(self, data: Union[JSONDict, JSONList]) -> Union[List[TestModel], JSONList, ApiResponse]:
+    def convert_list(self, data: Union[JSONDict, JSONList, str]) -> Union[List[TestModel], JSONList, ApiResponse]:
+        # Handle string data by trying to parse it as JSON
+        if isinstance(data, str):
+            try:
+                import json
+                parsed_data = json.loads(data)
+                return self.convert_list(parsed_data)
+            except json.JSONDecodeError:
+                return []
+
         if isinstance(data, dict) and "custom_items" in data:
             items = data["custom_items"]
             if isinstance(items, list) and self.datamodel:
@@ -71,7 +92,12 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
 class TestCustomCrud(Crud[TestModel]):
     _resource_path = "test-resources"
     _datamodel = TestModel
-    _response_model_strategy = TestCustomStrategy
+    _list_return_keys = ["items", "data", "results", "custom_items"]
+
+    def __init__(self, client):
+        super().__init__(client)
+        # Explicitly create and set the custom strategy
+        self._response_strategy = TestCustomStrategy(datamodel=self._datamodel)
 
 
 @pytest.fixture

@@ -1,33 +1,5 @@
-"""
-Module `response.py`
-===================
-
-This module defines the ResponseHandler class, which is responsible for processing and validating
-HTTP responses. It provides methods for parsing responses based on content type and handling
-different response formats.
-
-Class `ResponseHandler`
-----------------------
-
-The `ResponseHandler` class provides a flexible way to process HTTP responses based on their
-content type. It includes methods for parsing different content types (JSON, binary, text)
-and validating response status.
-
-To use the ResponseHandler:
-    1. Create a ResponseHandler instance.
-    2. Use the handle_response method to process a response.
-    3. The method will return the parsed response data based on the content type.
-
-Example:
-    handler = ResponseHandler()
-    parsed_data = handler.handle_response(response)
-    # Use parsed_data in your application
-
-Classes:
-    - ResponseHandler: Main class for response processing and validation.
-"""
-
 import logging
+from typing import Union
 
 import requests
 
@@ -38,18 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ResponseHandler:
-    """
-    Handles HTTP response processing and validation.
-
-    This class is responsible for processing HTTP responses based on their content type
-    and validating response status. It supports JSON, binary, and text responses.
-
-    Methods:
-        handle_response: Processes an HTTP response and returns the parsed data.
-        parse_json_response: Parses a JSON response.
-        parse_binary_response: Parses a binary response.
-        parse_text_response: Parses a text response.
-    """
 
     def handle_response(self, response: requests.Response) -> RawResponseSimple:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
@@ -78,12 +38,21 @@ class ResponseHandler:
         else:
             return self.parse_text_response(response)
 
-    def parse_json_response(self, response: requests.Response) -> dict:
+    def parse_json_response(self, response: requests.Response) -> Union[dict, list, str]:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
         if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         logger.debug("Parsing JSON response")
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as e:
+            logger.warning(f"Failed to parse JSON response: {e}")
+            # If the content type is explicitly JSON but parsing failed, raise the exception
+            if response.headers.get("Content-Type", "").startswith("application/json"):
+                # Re-raise the original JSONDecodeError
+                response.json()
+            # Otherwise, return the text content
+            return response.text
 
     def parse_binary_response(self, response: requests.Response) -> bytes:
         # Runtime type check - allow both real Response objects and mocks with spec=Response

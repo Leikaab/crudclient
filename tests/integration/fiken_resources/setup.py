@@ -7,7 +7,8 @@ from crudclient.api import API
 from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.crud import Crud, ModelDumpable
+from crudclient.crud import Crud
+from crudclient.response_strategies import ModelDumpable
 
 from .models import Company, Contact, User
 
