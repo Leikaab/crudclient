@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Optional, Type, TypeVar, Union, cast
+from typing import List, Optional, TypeVar, Union, cast
 
 from pydantic import ValidationError as PydanticValidationError
 
