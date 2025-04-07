@@ -1,8 +1,7 @@
-from unittest.mock import patch
 
 import pytest
+
 from crudclient.exceptions import AuthenticationError, CrudClientError, NotFoundError
-from crudclient.http.client import HttpClient
 from crudclient.http.errors import ErrorHandler
 from crudclient.http.request import RequestFormatter
 from crudclient.http.response import ResponseHandler
@@ -10,7 +9,6 @@ from crudclient.http.retry import RetryHandler
 from crudclient.http.session import SessionManager
 
 # Import fixtures from conftest.py
-from .conftest import config, http_client, mock_request
 
 
 class TestHttpClient:

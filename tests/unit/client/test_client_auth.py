@@ -1,4 +1,3 @@
-import pytest
 from crudclient.client import Client
 
 # Import fixtures from conftest.py

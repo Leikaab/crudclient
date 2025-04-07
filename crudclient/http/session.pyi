@@ -1,9 +1,31 @@
 """
-Stub file for `session.py`
-=========================
+Module `session.py`
+==================
 
-This file provides type hints and method signatures for the `session.py` module.
-It is used to provide better type checking and autocompletion support.
+This module defines the SessionManager class, which is responsible for managing HTTP sessions
+and their lifecycle. It handles session creation, configuration, authentication, and cleanup.
+
+Class `SessionManager`
+---------------------
+
+The `SessionManager` class provides a centralized way to manage HTTP sessions for API clients.
+It includes methods for setting up authentication, configuring retries and timeouts, and
+cleaning up resources when the session is no longer needed.
+
+To use the SessionManager:
+    1. Create a ClientConfig object with the necessary configuration.
+    2. Initialize a SessionManager instance with the config.
+    3. Use the SessionManager to manage the HTTP session lifecycle.
+
+Example:
+    config = ClientConfig(hostname="https://api.example.com", api_key="your_api_key")
+    session_manager = SessionManager(config)
+    session = session_manager.session
+    # Use the session for making requests
+    session_manager.close()  # Clean up when done
+
+Classes:
+    - SessionManager: Main class for managing HTTP sessions.
 """
 
 from typing import Any, Dict, Optional

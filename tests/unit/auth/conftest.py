@@ -2,9 +2,10 @@
 Fixtures specific to authentication tests.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
 import requests_mock
-from unittest.mock import MagicMock
 
 from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth

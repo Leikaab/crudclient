@@ -2,9 +2,10 @@
 Fixtures specific to response strategies tests.
 """
 
-import pytest
-from unittest.mock import MagicMock
 from typing import List, Optional, Type, Union
+from unittest.mock import MagicMock
+
+import pytest
 from pydantic import BaseModel
 
 from crudclient.models import ApiResponse
@@ -23,7 +24,6 @@ class TestModel(BaseModel):
 
 class TestApiResponse(ApiResponse[TestModel]):
     """Test API response model."""
-    pass
 
 
 class TestCustomStrategy(ResponseModelStrategy[TestModel]):

@@ -9,11 +9,9 @@ import json
 import pytest
 import requests
 
-from crudclient.client import Client
 from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
 
 # Import fixtures from conftest.py
-from .conftest import client, mock_request
 
 
 class TestClientErrorHandling:

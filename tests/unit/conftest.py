@@ -3,11 +3,10 @@ Fixtures specific to unit tests.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 import requests_mock
 
-from crudclient.config import ClientConfig
 from crudclient.auth.bearer import BearerAuth
+from crudclient.config import ClientConfig
 
 
 class MockClientConfig(ClientConfig):

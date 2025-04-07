@@ -2,12 +2,12 @@
 Fixtures specific to CRUD tests.
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from pydantic import BaseModel
 
 from crudclient.client import Client
-from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 
 
@@ -26,7 +26,6 @@ class TestCrud(Crud[TestModel]):
 @pytest.fixture
 def mock_client():
     """Return a mock Client instance."""
-    config = ClientConfig(hostname="https://api.example.com", version="v1")
     return MagicMock(spec=Client)
 
 

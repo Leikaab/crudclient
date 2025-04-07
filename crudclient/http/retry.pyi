@@ -1,8 +1,15 @@
 """
-Stub file for `retry.py`
-========================
+Retry Module for CrudClient
+===========================
 
-This file provides type hints for the `retry.py` module.
+This module provides retry functionality for the CrudClient library.
+It contains classes and functions for managing retry policies and backoff strategies.
+
+Classes:
+    - RetryHandler: Manages retry policies and backoff strategies.
+    - RetryStrategy: Base class for retry strategies.
+    - FixedRetryStrategy: Implements a fixed delay retry strategy.
+    - ExponentialBackoffStrategy: Implements an exponential backoff retry strategy.
 """
 
 import logging

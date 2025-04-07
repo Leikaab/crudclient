@@ -5,24 +5,15 @@ This module contains tests for how the library handles various authentication
 failures, including invalid credentials, expired tokens, and token refresh scenarios.
 """
 
-from unittest.mock import MagicMock, patch
 
 import pytest
+
 from crudclient.auth.custom import CustomAuth
 from crudclient.client import Client
-from crudclient.config import ClientConfig
 from crudclient.exceptions import AuthenticationError
 
 # Import fixtures from conftest.py
-from .conftest import (
-    MockBasicAuthConfig,
-    MockBearerAuthConfig,
-    MockRefreshableTokenConfig,
-    basic_auth_client,
-    bearer_auth_client,
-    refreshable_token_client,
-    mock_request
-)
+from .conftest import MockBasicAuthConfig, MockBearerAuthConfig
 
 
 class TestAuthFailures:

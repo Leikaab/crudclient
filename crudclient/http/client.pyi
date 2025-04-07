@@ -1,9 +1,31 @@
 """
-Stub file for `client.py`
-========================
+Module `client.py`
+=================
 
-This file provides type hints and method signatures for the `client.py` module.
-It is used to provide better type checking and autocompletion support.
+This module defines the HttpClient class, which is responsible for making HTTP requests.
+It provides a clean interface for making requests while delegating specialized concerns
+to other components.
+
+Class `HttpClient`
+-----------------
+
+The `HttpClient` class provides a centralized way to make HTTP requests for API clients.
+It delegates session management, request preparation, response handling, error handling,
+and retry logic to specialized components.
+
+To use the HttpClient:
+    1. Create a ClientConfig object with the necessary configuration.
+    2. Initialize an HttpClient instance with the config and optional components.
+    3. Use the HttpClient to make HTTP requests.
+
+Example:
+    config = ClientConfig(base_url="https://api.example.com")
+    client = HttpClient(config)
+    response = client.get("users")
+    # Use the response data
+
+Classes:
+    - HttpClient: Main class for making HTTP requests.
 """
 
 from typing import Any, Dict, Literal, Optional, Union, overload

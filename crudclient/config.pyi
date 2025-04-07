@@ -1,3 +1,22 @@
+"""
+Module `config.py`
+==================
+
+Defines the `ClientConfig` base class used for configuring API clients.
+
+This module provides a reusable configuration system for HTTP API clients,
+including support for base URLs, authentication strategies, headers, timeouts,
+and retry logic. Designed for subclassing and reuse across multiple APIs.
+
+Features:
+    - Support for Bearer, Basic, or no authentication
+    - Automatic generation of authentication headers
+    - Pre-request initialization and hook support
+    - Extensible retry logic, including 403-retry fallback for session-based APIs
+
+Classes:
+    - ClientConfig: Base configuration class for API clients.
+"""
 from typing import Any, Dict, Literal, Optional
 from crudclient.auth.base import AuthStrategy
 
@@ -172,7 +191,7 @@ class ClientConfig:
         Otherwise, returns an empty dictionary.
 
         Returns:
-            Dict[str, Any]: Headers to include in requests.
+            Dict[str, str]: Headers to include in requests.
         """
         ...
 
@@ -182,9 +201,6 @@ class ClientConfig:
 
         Returns authentication headers based on the auth_type and token.
         New code should use the AuthStrategy pattern instead.
-
-        Returns:
-            Dict[str, Any]: Headers to include in requests.
         """
         ...
 
@@ -220,5 +236,8 @@ class ClientConfig:
 
         Args:
             client: Reference to the API client instance making the request.
+
+        Returns:
+            None: This method doesn't return any value.
         """
         ...

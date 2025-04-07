@@ -1,10 +1,8 @@
-from unittest.mock import MagicMock
 
 import pytest
 import requests
 
 # Import fixtures from conftest.py
-from .conftest import client, mock_request
 
 
 class TestClient:

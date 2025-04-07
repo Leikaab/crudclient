@@ -1,16 +1,3 @@
-"""
-Retry Module for CrudClient
-===========================
-
-This module provides retry functionality for the CrudClient library.
-It contains classes and functions for managing retry policies and backoff strategies.
-
-Classes:
-    - RetryHandler: Manages retry policies and backoff strategies.
-    - RetryStrategy: Base class for retry strategies.
-    - FixedRetryStrategy: Implements a fixed delay retry strategy.
-    - ExponentialBackoffStrategy: Implements an exponential backoff retry strategy.
-"""
 
 import logging
 import time
@@ -27,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class RetryEvent(Enum):
-    """Enum representing different retry events."""
     FORBIDDEN = 403
     UNAUTHORIZED = 401
     SERVER_ERROR = 500
@@ -37,12 +23,6 @@ class RetryEvent(Enum):
 
 
 class RetryStrategy(ABC):
-    """
-    Base class for retry strategies.
-
-    This abstract class defines the interface for retry strategies.
-    Concrete implementations should provide specific backoff algorithms.
-    """
 
     @abstractmethod
     def get_delay(self, attempt: int) -> float:
@@ -50,11 +30,6 @@ class RetryStrategy(ABC):
 
 
 class FixedRetryStrategy(RetryStrategy):
-    """
-    Implements a fixed delay retry strategy.
-
-    This strategy uses the same delay between each retry attempt.
-    """
 
     def __init__(self, delay: float = 1.0) -> None:
         self.delay = delay
@@ -70,12 +45,6 @@ class FixedRetryStrategy(RetryStrategy):
 
 
 class ExponentialBackoffStrategy(RetryStrategy):
-    """
-    Implements an exponential backoff retry strategy.
-
-    This strategy increases the delay exponentially between retry attempts,
-    optionally with jitter to prevent synchronized retries.
-    """
 
     def __init__(
         self,
@@ -109,12 +78,6 @@ class ExponentialBackoffStrategy(RetryStrategy):
 
 
 class RetryCondition:
-    """
-    Represents a condition for retrying a request.
-
-    This class encapsulates the logic for determining whether a request should be retried
-    based on the response or exception.
-    """
 
     def __init__(
         self,
@@ -165,12 +128,6 @@ class RetryCondition:
 
 
 class RetryHandler:
-    """
-    Manages retry policies and backoff strategies.
-
-    This class is responsible for determining whether a request should be retried
-    and calculating the delay before the next retry attempt.
-    """
 
     def __init__(
         self,

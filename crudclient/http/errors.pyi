@@ -1,8 +1,13 @@
 """
-Stub file for `errors.py`
-========================
+Error Handling Module for CrudClient
+===================================
 
-This file provides type hints for the `errors.py` module.
+This module provides centralized error handling functionality for the CrudClient library.
+It contains classes and functions for processing HTTP error responses and mapping them
+to appropriate exceptions.
+
+Classes:
+    - ErrorHandler: Centralizes error processing logic for HTTP responses.
 """
 
 from typing import Dict, Optional, Type

@@ -2,8 +2,9 @@
 Global fixtures for both unit and integration tests.
 """
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 
 @pytest.fixture(scope="session")

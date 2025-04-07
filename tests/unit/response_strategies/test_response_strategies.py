@@ -1,7 +1,5 @@
 from typing import List, Optional, Type, Union
-from unittest.mock import MagicMock
 
-import pytest
 from pydantic import BaseModel
 
 from crudclient.crud import Crud

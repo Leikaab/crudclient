@@ -246,10 +246,10 @@ def test_client_get_request(mock_client_config, requests_mocker):
         "https://api.example.com/users/1",
         json={"id": 1, "name": "Test User"}
     )
-    
+
     # Act
     response = client.get("users/1")
-    
+
     # Assert
     assert response == {"id": 1, "name": "Test User"}
 ```
@@ -265,13 +265,13 @@ def test_api_with_mock_client(mocker):
     # Create a mock client
     mock_client = mocker.Mock(spec=Client)
     mock_client.get.return_value = {"id": 1, "name": "Test User"}
-    
+
     # Inject the mock client into the API
     api = API(client=mock_client)
-    
+
     # Use the API with the mock client
     result = api.users.read("1")
-    
+
     # Verify the client was called correctly
     mock_client.get.assert_called_once_with("users/1")
     assert result == {"id": 1, "name": "Test User"}
@@ -310,13 +310,13 @@ def create_api_response():
             "status_code": status_code,
             "headers": {"Content-Type": "application/json"}
         }
-        
+
         if data is not None:
             response["json"] = {"data": data}
-        
+
         if error is not None:
             response["json"] = {"error": error}
-            
+
         return response
     return _create
 ```
@@ -355,14 +355,14 @@ python_files = test_*.py
 # tests/conftest.py
 def pytest_xdist_make_scheduler(config, log):
     from xdist.scheduler import LoadScheduling
-    
+
     class CustomScheduling(LoadScheduling):
         def _split_scope(self, nodeid):
             if "no_parallel" in nodeid:
                 # Run tests marked with no_parallel on the first worker only
                 return "no_parallel"
             return super()._split_scope(nodeid)
-    
+
     return CustomScheduling(config, log)
 ```
 

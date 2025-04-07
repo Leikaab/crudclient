@@ -1,6 +1,6 @@
-from unittest.mock import patch
 
 import pytest
+
 from crudclient.api import API
 from crudclient.client import Client
 from crudclient.config import ClientConfig

@@ -68,7 +68,9 @@ class Link(BaseModel):
 
     @field_validator('href')
     @classmethod
-    def validate_href(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]: ...
+    def validate_href(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]:
+        """Validate the href URL if present."""
+        ...
 
 
 class PaginationLinks(BaseModel):
@@ -87,7 +89,9 @@ class PaginationLinks(BaseModel):
 
     @field_validator('self')
     @classmethod
-    def validate_self_link(cls, v: Link) -> Link: ...
+    def validate_self_link(cls, v: Link) -> Link:
+        """Validate that the self link is present and properly formatted."""
+        ...
 
 
 class ApiResponse(BaseModel, Generic[T]):
@@ -109,5 +113,7 @@ class ApiResponse(BaseModel, Generic[T]):
 
     @field_validator('count')
     @classmethod
-    def validate_count(cls, v: int) -> int: ...
+    def validate_count(cls, v: int) -> int:
+        """Validate that count is non-negative."""
+        ...
     data: List[T]

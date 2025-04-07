@@ -1,32 +1,3 @@
-"""
-Module `session.py`
-==================
-
-This module defines the SessionManager class, which is responsible for managing HTTP sessions
-and their lifecycle. It handles session creation, configuration, authentication, and cleanup.
-
-Class `SessionManager`
----------------------
-
-The `SessionManager` class provides a centralized way to manage HTTP sessions for API clients.
-It includes methods for setting up authentication, configuring retries and timeouts, and
-cleaning up resources when the session is no longer needed.
-
-To use the SessionManager:
-    1. Create a ClientConfig object with the necessary configuration.
-    2. Initialize a SessionManager instance with the config.
-    3. Use the SessionManager to manage the HTTP session lifecycle.
-
-Example:
-    config = ClientConfig(hostname="https://api.example.com", api_key="your_api_key")
-    session_manager = SessionManager(config)
-    session = session_manager.session
-    # Use the session for making requests
-    session_manager.close()  # Clean up when done
-
-Classes:
-    - SessionManager: Main class for managing HTTP sessions.
-"""
 
 import logging
 from typing import Dict
@@ -42,17 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class SessionManager:
-    """
-    Manages HTTP sessions and their lifecycle.
-
-    This class is responsible for creating, configuring, and cleaning up HTTP sessions.
-    It handles authentication, retries, timeouts, and other session parameters.
-
-    Attributes:
-        config (ClientConfig): Configuration object for the session.
-        session (requests.Session): The HTTP session managed by this instance.
-        timeout (float): The timeout for requests in seconds.
-    """
 
     def __init__(self, config: ClientConfig) -> None:
         if not isinstance(config, ClientConfig):

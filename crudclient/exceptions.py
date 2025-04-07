@@ -33,17 +33,6 @@ class InvalidResponseError(CrudClientError):
 
 
 class ModelConversionError(CrudClientError):
-    """
-    Raised when a model conversion fails.
-
-    This error is raised when the library fails to convert the API response
-    to the expected model type, typically due to missing or invalid fields.
-
-    Attributes:
-        message (str): A descriptive error message.
-        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
-        data (Any): The data that failed to convert.
-    """
 
     def __init__(self, message: str, response: Optional[requests.Response] = None, data: Any = None):
         self.data = data
@@ -54,18 +43,6 @@ class ModelConversionError(CrudClientError):
 
 
 class ValidationError(CrudClientError):
-    """
-    Raised when data validation fails.
-
-    This error is raised when the input data or response data fails validation,
-    typically due to missing required fields, invalid field types, or constraint violations.
-
-    Attributes:
-        message (str): A descriptive error message.
-        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
-        data (Any): The data that failed validation.
-        errors (Optional[Dict[str, Any]]): Detailed validation errors, if available.
-    """
 
     def __init__(
         self,

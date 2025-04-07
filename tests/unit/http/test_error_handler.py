@@ -5,13 +5,11 @@ This module contains tests for how the ErrorHandler class handles various HTTP e
 including different status codes and malformed responses.
 """
 import json
-from unittest.mock import MagicMock
 
 import pytest
 import requests
 
 from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
-from crudclient.http.errors import ErrorHandler
 
 
 @pytest.fixture

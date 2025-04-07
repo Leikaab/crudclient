@@ -3,7 +3,6 @@ Fixtures specific to API tests.
 """
 
 import pytest
-from unittest.mock import MagicMock
 from pydantic import BaseModel
 
 from crudclient.api import API

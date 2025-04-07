@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 import requests
@@ -302,7 +302,7 @@ class TestRetryHandler:
     def test_on_retry_callback(self, mocker):
         """Test that the on_retry_callback is called correctly."""
         # Arrange
-        mock_sleep = mocker.patch("time.sleep")
+        mocker.patch("time.sleep")  # Patch time.sleep but don't assign to unused variable
         callback = mocker.Mock()
 
         # Create a retry handler with the callback

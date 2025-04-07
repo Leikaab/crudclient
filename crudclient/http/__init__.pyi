@@ -1,8 +1,17 @@
 """
-Stub file for `http/__init__.py`
-==============================
+HTTP Module for CrudClient
+=========================
 
-This file provides type hints for the `http` package.
+This package contains modules for handling HTTP operations in the CrudClient library.
+It provides a modular architecture with clear separation of concerns for HTTP operations.
+
+Modules:
+    - client: Core HTTP client functionality
+    - session: Session management
+    - request: Request preparation and formatting
+    - response: Response handling and parsing
+    - retry: Retry policies and backoff strategies
+    - errors: Error handling
 """
 from .client import HttpClient
 from .session import SessionManager

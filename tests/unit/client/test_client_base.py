@@ -1,7 +1,6 @@
 import pytest
 
 # Import fixtures from conftest.py
-from .conftest import client, mock_request
 
 
 class TestClient:

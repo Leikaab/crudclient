@@ -1,32 +1,3 @@
-"""
-Module `client.py`
-=================
-
-This module defines the HttpClient class, which is responsible for making HTTP requests.
-It provides a clean interface for making requests while delegating specialized concerns
-to other components.
-
-Class `HttpClient`
------------------
-
-The `HttpClient` class provides a centralized way to make HTTP requests for API clients.
-It delegates session management, request preparation, response handling, error handling,
-and retry logic to specialized components.
-
-To use the HttpClient:
-    1. Create a ClientConfig object with the necessary configuration.
-    2. Initialize an HttpClient instance with the config and optional components.
-    3. Use the HttpClient to make HTTP requests.
-
-Example:
-    config = ClientConfig(base_url="https://api.example.com")
-    client = HttpClient(config)
-    response = client.get("users")
-    # Use the response data
-
-Classes:
-    - HttpClient: Main class for making HTTP requests.
-"""
 
 import logging
 from typing import Any, Dict, Optional
@@ -46,21 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class HttpClient:
-    """
-    Makes HTTP requests and delegates specialized concerns to other components.
-
-    This class is responsible for making HTTP requests while delegating session management,
-    request preparation, response handling, error handling, and retry logic to specialized
-    components.
-
-    Attributes:
-        config (ClientConfig): Configuration object for the client.
-        session_manager (SessionManager): Manages the HTTP session.
-        request_formatter (RequestFormatter): Formats request data.
-        response_handler (ResponseHandler): Processes HTTP responses.
-        error_handler (ErrorHandler): Handles error responses.
-        retry_handler (RetryHandler): Manages retry policies.
-    """
 
     def __init__(
         self,

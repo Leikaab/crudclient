@@ -1,14 +1,3 @@
-"""
-Error Handling Module for CrudClient
-===================================
-
-This module provides centralized error handling functionality for the CrudClient library.
-It contains classes and functions for processing HTTP error responses and mapping them
-to appropriate exceptions.
-
-Classes:
-    - ErrorHandler: Centralizes error processing logic for HTTP responses.
-"""
 
 import logging
 from typing import Dict, Type
@@ -22,17 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorHandler:
-    """
-    Centralizes error processing logic for HTTP responses.
-
-    This class provides methods for handling error responses from API calls,
-    extracting error information, and raising appropriate exceptions based on
-    status codes.
-
-    Attributes:
-        status_code_to_exception (Dict[int, Type[CrudClientError]]): Mapping of HTTP status
-            codes to exception types.
-    """
 
     def __init__(self) -> None:
         # Map status codes to specific error types

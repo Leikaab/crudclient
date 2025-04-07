@@ -1,9 +1,30 @@
 """
-Stub file for `request.py`
-=========================
+Module `request.py`
+==================
 
-This file provides type hints and method signatures for the `request.py` module.
-It is used to provide better type checking and autocompletion support.
+This module defines the RequestFormatter class, which is responsible for handling request
+preparation and content-type setting. It provides methods for formatting different types of
+requests (JSON, form data, multipart) and setting the appropriate content-type headers.
+
+Class `RequestFormatter`
+-----------------------
+
+The `RequestFormatter` class provides a flexible way to prepare request data based on the
+content type. It includes methods for different content types (JSON, form data, multipart)
+and handles the appropriate content-type header setting.
+
+To use the RequestFormatter:
+    1. Create a RequestFormatter instance.
+    2. Use the appropriate method to prepare the request data.
+    3. Apply the returned headers and data to your request.
+
+Example:
+    formatter = RequestFormatter()
+    prepared_data, headers = formatter.prepare_json({"name": "example"})
+    # Use prepared_data and headers in your request
+
+Classes:
+    - RequestFormatter: Main class for request preparation and formatting.
 """
 
 from typing import Any, Dict, Optional, Tuple
