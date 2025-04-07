@@ -25,6 +25,7 @@ def test_list_posts(api):
     assert posts[0].title is not None
 
 
+@pytest.mark.no_parallel
 def test_create_post(api):
     """
     Test creating a post in the JSONPlaceholder API.
@@ -65,6 +66,7 @@ def test_read_post(api):
     assert post.body is not None
 
 
+@pytest.mark.no_parallel
 def test_update_post(api):
     """
     Test updating a post in the JSONPlaceholder API.
@@ -87,6 +89,7 @@ def test_update_post(api):
     assert updated_post.body == "Updated Body"
 
 
+@pytest.mark.no_parallel
 def test_partial_update_post(api):
     """
     Test partially updating a post in the JSONPlaceholder API.
@@ -103,6 +106,7 @@ def test_partial_update_post(api):
     assert updated_post.title == "Partially Updated Title"
 
 
+@pytest.mark.no_parallel
 def test_delete_post(api):
     """
     Test deleting a post in the JSONPlaceholder API.

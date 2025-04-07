@@ -50,6 +50,7 @@ def test_read_template_type(api):
     assert template_type.updated_time is not None
 
 
+@pytest.mark.no_parallel
 def test_update_data_field(api):
     template_type_id = api.template_types.read(220129)
     rand = random.randint(1, 1000)

@@ -99,35 +99,32 @@ class TestCustomCrud(Crud[TestModel]):
         # Explicitly create and set the custom strategy
         self._response_strategy = TestCustomStrategy(datamodel=self._datamodel)
 
-
-@pytest.fixture
-def client():
-    return MagicMock()
+# Using client fixture from conftest.py
 
 
 def test_default_strategy_single_item(client):
-    # Setup
+    # Arrange
     crud = TestCrud(client)
     test_data = {"id": 1, "name": "Test Item"}
 
-    # Test
+    # Act
     result = crud._convert_to_model(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_default_strategy_list(client):
-    # Setup
+    # Arrange
     crud = TestCrud(client)
     test_data = [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]
 
-    # Test
+    # Act
     result = crud._validate_list_return(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, list)
     assert len(result) == 2
     assert all(isinstance(item, TestModel) for item in result)
@@ -138,14 +135,14 @@ def test_default_strategy_list(client):
 
 
 def test_default_strategy_dict_with_data_key(client):
-    # Setup
+    # Arrange
     crud = TestCrud(client)
     test_data = {"data": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
 
-    # Test
+    # Act
     result = crud._validate_list_return(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, list)
     assert len(result) == 2
     assert all(isinstance(item, TestModel) for item in result)
@@ -156,28 +153,28 @@ def test_default_strategy_dict_with_data_key(client):
 
 
 def test_path_based_strategy_single_item(client):
-    # Setup
+    # Arrange
     crud = TestPathBasedCrud(client)
     test_data = {"data": {"item": {"id": 1, "name": "Test Item"}}}
 
-    # Test
+    # Act
     result = crud._convert_to_model(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_path_based_strategy_list(client):
-    # Setup
+    # Arrange
     crud = TestPathBasedCrud(client)
     test_data = {"data": {"items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}}
 
-    # Test
+    # Act
     result = crud._validate_list_return(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, list)
     assert len(result) == 2
     assert all(isinstance(item, TestModel) for item in result)
@@ -188,28 +185,28 @@ def test_path_based_strategy_list(client):
 
 
 def test_custom_strategy(client):
-    # Setup
+    # Arrange
     crud = TestCustomCrud(client)
     test_data = {"custom_data": {"id": 1, "name": "Test Item"}}
 
-    # Test
+    # Act
     result = crud._convert_to_model(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
 
 
 def test_custom_strategy_list(client):
-    # Setup
+    # Arrange
     crud = TestCustomCrud(client)
     test_data = {"custom_items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
 
-    # Test
+    # Act
     result = crud._validate_list_return(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, list)
     assert len(result) == 2
     assert all(isinstance(item, TestModel) for item in result)
@@ -219,18 +216,19 @@ def test_custom_strategy_list(client):
     assert result[1].id == 2
 
 
-def test_fallback_to_original_behavior(client):
-    # Setup
+def test_fallback_to_original_behavior(client, mocker):
+    # Arrange
     crud = TestCrud(client)
     # Create a strategy that will raise an exception
-    crud._strategy = MagicMock()
-    crud._strategy.convert_single.side_effect = ValueError("Test error")
+    mock_strategy = mocker.Mock()
+    mock_strategy.convert_single.side_effect = ValueError("Test error")
+    crud._strategy = mock_strategy
     test_data = {"id": 1, "name": "Test Item"}
 
-    # Test
+    # Act
     result = crud._convert_to_model(test_data)
 
-    # Verify
+    # Assert
     assert isinstance(result, TestModel)
     assert result.id == 1
     assert result.name == "Test Item"

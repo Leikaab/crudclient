@@ -38,6 +38,7 @@ def test_api_configuration(api):
     assert api.client.config.auth_strategy.session_expires_at > datetime.now(timezone.utc)
 
 
+@pytest.mark.no_parallel
 def test_token_refresh(api):
     """
     Test that the token can be refreshed.

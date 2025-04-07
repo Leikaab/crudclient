@@ -110,29 +110,18 @@ class TestRetryCondition:
 class TestRetryHandler:
     """Tests for the retry handler class."""
 
-    @pytest.fixture
-    def retry_handler(self):
-        """Create a retry handler with a fixed retry strategy for testing."""
-        return RetryHandler(
-            max_retries=3,
-            retry_strategy=FixedRetryStrategy(delay=0.01),  # Small delay for faster tests
-            retry_conditions=[
-                RetryCondition(
-                    status_codes=[500, 502, 503, 504],
-                    exceptions=[requests.Timeout, requests.ConnectionError],
-                )
-            ],
-        )
+    # Using retry_handler fixture from conftest.py
 
-    def test_should_retry_status_code(self, retry_handler):
+    def test_should_retry_status_code(self, retry_handler, mocker):
         """Test that the retry handler correctly identifies status codes to retry on."""
-        # Create mock responses with different status codes
-        response_500 = MagicMock(spec=requests.Response)
+        # Arrange
+        response_500 = mocker.Mock(spec=requests.Response)
         response_500.status_code = 500
 
-        response_404 = MagicMock(spec=requests.Response)
+        response_404 = mocker.Mock(spec=requests.Response)
         response_404.status_code = 404
 
+        # Act & Assert
         # Should retry on 500
         assert retry_handler.should_retry(0, response_500) is True
         # Should not retry on 404
@@ -142,90 +131,100 @@ class TestRetryHandler:
 
     def test_should_retry_exception(self, retry_handler):
         """Test that the retry handler correctly identifies exceptions to retry on."""
+        # Arrange
+        timeout_exception = requests.Timeout()
+        connection_error = requests.ConnectionError()
+        value_error = ValueError()
+
+        # Act & Assert
         # Should retry on Timeout
-        assert retry_handler.should_retry(0, exception=requests.Timeout()) is True
+        assert retry_handler.should_retry(0, exception=timeout_exception) is True
         # Should retry on ConnectionError
-        assert retry_handler.should_retry(0, exception=requests.ConnectionError()) is True
+        assert retry_handler.should_retry(0, exception=connection_error) is True
         # Should not retry on other exceptions
-        assert retry_handler.should_retry(0, exception=ValueError()) is False
+        assert retry_handler.should_retry(0, exception=value_error) is False
         # Should not retry after max_retries
-        assert retry_handler.should_retry(3, exception=requests.Timeout()) is False
+        assert retry_handler.should_retry(3, exception=timeout_exception) is False
 
     def test_get_delay(self, retry_handler):
         """Test that the retry handler correctly calculates the delay."""
-        # Using FixedRetryStrategy with delay=0.01
+        # Arrange - Using FixedRetryStrategy with delay=0.01 from fixture
+
+        # Act & Assert
         assert retry_handler.get_delay(1) == 0.01
         assert retry_handler.get_delay(2) == 0.01
         assert retry_handler.get_delay(3) == 0.01
 
-    @patch("time.sleep")
-    def test_execute_with_retry_success_first_try(self, mock_sleep, retry_handler):
+    def test_execute_with_retry_success_first_try(self, retry_handler, mocker):
         """Test that the retry handler returns the response if the first try succeeds."""
-        # Mock a successful request function
-        mock_response = MagicMock(spec=requests.Response)
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
+        mock_response = mocker.Mock(spec=requests.Response)
         mock_response.ok = True
-        request_func = MagicMock(return_value=mock_response)
+        request_func = mocker.Mock(return_value=mock_response)
 
-        # Execute with retry
+        # Act
         response = retry_handler.execute_with_retry(request_func)
 
-        # Should return the response from the first try
+        # Assert
         assert response == mock_response
-        # Should call the request function once
         request_func.assert_called_once()
-        # Should not sleep
         mock_sleep.assert_not_called()
 
-    @patch("time.sleep")
-    def test_execute_with_retry_success_after_retry(self, mock_sleep, retry_handler):
+    def test_execute_with_retry_success_after_retry(self, retry_handler, mocker):
         """Test that the retry handler retries and returns the response if a retry succeeds."""
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
+
         # Mock a request function that fails once then succeeds
-        mock_error_response = MagicMock(spec=requests.Response)
+        mock_error_response = mocker.Mock(spec=requests.Response)
         mock_error_response.ok = False
         mock_error_response.status_code = 500
 
-        mock_success_response = MagicMock(spec=requests.Response)
+        mock_success_response = mocker.Mock(spec=requests.Response)
         mock_success_response.ok = True
 
-        request_func = MagicMock(side_effect=[mock_error_response, mock_success_response])
+        request_func = mocker.Mock(side_effect=[mock_error_response, mock_success_response])
 
-        # Execute with retry
+        # Act
         response = retry_handler.execute_with_retry(request_func)
 
-        # Should return the successful response
+        # Assert
         assert response == mock_success_response
-        # Should call the request function twice
         assert request_func.call_count == 2
-        # Should sleep once
         mock_sleep.assert_called_once_with(0.01)
 
-    @patch("time.sleep")
-    def test_execute_with_retry_all_failures(self, mock_sleep, retry_handler):
+    def test_execute_with_retry_all_failures(self, retry_handler, mocker):
         """Test that the retry handler raises an exception if all retries fail."""
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
+
         # Mock a request function that always fails with a 500 error
-        mock_error_response = MagicMock(spec=requests.Response)
+        mock_error_response = mocker.Mock(spec=requests.Response)
         mock_error_response.ok = False
         mock_error_response.status_code = 500
 
-        request_func = MagicMock(return_value=mock_error_response)
+        request_func = mocker.Mock(return_value=mock_error_response)
 
-        # Execute with retry - should return the last error response after max retries
+        # Act
         response = retry_handler.execute_with_retry(request_func)
 
-        # Should return the last error response
+        # Assert
         assert response == mock_error_response
         # Should call the request function max_retries + 1 times (initial + retries)
         assert request_func.call_count == 4
         # Should sleep max_retries times
         assert mock_sleep.call_count == 3
 
-    @patch("time.sleep")
-    def test_execute_with_retry_exception(self, mock_sleep, retry_handler):
+    def test_execute_with_retry_exception(self, retry_handler, mocker):
         """Test that the retry handler handles exceptions correctly."""
-        # Mock a request function that raises an exception
-        request_func = MagicMock(side_effect=requests.Timeout("Connection timed out"))
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
 
-        # Execute with retry - should raise CrudClientError after max retries
+        # Mock a request function that raises an exception
+        request_func = mocker.Mock(side_effect=requests.Timeout("Connection timed out"))
+
+        # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
             retry_handler.execute_with_retry(request_func)
 
@@ -236,13 +235,15 @@ class TestRetryHandler:
         # Should sleep max_retries times
         assert mock_sleep.call_count == 3
 
-    @patch("time.sleep")
-    def test_execute_with_retry_non_retryable_exception(self, mock_sleep, retry_handler):
+    def test_execute_with_retry_non_retryable_exception(self, retry_handler, mocker):
         """Test that the retry handler doesn't retry on non-retryable exceptions."""
-        # Mock a request function that raises a non-retryable exception
-        request_func = MagicMock(side_effect=ValueError("Invalid value"))
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
 
-        # Execute with retry - should raise the original exception
+        # Mock a request function that raises a non-retryable exception
+        request_func = mocker.Mock(side_effect=ValueError("Invalid value"))
+
+        # Act & Assert
         with pytest.raises(ValueError) as excinfo:
             retry_handler.execute_with_retry(request_func)
 
@@ -253,60 +254,56 @@ class TestRetryHandler:
         # Should not sleep
         mock_sleep.assert_not_called()
 
-    def test_maybe_retry_after_403(self, retry_handler):
+    def test_maybe_retry_after_403(self, retry_handler, mocker):
         """Test the maybe_retry_after_403 method."""
-        # Create mock objects
-        session = MagicMock(spec=requests.Session)
-        setup_auth_func = MagicMock()
+        # Arrange
+        session = mocker.Mock(spec=requests.Session)
+        setup_auth_func = mocker.Mock()
 
         # Mock a 403 response
-        response_403 = MagicMock(spec=requests.Response)
+        response_403 = mocker.Mock(spec=requests.Response)
         response_403.status_code = 403
 
         # Mock a successful retry response
-        retry_response = MagicMock(spec=requests.Response)
+        retry_response = mocker.Mock(spec=requests.Response)
         retry_response.status_code = 200
         session.request.return_value = retry_response
 
-        # Call maybe_retry_after_403
+        # Act
         result = retry_handler.maybe_retry_after_403(
             "GET", "https://example.com", {}, response_403, session, setup_auth_func
         )
 
-        # Should return the retry response
+        # Assert
         assert result == retry_response
-        # Should call setup_auth_func
         setup_auth_func.assert_called_once()
-        # Should make a new request
         session.request.assert_called_once_with("GET", "https://example.com", **{})
 
-    def test_maybe_retry_after_403_non_403(self, retry_handler):
+    def test_maybe_retry_after_403_non_403(self, retry_handler, mocker):
         """Test that maybe_retry_after_403 doesn't retry for non-403 responses."""
-        # Create mock objects
-        session = MagicMock(spec=requests.Session)
-        setup_auth_func = MagicMock()
+        # Arrange
+        session = mocker.Mock(spec=requests.Session)
+        setup_auth_func = mocker.Mock()
 
         # Mock a non-403 response
-        response_404 = MagicMock(spec=requests.Response)
+        response_404 = mocker.Mock(spec=requests.Response)
         response_404.status_code = 404
 
-        # Call maybe_retry_after_403
+        # Act
         result = retry_handler.maybe_retry_after_403(
             "GET", "https://example.com", {}, response_404, session, setup_auth_func
         )
 
-        # Should return the original response
+        # Assert
         assert result == response_404
-        # Should not call setup_auth_func
         setup_auth_func.assert_not_called()
-        # Should not make a new request
         session.request.assert_not_called()
 
-    @patch("time.sleep")
-    def test_on_retry_callback(self, mock_sleep):
+    def test_on_retry_callback(self, mocker):
         """Test that the on_retry_callback is called correctly."""
-        # Create a mock callback
-        callback = MagicMock()
+        # Arrange
+        mock_sleep = mocker.patch("time.sleep")
+        callback = mocker.Mock()
 
         # Create a retry handler with the callback
         retry_handler = RetryHandler(
@@ -317,15 +314,16 @@ class TestRetryHandler:
         )
 
         # Mock a request function that always fails with a 500 error
-        mock_error_response = MagicMock(spec=requests.Response)
+        mock_error_response = mocker.Mock(spec=requests.Response)
         mock_error_response.ok = False
         mock_error_response.status_code = 500
 
-        request_func = MagicMock(return_value=mock_error_response)
+        request_func = mocker.Mock(return_value=mock_error_response)
 
-        # Execute with retry
+        # Act
         retry_handler.execute_with_retry(request_func)
 
+        # Assert
         # Callback should be called twice (once for each retry)
         assert callback.call_count == 2
 

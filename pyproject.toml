@@ -30,6 +30,8 @@ pytest = "^8.1.1"
 pytest-cov = "*"
 requests-mock = "^1.12.1"
 python-dotenv = "^1.1.0"
+pytest-xdist = "^3.5.0"
+pytest-mock = "^3.12.0"
 
 autoflake = "*"
 isort = "*"

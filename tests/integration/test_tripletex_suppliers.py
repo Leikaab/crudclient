@@ -21,6 +21,7 @@ def generate_unique_name():
     return f"Test Supplier {uuid.uuid4()}"
 
 
+@pytest.mark.no_parallel
 def test_create_supplier(api):
     """
     Test creating a supplier.
@@ -49,6 +50,7 @@ def test_create_supplier(api):
     api.suppliers.destroy(supplier["id"])
 
 
+@pytest.mark.no_parallel
 def test_read_supplier(api):
     """
     Test reading a supplier.
@@ -76,6 +78,7 @@ def test_read_supplier(api):
     api.suppliers.destroy(supplier["id"])
 
 
+@pytest.mark.no_parallel
 def test_update_supplier(api):
     """
     Test updating a supplier.
@@ -111,6 +114,7 @@ def test_update_supplier(api):
     api.suppliers.destroy(updated_supplier["id"])
 
 
+@pytest.mark.no_parallel
 def test_list_suppliers(api):
     """
     Test listing suppliers.
@@ -144,6 +148,7 @@ def test_list_suppliers(api):
         api.suppliers.destroy(supplier["id"])
 
 
+@pytest.mark.no_parallel
 def test_destroy_supplier(api):
     """
     Test deleting a supplier.
@@ -171,6 +176,7 @@ def test_destroy_supplier(api):
         pass
 
 
+@pytest.mark.no_parallel
 def test_listcreate_suppliers(api):
     """
     Test creating multiple suppliers in a single request.
@@ -203,6 +209,7 @@ def test_listcreate_suppliers(api):
         api.suppliers.destroy(supplier["id"])
 
 
+@pytest.mark.no_parallel
 def test_listupdate_suppliers(api):
     """
     Test updating multiple suppliers in a single request.
