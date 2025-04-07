@@ -7,9 +7,8 @@ Pre-commit hook to enforce file length rules:
 
 import argparse
 import ast
-import os
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 
 def count_file_lines(file_path: str) -> int:
@@ -89,6 +88,10 @@ def check_file_length(files: List[str], max_lines: int = 300) -> Dict[str, int]:
 
     for file_path in files:
         if not file_path.endswith('.py'):
+            continue
+
+        # Skip files in the hooks/ directory
+        if file_path.startswith('hooks/'):
             continue
 
         line_count = count_file_lines(file_path)

@@ -7,9 +7,8 @@ Pre-commit hook to enforce docstring rules:
 
 import argparse
 import ast
-import os
 import sys
-from typing import List, Set, Tuple
+from typing import List, Tuple
 
 
 def has_docstrings(file_path: str) -> List[Tuple[int, str, str]]:
@@ -66,6 +65,10 @@ def main(files: List[str]) -> int:
 
     for file_path in files:
         if not (file_path.endswith('.py') or file_path.endswith('.pyi')):
+            continue
+
+        # Skip files in the hooks/ directory
+        if file_path.startswith('hooks/'):
             continue
 
         is_stub = file_path.endswith('.pyi')

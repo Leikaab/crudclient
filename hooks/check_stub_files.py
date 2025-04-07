@@ -8,7 +8,7 @@ Pre-commit hook to enforce stub file rules:
 import argparse
 import os
 import sys
-from typing import List, Set, Tuple
+from typing import List
 
 
 def check_stub_files(files: List[str]) -> List[str]:
@@ -22,7 +22,8 @@ def check_stub_files(files: List[str]) -> List[str]:
         List of .py files that don't have matching .pyi files
     """
     # Get all .py files in the commit that are in the crudclient/ directory
-    py_files = [f for f in files if f.endswith('.py') and f.startswith('crudclient/')]
+    # Note: Files in hooks/ directory are already excluded since we only check crudclient/
+    py_files = [f for f in files if f.endswith('.py') and f.startswith('crudclient/') and not f.startswith('hooks/')]
 
     # For each .py file, check if a corresponding .pyi file exists
     missing_stubs = []
