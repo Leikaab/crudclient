@@ -1,26 +1,6 @@
 from typing import Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl, root_validator
-
-
-class RoleBasedModel(BaseModel):
-    _current_role: Optional[str] = None
-
-    @root_validator(pre=True)
-    def check_fields_based_on_role(cls, values):
-        role = values.pop("_role", None)  # API internally uses this
-        if not role:
-            return values
-
-        for field_name, field_value in values.items():
-            field_config = cls.__fields__[field_name].field_info.extra.get("methods", {})
-            if role in field_config:
-                if field_config[role] == "required" and field_value is None:
-                    raise ValueError(f"Field '{field_name}' is required for '{role}' operation.")
-                if field_config[role] == "unallowed" and field_value is not None:
-                    raise ValueError(f"Field '{field_name}' is not allowed in '{role}' operation.")
-        return values
-
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 T = TypeVar("T")
 
@@ -28,14 +8,39 @@ T = TypeVar("T")
 class Link(BaseModel):
     href: Optional[HttpUrl] = None
 
+    @field_validator('href')
+    @classmethod
+    def validate_href(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]:
+        """Validate the href URL if present."""
+        if v is None:
+            return v
+        # Additional validation could be added here if needed
+        return v
+
 
 class PaginationLinks(BaseModel):
     next: Optional[Link] = None
     previous: Optional[Link] = None
-    self: Link
+    self: Link = Field(..., description="Link to the current page")
+
+    @field_validator('self')
+    @classmethod
+    def validate_self_link(cls, v: Link) -> Link:
+        """Validate that the self link is present and properly formatted."""
+        if v.href is None:
+            raise ValueError("Self link must have a valid href")
+        return v
 
 
 class ApiResponse(BaseModel, Generic[T]):
-    links: PaginationLinks = Field(..., alias="_links")
-    count: int
-    data: List[T]
+    links: PaginationLinks = Field(..., alias="_links", description="Pagination links")
+    count: int = Field(..., ge=0, description="Total number of items")
+    data: List[T] = Field(..., description="The actual data items")
+
+    @field_validator('count')
+    @classmethod
+    def validate_count(cls, v: int) -> int:
+        """Validate that count is non-negative."""
+        if v < 0:
+            raise ValueError("Count cannot be negative")
+        return v

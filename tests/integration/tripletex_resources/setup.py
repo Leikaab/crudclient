@@ -299,6 +299,10 @@ class TripletexCrud(Crud[T], Generic[T]):
 class TripletexSuppliers(TripletexCrud[Supplier]):
     """
     CRUD operations for Tripletex suppliers.
+
+    Note: We're using None for _datamodel to return dictionaries instead of model objects
+    because the Tripletex API has specific requirements for the request format.
+    The Supplier model is still used for type hints and documentation.
     """
     _resource_path = "supplier"
     _datamodel = None  # Use None to return dictionaries instead of model objects

@@ -1,10 +1,10 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
 
 import requests
 
 from .config import ClientConfig
+from .http.client import HttpClient
 from .types import RawResponseSimple
-from .auth.base import AuthStrategy
 
 # filepath: /workspace/crudclient/client.pyi
 """
@@ -20,35 +20,18 @@ class Client:
     """
     Client class for making API requests.
 
-    This class manages the HTTP session, handles authentication, and provides
-    methods for different types of HTTP requests (GET, POST, PUT, DELETE, PATCH).
+    This class delegates HTTP operations to the HttpClient class, which handles
+    request preparation, authentication, response handling, and error handling.
 
     Attributes:
         config (ClientConfig): Configuration object for the client.
-        session (requests.Session): The HTTP session used for making requests.
+        http_client (HttpClient): The HTTP client used for making requests.
         base_url (str): The base URL for the API.
-        timeout (float): The timeout for requests in seconds.
-
-    Methods:
-        _setup_auth: Sets up authentication for the requests session.
-        _setup_retries_and_timeouts: Sets up retries and timeouts for the requests session.
-        _set_content_type_header: Sets the 'Content-Type' header for the request.
-        _prepare_data: Prepares the data for the request based on the content type.
-        _handle_response: Handles the response from the API based on the content type.
-        _handle_error_response: Handles error responses from the API.
-        _request: Makes a request to the API using the requests session.
-        get: Makes a GET request to the API.
-        post: Makes a POST request to the API.
-        put: Makes a PUT request to the API.
-        delete: Makes a DELETE request to the API.
-        patch: Makes a PATCH request to the API.
-        close: Closes the HTTP session.
     """
 
     config: ClientConfig
-    session: requests.Session
+    http_client: HttpClient
     base_url: str
-    timeout: float
 
     def __init__(self, config: Union[ClientConfig, Dict[str, Any]]) -> None:
         """
@@ -63,189 +46,234 @@ class Client:
         """
         ...
 
-    def _setup_auth(self) -> None:
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """
-        This function sets up authentication for the requests session. It retrieves the authentication headers from the config using get_auth_headers() and updates the session headers accordingly.
-        Parameters:
-        - None
+        Make a GET request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
+
         Returns:
-        - None
+            RawResponseSimple: The processed response data.
 
-        """
-        ...
-
-    def _setup_retries_and_timeouts(self) -> None:
-        """
-        This function sets up the retries and timeouts for the requests session. It retrieves the number of retries and timeout duration from the config. If the number of retries is not specified in the config, it defaults to 3. If the timeout duration is not specified in the config, it defaults to 5.
-        The function creates an HTTPAdapter with the specified number of retries and mounts it to both 'http://' and 'https://' URLs in the session. It also sets the timeout duration for the session.
-        Parameters:
-        - None
-        Returns:
-        - None
-
-        """
-        ...
-
-    def _set_content_type_header(self, content_type: str) -> None:
-        """
-        This function sets the 'Content-Type' header for the request session. It updates the 'Content-Type' header in the session headers with the specified content type.
-        Parameters:
-        - content_type (str): The content type to set in the 'Content-Type' header.
-        Returns:
-        - None
-
-        """
-        ...
-
-    def _prepare_data(self, data: Optional[Dict[str, Any]] = ..., json: Optional[Any] = ..., files: Optional[Dict[str, Any]] = ...) -> Dict[str, Any]:
-        """
-        This function prepares the data for the request based on the content type. It checks if the data is JSON, files, or form data, and sets the appropriate 'Content-Type' header for the request session.
-        Parameters:
-        - data (Optional[Dict[str, Any]]): The data to send in the request body.
-        - json (Optional[Any]): The JSON data to send in the request body.
-        - files (Optional[Dict[str, Any]]): The files to send in the request body.
-        Returns:
-        - Dict[str, Any]: A dictionary containing the data, json, or files to send in the request body.
-
-        """
-        ...
-
-    def _maybe_retry_after_403(self, method: str, url: str, kwargs: dict, response: requests.Response) -> requests.Response: ...
-
-    def _handle_response(self, response: requests.Response) -> RawResponseSimple:
-        """
-        This function handles the response from the API based on the content type. It checks the 'Content-Type' header in the response and parses the response content accordingly.
-        Parameters:
-        - response (requests.Response): The response object from the API.
-        Returns:
-        - RawResponseSimple: The parsed response content.
-
-        """
-        ...
-
-    def _handle_error_response(self, response: requests.Response) -> None:
-        """
-        This function handles error responses from the API. It parses the response content and raises an appropriate exception with the error message.
-        Parameters:
-        - response (requests.Response): The response object from the API.
         Raises:
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
-        Returns:
-        - None
-
-        """
-        ...
-
-    def _request(self, method: str, endpoint: Optional[str] = ..., url: Optional[str] = ..., handle_response: bool = ..., **kwargs: Any) -> Any:
-        """
-        This function makes a request to the API using the requests session. It constructs the URL for the request based on the endpoint or URL provided. It logs the request details and returns the parsed response from the API.
-        Parameters:
-        - method (str): The HTTP method for the request (GET, POST, PUT, DELETE, PATCH).
-        - endpoint (Optional[str]): The endpoint for the request.
-        - url (Optional[str]): The full URL for the request (alternative to endpoint).
-        - kwargs: Additional keyword arguments for the request.
-        Raises:
-        - ValueError: If neither 'endpoint' nor 'url' is provided
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
-        Returns:
-        - Any: The parsed response content from the API.
-        """
-        ...
-
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = ...) -> RawResponseSimple:
-        """
-        Make a GET request to the API.
-        Parameters:
-        - endpoint (str): The endpoint for the request.
-        - params (Optional[Dict[str, Any]]): The query parameters for the request.
-        Raises:
-        - ValueError: If 'endpoint' is not provided.
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
-        Returns:
-        - RawResponseSimple: The parsed response content from the API.
+            TypeError: If the parameters are of incorrect types.
         """
         ...
 
     def post(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = ..., json: Optional[Any] = ..., files: Optional[Dict[str, Any]] = ...
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Make a POST request to the API.
-        Parameters:
-        - endpoint (str): The endpoint for the request.
-        - data (Optional[Dict[str, Any]]): The form data to send in the request body.
-        - json (Optional[Any]): The JSON data to send in the request body.
-        - files (Optional[Dict[str, Any]]): The files to send in the request body.
-        Raises:
-        - ValueError: If neither 'data' nor 'json' is provided.
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
+        Make a POST request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
         Returns:
-        - RawResponseSimple: The parsed response content from the API.
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
         """
         ...
 
     def put(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = ..., json: Optional[Any] = ..., files: Optional[Dict[str, Any]] = ...
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Make a PUT request to the API.
-        Parameters:
-        - endpoint (str): The endpoint for the request.
-        - data (Optional[Dict[str, Any]]): The form data to send in the request body.
-        - json (Optional[Any]): The JSON data to send in the request body.
-        - files (Optional[Dict[str, Any]]): The files to send in the request body.
-        Raises:
-        - ValueError: If neither 'data' nor 'json' is provided.
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
+        Make a PUT request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
         Returns:
-        - RawResponseSimple: The parsed response content from the API.
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
         """
         ...
 
     def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
         """
-        Make a DELETE request to the API.
-        Parameters:
-        - endpoint (str): The endpoint for the request.
-        Raises:
-        - ValueError: If 'endpoint' is not provided.
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
+        Make a DELETE request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            **kwargs: Additional keyword arguments to pass to the request.
+
         Returns:
-        - RawResponseSimple: The parsed response content from the API.
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
         """
         ...
 
     def patch(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = ..., json: Optional[Any] = ..., files: Optional[Dict[str, Any]] = ...
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Make a PATCH request to the API.
-        Parameters:
-        - endpoint (str): The endpoint for the request.
-        - data (Optional[Dict[str, Any]]): The form data to send in the request body.
-        - json (Optional[Any]): The JSON data to send in the request body.
-        - files (Optional[Dict[str, Any]]): The files to send in the request body.
-        Raises:
-        - ValueError: If neither 'data' nor 'json' is provided.
-        - requests.RequestException: If the request fails with an error response.
-        - requests.HTTPError: If an HTTP error occurs.
+        Make a PATCH request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
         Returns:
-        - RawResponseSimple: The parsed response content from the API.
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        ...
+
+    @overload
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
+                 handle_response: Literal[True] = True, **kwargs: Any) -> RawResponseSimple: ...
+
+    @overload
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
+                 handle_response: Literal[False] = False, **kwargs: Any) -> requests.Response: ...
+
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
+                 handle_response: bool = True, **kwargs: Any) -> Union[RawResponseSimple, requests.Response]: ...
+
+    @property
+    def session(self) -> requests.Session:
+        """
+        Get the HTTP session.
+
+        This property is provided for backward compatibility with existing tests.
+        It returns the session from the HTTP client's session manager.
+
+        Returns:
+            requests.Session: The HTTP session.
+        """
+        ...
+
+    def _setup_auth(self) -> None:
+        """
+        Set up authentication for the session.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's session_manager.
+        """
+        ...
+
+    def _prepare_data(
+        self,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None
+    ) -> Tuple[Dict[str, str], Dict[str, Any]]:
+        """
+        Prepare request data based on the provided parameters.
+
+        This method is provided for backward compatibility with existing tests.
+        It returns headers and request kwargs instead of modifying session state directly.
+
+        Args:
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+            json (Optional[Any]): JSON data to include in the request.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+
+        Returns:
+            Tuple[Dict[str, str], Dict[str, Any]]: A tuple containing:
+                - Headers dictionary with the appropriate content-type.
+                - A dictionary containing the prepared request data.
+        """
+        ...
+
+    def _maybe_retry_after_403(
+        self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response
+    ) -> requests.Response:
+        """
+        Retry a request after receiving a 403 Forbidden response.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's retry_handler.
+
+        Args:
+            method (str): The HTTP method for the request.
+            url (str): The URL for the request.
+            kwargs (dict): Additional keyword arguments for the request.
+            response (requests.Response): The response from the original request.
+
+        Returns:
+            requests.Response: The response from the retry or the original response if no retry.
+        """
+        ...
+
+    def _handle_response(self, response: requests.Response) -> RawResponseSimple:
+        """
+        Handle the response from the API based on the content type.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's response_handler.
+
+        Args:
+            response (requests.Response): The response object from the API.
+
+        Returns:
+            RawResponseSimple: The parsed response content.
+        """
+        ...
+
+    def _handle_error_response(self, response: requests.Response) -> None:
+        """
+        Handle error responses from the API.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's error_handler.
+
+        Args:
+            response (requests.Response): The response object from the API.
+
+        Raises:
+            AuthenticationError: If the status code is 401 (Unauthorized).
+            NotFoundError: If the status code is 404 (Not Found).
+            CrudClientError: For other error status codes.
         """
         ...
 
     def close(self) -> None:
         """
-        Close the HTTP session.
-        Parameters:
-        - None
-        Returns:
-        - None
+        Close the HTTP client and clean up resources.
+
+        This method should be called when the client is no longer needed
+        to ensure proper cleanup of resources.
         """
         ...

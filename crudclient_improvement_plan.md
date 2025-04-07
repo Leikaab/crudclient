@@ -2,80 +2,98 @@
 
 This plan integrates suggestions, code analysis findings, and existing improvement items into a cohesive strategy for the `crudclient` library.
 
-**Phase 1: Core Refactoring & Foundational Improvements**
+**Phase 1: Core Refactoring & Foundational Improvements** ✅
 
-1.  **Refactor Client & Authentication Logic:** ✅
-    *   **Goal:** Decouple authentication logic, improve modularity, and make it easier for users to add custom authentication methods.
-    *   **Action:** Implement the **Strategy Pattern** for authentication. ✅
-        *   Define a base `AuthStrategy` protocol/abstract class in `crudclient/auth/base.py`. ✅
-        *   Implement concrete strategies: `BearerAuth(AuthStrategy)`, `BasicAuth(AuthStrategy)`, etc., in `crudclient/auth/`. ✅
-        *   Refactor `ClientConfig` to accept an `AuthStrategy` instance instead of handling auth logic directly. ✅
-        *   Refactor `Client._request` (or a dedicated method called by it) to use the configured `AuthStrategy` to prepare the request. ✅
-    *   **Action:** Restructure the `crudclient` directory: ✅
-        ```
-        crudclient/
-            __init__.py
-            client.py      # Core Client, _request logic
-            config.py      # ClientConfig (now simpler, holds AuthStrategy)
-            crud.py
-            api.py
-            models.py
-            exceptions.py
-            types.py
-            auth/          # Authentication strategies
-                __init__.py
-                base.py        # Base AuthStrategy protocol/ABC
-                bearer.py      # Bearer token implementation
-                basic.py       # Basic auth implementation
-                custom.py      # Custom auth implementation
+Summary of what we did: Core Refactoring & Stability Upgrades
+
+Modular Authentication: Introduced a pluggable auth system using the Strategy Pattern. AuthStrategy interface implemented via BearerAuth, BasicAuth, etc., and injected via ClientConfig.
+
+Project Restructure: Cleaned up crudclient/ layout for better separation of concerns, especially for auth logic.
+
+Improved Error Handling: Added specific error types, structured exceptions, and debug-level request/response logging.
+
+Robustness Fixes: Patched edge cases in URL building, Content-Type parsing, and type safety. Reordered internal init sequence for consistency.
+
+
+**Phase 2: Type Safety & API Refinements**
+
+1.  **Refactor Client into Smaller Modules with Better Decoupling:** ✅
+    *   **Goal:** Improve modularity, testability, and maintainability of the client code by breaking it down into smaller, focused components.
+    *   **Action:** Implement a modular architecture with clear separation of concerns: ✅
+        *   **Core HTTP Client Module** (`crudclient/http/client.py`): Focused solely on making HTTP requests. ✅
+            * Responsible for the basic HTTP operations (GET, POST, PUT, etc.)
+            * Delegates to specialized components for other concerns
+        *   **Request Preparation Module** (`crudclient/http/request.py`): Handles request formatting and content-type setting. ✅
+            * Extracts `_prepare_data` method into a dedicated `RequestFormatter` class
+            * Provides methods for different content types (JSON, form data, multipart)
+        *   **Response Handling Module** (`crudclient/http/response.py`): Processes and validates responses. ✅
+            * Extracts `_handle_response` method into a dedicated `ResponseHandler` class
+            * Provides content-type specific response parsing
+        *   **Retry Module** (`crudclient/http/retry.py`): Manages retry policies and backoff strategies. ✅
+            * Implements various retry strategies (fixed, exponential backoff)
+            * Extracts `_maybe_retry_after_403` into a more general retry mechanism
+            * Supports custom retry conditions and callbacks
+        *   **Error Handling Module** (`crudclient/http/errors.py`): Centralizes error processing logic. ✅
+            * Extracts `_handle_error_response` into a dedicated `ErrorHandler` class
+            * Maps HTTP status codes to appropriate exceptions
+        *   **Session Management Module** (`crudclient/http/session.py`): Manages HTTP sessions and their lifecycle. ✅
+            * Handles session creation, configuration, and cleanup
+            * Configures adapters, timeouts, and other session parameters
+    *   **Action:** Refactor the main `Client` class to use these components: ✅
+        ```python
+        class Client:
+            def __init__(self, config: ClientConfig) -> None:
+                self.config = config
+                self.session_manager = SessionManager(config)
+                self.request_formatter = RequestFormatter()
+                self.response_handler = ResponseHandler()
+                self.error_handler = ErrorHandler()
+                self.retry_handler = RetryHandler(config)
+
+            def _request(self, method, endpoint, **kwargs):
+                # Simplified request flow using the specialized components
+                session = self.session_manager.get_session()
+                prepared_request = self.request_formatter.prepare(method, endpoint, **kwargs)
+
+                response = self.retry_handler.execute(
+                    lambda: session.request(**prepared_request)
+                )
+
+                if not response.ok:
+                    self.error_handler.handle(response)
+
+                return self.response_handler.process(response)
         ```
     *   **Diagram (Illustrative):**
         ```mermaid
         graph TD
-            subgraph Client Configuration
-                Config[ClientConfig] -- holds --> AuthStrat[AuthStrategy]
+            subgraph Client Architecture
+                Client --> SessionManager
+                Client --> RequestFormatter
+                Client --> ResponseHandler
+                Client --> ErrorHandler
+                Client --> RetryHandler
+
+                SessionManager --> AuthStrategy
+                RetryHandler --> RetryStrategy
             end
 
-            subgraph Authentication Strategies
-                AuthStrat -- implements --> BaseAuth(AuthStrategy Base)
-                BaseAuth <|-- BearerAuth
-                BaseAuth <|-- BasicAuth
-                BaseAuth <|-- CustomAuth
-            end
-
-            subgraph Client Execution
-                Client -- uses --> Config
-                Client -- prepares request using --> AuthStrat
+            subgraph External Components
+                Crud --> Client
+                API --> Client
             end
         ```
 
-2.  **Enhance Error Handling & Logging:** ✅
-    *   **Goal:** Provide better debugging information and more specific error types.
-    *   **Action:** Implement enhanced request/response logging in `Client._request` at DEBUG level. ✅
-    *   **Action:** Define `CrudClientError(APIError)` and potentially more specific errors (`AuthenticationError`, `NotFoundError`, `InvalidResponseError`, `ModelConversionError`) in `exceptions.py`. ✅
-    *   **Action:** Refactor `Client._handle_error_response` to raise `CrudClientError`, embedding the original `requests.HTTPError` and the raw `requests.Response`. ✅
-    *   **Action:** Refactor `Crud.custom_action`'s `try/except ValueError` to log details and raise a specific `ModelConversionError` instead of returning the raw response. ✅
-
-3.  **Address Core Robustness Issues:** ✅
-    *   **Goal:** Fix potential bugs and improve reliability.
-    *   **Action:** Improve URL construction in `Client._request` while maintaining backward compatibility. ✅
-        * Note: We decided against using `urllib.parse.urljoin` to maintain backward compatibility with existing tests and integrations.
-    *   **Action:** Use `startswith()` or a proper MIME parser for Content-Type checking in `Client._handle_response`. ✅
-    *   **Action:** Replace runtime `assert` checks in `Crud.__init__` and `Crud._dump_data` with explicit `isinstance` checks raising `TypeError` or `ValueError`. ✅
-    *   **Action:** Ensure `API._initialize_client` is called *before* `_register_endpoints` during initialization. ✅
-
-**Phase 2: Type Safety & API Refinements**
-
-4.  **Define Type Safety Strategy:**
+2.  **Define Type Safety Strategy:** ✅
     *   **Goal:** Ensure type correctness both statically and, where critical, at runtime.
-    *   **Action:** Remove `crudclient/runtime_type_checkers.py` and its usages.
-    *   **Action:** Rely primarily on:
-        *   **Comprehensive Static Typing:** Continue using `mypy` and detailed `.pyi` stubs. Enable stricter `mypy` checks progressively.
-        *   **Pydantic Validation:** Leverage Pydantic's validation for data entering/leaving the `Crud` layer via API interactions.
-        *   **Targeted Runtime Checks:** Use explicit `isinstance` checks in critical internal logic or public API entry points where type errors are likely and detrimental.
-    *   **Action (Evaluation):** Evaluate `typeguard` as an *optional* dependency or configuration for users who need stricter runtime guarantees.
+    *   **Action:** Remove `crudclient/runtime_type_checkers.py` and its usages. ✅
+    *   **Action:** Rely primarily on: ✅
+        *   **Comprehensive Static Typing:** Continue using `mypy` and detailed `.pyi` stubs. Enable stricter `mypy` checks progressively. ✅
+        *   **Pydantic Validation:** Leverage Pydantic's validation for data entering/leaving the `Crud` layer via API interactions. ✅
+        *   **Targeted Runtime Checks:** Use explicit `isinstance` checks in critical internal logic or public API entry points where type errors are likely and detrimental. ✅
+    *   **Summary:** The type safety strategy has been defined and documented in `type_safety_strategy_specification.md`. The approach relies on a combination of comprehensive static typing (`mypy`, `.pyi` stubs), Pydantic validation for API boundaries, and targeted runtime checks for critical paths, replacing the previous runtime-heavy approach. The initial action item of removing `runtime_type_checkers.py` was also completed.
 
-5.  **Refine API/CRUD Layer:**
+3.  **Refine API/CRUD Layer:**
     *   **Goal:** Improve flexibility, readability, and maintainability of the `Crud` and `API` layers.
     *   **Action:** Design and implement a more flexible strategy for Pydantic response model handling in `Crud`.
     *   **Action:** Refactor complex `Crud` methods (`_get_endpoint`, `_validate_list_return`) for clarity, potentially using helper methods.
@@ -86,16 +104,9 @@ This plan integrates suggestions, code analysis findings, and existing improveme
 
 **Phase 3: Testing, Documentation & Polish**
 
-6.  **Enhance Testing:**
+
+4.  **Enhance Testing:**
     *   **Goal:** Increase confidence in the library's correctness and robustness.
     *   **Action:** Use specific Pydantic models in integration tests.
     *   **Action:** Add more tests for error conditions (4xx, 5xx, network errors, malformed responses).
     *   **Action:** Investigate downstream testing strategies.
-
-7.  **Update Documentation & Stubs:** ✅
-    *   **Goal:** Ensure documentation and type information are accurate and reflect the changes.
-    *   **Action:** Update `ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md` as needed to reflect the new structure, patterns (Strategy), and decisions. ✅
-    *   **Action:** Ensure all public API docstrings are comprehensive and located *only* in `.pyi` files. ✅
-        *   Created `.pyi` files for exceptions module ✅
-        *   Created `.pyi` files for auth module ✅
-        *   Created `.pyi` files for api, crud, models, types, runtime_type_checkers, __init__ module ✅

@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 import requests
+
+from .types import JSONDict
 
 
 class APIError(Exception):
@@ -63,8 +65,42 @@ class ModelConversionError(CrudClientError):
 
     This error is raised when the library fails to convert the API response
     to the expected model type, typically due to missing or invalid fields.
+
+    Attributes:
+        message (str): A descriptive error message.
+        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
+        data (Any): The data that failed to convert.
     """
-    pass
+    data: Any
+
+    def __init__(self, message: str, response: Optional[requests.Response] = None, data: Any = None) -> None: ...
+    def __repr__(self) -> str: ...
+
+
+class ValidationError(CrudClientError):
+    """
+    Raised when data validation fails.
+
+    This error is raised when the input data or response data fails validation,
+    typically due to missing required fields, invalid field types, or constraint violations.
+
+    Attributes:
+        message (str): A descriptive error message.
+        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
+        data (Any): The data that failed validation.
+        errors (Optional[Dict[str, Any]]): Detailed validation errors, if available.
+    """
+    data: Any
+    errors: Dict[str, Any]
+
+    def __init__(
+        self,
+        message: str,
+        data: Any,
+        response: Optional[requests.Response] = None,
+        errors: Optional[Dict[str, Any]] = None
+    ) -> None: ...
+    def __repr__(self) -> str: ...
 
 
 class InvalidClientError(APIError):

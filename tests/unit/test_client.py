@@ -8,7 +8,10 @@ class TestClient(TestClientAuth):
     def test_no_url_get(self, client, mock_request):
         # Mock the request to the API
         endpoint = None
-        with pytest.raises(ValueError):
+        # We need to mock the URL that would be constructed with an empty endpoint
+        url = f"{client.base_url}/"
+        mock_request.get(url, status_code=200)
+        with pytest.raises(TypeError):
             client.get(endpoint)
 
     def test_get(self, client, mock_request):

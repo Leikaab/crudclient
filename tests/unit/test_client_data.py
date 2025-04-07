@@ -9,23 +9,27 @@ from .test_client_auth import TestClientAuth
 class TestClient(TestClientAuth):
 
     def test_prepare_data_sets_json_content_type(self, client):
-        data = client._prepare_data(json={"a": 1})
+        headers, data = client._prepare_data(json={"a": 1})
         assert "json" in data
+        assert headers["Content-Type"] == "application/json"
         assert client.session.headers["Content-Type"] == "application/json"
 
     def test_prepare_data_sets_files_content_type(self, client):
-        data = client._prepare_data(files={"file": b"abc"}, data={"name": "test"})
+        headers, data = client._prepare_data(files={"file": b"abc"}, data={"name": "test"})
         assert "files" in data
         assert "data" in data
-        assert client.session.headers["Content-Type"].startswith("multipart/form-data")
+        assert headers["Content-Type"] == "multipart/form-data"
+        assert client.session.headers["Content-Type"] == "multipart/form-data"
 
     def test_prepare_data_sets_form_content_type(self, client):
-        data = client._prepare_data(data={"a": "b"})
+        headers, data = client._prepare_data(data={"a": "b"})
         assert "data" in data
+        assert headers["Content-Type"] == "application/x-www-form-urlencoded"
         assert client.session.headers["Content-Type"] == "application/x-www-form-urlencoded"
 
     def test_prepare_data_empty(self, client):
-        data = client._prepare_data()
+        headers, data = client._prepare_data()
+        assert headers == {}
         assert data == {}
 
     def test_maybe_retry_after_403_should_retry(self, client, mock_request):
@@ -92,7 +96,7 @@ class TestClient(TestClientAuth):
     def test_handle_error_response_value_error(self, client):
         from crudclient.exceptions import CrudClientError
 
-        response = MagicMock()
+        response = MagicMock(spec=requests.Response)
         response.json.side_effect = ValueError("Invalid JSON")
         response.text = "raw text error"
         response.status_code = 500
@@ -107,7 +111,7 @@ class TestClient(TestClientAuth):
     def test_handle_error_response_no_http_error(self, client):
         from crudclient.exceptions import CrudClientError
 
-        response = MagicMock()
+        response = MagicMock(spec=requests.Response)
         response.json.return_value = {"error": "Bad Request"}
         response.status_code = 400
         response.raise_for_status.return_value = None  # No exception

@@ -56,7 +56,7 @@ class OneflowDataFields(Crud[DataField]):
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
-        converted_data: JSONDict = self._dump_data(data)
+        converted_data: JSONDict = self._dump_data(data, partial=True)
 
         converted_data["custom_id"] = resource_id
         passable_data = {"data_fields": [converted_data]}

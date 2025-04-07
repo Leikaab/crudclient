@@ -57,3 +57,60 @@ class CustomAuth(AuthStrategy):
                 param_callback is None.
         """
         ...
+
+
+class ApiKeyAuth(AuthStrategy):
+    """
+    API key authentication strategy.
+
+    This strategy provides authentication using an API key, which can be
+    included either as a header or as a query parameter.
+
+    Attributes:
+        api_key (str): The API key for authentication.
+        header_name (str): The name of the header to use for the API key.
+        param_name (Optional[str]): The name of the query parameter to use for the API key.
+    """
+
+    api_key: str
+    header_name: str
+    param_name: Optional[str]
+
+    def __init__(
+        self,
+        api_key: str,
+        header_name: str = "X-API-Key",
+        param_name: Optional[str] = None
+    ) -> None:
+        """
+        Initialize an ApiKeyAuth strategy.
+
+        Args:
+            api_key (str): The API key for authentication.
+            header_name (str, optional): The name of the header to use for the API key.
+                Defaults to "X-API-Key".
+            param_name (Optional[str], optional): The name of the query parameter to use
+                for the API key. If provided, the API key will be sent as a query parameter
+                instead of a header. Defaults to None.
+        """
+        ...
+
+    def prepare_request_headers(self) -> Dict[str, str]:
+        """
+        Prepare headers for API key authentication.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the API key header,
+                or an empty dictionary if param_name is provided.
+        """
+        ...
+
+    def prepare_request_params(self) -> Dict[str, str]:
+        """
+        Prepare query parameters for API key authentication.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the API key parameter,
+                or an empty dictionary if param_name is not provided.
+        """
+        ...

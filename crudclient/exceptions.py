@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import requests
 
@@ -33,7 +33,56 @@ class InvalidResponseError(CrudClientError):
 
 
 class ModelConversionError(CrudClientError):
-    pass
+    """
+    Raised when a model conversion fails.
+
+    This error is raised when the library fails to convert the API response
+    to the expected model type, typically due to missing or invalid fields.
+
+    Attributes:
+        message (str): A descriptive error message.
+        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
+        data (Any): The data that failed to convert.
+    """
+
+    def __init__(self, message: str, response: Optional[requests.Response] = None, data: Any = None):
+        self.data = data
+        super().__init__(message, response)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(message={self.message!r}, response={self.response!r}, data={self.data!r})"
+
+
+class ValidationError(CrudClientError):
+    """
+    Raised when data validation fails.
+
+    This error is raised when the input data or response data fails validation,
+    typically due to missing required fields, invalid field types, or constraint violations.
+
+    Attributes:
+        message (str): A descriptive error message.
+        response (Optional[requests.Response]): The HTTP response that caused the error, if available.
+        data (Any): The data that failed validation.
+        errors (Optional[Dict[str, Any]]): Detailed validation errors, if available.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        data: Any,
+        response: Optional[requests.Response] = None,
+        errors: Optional[Dict[str, Any]] = None
+    ):
+        self.data = data
+        self.errors = errors or {}
+        super().__init__(message, response)
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}(message={self.message!r}, "
+            f"response={self.response!r}, data={self.data!r}, errors={self.errors!r})"
+        )
 
 
 class InvalidClientError(APIError):

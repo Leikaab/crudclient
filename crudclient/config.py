@@ -19,7 +19,7 @@ Classes:
 """
 
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 from crudclient.auth.base import AuthStrategy
@@ -135,7 +135,7 @@ class ClientConfig:
         """
         return False
 
-    def handle_403_retry(self, client) -> None:
+    def handle_403_retry(self, client: Any) -> None:
         """
         Hook to handle 403 response fallback logic (e.g. token/session refresh).
 
@@ -144,23 +144,112 @@ class ClientConfig:
 
         Args:
             client: Reference to the API client instance making the request.
-        """
 
-    def __add__(self, other):
+        Returns:
+            None: This method doesn't return any value.
+        """
+        return None
+
+    def merge(self, other: "ClientConfig") -> "ClientConfig":
+        """
+        Merges two configuration objects, creating a new instance.
+
+        Creates a deep copy of 'other' and selectively updates it with attributes
+        from 'self' that don't exist in 'other'. Headers are specially handled
+        by merging the two dictionaries, with 'other' values taking precedence.
+
+        This method allows for configuration composition without modifying
+        the original instances.
+
+        Args:
+            other (ClientConfig): The configuration to combine with.
+                Attributes from 'other' take precedence over 'self'.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = base_config.merge(custom_config)  # hostname from base, timeout from custom
+        """
         if not isinstance(other, self.__class__):
-            return NotImplemented
+            return NotImplemented  # type: ignore
 
         import copy
 
-        new_instance = copy.deepcopy(other)
+        # Create a deep copy of self as the base for the new instance
+        new_instance = copy.deepcopy(self)
 
-        if hasattr(self, "headers") and self.headers:
-            new_headers = copy.deepcopy(self.headers or {})
-            new_headers.update(new_instance.headers or {})
+        # Special handling for headers - merge them with other's headers taking precedence
+        if hasattr(other, "headers") and other.headers:
+            new_headers = copy.deepcopy(new_instance.headers or {})
+            new_headers.update(other.headers)
             new_instance.headers = new_headers
 
-        for key, value in self.__dict__.items():
-            if key != "headers" and key not in other.__dict__:
+        # Copy all other attributes from other, overriding self's values
+        for key, value in other.__dict__.items():
+            if key != "headers" and value is not None:
                 setattr(new_instance, key, copy.deepcopy(value))
 
         return new_instance
+
+    def __add__(self, other: "ClientConfig") -> "ClientConfig":
+        """
+        Combines two configuration objects, creating a new instance.
+
+        This method is deprecated. Use `merge()` instead.
+
+        Creates a deep copy of 'other' and selectively updates it with attributes
+        from 'self' that don't exist in 'other'. Headers are specially handled
+        by merging the two dictionaries, with 'other' values taking precedence.
+
+        This method allows for configuration composition without modifying
+        the original instances.
+
+        Args:
+            other (ClientConfig): The configuration to combine with.
+                Attributes from 'other' take precedence over 'self'.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = base_config + custom_config  # hostname from base, timeout from custom
+        """
+        import warnings
+        warnings.warn(
+            "The __add__ method is deprecated. Use merge() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.merge(other)
+
+    @staticmethod
+    def merge_configs(base_config: "ClientConfig", other_config: "ClientConfig") -> "ClientConfig":
+        """
+        Static method to merge two configuration objects without requiring an instance.
+
+        Creates a new instance by merging attributes from both configurations.
+        Attributes from 'other_config' take precedence over 'base_config'.
+        Headers are specially handled by merging the two dictionaries.
+
+        Args:
+            base_config (ClientConfig): The base configuration.
+            other_config (ClientConfig): The configuration to merge with base.
+                Attributes from 'other_config' take precedence.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = ClientConfig.merge_configs(base_config, custom_config)
+        """
+        if not isinstance(base_config, ClientConfig) or not isinstance(other_config, ClientConfig):
+            raise TypeError("Both arguments must be instances of ClientConfig")
+
+        return base_config.merge(other_config)

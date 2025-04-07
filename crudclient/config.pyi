@@ -53,9 +53,36 @@ class ClientConfig:
         auth_type: Optional[str] = ...,
     ) -> None: ...
 
+    def merge(self, other: "ClientConfig") -> "ClientConfig":
+        """
+        Merges two configuration objects, creating a new instance.
+
+        Creates a deep copy of 'other' and selectively updates it with attributes
+        from 'self' that don't exist in 'other'. Headers are specially handled
+        by merging the two dictionaries, with 'other' values taking precedence.
+
+        This method allows for configuration composition without modifying
+        the original instances.
+
+        Args:
+            other (ClientConfig): The configuration to combine with.
+                Attributes from 'other' take precedence over 'self'.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = base_config.merge(custom_config)  # hostname from base, timeout from custom
+        """
+        ...
+
     def __add__(self, other: "ClientConfig") -> "ClientConfig":
         """
         Combines two configuration objects, creating a new instance.
+
+        This method is deprecated. Use `merge()` instead.
 
         Creates a deep copy of 'other' and selectively updates it with attributes
         from 'self' that don't exist in 'other'. Headers are specially handled
@@ -75,6 +102,30 @@ class ClientConfig:
             base_config = ClientConfig(hostname="https://api.example.com")
             custom_config = ClientConfig(timeout=30.0)
             combined = base_config + custom_config  # hostname from base, timeout from custom
+        """
+        ...
+
+    @staticmethod
+    def merge_configs(base_config: "ClientConfig", other_config: "ClientConfig") -> "ClientConfig":
+        """
+        Static method to merge two configuration objects without requiring an instance.
+
+        Creates a new instance by merging attributes from both configurations.
+        Attributes from 'other_config' take precedence over 'base_config'.
+        Headers are specially handled by merging the two dictionaries.
+
+        Args:
+            base_config (ClientConfig): The base configuration.
+            other_config (ClientConfig): The configuration to merge with base.
+                Attributes from 'other_config' take precedence.
+
+        Returns:
+            ClientConfig: A new configuration instance with combined attributes.
+
+        Example:
+            base_config = ClientConfig(hostname="https://api.example.com")
+            custom_config = ClientConfig(timeout=30.0)
+            combined = ClientConfig.merge_configs(base_config, custom_config)
         """
         ...
 

@@ -39,13 +39,12 @@ Exceptions:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Type
+from typing import Any, Optional, Type, Union
 
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
-from .runtime_type_checkers import assert_type
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -66,23 +65,26 @@ class API(ABC):
 
     client_class: Optional[Type[Client]] = None
 
-    def _assert_client(self, varname: str, Instance: Client | ClientConfig | None, Class: Type[Client] | Type[ClientConfig]) -> None:
+    def _assert_client(self, varname: str, Instance: Optional[Union[Client, ClientConfig]], Class: Union[Type[Client], Type[ClientConfig]]) -> None:
         """
         Asserts that the provided `Instance` is an instance of the specified `Class` or `None`.
         Args:
             varname (str): The name of the variable being asserted.
-            Instance (Client | ClientConfig | None): The instance to be checked.
-            Class (Type[Client] | Type[ClientConfig]): The expected class type.
+            Instance (Optional[Union[Client, ClientConfig]]): The instance to be checked.
+            Class (Union[Type[Client], Type[ClientConfig]]): The expected class type.
         Raises:
             InvalidClientError: If the `Instance` is not an instance of the specified `Class` or `None`.
         """
+        if not (Instance is None or isinstance(Instance, Class)):
+            if isinstance(Class, tuple):
+                expected_classes = " or ".join([cls.__name__ for cls in Class])
+            else:
+                expected_classes = Class.__name__
+            message = f"Invalid {varname} provided: expected {expected_classes} or None, got {type(Instance).__name__}."
+            logger.error(message)
+            raise InvalidClientError(message=message)
 
-        try:
-            assert_type(varname, Instance, Class, logger, optional=True)
-        except TypeError as e:
-            raise InvalidClientError(message=str(e))
-
-    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs) -> None:
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         """
         Initializes the API class.
 
@@ -90,15 +92,12 @@ class API(ABC):
         @type client: Optional[Client]
         @param client_config: A configuration object for initializing the client. If None, default configuration will be used.
         @type client_config: Optional[ClientConfig]
-        @param args: Additional positional arguments for the API class. These are stored for potential use in API subclasses.
-        @type args: tuple
         @param kwargs: Additional keyword arguments for the API class. These are stored for potential use in API subclasses.
-        @type kwargs: dict
+        @type kwargs: Dict[str, Any]
 
         @raises InvalidClientError: If the `client` is not an instance of Client or None.
         @raises InvalidClientConfigError: If the `client_config` is not a ClientConfig or None.
         @raises ClientInitializationError: If the client could not be initialized due to issues with the client_class or other factors.
-
         """
         logger.debug(f"Initializing API class with client: {client}, client_config: {client_config}")
 
@@ -180,23 +179,23 @@ class API(ABC):
             self._initialize_client()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[Any]) -> None:
         """
         Exits the runtime context related to this object.
 
         Closes the client session if it is open.
 
         @param exc_type: The exception type, if an exception was raised.
-        @type exc_type: type
+        @type exc_type: Optional[Type[BaseException]]
         @param exc_value: The exception instance, if an exception was raised.
-        @type exc_value: Exception
+        @type exc_value: Optional[BaseException]
         @param traceback: The traceback object, if an exception was raised.
-        @type traceback: traceback
+        @type traceback: Optional[Any]
         """
         logger.debug("Exiting API context.")
         self.close()
         if exc_type:
-            logger.error("An exception occurred during API context.", exc_info=(exc_type, exc_value, traceback))
+            logger.error("An exception occurred during API context.", exc_info=True)
 
     def close(self) -> None:
         """
@@ -210,7 +209,7 @@ class API(ABC):
         self.client = None
         logger.info("Client session fully closed and client set to None.")
 
-    def use_custom_resource(self, resource_class: Type[Crud], *args, **kwargs) -> Crud:
+    def use_custom_resource(self, resource_class: Type[Crud], *args: Any, **kwargs: Any) -> Crud:
         """
         Dynamically use custom resources that follow the CRUD structure,
         enabling the extension of the API without modifying the core API class.
@@ -223,9 +222,9 @@ class API(ABC):
         @param resource_class: The class of the custom resource to be instantiated.
         @type resource_class: Type[Crud]
         @param args: Positional arguments to pass to the resource class constructor.
-        @type args: tuple
+        @type args: Any
         @param kwargs: Keyword arguments to pass to the resource class constructor.
-        @type kwargs: dict
+        @type kwargs: Any
 
         @return: An instance of the specified resource class, initialized with the provided arguments.
         @rtype: Crud

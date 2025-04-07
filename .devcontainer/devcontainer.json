@@ -32,7 +32,6 @@
 	},
 	"forwardPorts": [
 		5051, // forward custom liveserver port for coverage
-		3001, // MCP github server port
 		9222  // Chrome DevTools Protocol port for remote debugging
 	],
 
@@ -41,21 +40,13 @@
 			"label": "Coverage - Live Server",
 			"onAutoForward": "notify"
 		},
-		"3000": {
-			"label": "MCP Browser Server",
-			"onAutoForward": "notify"
-		},
-		"3001": {
-			"label": "MCP GitHub Server",
-			"onAutoForward": "notify"
-		},
 		"9222": {
 			"label": "Chrome DevTools Protocol",
 			"onAutoForward": "notify"
 		}
 	},
 	"postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh; sh -c ./.devcontainer/postCreateCommand.sh",
-	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x ./.devcontainer/startMcpServers.sh && sh -c ./.devcontainer/startMcpServers.sh",
+	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 	"remoteUser": "vscode",
 	"remoteEnv": {
 		"PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",

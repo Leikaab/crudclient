@@ -21,7 +21,7 @@ JSONDict = Dict[str, Any]
 JSONList = List[JSONDict]
 
 # A union type representing various possible raw API responses
-RawResponse = Union[JSONDict, JSONList, bytes, str]
+RawResponse = Union[JSONDict, JSONList, bytes, str, None]
 
 # A simplified union type for raw API responses
-RawResponseSimple = Union[JSONDict, bytes, str]
+RawResponseSimple = Union[JSONDict, bytes, str, None]
