@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 
 import pytest
 
-from crudclient.auth import AuthStrategy, create_auth_strategy
+from crudclient.auth import create_auth_strategy
 from crudclient.auth.base import BaseAuthStrategy
 from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth

@@ -13,6 +13,11 @@ from crudclient.auth.custom import ApiKeyAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
+from tests.unit.mock_client.auth import (
+    create_basic_auth_mock, create_bearer_auth_mock,
+    create_api_key_auth_mock, create_custom_auth_mock
+)
+
 
 class MockBasicAuthConfig(ClientConfig):
     """Mock config with Basic Authentication."""
@@ -22,7 +27,8 @@ class MockBasicAuthConfig(ClientConfig):
 
     def __init__(self):
         super().__init__()
-        self.auth_strategy = BasicAuth(username="user", password="pass")
+        auth_mock = create_basic_auth_mock(username="user", password="pass")
+        self.auth_strategy = auth_mock.get_auth_strategy()
 
 
 class MockBearerAuthConfig(ClientConfig):
@@ -33,7 +39,8 @@ class MockBearerAuthConfig(ClientConfig):
 
     def __init__(self):
         super().__init__()
-        self.auth_strategy = BearerAuth(token="valid_token")
+        auth_mock = create_bearer_auth_mock(token="valid_token")
+        self.auth_strategy = auth_mock.get_auth_strategy()
 
 
 class MockRefreshableTokenConfig(ClientConfig):
@@ -47,26 +54,13 @@ class MockRefreshableTokenConfig(ClientConfig):
         self.token = "valid_token"
         self.refresh_token = "refresh_token"
 
-        # Create a custom auth strategy that supports token refresh
-        from crudclient.auth.base import AuthStrategy
+        # Create a bearer auth mock with refresh capability
+        auth_mock = create_bearer_auth_mock(token=self.token)
+        auth_mock.with_refresh_token(self.refresh_token)
 
-        class RefreshableBearerAuth(AuthStrategy):
-            def __init__(self, config):
-                self.config = config
-                self.refresh_called = False
-
-            def prepare_request_headers(self) -> dict[str, str]:
-                return {"Authorization": f"Bearer {self.config.token}"}
-
-            def prepare_request_params(self) -> dict[str, str]:
-                return {}
-
-            def refresh_token(self):
-                self.config.token = "new_token"
-                self.refresh_called = True
-                return True
-
-        self.auth_strategy = RefreshableBearerAuth(self)
+        # Store the auth mock for later access
+        self.auth_mock = auth_mock
+        self.auth_strategy = auth_mock.get_auth_strategy()
         self.should_retry_on_403 = lambda: False
         self.handle_403_retry = MagicMock()
 
@@ -79,7 +73,8 @@ class MockApiKeyHeaderConfig(ClientConfig):
 
     def __init__(self):
         super().__init__()
-        self.auth_strategy = ApiKeyAuth(api_key="valid_api_key", header_name="X-API-Key")
+        auth_mock = create_api_key_auth_mock(api_key="valid_api_key", header_name="X-API-Key")
+        self.auth_strategy = auth_mock.get_auth_strategy()
 
 
 class MockApiKeyParamConfig(ClientConfig):
@@ -90,7 +85,8 @@ class MockApiKeyParamConfig(ClientConfig):
 
     def __init__(self):
         super().__init__()
-        self.auth_strategy = ApiKeyAuth(api_key="valid_api_key", param_name="api_key")
+        auth_mock = create_api_key_auth_mock(api_key="valid_api_key", header_name=None, param_name="api_key")
+        self.auth_strategy = auth_mock.get_auth_strategy()
 
 
 @pytest.fixture
@@ -126,5 +122,12 @@ def apikey_param_client():
 @pytest.fixture
 def mock_request():
     """Create a requests_mock for testing."""
+
+
+@pytest.fixture
+def mock_auth_verification():
+    """Create auth verification helpers for testing."""
+    from tests.unit.mock_client.auth import AuthVerificationHelpers
+    return AuthVerificationHelpers
     with requests_mock.Mocker() as m:
         yield m

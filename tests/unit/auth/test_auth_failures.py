@@ -5,7 +5,6 @@ This module contains tests for how the library handles various authentication
 failures, including invalid credentials, expired tokens, and token refresh scenarios.
 """
 
-
 import pytest
 
 from crudclient.auth.custom import CustomAuth
@@ -14,15 +13,18 @@ from crudclient.exceptions import AuthenticationError
 
 # Import fixtures from conftest.py - Ensure all needed fixtures are imported
 from .conftest import (
-    MockBasicAuthConfig,
-    MockBearerAuthConfig,
-    apikey_header_client,  # Added
-    apikey_param_client,  # Added
-    basic_auth_client,
-    bearer_auth_client,
-    mock_request,
-    refreshable_token_client,
+    apikey_header_client, apikey_param_client,
+    MockBasicAuthConfig, MockBearerAuthConfig,
+    basic_auth_client, bearer_auth_client,
+    mock_request, refreshable_token_client,
+    mock_auth_verification
 )
+
+from tests.unit.mock_client.auth import (
+    create_basic_auth_mock, create_bearer_auth_mock,
+    create_api_key_auth_mock, create_custom_auth_mock
+)
+from .conftest import MockBasicAuthConfig, MockBearerAuthConfig, basic_auth_client, bearer_auth_client, mock_request, refreshable_token_client
 
 
 class TestAuthFailures:
@@ -79,12 +81,32 @@ class TestAuthFailures:
     def test_token_refresh_on_401(self, refreshable_token_client, mock_request):
         """Test token refresh on 401 Unauthorized responses."""
         # Arrange
-        # Instead of testing the actual refresh mechanism, which is complex,
-        # we'll just verify that a 401 response raises an AuthenticationError
+        # Configure the auth mock to have an expired token that can be refreshed
+        config = refreshable_token_client.config
+
+        # Set up the mock response for the expired token
         url = f"{refreshable_token_client.base_url}/users"
         mock_request.get(
             url,
             status_code=401,
+            json={"error": "Unauthorized", "message": "Token expired"}
+        )
+
+        # Set up the mock response for the token refresh endpoint
+        refresh_url = f"{refreshable_token_client.base_url}/oauth/token"
+        mock_request.post(
+            refresh_url,
+            json={
+                "access_token": "new_token",
+                "refresh_token": "new_refresh_token",
+                "expires_in": 3600
+            }
+        )
+
+        # Set up the mock response for the retry with the new token
+        mock_request.get(
+            url,
+            status_code=401,  # Still fail even with new token for this test
             json={"error": "Unauthorized", "message": "Token expired"}
         )
 
@@ -121,13 +143,26 @@ class TestAuthFailures:
     def test_token_refresh_failure(self, refreshable_token_client, mock_request):
         """Test handling of token refresh failures."""
         # Arrange
-        # This test is similar to test_token_refresh_on_401, but we're just verifying
-        # that a 401 response raises an AuthenticationError
+        # Configure the auth mock to have an expired token with a refresh token that will fail
+        config = refreshable_token_client.config
+
+        # Set up the mock response for the expired token
         url = f"{refreshable_token_client.base_url}/users"
         mock_request.get(
             url,
             status_code=401,
             json={"error": "Unauthorized", "message": "Token expired"}
+        )
+
+        # Set up the mock response for the token refresh endpoint to fail
+        refresh_url = f"{refreshable_token_client.base_url}/oauth/token"
+        mock_request.post(
+            refresh_url,
+            status_code=400,
+            json={
+                "error": "invalid_grant",
+                "error_description": "Refresh token is invalid or expired"
+            }
         )
 
         # Act
@@ -294,6 +329,9 @@ class TestAuthFailures:
     def test_auth_setup_failure(self, mock_request, mocker):
         """Test handling of authentication setup failures."""
         # Arrange
+        # Create a bearer auth mock with a failing callback
+        auth_mock = create_bearer_auth_mock(token="test_token")
+
         # Configure the auth setup to fail
         mock_prepare_headers = mocker.patch("crudclient.auth.bearer.BearerAuth.prepare_request_headers")
         mock_prepare_headers.side_effect = Exception("Auth setup failed")
@@ -314,13 +352,25 @@ class TestAuthFailures:
     def test_auth_param_setup_failure(self, mock_request, mocker):
         """Test handling of authentication parameter setup failures."""
         # Arrange
-        # Configure the auth param setup to fail (e.g., in CustomAuth)
+        # Create a custom auth mock with a failing param callback
+        def header_callback():
+            return {"X-Custom-Auth": "custom_value"}
+
+        def param_callback():
+            return {"key": "value"}
+
+        auth_mock = create_custom_auth_mock(
+            header_callback=header_callback,
+            param_callback=param_callback
+        )
+
+        # Configure the auth param setup to fail
         mock_prepare_params = mocker.patch("crudclient.auth.custom.CustomAuth.prepare_request_params")
         mock_prepare_params.side_effect = Exception("Auth param setup failed")
 
         # Create a client with the failing auth
         config = MockBasicAuthConfig()  # Use any base config
-        config.auth_strategy = CustomAuth(header_callback=lambda: {}, param_callback=lambda: {"key": "value"})  # Dummy callback
+        config.auth_strategy = auth_mock.get_auth_strategy()
 
         # Act & Assert
         with pytest.raises(Exception) as excinfo:
@@ -395,3 +445,79 @@ class TestAuthFailures:
         # Check that the exception contains the error details
         assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
         assert "Invalid token" in str(excinfo.value)
+
+
+class TestAuthVerificationHelpers:
+    """Tests for authentication verification helpers."""
+
+    def test_verify_basic_auth_header(self, basic_auth_client, mock_auth_verification):
+        """Test verification of Basic Auth headers."""
+        # Arrange
+        auth_strategy = basic_auth_client.config.auth_strategy
+        headers = auth_strategy.prepare_request_headers()
+
+        # Act & Assert
+        assert mock_auth_verification.verify_basic_auth_header(headers["Authorization"]) is True
+
+        # Test with invalid header
+        assert mock_auth_verification.verify_basic_auth_header("NotBasic xyz") is False
+
+        # Test credential extraction
+        username, password = mock_auth_verification.extract_basic_auth_credentials(headers["Authorization"])
+        assert username == "user"
+        assert password == "pass"
+
+    def test_verify_bearer_auth_header(self, bearer_auth_client, mock_auth_verification):
+        """Test verification of Bearer Auth headers."""
+        # Arrange
+        auth_strategy = bearer_auth_client.config.auth_strategy
+        headers = auth_strategy.prepare_request_headers()
+
+        # Act & Assert
+        assert mock_auth_verification.verify_bearer_auth_header(headers["Authorization"]) is True
+
+        # Test with invalid header
+        assert mock_auth_verification.verify_bearer_auth_header("NotBearer xyz") is False
+
+        # Test token extraction
+        token = mock_auth_verification.extract_bearer_token(headers["Authorization"])
+        assert token == "valid_token"
+
+    def test_assert_auth_header_format(self, bearer_auth_client, mock_auth_verification):
+        """Test assertion of auth header format."""
+        # Arrange
+        auth_strategy = bearer_auth_client.config.auth_strategy
+        headers = auth_strategy.prepare_request_headers()
+
+        # Act & Assert - Should not raise
+        mock_auth_verification.assert_auth_header_format(headers, "bearer")
+
+        # Test with invalid format - Should raise
+        with pytest.raises(AssertionError):
+            mock_auth_verification.assert_auth_header_format({"Authorization": "Invalid format"}, "bearer")
+
+    def test_assert_token_usage(self, bearer_auth_client, mock_auth_verification):
+        """Test assertion of token usage."""
+        # Arrange
+        auth_strategy = bearer_auth_client.config.auth_strategy
+        headers = auth_strategy.prepare_request_headers()
+
+        # Act & Assert - Should not raise
+        mock_auth_verification.assert_token_usage(headers, "valid_token", "bearer")
+
+        # Test with wrong token - Should raise
+        with pytest.raises(AssertionError):
+            mock_auth_verification.assert_token_usage(headers, "wrong_token", "bearer")
+
+    def test_assert_refresh_behavior(self, mock_auth_verification):
+        """Test assertion of token refresh behavior."""
+        # Arrange
+        old_headers = {"Authorization": "Bearer old_token"}
+        new_headers = {"Authorization": "Bearer new_token"}
+
+        # Act & Assert - Should not raise
+        mock_auth_verification.assert_refresh_behavior(old_headers, new_headers, "bearer")
+
+        # Test with same token (not refreshed) - Should raise
+        with pytest.raises(AssertionError):
+            mock_auth_verification.assert_refresh_behavior(old_headers, old_headers, "bearer")

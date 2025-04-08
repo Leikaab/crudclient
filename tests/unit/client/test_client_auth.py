@@ -1,6 +1,6 @@
+from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.auth.bearer import BearerAuth
 
 # Import fixtures from conftest.py
 from .conftest import MockBasicAuthConfig, MockCustomAuthConfig

@@ -2,13 +2,13 @@
 Global fixtures for both unit and integration tests.
 """
 
-import pytest
-import os
-import time
 import json
-from unittest.mock import Mock
+import time
 from contextlib import contextmanager
-from pathlib import Path
+from unittest.mock import Mock
+
+import pytest
+
 # Consider adding 'import xml.etree.ElementTree as ET' if XML parsing/mocking is needed
 
 

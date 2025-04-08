@@ -58,7 +58,7 @@ Example:
 def test_token_refresh_on_401(self, refreshable_token_client, mock_request):
     """
     Test token refresh behavior when receiving a 401 Unauthorized response.
-    
+
     Verifies that when a 401 response with 'Token expired' message is received,
     the client properly raises an AuthenticationError with the appropriate details.
     """
@@ -126,11 +126,11 @@ The project provides several fixtures in the `conftest.py` files to simplify tes
 def test_with_mock_response(mock_response_factory):
     # Create a mock response with custom attributes
     mock_resp = mock_response_factory(
-        status_code=201, 
+        status_code=201,
         json_data={'id': 123},
         headers={"Content-Type": "application/json"}
     )
-    
+
     # Use the mock response in your test
     assert mock_resp.status_code == 201
     assert mock_resp.json() == {'id': 123}
@@ -140,13 +140,13 @@ def test_with_mock_response(mock_response_factory):
 def test_with_env_vars(manage_env_vars):
     # Unpack the fixture
     set_var, del_var = manage_env_vars
-    
+
     # Set environment variables for the test
     set_var('API_KEY', 'test-key')
-    
+
     # Test code that uses environment variables
     # ...
-    
+
     # Optionally, explicitly delete variables
     del_var('API_KEY')
 ```
@@ -168,7 +168,7 @@ def test_client_initialization(create_mock_client_config):
         version="v2",
         retries=5
     )
-    
+
     # Use the config in your test
     client = Client(config)
     assert client.base_url == "https://custom-api.example.com/v2"
@@ -185,10 +185,10 @@ def test_paginated_response(create_paginated_api_response, requests_mocker):
         total_items=20,
         total_pages=4
     )
-    
+
     # Mock the API request
     requests_mocker.get("https://api.example.com/v1/items", **response)
-    
+
     # Test code that makes the request
     # ...
 ```
