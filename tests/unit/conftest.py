@@ -16,11 +16,13 @@ from crudclient.auth.custom import CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
 
-from tests.unit.mock_client import (
+from crudclient.testing import (
     MockClient, MockResponse, SimpleMockClient,
     APIPatternBuilder, ResponseBuilder, RequestVerifier, ResponseVerifier
 )
-from tests.unit.mock_client.factory import create_mock_client, create_simple_mock_client
+# Update import paths to match the actual module structure
+from crudclient.testing.factory import MockClientFactory
+from crudclient.testing.factory.simple_mock import create_simple_mock_client
 
 # --- Authentication Strategy Fixtures ---
 
