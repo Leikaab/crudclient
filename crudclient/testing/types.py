@@ -1,12 +1,4 @@
-"""
-Type definitions for the crudclient testing framework.
-
-This module provides type definitions and utility classes used throughout the testing framework.
-"""
-
-import requests
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
-from crudclient.testing.response_builder.response import MockResponse
+from typing import Any, Dict, List, Union
 
 # Type aliases for HTTP components
 Headers = Dict[str, str]

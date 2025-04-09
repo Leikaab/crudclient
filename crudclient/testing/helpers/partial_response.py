@@ -7,8 +7,8 @@ dot notation, wildcards, exclusions, and depth limiting, allowing tests to verif
 client behavior with different response structures.
 """
 
-from typing import Any, Dict, List, Optional, Set, Union
 import copy
+from typing import Any, Dict, List, Optional, Set
 
 
 class PartialResponseHelper:

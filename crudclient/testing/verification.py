@@ -1,25 +1,10 @@
-"""
-Verification utilities for the crudclient testing framework.
-
-This module provides high-level verification functions and classes that might
-coordinate verification across different spies (client, auth, crud).
-"""
-
-from typing import Any, Dict, List, Optional, Pattern, Union
-import re
+from typing import Any
 
 from .exceptions import VerificationError
-from .types import CallRecord, SpyTarget
+from .types import SpyTarget
 
 
 class Verifier:
-    """
-    High-level verification utilities for the testing framework.
-
-    This class provides methods to verify interactions with mock objects
-    across different components of the testing framework.
-    """
-
     @staticmethod
     def verify_called_with(
         target: SpyTarget,
@@ -27,21 +12,6 @@ class Verifier:
         *args: Any,
         **kwargs: Any
     ) -> bool:
-        """
-        Verify that the given method was called with the given arguments.
-
-        Args:
-            target: The object that was called.
-            method_name: The name of the method that was called.
-            *args: The positional arguments that should have been passed.
-            **kwargs: The keyword arguments that should have been passed.
-
-        Returns:
-            True if the method was called with the given arguments, False otherwise.
-
-        Raises:
-            VerificationError: If the verification fails.
-        """
         if not hasattr(target, 'calls'):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -75,21 +45,6 @@ class Verifier:
         *args: Any,
         **kwargs: Any
     ) -> bool:
-        """
-        Verify that the given method was called exactly once with the given arguments.
-
-        Args:
-            target: The object that was called.
-            method_name: The name of the method that was called.
-            *args: The positional arguments that should have been passed.
-            **kwargs: The keyword arguments that should have been passed.
-
-        Returns:
-            True if the method was called exactly once with the given arguments, False otherwise.
-
-        Raises:
-            VerificationError: If the verification fails.
-        """
         if not hasattr(target, 'calls'):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -132,19 +87,6 @@ class Verifier:
         target: SpyTarget,
         method_name: str
     ) -> bool:
-        """
-        Verify that the given method was not called.
-
-        Args:
-            target: The object that was called.
-            method_name: The name of the method that was called.
-
-        Returns:
-            True if the method was not called, False otherwise.
-
-        Raises:
-            VerificationError: If the verification fails.
-        """
         if not hasattr(target, 'calls'):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -160,20 +102,6 @@ class Verifier:
         method_name: str,
         count: int
     ) -> bool:
-        """
-        Verify that the given method was called exactly count times.
-
-        Args:
-            target: The object that was called.
-            method_name: The name of the method that was called.
-            count: The expected number of calls.
-
-        Returns:
-            True if the method was called exactly count times, False otherwise.
-
-        Raises:
-            VerificationError: If the verification fails.
-        """
         if not hasattr(target, 'calls'):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -194,21 +122,6 @@ class Verifier:
         *args: Any,
         **kwargs: Any
     ) -> bool:
-        """
-        Verify that the given method was called at least once with the given arguments.
-
-        Args:
-            target: The object that was called.
-            method_name: The name of the method that was called.
-            *args: The positional arguments that should have been passed.
-            **kwargs: The keyword arguments that should have been passed.
-
-        Returns:
-            True if the method was called at least once with the given arguments, False otherwise.
-
-        Raises:
-            VerificationError: If the verification fails.
-        """
         if not hasattr(target, 'calls'):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 

@@ -5,8 +5,6 @@ This module tests the functionality of the MockHTTPClient class in crudclient.te
 """
 
 import pytest
-from unittest.mock import patch
-import json
 
 from crudclient.testing.core.http_client import MockHTTPClient
 from crudclient.testing.exceptions import RequestNotConfiguredError

@@ -15,7 +15,6 @@ class ConcurrencyError(CrudClientError):
     This exception is used to simulate scenarios where multiple clients attempt
     to update the same resource simultaneously, resulting in a conflict.
     """
-    pass
 
 
 class ValidationFailedError(CrudClientError):
@@ -26,4 +25,3 @@ class ValidationFailedError(CrudClientError):
     during create or update operations, such as when required fields are missing
     or field values don't meet validation criteria.
     """
-    pass

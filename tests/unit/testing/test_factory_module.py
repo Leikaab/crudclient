@@ -4,16 +4,14 @@ Tests for the MockClientFactory class.
 This module tests the functionality of the MockClientFactory class in crudclient.testing.factory_module.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
+from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.auth.bearer import BearerAuth
-from crudclient.testing.factory_module import MockClientFactory
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
-from crudclient.testing.exceptions import MockConfigurationError
+from crudclient.testing.factory_module import MockClientFactory
 
 
 class TestMockClientFactory:

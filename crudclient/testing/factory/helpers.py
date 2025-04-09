@@ -7,13 +7,7 @@ response patterns, error behaviors, and authentication strategies.
 
 from typing import Any, Dict, List, Union
 
-from crudclient.testing.auth import (
-    ApiKeyAuthMock,
-    BasicAuthMock,
-    BearerAuthMock,
-    CustomAuthMock,
-    OAuthMock,
-)
+from crudclient.testing.auth import ApiKeyAuthMock, BasicAuthMock, BearerAuthMock, CustomAuthMock, OAuthMock
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.response_builder.api_patterns import APIPatternBuilder
 
@@ -125,7 +119,6 @@ def _add_error_responses(
             - auth: Configuration for authentication error responses
     """
     # Import here to avoid circular imports
-    from crudclient.testing.response_builder import ResponseBuilder
 
     # Add validation error response
     if 'validation' in error_configs:

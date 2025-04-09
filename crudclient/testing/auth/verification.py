@@ -7,9 +7,8 @@ including header validation, error handling, and token refresh verification.
 
 import base64
 import json
-import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class AuthVerificationHelpers:

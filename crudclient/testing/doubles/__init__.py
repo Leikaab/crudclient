@@ -8,7 +8,7 @@ including FakeAPI with an in-memory data store and specialized stubs.
 from .data_store import DataStore, ValidationException
 from .data_store_helpers import RelationshipType
 from .fake_api import FakeAPI, FakeCrud
-from .stubs import Response, CrudBase, StubResponse, StubClient, StubCrud, StubAPI
+from .stubs import CrudBase, Response, StubAPI, StubClient, StubCrud, StubResponse
 
 __all__ = [
     'DataStore',

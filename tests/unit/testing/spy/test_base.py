@@ -5,10 +5,8 @@ This module tests the functionality of the SpyBase class in crudclient.testing.s
 """
 
 import pytest
-from typing import Any, Dict, List, Tuple
 
 from crudclient.testing.spy.base import SpyBase
-from crudclient.testing.spy.method_call import MethodCall
 
 
 class TestSpyBase:

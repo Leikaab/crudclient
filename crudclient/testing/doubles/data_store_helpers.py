@@ -8,7 +8,7 @@ relationship handling in the in-memory data store.
 import copy
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 
 class RelationshipType:

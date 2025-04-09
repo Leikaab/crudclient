@@ -4,7 +4,6 @@ Tests for the MethodCall class.
 This module tests the functionality of the MethodCall class in crudclient.testing.spy.method_call.
 """
 
-import pytest
 
 from crudclient.testing.spy.method_call import MethodCall
 

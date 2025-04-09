@@ -8,8 +8,8 @@ page-based pagination with metadata and HATEOAS links.
 
 from typing import Any, List, Optional
 
-from .response import MockResponse
 from .basic import BasicResponseBuilder
+from .response import MockResponse
 
 
 class PaginationResponseBuilder:

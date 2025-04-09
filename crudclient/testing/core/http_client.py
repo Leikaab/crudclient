@@ -6,10 +6,9 @@ that can be used in tests to simulate HTTP requests and responses without making
 actual network calls.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import urljoin
 
-from crudclient.http.client import HttpClient
 import requests
 from requests import Response
 

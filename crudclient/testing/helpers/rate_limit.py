@@ -9,7 +9,7 @@ rate-limited conditions.
 """
 
 import time
-from typing import Dict, List, Optional, Tuple, Union, Any, cast
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def get_current_time() -> float:

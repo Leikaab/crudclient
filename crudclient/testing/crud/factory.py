@@ -5,11 +5,11 @@ This module provides a factory class for creating instances of the various
 CRUD operation mocks, making it easier to set up mocks for testing.
 """
 
+from .combined import CombinedCrudMock
 from .create import CreateMock
+from .delete import DeleteMock
 from .read import ReadMock
 from .update import UpdateMock
-from .delete import DeleteMock
-from .combined import CombinedCrudMock
 
 
 class CrudMockFactory:

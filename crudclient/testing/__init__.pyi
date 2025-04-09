@@ -1,3 +1,9 @@
+"""
+Testing utilities for the crudclient library.
+
+This module provides a framework for creating test doubles (mocks, stubs, fakes, spies)
+for the crudclient library components (Client, API, CRUD, Auth, HTTPClient).
+"""
 from .auth import (
     ApiKeyAuthMock,
     AuthMockBase,
@@ -15,7 +21,6 @@ from .auth import (
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
 from .doubles import DataStore, FakeAPI
-# Import directly from the module file
 from .exceptions import (
     AuthStrategyError,
     CRUDOperationError,
@@ -27,24 +32,23 @@ from .exceptions import (
     TestingError,
     VerificationError,
 )
-from .factory import MockClientFactory  # Import from factory.py file
-from .response_builder import ResponseBuilder  # Import ResponseBuilder
-from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatternBuilder
-from .response_builder.response import MockResponse  # Import MockResponse from response_builder
-from .simple_mock import SimpleMockClient  # Import SimpleMockClient
+from .factory import MockClientFactory
+from .response_builder import ResponseBuilder
+from .response_builder.api_patterns import APIPatternBuilder
+from .response_builder.response import MockResponse
+from .simple_mock import SimpleMockClient
 from .spy import MethodCall, SpyBase
 from .verification import Verifier
 
-# These classes are referenced in tests but don't seem to exist in the codebase
-# Defining placeholder classes to avoid import errors
-
 
 class RequestVerifier:
-    pass
+    """Placeholder for RequestVerifier class referenced in tests."""
+    ...
 
 
 class ResponseVerifier:
-    pass
+    """Placeholder for ResponseVerifier class referenced in tests."""
+    ...
 
 
 __all__ = [

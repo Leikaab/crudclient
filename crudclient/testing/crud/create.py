@@ -7,9 +7,10 @@ validation constraints, unique constraints, and auto-incrementing IDs.
 
 import copy
 import json
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from crudclient.testing.response_builder.response import MockResponse
+
 from .base import BaseCrudMock
 from .exceptions import ValidationFailedError
 from .request_record import RequestRecord

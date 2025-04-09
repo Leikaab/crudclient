@@ -8,10 +8,11 @@ filtering, sorting, field selection, and pagination.
 import copy
 import json
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 from crudclient.exceptions import NotFoundError
 from crudclient.testing.response_builder.response import MockResponse
+
 from .base import BaseCrudMock
 from .request_record import RequestRecord
 

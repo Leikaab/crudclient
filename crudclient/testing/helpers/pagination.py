@@ -7,7 +7,7 @@ It supports generating consistent pagination metadata and navigation links for
 testing APIs that implement pagination.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 
 class PaginationHelper:

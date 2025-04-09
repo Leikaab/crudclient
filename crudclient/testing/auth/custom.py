@@ -6,7 +6,7 @@ for OAuth grant types, scopes, and advanced authentication scenarios.
 """
 
 from datetime import datetime, timedelta
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, List, Optional, Set
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth

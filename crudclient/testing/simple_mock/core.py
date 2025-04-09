@@ -7,11 +7,8 @@ This approach avoids the complexities of the real HTTP client while providing
 a simple interface for testing.
 """
 
-import json
-import re
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, Union
 
-from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse
 
 

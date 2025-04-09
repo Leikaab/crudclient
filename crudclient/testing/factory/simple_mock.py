@@ -7,11 +7,10 @@ The factory function supports various configuration options including response p
 error responses, and API-specific behaviors.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict
 
-from crudclient.testing.simple_mock import SimpleMockClient
 from crudclient.testing.factory.helpers import _create_api_patterns
-from crudclient.testing.response_builder import ResponseBuilder
+from crudclient.testing.simple_mock import SimpleMockClient
 
 
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:

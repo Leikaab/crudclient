@@ -1,31 +1,17 @@
-"""
-Factory for creating mock client instances.
 
-This module provides the main factory for creating configured mock client instances
-that can be used in tests to simulate the behavior of the crudclient library.
-"""
-
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Union
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
+from .auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock, create_oauth_mock
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
-from .exceptions import MockConfigurationError
-from .types import Headers, ResponseData, StatusCode
-from .auth import (
-    create_api_key_auth_mock,
-    create_basic_auth_mock,
-    create_bearer_auth_mock,
-    create_custom_auth_mock,
-    create_oauth_mock,
-)
 from .factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns
+from .types import Headers, ResponseData, StatusCode
 
 
 class MockClientFactory:
-    """Factory for creating and configuring mock client instances."""
 
     @classmethod
     def create(
@@ -34,17 +20,6 @@ class MockClientFactory:
         enable_spy: bool = False,
         **kwargs: Any
     ) -> MockClient:
-        """
-        Create a new mock client instance.
-
-        Args:
-            base_url: The base URL for the mock client.
-            enable_spy: Whether to enable spying on the mock client.
-            **kwargs: Additional keyword arguments to pass to the MockClient constructor.
-
-        Returns:
-            A configured MockClient instance.
-        """
         # Create a mock HTTP client
         http_client = MockHTTPClient(base_url=base_url)
 
@@ -64,17 +39,6 @@ class MockClientFactory:
         enable_spy: bool = False,
         **kwargs: Any
     ) -> MockClient:
-        """
-        Create a new mock client instance from a ClientConfig.
-
-        Args:
-            config: The ClientConfig to use.
-            enable_spy: Whether to enable spying on the mock client.
-            **kwargs: Additional keyword arguments to pass to the MockClient constructor.
-
-        Returns:
-            A configured MockClient instance.
-        """
         # Extract the base URL from the config
         base_url = config.hostname or "https://api.example.com"
 
@@ -98,17 +62,6 @@ class MockClientFactory:
         enable_spy: bool = False,
         **kwargs: Any
     ) -> MockClient:
-        """
-        Create a new mock client instance that mimics a real client.
-
-        Args:
-            client: The real client to mimic.
-            enable_spy: Whether to enable spying on the mock client.
-            **kwargs: Additional keyword arguments to pass to the MockClient constructor.
-
-        Returns:
-            A configured MockClient instance.
-        """
         # Extract the config from the real client
         config = client.config
 
@@ -131,17 +84,6 @@ class MockClientFactory:
         status_code: StatusCode = 200,
         headers: Optional[Headers] = None
     ) -> None:
-        """
-        Configure a successful response for a specific request.
-
-        Args:
-            mock_client: The mock client to configure.
-            method: The HTTP method of the request.
-            path: The path of the request.
-            data: The data to return in the response body.
-            status_code: The status code to return.
-            headers: The headers to return in the response.
-        """
         mock_client.configure_response(
             method=method,
             path=path,
@@ -161,18 +103,6 @@ class MockClientFactory:
         headers: Optional[Headers] = None,
         error: Optional[Exception] = None
     ) -> None:
-        """
-        Configure an error response for a specific request.
-
-        Args:
-            mock_client: The mock client to configure.
-            method: The HTTP method of the request.
-            path: The path of the request.
-            status_code: The status code to return.
-            data: The data to return in the response body.
-            headers: The headers to return in the response.
-            error: An exception to raise instead of returning a response.
-        """
         if error is not None:
             mock_client.configure_response(
                 method=method,
@@ -194,34 +124,6 @@ class MockClientFactory:
         config: Optional[Union[ClientConfig, Dict[str, Any]]] = None,
         **kwargs: Any
     ) -> MockClient:
-        """
-        Create a pre-configured MockClient instance with advanced configuration options.
-
-        This method provides a comprehensive way to create and configure a mock client
-        with various behaviors including authentication, network conditions, rate limiting,
-        and pre-configured response patterns.
-
-        Args:
-            config: Optional client configuration
-            **kwargs: Additional configuration options including:
-                - latency_ms: Simulated network latency in milliseconds
-                - packet_loss_percentage: Percentage of requests that will be dropped
-                - error_rate_percentage: Percentage of requests that will raise errors
-                - rate_limit: Maximum number of requests allowed in the rate window
-                - rate_window_seconds: Time window for rate limiting in seconds
-                - response_patterns: List of response patterns to configure
-                - default_response: Default response for unmatched requests
-                - api_type: Type of API to mock (rest, graphql, etc.)
-                - api_resources: Resources to mock for REST APIs
-                - error_responses: Pre-configured error responses to include
-                - auth_strategy: Authentication strategy to use
-                - auth_type: Type of authentication to mock (basic, bearer, apikey, custom)
-                - auth_config: Configuration for the authentication strategy
-                - enable_spy: Whether to enable spying on the mock client
-
-        Returns:
-            Configured MockClient instance
-        """
         # Ensure we have a valid config
         if config is None:
             config = ClientConfig(hostname="https://api.example.com", version="v1")

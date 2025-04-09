@@ -4,13 +4,13 @@ Tests for the verification module.
 This module tests the verification methods in the crudclient.testing.verification module.
 """
 
-import pytest
-from typing import Any, Dict, List, Optional, Tuple
-from typing import Any, Dict, List, Tuple
+from typing import List, Optional
 
-from crudclient.testing.verification import Verifier
+import pytest
+
 from crudclient.testing.exceptions import VerificationError
 from crudclient.testing.spy.method_call import MethodCall
+from crudclient.testing.verification import Verifier
 
 
 class MockSpyObject:

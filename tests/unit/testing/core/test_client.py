@@ -4,13 +4,12 @@ Tests for the MockClient class.
 This module tests the functionality of the MockClient class in crudclient.testing.core.client.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
-import re
 
 from crudclient.auth.bearer import BearerAuth
 from crudclient.testing.core.client import MockClient
-from crudclient.testing.exceptions import RequestNotConfiguredError
 
 
 class TestMockClient:

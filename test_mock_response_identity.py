@@ -2,9 +2,9 @@
 Test to verify that the MockResponse class is the same when imported from different places.
 """
 
-from crudclient.testing.types import MockResponse as TypesMockResponse
-from crudclient.testing.response_builder.response import MockResponse as ResponseBuilderMockResponse
 from crudclient.testing import MockResponse as TestingMockResponse
+from crudclient.testing.response_builder.response import MockResponse as ResponseBuilderMockResponse
+from crudclient.testing.types import MockResponse as TypesMockResponse
 
 
 def test_mock_response_identity():

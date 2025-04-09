@@ -8,7 +8,7 @@ based on configured patterns.
 
 import json
 import re
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse

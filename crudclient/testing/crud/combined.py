@@ -6,12 +6,12 @@ into a single class for convenience.
 """
 
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from .create import CreateMock
+from .delete import DeleteMock
 from .read import ReadMock
 from .update import UpdateMock
-from .delete import DeleteMock
 
 
 class CombinedCrudMock:

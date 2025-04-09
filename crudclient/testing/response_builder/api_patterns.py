@@ -6,7 +6,7 @@ These patterns can be used to quickly set up mock responses for different API ar
 without having to manually configure each endpoint.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union, Tuple
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from .response import MockResponse
 

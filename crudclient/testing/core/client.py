@@ -6,15 +6,12 @@ that can be used in tests to simulate client behavior without making
 actual network calls.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 import re
-from urllib.parse import urljoin
+from typing import Any, Dict, List, Optional, Pattern, Union
 
-from crudclient.client import Client
-from crudclient.config import ClientConfig
 from crudclient.auth.base import AuthStrategy
+from crudclient.config import ClientConfig
 
-from ..exceptions import MockConfigurationError, RequestNotConfiguredError
 from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
 
 

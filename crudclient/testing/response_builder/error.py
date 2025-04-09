@@ -6,13 +6,13 @@ formats and appropriate HTTP status codes. It supports common error types such a
 validation errors, rate limit errors, and authentication errors.
 """
 
-import uuid
 import random
+import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from .response import MockResponse
 from .basic import BasicResponseBuilder
+from .response import MockResponse
 
 
 class ErrorResponseBuilder:

@@ -13,15 +13,15 @@ The stubs support:
 - Realistic default behaviors
 """
 
-from typing import Any, Callable, Dict, List, Optional, Type, Union
-import uuid
+import copy
 import json
 import re
-import copy
+import uuid
 from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from crudclient.client import Client
 from crudclient.api import API
+from crudclient.client import Client
 from crudclient.config import ClientConfig
 
 
@@ -36,7 +36,6 @@ class Response:
 
     def __init__(self):
         """Initialize the response."""
-        pass
 
     @property
     def status_code(self) -> int:
@@ -1249,7 +1248,6 @@ class StubAPI(API):
         This method is required by the API abstract base class but is not used
         in the stub implementation since endpoints are registered dynamically.
         """
-        pass
 
     def __getattr__(self, name: str) -> Any:
         """

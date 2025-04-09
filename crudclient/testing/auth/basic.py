@@ -7,7 +7,7 @@ for username/password validation and various authentication scenarios.
 
 import base64
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.basic import BasicAuth

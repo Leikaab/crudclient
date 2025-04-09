@@ -5,17 +5,12 @@ This module provides the base class for all CRUD operation mocks, with common
 functionality for handling requests, responses, and assertions.
 """
 
-import copy
 import json
 import re
-from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from crudclient.exceptions import (
-    AuthenticationError, CrudClientError,
-    InvalidResponseError, NotFoundError, ValidationError as CrudValidationError
-)
+from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
-from .request_record import RequestRecord
 
 
 class BaseCrudMock:

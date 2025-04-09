@@ -6,7 +6,6 @@ import uuid
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import pytest
-from unittest.mock import MagicMock
 import requests_mock
 
 from crudclient.auth.base import AuthStrategy
@@ -15,14 +14,9 @@ from crudclient.auth.bearer import BearerAuth
 from crudclient.auth.custom import CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
+from crudclient.testing import APIPatternBuilder, MockClient, MockResponse, RequestVerifier, ResponseBuilder, ResponseVerifier, SimpleMockClient
 
-from crudclient.testing import (
-    MockClient, MockResponse, SimpleMockClient,
-    APIPatternBuilder, ResponseBuilder, RequestVerifier, ResponseVerifier
-)
 # Update import paths to match the actual module structure
-from crudclient.testing.factory import MockClientFactory
-from crudclient.testing.factory.simple_mock import create_simple_mock_client
 
 # --- Authentication Strategy Fixtures ---
 

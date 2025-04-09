@@ -16,7 +16,7 @@ The enhanced spy components can be used to:
 import inspect
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .method_call import MethodCall
 

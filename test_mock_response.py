@@ -3,6 +3,7 @@ Simple test to verify that the MockResponse class is correctly imported and work
 """
 
 import json
+
 from crudclient.testing.types import MockResponse
 
 
