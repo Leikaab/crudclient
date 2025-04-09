@@ -5,10 +5,7 @@ This module demonstrates how to use the Custom Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import (
-    pytest, AuthenticationError, create_mock_client,
-    create_custom_auth_mock, AuthVerificationHelpers, ClientConfig
-)
+from .common import ClientConfig, create_custom_auth_mock, create_mock_client, pytest
 
 
 class TestCustomAuthExamples:

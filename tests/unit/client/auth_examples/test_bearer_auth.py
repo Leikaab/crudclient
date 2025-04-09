@@ -5,10 +5,7 @@ This module demonstrates how to use the Bearer Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import (
-    pytest, AuthenticationError, create_mock_client,
-    create_bearer_auth_mock, AuthVerificationHelpers
-)
+from .common import AuthenticationError, create_mock_client, pytest
 
 
 class TestBearerAuthExamples:

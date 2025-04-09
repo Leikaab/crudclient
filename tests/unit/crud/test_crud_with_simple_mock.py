@@ -2,10 +2,8 @@
 Tests for CRUD operations using SimpleMockClient.
 """
 
-import pytest
 
 from .conftest import TestModel
-
 
 # Sample data
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}

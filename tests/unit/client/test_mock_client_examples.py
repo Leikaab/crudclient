@@ -3,9 +3,8 @@ Examples of using the enhanced mock client for testing.
 """
 
 import pytest
-import re
 
-from tests.unit.mock_client import MockClient, MockResponse
+from crudclient.testing import MockClient, MockResponse
 
 
 class TestMockClientExamples:

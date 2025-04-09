@@ -5,10 +5,7 @@ This module demonstrates how to use the API Key Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import (
-    pytest, AuthenticationError, create_mock_client,
-    create_api_key_auth_mock, AuthVerificationHelpers
-)
+from .common import AuthenticationError, create_mock_client, pytest
 
 
 class TestApiKeyAuthExamples:

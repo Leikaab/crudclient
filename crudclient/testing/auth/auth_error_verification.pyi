@@ -1,0 +1,59 @@
+"""
+Authentication error verification utilities for testing.
+
+This module provides helper methods for verifying authentication error responses
+and rate limit headers.
+"""
+
+from typing import Any, Dict, List, Optional
+
+
+class AuthErrorVerification:
+    """
+    Helper methods for verifying authentication error responses.
+
+    This class provides static methods for verifying authentication error responses
+    and rate limit headers.
+    """
+
+    @staticmethod
+    def assert_auth_error_response(
+        response: Dict[str, Any],
+        expected_status: int = 401,
+        expected_error: Optional[str] = None,
+        expected_error_description: Optional[str] = None
+    ) -> None:
+        """
+        Assert that an authentication error response is correct.
+
+        Args:
+            response: The response to verify
+            expected_status: The expected HTTP status code
+            expected_error: The expected error code
+            expected_error_description: The expected error description
+
+        Raises:
+            AssertionError: If the response does not match the expected values
+        """
+        ...
+
+    @staticmethod
+    def assert_rate_limit_headers(
+        headers: Dict[str, str],
+        expected_limit: Optional[int] = None,
+        expected_remaining: Optional[int] = None,
+        expected_reset: Optional[int] = None
+    ) -> None:
+        """
+        Assert that rate limit headers are correct.
+
+        Args:
+            headers: The headers to verify
+            expected_limit: The expected rate limit
+            expected_remaining: The expected remaining requests
+            expected_reset: The expected reset time
+
+        Raises:
+            AssertionError: If the headers do not match the expected values
+        """
+        ...

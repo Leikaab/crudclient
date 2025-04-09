@@ -5,10 +5,7 @@ This module demonstrates how to use the Basic Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import (
-    pytest, AuthenticationError, create_mock_client,
-    create_basic_auth_mock, AuthVerificationHelpers
-)
+from .common import AuthenticationError, AuthVerificationHelpers, create_mock_client, pytest
 
 
 class TestBasicAuthExamples:

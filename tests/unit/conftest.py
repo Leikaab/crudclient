@@ -14,7 +14,13 @@ from crudclient.auth.bearer import BearerAuth
 from crudclient.auth.custom import CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
-from crudclient.testing import APIPatternBuilder, MockClient, MockResponse, RequestVerifier, ResponseBuilder, ResponseVerifier, SimpleMockClient
+from crudclient.testing.core.client import MockClient
+from crudclient.testing.response_builder import MockResponse, ResponseBuilder
+from crudclient.testing.response_builder.api_patterns import APIPatternBuilder
+from crudclient.testing.response_builder.basic import BasicResponseBuilder
+from crudclient.testing.factory.simple_mock import SimpleMockClient
+from crudclient.testing.auth.verification import AuthVerificationHelpers
+from crudclient.testing.verification import Verifier
 
 # Update import paths to match the actual module structure
 
@@ -274,7 +280,7 @@ def request_verifier():
     """
     Provides the RequestVerifier class for verifying API requests.
     """
-    return RequestVerifier
+    return Verifier
 
 
 @pytest.fixture
@@ -282,8 +288,7 @@ def response_verifier():
     """
     Provides the ResponseVerifier class for verifying API responses.
     """
-    return ResponseVerifier
-    return ResponseVerifier
+    return Verifier
 
 
 @pytest.fixture
@@ -509,10 +514,7 @@ def graphql_mock_client() -> MockClient:
     client.with_response_pattern(
         method="POST",
         url_pattern=r"/graphql$",
-        json_matcher=lambda json_data: isinstance(json_data, dict)
-        and "query" in json_data
-        and "GetUsers" in json_data["query"],
-        response=ResponseBuilder.create_graphql_response(
+        response=BasicResponseBuilder.create_graphql_response(
             data={
                 'users': [
                     {'id': '1', 'name': 'User 1', 'email': 'user1@example.com'},
@@ -525,10 +527,7 @@ def graphql_mock_client() -> MockClient:
     client.with_response_pattern(
         method="POST",
         url_pattern=r"/graphql$",
-        json_matcher=lambda json_data: isinstance(json_data, dict)
-        and "query" in json_data
-        and "GetUser" in json_data["query"],
-        response=ResponseBuilder.create_graphql_response(
+        response=BasicResponseBuilder.create_graphql_response(
             data={
                 'user': {
                     'id': '1',
@@ -546,10 +545,7 @@ def graphql_mock_client() -> MockClient:
     client.with_response_pattern(
         method="POST",
         url_pattern=r"/graphql$",
-        json_matcher=lambda json_data: isinstance(json_data, dict)
-        and "mutation" in json_data.get("query", "")
-        and "CreateUser" in json_data.get("query", ""),
-        response=ResponseBuilder.create_graphql_response(
+        response=BasicResponseBuilder.create_graphql_response(
             data={
                 'createUser': {
                     'id': '3',
@@ -564,7 +560,7 @@ def graphql_mock_client() -> MockClient:
     client.with_response_pattern(
         method="POST",
         url_pattern=r"/graphql$",
-        response=ResponseBuilder.create_graphql_response(
+        response=BasicResponseBuilder.create_graphql_response(
             errors=[{
                 'message': 'Unknown query',
                 'locations': [{'line': 1, 'column': 1}],

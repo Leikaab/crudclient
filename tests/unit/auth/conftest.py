@@ -7,16 +7,9 @@ from unittest.mock import MagicMock
 import pytest
 import requests_mock
 
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
-from crudclient.auth.custom import ApiKeyAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-
-from tests.unit.mock_client.auth import (
-    create_basic_auth_mock, create_bearer_auth_mock,
-    create_api_key_auth_mock, create_custom_auth_mock
-)
+from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock
 
 
 class MockBasicAuthConfig(ClientConfig):
@@ -122,12 +115,12 @@ def apikey_param_client():
 @pytest.fixture
 def mock_request():
     """Create a requests_mock for testing."""
+    with requests_mock.Mocker() as m:
+        yield m
 
 
 @pytest.fixture
 def mock_auth_verification():
     """Create auth verification helpers for testing."""
-    from tests.unit.mock_client.auth import AuthVerificationHelpers
-    return AuthVerificationHelpers
-    with requests_mock.Mocker() as m:
-        yield m
+    from crudclient.testing.auth import AuthVerificationHelpers
+    yield AuthVerificationHelpers

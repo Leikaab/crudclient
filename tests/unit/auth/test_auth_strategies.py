@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple, Union
 import pytest
 
 from crudclient.auth import create_auth_strategy
-from crudclient.auth.base import BaseAuthStrategy
+from crudclient.auth.base import AuthStrategy
 from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth
 from crudclient.auth.custom import ApiKeyAuth, CustomAuth
@@ -444,15 +444,18 @@ class TestCreateAuthStrategy:
 class TestBaseAuthStrategy:
     def test_base_methods_not_implemented(self):
         """
-        GIVEN a BaseAuthStrategy instance
-        WHEN prepare_request_headers or prepare_request_params is called
-        THEN a NotImplementedError is raised.
+        GIVEN the AuthStrategy class
+        WHEN we check its methods
+        THEN we verify they are abstract methods.
         """
-        # GIVEN
-        base_auth = BaseAuthStrategy()
+        # We can't instantiate an abstract class, so let's just verify
+        # that the methods are marked as abstract
+        from abc import abstractmethod
 
-        # WHEN / THEN
-        with pytest.raises(NotImplementedError):
-            base_auth.prepare_request_headers()
-        with pytest.raises(NotImplementedError):
-            base_auth.prepare_request_params()
+        # Check that prepare_request_headers is an abstract method
+        assert AuthStrategy.prepare_request_headers.__isabstractmethod__
+
+        # Check that prepare_request_params is an abstract method
+        assert AuthStrategy.prepare_request_params.__isabstractmethod__
+
+        # No need for WHEN/THEN section since we're just checking if methods are abstract
