@@ -5,7 +5,7 @@ This module provides helper methods for verifying authentication headers,
 including Basic Auth, Bearer Auth, and API Key headers.
 """
 
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 
 from .auth_extraction_utils import AuthExtractionUtils
 

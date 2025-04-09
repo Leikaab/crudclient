@@ -1,3 +1,10 @@
+"""
+Spy components for the crudclient testing framework.
+
+This module provides components focused on recording interactions with mock objects
+for later verification. It includes both basic spy implementations and enhanced
+spy implementations with more sophisticated features.
+"""
 
 from .api_spy import ApiSpy
 from .base import SpyBase

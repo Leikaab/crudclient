@@ -5,11 +5,11 @@ This module provides helper methods for verifying authentication behavior,
 including header validation, error handling, and token refresh verification.
 """
 
+from .auth_error_verification import AuthErrorVerification
 # Re-export the classes from their respective modules
 from .auth_extraction_utils import AuthExtractionUtils
 from .auth_header_verification import AuthHeaderVerification
 from .auth_token_verification import AuthTokenVerification
-from .auth_error_verification import AuthErrorVerification
 
 
 class AuthVerificationHelpers:

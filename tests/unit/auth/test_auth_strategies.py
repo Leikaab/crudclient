@@ -450,7 +450,6 @@ class TestBaseAuthStrategy:
         """
         # We can't instantiate an abstract class, so let's just verify
         # that the methods are marked as abstract
-        from abc import abstractmethod
 
         # Check that prepare_request_headers is an abstract method
         assert AuthStrategy.prepare_request_headers.__isabstractmethod__

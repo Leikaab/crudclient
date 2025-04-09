@@ -6,7 +6,6 @@ failures, including invalid credentials, expired tokens, and token refresh scena
 """
 
 import pytest
-import requests_mock
 
 from crudclient.auth.custom import CustomAuth
 from crudclient.client import Client
@@ -190,7 +189,6 @@ class TestAuthFailures:
     def test_apikey_param_auth_failure(self, apikey_param_client, mock_request):
         """Test handling of API Key Param Authentication failures."""
         # This test needs to be updated to work with the new testing module
-        pass
 
     def test_custom_auth_failure(self, mock_request):
         """Test handling of custom authentication failures."""
@@ -218,7 +216,6 @@ class TestAuthFailures:
     def test_custom_auth_param_callback_failure(self, mock_request):
         """Test handling of custom authentication failures in param callback."""
         # This test needs to be updated to work with the new testing module
-        pass
 
     def test_custom_auth_api_failure(self, mock_request):
         """Test handling of API returning 401/403 with CustomAuth."""

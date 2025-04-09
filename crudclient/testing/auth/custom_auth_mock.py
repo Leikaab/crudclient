@@ -38,15 +38,6 @@ class CustomAuthMock(AuthMockBase):
         self.param_validators: Dict[str, Callable[[str], bool]] = {}
 
     def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
-        """
-        Set the header callback for the Custom Auth mock.
-
-        Args:
-            callback: Callback function that returns authentication headers
-
-        Returns:
-            Self for method chaining
-        """
         self.header_callback = callback
         self.auth_strategy = CustomAuth(
             header_callback=callback,
@@ -55,15 +46,6 @@ class CustomAuthMock(AuthMockBase):
         return self
 
     def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
-        """
-        Set the parameter callback for the Custom Auth mock.
-
-        Args:
-            callback: Callback function that returns authentication parameters
-
-        Returns:
-            Self for method chaining
-        """
         self.param_callback = callback
         # Create a safe header callback that handles None
         safe_header_callback = self.header_callback if self.header_callback else lambda: {}
@@ -75,99 +57,32 @@ class CustomAuthMock(AuthMockBase):
         return self
 
     def with_expected_header(self, name: str, value: str) -> 'CustomAuthMock':
-        """
-        Set an expected header for validation.
-
-        Args:
-            name: Header name
-            value: Expected header value
-
-        Returns:
-            Self for method chaining
-        """
         self.expected_headers[name] = value
         return self
 
     def with_expected_param(self, name: str, value: str) -> 'CustomAuthMock':
-        """
-        Set an expected parameter for validation.
-
-        Args:
-            name: Parameter name
-            value: Expected parameter value
-
-        Returns:
-            Self for method chaining
-        """
         self.expected_params[name] = value
         return self
 
     def with_required_header(self, name: str) -> 'CustomAuthMock':
-        """
-        Add a required header for validation.
-
-        Args:
-            name: Required header name
-
-        Returns:
-            Self for method chaining
-        """
         if name not in self.required_headers:
             self.required_headers.append(name)
         return self
 
     def with_required_param(self, name: str) -> 'CustomAuthMock':
-        """
-        Add a required parameter for validation.
-
-        Args:
-            name: Required parameter name
-
-        Returns:
-            Self for method chaining
-        """
         if name not in self.required_params:
             self.required_params.append(name)
         return self
 
     def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
-        """
-        Add a custom validator for a header.
-
-        Args:
-            name: Header name
-            validator: Function that validates the header value
-
-        Returns:
-            Self for method chaining
-        """
         self.header_validators[name] = validator
         return self
 
     def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
-        """
-        Add a custom validator for a parameter.
-
-        Args:
-            name: Parameter name
-            validator: Function that validates the parameter value
-
-        Returns:
-            Self for method chaining
-        """
         self.param_validators[name] = validator
         return self
 
     def verify_headers(self, headers: Dict[str, str]) -> bool:
-        """
-        Verify that the headers meet all requirements.
-
-        Args:
-            headers: The headers to verify
-
-        Returns:
-            True if the headers are valid, False otherwise
-        """
         # Check required headers
         for name in self.required_headers:
             if name not in headers:
@@ -186,15 +101,6 @@ class CustomAuthMock(AuthMockBase):
         return True
 
     def verify_params(self, params: Dict[str, str]) -> bool:
-        """
-        Verify that the parameters meet all requirements.
-
-        Args:
-            params: The parameters to verify
-
-        Returns:
-            True if the parameters are valid, False otherwise
-        """
         # Check required parameters
         for name in self.required_params:
             if name not in params:
@@ -213,10 +119,4 @@ class CustomAuthMock(AuthMockBase):
         return True
 
     def get_auth_strategy(self) -> AuthStrategy:
-        """
-        Get the configured auth strategy.
-
-        Returns:
-            The configured CustomAuth strategy
-        """
         return self.auth_strategy

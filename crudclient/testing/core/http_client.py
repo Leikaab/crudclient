@@ -1,10 +1,3 @@
-"""
-Mock HTTP client implementation.
-
-This module provides a mock implementation of the crudclient.http.Client class
-that can be used in tests to simulate HTTP requests and responses without making
-actual network calls.
-"""
 
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import urljoin
@@ -17,25 +10,12 @@ from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody,
 
 
 class MockHTTPClient:
-    """
-    Mock implementation of the crudclient.http.Client class.
-
-    This class simulates HTTP requests and responses without making actual network calls.
-    It allows configuring expected requests and their responses for testing purposes.
-    """
 
     def __init__(self, base_url: str = "https://api.example.com") -> None:
-        """
-        Initialize a new MockHTTPClient.
-
-        Args:
-            base_url: The base URL for the mock client.
-        """
         self.base_url = base_url
         self._configured_responses: Dict[Tuple[HttpMethod, str], Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]] = {}
 
     def reset(self) -> None:
-        """Reset the mock HTTP client to its initial state."""
         self._configured_responses = {}
 
     def configure_response(
@@ -47,17 +27,6 @@ class MockHTTPClient:
         headers: Optional[Headers] = None,
         error: Optional[Exception] = None
     ) -> None:
-        """
-        Configure a response for a specific request.
-
-        Args:
-            method: The HTTP method of the request.
-            path: The path of the request.
-            status_code: The status code to return.
-            data: The data to return in the response body.
-            headers: The headers to return in the response.
-            error: An exception to raise instead of returning a response.
-        """
         # Normalize the method to uppercase
         method = method.upper()
 
@@ -77,19 +46,6 @@ class MockHTTPClient:
         method: HttpMethod,
         path: str
     ) -> Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]:
-        """
-        Get the configured response for a specific request.
-
-        Args:
-            method: The HTTP method of the request.
-            path: The path of the request.
-
-        Returns:
-            A tuple of (status_code, response_body, headers, error).
-
-        Raises:
-            RequestNotConfiguredError: If no response is configured for the request.
-        """
         # Normalize the method to uppercase
         method = method.upper()
 
@@ -112,24 +68,6 @@ class MockHTTPClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock HTTP request.
-
-        Args:
-            method: The HTTP method of the request.
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            data: Optional body for the request.
-            **kwargs: Additional keyword arguments (ignored).
-
-        Returns:
-            A Response object with the configured response.
-
-        Raises:
-            RequestNotConfiguredError: If no response is configured for the request.
-            Exception: If an error is configured for the request.
-        """
         # Get the configured response
         status_code, response_body, response_headers, error = self._get_configured_response(
             method=method,
@@ -160,18 +98,6 @@ class MockHTTPClient:
         params: Optional[QueryParams] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock GET request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            A Response object with the configured response.
-        """
         return self.request(
             method="GET",
             path=path,
@@ -188,19 +114,6 @@ class MockHTTPClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock POST request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            data: Optional body for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            A Response object with the configured response.
-        """
         return self.request(
             method="POST",
             path=path,
@@ -218,19 +131,6 @@ class MockHTTPClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock PUT request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            data: Optional body for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            A Response object with the configured response.
-        """
         return self.request(
             method="PUT",
             path=path,
@@ -247,18 +147,6 @@ class MockHTTPClient:
         params: Optional[QueryParams] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock DELETE request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            A Response object with the configured response.
-        """
         return self.request(
             method="DELETE",
             path=path,
@@ -275,19 +163,6 @@ class MockHTTPClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Response:
-        """
-        Make a mock PATCH request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            data: Optional body for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            A Response object with the configured response.
-        """
         return self.request(
             method="PATCH",
             path=path,

@@ -6,7 +6,7 @@ including OAuth tokens, JWT tokens, and token refresh behavior.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from .auth_extraction_utils import AuthExtractionUtils
 

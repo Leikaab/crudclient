@@ -5,7 +5,7 @@ This module provides helper methods for verifying authentication error responses
 and rate limit headers.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 class AuthErrorVerification:

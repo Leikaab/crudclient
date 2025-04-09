@@ -15,11 +15,10 @@ from crudclient.auth.custom import CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
 from crudclient.testing.core.client import MockClient
+from crudclient.testing.factory.simple_mock import SimpleMockClient
 from crudclient.testing.response_builder import MockResponse, ResponseBuilder
 from crudclient.testing.response_builder.api_patterns import APIPatternBuilder
 from crudclient.testing.response_builder.basic import BasicResponseBuilder
-from crudclient.testing.factory.simple_mock import SimpleMockClient
-from crudclient.testing.auth.verification import AuthVerificationHelpers
 from crudclient.testing.verification import Verifier
 
 # Update import paths to match the actual module structure

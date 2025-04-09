@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
-from typing import Callable, Dict, List, Optional, Set, Any, TypeVar
+from typing import List, Optional
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
 
 from .base import AuthMockBase
-from .oauth_token_manager import OAuthTokenManager
-from .oauth_scope_validator import OAuthScopeValidator
 from .oauth_grant_handler import OAuthGrantHandler
+from .oauth_scope_validator import OAuthScopeValidator
+from .oauth_token_manager import OAuthTokenManager
 
 
 class OAuthMock(AuthMockBase):

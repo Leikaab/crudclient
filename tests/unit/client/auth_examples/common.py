@@ -2,24 +2,13 @@
 Common imports and utilities for authentication examples.
 """
 
-import re
-from typing import Any, Dict, List, Optional, Pattern, Union
+from typing import Any, Dict, List, Optional, Union
 
-import pytest
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
 from crudclient.exceptions import AuthenticationError
-from crudclient.testing.auth import (
-    AuthVerificationHelpers,
-    create_api_key_auth_mock,
-    create_basic_auth_mock,
-    create_bearer_auth_mock,
-    create_custom_auth_mock,
-)
+from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
-from crudclient.testing.types import Headers, HttpMethod, ResponseBody, StatusCode
+from crudclient.testing.types import Headers
 
 
 # Adapter class to provide backward compatibility with old mock client API

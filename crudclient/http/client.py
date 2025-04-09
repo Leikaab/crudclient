@@ -84,11 +84,8 @@ class HttpClient:
             # If handle_error_response doesn't raise an exception, return the response
             return e.response if not handle_response else self.response_handler.handle_response(e.response)
 
-        # Check if we need to retry after a 403 Forbidden
-        if response.status_code == 403:
-            response = self.retry_handler.maybe_retry_after_403(
-                method, url, kwargs, response, self.session_manager.session, self.session_manager.refresh_auth
-            )
+        # We don't handle 403 retries here - let the Client class handle them
+        # This ensures the correct object is passed to handle_403_retry
 
         if not handle_response:
             return response

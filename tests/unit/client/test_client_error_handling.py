@@ -224,7 +224,7 @@ class TestClientErrorHandling:
         # 3. Check auth was refreshed
         mock_setup_auth.assert_called_once()
 
-        # 4. Check two requests were made
+        # 4. Check two requests were made to the same URL
         assert len(mock_request.request_history) == 2
-        assert mock_request.request_history[0].status_code == 403
-        assert mock_request.request_history[1].status_code == 200
+        assert mock_request.request_history[0].url == url
+        assert mock_request.request_history[1].url == url

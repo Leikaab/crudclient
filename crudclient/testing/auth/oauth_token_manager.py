@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Set, List, Union, Any, Mapping
+from typing import Any, Dict, List, Optional
 
 
 class OAuthTokenManager:
@@ -40,7 +40,6 @@ class OAuthTokenManager:
         grant_type: str = "client_credentials",
         user: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Create a new access token and refresh token pair."""
         now = datetime.now()
         access_token = f"access_token_{now.timestamp()}"
         refresh_token = f"refresh_token_{now.timestamp()}"
@@ -73,7 +72,6 @@ class OAuthTokenManager:
         scope: Optional[str] = None,
         state: Optional[str] = None
     ) -> str:
-        """Create a new authorization code."""
         now = datetime.now()
         code = f"auth_code_{now.timestamp()}"
 
@@ -88,7 +86,6 @@ class OAuthTokenManager:
         return code
 
     def validate_token(self, token: str) -> bool:
-        """Check if a token is valid."""
         if token not in self.access_tokens:
             return False
 
@@ -99,7 +96,6 @@ class OAuthTokenManager:
         return True
 
     def refresh_token(self, refresh_token: str) -> Optional[Dict[str, Any]]:
-        """Refresh an access token using a refresh token."""
         if refresh_token not in self.refresh_tokens:
             return None
 
@@ -119,7 +115,6 @@ class OAuthTokenManager:
         )
 
     def revoke_token(self, token: str) -> bool:
-        """Revoke an access token."""
         if token not in self.access_tokens:
             return False
 
@@ -146,14 +141,12 @@ class OAuthTokenManager:
         return True
 
     def add_user(self, username: str, password: str, scopes: List[str]) -> None:
-        """Add a user for password grant type."""
         self.users[username] = {
             "password": password,
             "scopes": scopes
         }
 
     def validate_user(self, username: str, password: str) -> bool:
-        """Validate user credentials."""
         if username not in self.users:
             return False
 

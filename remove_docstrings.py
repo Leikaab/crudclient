@@ -3,9 +3,9 @@
 Script to remove docstrings from Python files.
 """
 
+import os
 import re
 import sys
-import os
 
 
 def remove_docstrings(file_path):
