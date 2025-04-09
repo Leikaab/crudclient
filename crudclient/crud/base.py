@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, Generic, List, Literal, Optional, Type, TypeAlias, TypeVar, Union
 
@@ -56,3 +55,7 @@ class Crud(Generic[T]):
         _validate_list_return,
         _validate_response,
     )
+
+
+# Alias for backward compatibility
+CrudBase = Crud

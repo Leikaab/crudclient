@@ -54,8 +54,6 @@ class API(ABC):
         pass
 
     def _initialize_client(self) -> None:
-        pass
-
         logger.debug("Doing typechecks before initializing client.")
 
         # check if client_class is defined

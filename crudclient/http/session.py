@@ -20,6 +20,7 @@ class SessionManager:
 
         self.config: ClientConfig = config
         self.session = requests.Session()
+        self.is_closed = False
 
         # Set up authentication
         self._setup_auth()
@@ -85,4 +86,5 @@ class SessionManager:
 
     def close(self) -> None:
         self.session.close()
+        self.is_closed = True
         logger.debug("Session closed.")
