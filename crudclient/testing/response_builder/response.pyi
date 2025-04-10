@@ -10,7 +10,7 @@ class MockResponse:
     status_code: int
     text: Optional[str]
     headers: Dict[str, str]
-    _json_data: Optional[Dict[str, Any]]
+    json_data: Optional[Dict[str, Any]]
 
     def __init__(
         self,

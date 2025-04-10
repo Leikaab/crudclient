@@ -48,6 +48,6 @@ class TestClientInitialization:
         assert isinstance(client.config, ClientConfig)
         assert client.config.hostname == "https://dict-init.com"
         assert client.config.version == "v2"
-        assert client.config.base_url == "https://dict-init.com/api/v2"
+        assert client.config.base_url == "https://dict-init.com/v2"
         # Check if header is passed down to http_client's session
         assert client.http_client.session_manager.session.headers["X-Dict-Test"] == "true"

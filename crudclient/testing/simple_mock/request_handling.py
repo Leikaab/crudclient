@@ -91,16 +91,16 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                     record.response = response_obj
 
                     # Convert to string
-                    if hasattr(response_obj, '_json_data') and response_obj._json_data:
-                        return json.dumps(response_obj._json_data)
+                    if response_obj.json_data is not None:
+                        return json.dumps(response_obj.json_data)
                     return response_obj.text
 
         # No pattern matched, use default response
         record.response = self.default_response
 
         # Convert to string
-        if hasattr(self.default_response, '_json_data') and self.default_response._json_data:
-            return json.dumps(self.default_response._json_data)
+        if self.default_response.json_data is not None:
+            return json.dumps(self.default_response.json_data)
         return self.default_response.text
 
     def get(self, url: str, **kwargs: Any) -> Optional[str]:

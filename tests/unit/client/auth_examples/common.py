@@ -4,7 +4,9 @@ Common imports and utilities for authentication examples.
 
 from typing import Any, Dict, List, Optional, Union
 
+from requests.auth import AuthBase
 from crudclient.exceptions import AuthenticationError
+
 from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
@@ -20,6 +22,47 @@ class BackwardCompatibleMockClient(MockClient):
     that were present in the old mock client API but are not in the new one.
     """
 
+    def _handle_response_compat(self, response: Any) -> Any:
+        """Handles response compatibility, raising AuthError or returning data."""
+        # If the response is a dict, just return it directly (already handled?)
+        if isinstance(response, dict):
+            return response
+
+        # If the response is a Response-like object (real or mock)
+        if hasattr(response, 'status_code'):
+            # If it's an auth error, raise an AuthenticationError
+            if response.status_code in [401, 403]:
+                error_data: Any = {}
+                try:
+                    # Use .json() method if available, else use text
+                    if hasattr(response, 'json') and callable(response.json):
+                        error_data = response.json() or {}
+                    elif hasattr(response, 'text'):
+                        error_data = {"error": response.text or "Authentication failed"}
+                    else:
+                        error_data = {"error": "Authentication failed"}
+                except Exception:  # Catch potential JSON parsing errors
+                    error_data = {"error": getattr(response, 'text', "Authentication failed")}
+
+                # Ensure we're raising the correct exception
+                from crudclient.exceptions import AuthenticationError
+                raise AuthenticationError(f"{response.status_code} Unauthorized: Authentication failed: {error_data}", response)
+
+            # For other successful responses, extract the data
+            try:
+                # Use .json() method if available
+                if hasattr(response, 'json') and callable(response.json):
+                    return response.json()
+                elif hasattr(response, 'text'):
+                    return response.text
+                else:
+                    return response  # Return as-is if no json/text method
+            except Exception:  # Catch potential JSON parsing errors
+                return getattr(response, 'text', response)  # Fallback to text or original response
+
+        # If it's not a dict or Response-like, return as-is
+        return response
+
     def get(
         self,
         path: str,
@@ -28,44 +71,10 @@ class BackwardCompatibleMockClient(MockClient):
         **kwargs: Any
     ) -> Any:
         """
-        Make a mock GET request.
-
-        Args:
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            The response data directly, not a Response object.
+        Make a mock GET request with backward compatible response handling.
         """
         response = super().get(path, headers=headers, params=params, **kwargs)
-
-        # If the response is a dict, just return it directly
-        if isinstance(response, dict):
-            return response
-
-        # If the response is a Response object
-        if hasattr(response, 'status_code'):
-            # If it's an auth error, raise an AuthenticationError
-            if response.status_code in [401, 403]:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except:
-                    error_data = {"error": "Authentication failed"}
-
-                # Include 401 and Unauthorized in the error message
-                status_code = response.status_code
-                raise AuthenticationError(f"401 Unauthorized: Authentication failed: {error_data}")
-
-            # For other responses, extract the data
-            try:
-                return response.json()
-            except:
-                return response.text
-
-        return response
+        return self._handle_response_compat(response)
 
     def post(
         self,
@@ -89,32 +98,7 @@ class BackwardCompatibleMockClient(MockClient):
             The response data directly, not a Response object.
         """
         response = super().post(path, headers=headers, params=params, data=data, **kwargs)
-
-        # If the response is a dict, just return it directly
-        if isinstance(response, dict):
-            return response
-
-        # If the response is a Response object
-        if hasattr(response, 'status_code'):
-            # If it's an auth error, raise an AuthenticationError
-            if response.status_code in [401, 403]:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except:
-                    error_data = {"error": "Authentication failed"}
-
-                # Include 401 and Unauthorized in the error message
-                status_code = response.status_code
-                raise AuthenticationError(f"401 Unauthorized: Authentication failed: {error_data}")
-
-            # For other responses, extract the data
-            try:
-                return response.json()
-            except:
-                return response.text
-
-        return response
+        return self._handle_response_compat(response)
 
     def put(
         self,
@@ -138,32 +122,7 @@ class BackwardCompatibleMockClient(MockClient):
             The response data directly, not a Response object.
         """
         response = super().put(path, headers=headers, params=params, data=data, **kwargs)
-
-        # If the response is a dict, just return it directly
-        if isinstance(response, dict):
-            return response
-
-        # If the response is a Response object
-        if hasattr(response, 'status_code'):
-            # If it's an auth error, raise an AuthenticationError
-            if response.status_code in [401, 403]:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except:
-                    error_data = {"error": "Authentication failed"}
-
-                # Include 401 and Unauthorized in the error message
-                status_code = response.status_code
-                raise AuthenticationError(f"401 Unauthorized: Authentication failed: {error_data}")
-
-            # For other responses, extract the data
-            try:
-                return response.json()
-            except:
-                return response.text
-
-        return response
+        return self._handle_response_compat(response)
 
     def delete(
         self,
@@ -185,32 +144,7 @@ class BackwardCompatibleMockClient(MockClient):
             The response data directly, not a Response object.
         """
         response = super().delete(path, headers=headers, params=params, **kwargs)
-
-        # If the response is a dict, just return it directly
-        if isinstance(response, dict):
-            return response
-
-        # If the response is a Response object
-        if hasattr(response, 'status_code'):
-            # If it's an auth error, raise an AuthenticationError
-            if response.status_code in [401, 403]:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except:
-                    error_data = {"error": "Authentication failed"}
-
-                # Include 401 and Unauthorized in the error message
-                status_code = response.status_code
-                raise AuthenticationError(f"401 Unauthorized: Authentication failed: {error_data}")
-
-            # For other responses, extract the data
-            try:
-                return response.json()
-            except:
-                return response.text
-
-        return response
+        return self._handle_response_compat(response)
 
     def patch(
         self,
@@ -234,34 +168,9 @@ class BackwardCompatibleMockClient(MockClient):
             The response data directly, not a Response object.
         """
         response = super().patch(path, headers=headers, params=params, data=data, **kwargs)
+        return self._handle_response_compat(response)
 
-        # If the response is a dict, just return it directly
-        if isinstance(response, dict):
-            return response
-
-        # If the response is a Response object
-        if hasattr(response, 'status_code'):
-            # If it's an auth error, raise an AuthenticationError
-            if response.status_code in [401, 403]:
-                error_data = {}
-                try:
-                    error_data = response.json()
-                except:
-                    error_data = {"error": "Authentication failed"}
-
-                # Include 401 and Unauthorized in the error message
-                status_code = response.status_code
-                raise AuthenticationError(f"401 Unauthorized: Authentication failed: {error_data}")
-
-            # For other responses, extract the data
-            try:
-                return response.json()
-            except:
-                return response.text
-
-        return response
-
-    def with_response_pattern(
+    def with_response_pattern(  # type: ignore[override]
         self,
         method: str,
         url_pattern: str,
@@ -282,38 +191,18 @@ class BackwardCompatibleMockClient(MockClient):
         Returns:
             self for method chaining
         """
-        # Check if response is a dict with specific keys that indicate it's a response object
-        if isinstance(response, dict) and any(key in response for key in ['status_code', 'json_data', 'headers']):
-            # It's already a response object, extract the components
-            response_status_code = response.get('status_code', status_code)
-            response_data = response.get('json_data', {})
-            response_headers = response.get('headers', headers)
-        else:
-            # It's just the response data
-            response_status_code = status_code
-            response_data = response
-            response_headers = headers
-
-        # Configure the HTTP client to return the response directly
-        # This is a workaround for the issue with the Response object
-        def mock_response(*args, **kwargs):
-            return response_data
-
-        # Override the HTTP method to return the response directly
-        if method.upper() == 'GET':
-            self.http_client.get = mock_response
-        elif method.upper() == 'POST':
-            self.http_client.post = mock_response
-        elif method.upper() == 'PUT':
-            self.http_client.put = mock_response
-        elif method.upper() == 'DELETE':
-            self.http_client.delete = mock_response
-        elif method.upper() == 'PATCH':
-            self.http_client.patch = mock_response
-
+        # Correctly delegate to the underlying MockHTTPClient's method
+        self.http_client.with_response_pattern(
+            method=method,
+            path_pattern=url_pattern,  # Use url_pattern as path_pattern
+            status_code=status_code,
+            data=response,  # Pass the raw response data
+            headers=headers,
+            error=None  # Assuming no error is configured here
+        )
         return self
 
-    def with_network_condition(
+    def with_network_condition(  # type: ignore[override]
         self,
         condition: str,
         **kwargs: Any
@@ -332,7 +221,49 @@ class BackwardCompatibleMockClient(MockClient):
         # we would configure the network condition based on the parameters
         return self
 
-    def with_rate_limiter(
+    def add_expected_failure(
+        self,
+        method: str,
+        path: str,  # Should be relative path for MockClient
+        status_code: int,
+        response_body: Optional[Union[Dict[str, Any], List[Any], str]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        expected_headers: Optional[Dict[str, str]] = None,  # Pass through header requirements
+    ) -> None:
+        """Adds an expected failure response, mapping to MockClient.add_response."""
+        # Convert to the format MockClient expects for add_response
+        # MockClient doesn't have a dedicated failure mechanism,
+        # just responses with non-2xx status codes. We also need to handle
+        # matching based on expected headers for the MFA retry case.
+        # Use with_response_pattern instead of add_response
+        if isinstance(response_body, (dict, list)):
+            self.with_response_pattern(
+                method=method,
+                url_pattern=path,
+                response=response_body,
+                status_code=status_code,
+                headers=headers
+            )
+        elif isinstance(response_body, str):
+            # Handle string response bodies
+            self.with_response_pattern(
+                method=method,
+                url_pattern=path,
+                response=response_body,
+                status_code=status_code,
+                headers=headers
+            )
+        else:
+            # Handle None or other types
+            self.with_response_pattern(
+                method=method,
+                url_pattern=path,
+                response={},  # Empty dict as default
+                status_code=status_code,
+                headers=headers
+            )
+
+    def with_rate_limiter(  # type: ignore[override]
         self,
         limit: int,
         window_seconds: int
@@ -351,7 +282,7 @@ class BackwardCompatibleMockClient(MockClient):
         # we would configure the rate limiter based on the parameters
         return self
 
-    def create_paginated_response(
+    def create_paginated_response(  # type: ignore[override]
         self,
         **kwargs: Any
     ) -> Any:
@@ -393,46 +324,95 @@ def create_mock_client(**kwargs):
         failure_type = auth_config.get('failure_type', 'invalid_credentials')
         failure_message = auth_config.get('message', 'Authentication failed')
 
-        if should_fail:
-            # For failure scenarios, we need to configure the client to raise an exception
-            # with the specific error message
-
-            # Create a function that raises an AuthenticationError with the specific message
-            def raise_auth_error(*args, **kwargs):
-                error_data = {"error": failure_message}
-                raise AuthenticationError(f"401 Unauthorized: {failure_message}")
-
-            # Override the HTTP methods to raise the exception
-            http_client.get = raise_auth_error
-            http_client.post = raise_auth_error
-            http_client.put = raise_auth_error
-            http_client.delete = raise_auth_error
-            http_client.patch = raise_auth_error
+        # The should_fail logic previously here was incorrect.
+        # Failure scenarios should be configured in the test itself by setting up
+        # a 401/403 response using client.with_response_pattern or configure_response.
+        # The BackwardCompatibleMockClient adapter will then correctly raise
+        # AuthenticationError based on the response status code.
 
         # Configure the auth strategy
         if auth_type == "basic":
-            auth_mock = create_basic_auth_mock(
+            basic_auth_mock = create_basic_auth_mock(
                 username=auth_config.get('username', ''),
                 password=auth_config.get('password', '')
             )
-            mock_client.set_auth_strategy(auth_mock.get_auth_strategy())
+            mock_client.set_auth_strategy(basic_auth_mock.get_auth_strategy())
         elif auth_type == "bearer":
-            auth_mock = create_bearer_auth_mock(
+            bearer_auth_mock = create_bearer_auth_mock(
                 token=auth_config.get('token', '')
             )
-            mock_client.set_auth_strategy(auth_mock.get_auth_strategy())
+            mock_client.set_auth_strategy(bearer_auth_mock.get_auth_strategy())
         elif auth_type == "apikey":
-            auth_mock = create_api_key_auth_mock(
+            api_key_auth_mock = create_api_key_auth_mock(
                 api_key=auth_config.get('api_key', ''),
                 header_name=auth_config.get('header_name'),
                 param_name=auth_config.get('param_name')
             )
-            mock_client.set_auth_strategy(auth_mock.get_auth_strategy())
+            mock_client.set_auth_strategy(api_key_auth_mock.get_auth_strategy())
         elif auth_type == "custom":
-            auth_mock = create_custom_auth_mock(
+            custom_auth_mock = create_custom_auth_mock(
                 header_callback=auth_config.get('header_callback'),
                 param_callback=auth_config.get('param_callback')
             )
-            mock_client.set_auth_strategy(auth_mock.get_auth_strategy())
+            mock_client.set_auth_strategy(custom_auth_mock.get_auth_strategy())
 
     return mock_client
+
+
+class MockMFAAuth(AuthBase):
+    """
+    Mock Multi-Factor Authentication strategy for testing.
+
+    This class simulates a Multi-Factor Authentication flow where:
+    1. Initial request fails with 401 and a WWW-Authenticate challenge
+    2. Client code provides an MFA token
+    3. Subsequent request with the token succeeds
+    """
+
+    def __init__(self) -> None:
+        """Initialize the MFA auth strategy."""
+        self.mfa_token: Optional[str] = None
+        self.last_challenge: Optional[str] = None  # Store the last WWW-Authenticate header
+
+    def __call__(self, r):
+        """Required by requests.auth.AuthBase but not used in our testing."""
+        return r
+
+    def handle_response_sync(self, response, request) -> Optional[Any]:
+        """Handles 401 responses to potentially trigger MFA flow."""
+        self.last_challenge = response.headers.get("WWW-Authenticate")
+        if response.status_code == 401 and self.last_challenge:
+            # Simulate "user" providing the token based on the challenge
+            if "mfa_token_required" in self.last_challenge:
+                self.mfa_token = "mock-mfa-12345"  # Simulate getting the token
+                # Re-prepare the original request with the MFA token
+                # Add the MFA token header for the retry attempt
+                new_headers = request.headers.copy() if request.headers else {}
+                new_headers["X-MFA-Token"] = self.mfa_token  # Add the token
+                # Create a new request object to retry
+                # Use a generic approach to avoid import issues
+                new_request = type(request)(
+                    method=request.method,
+                    url=str(request.url),  # Ensure URL is string
+                    params=request.params,
+                    json=getattr(request, 'json', None),  # Handle potential absence
+                    data=getattr(request, 'data', None),  # Handle potential absence
+                    headers=new_headers,
+                    extensions=getattr(request, 'extensions', {}) or {},  # Preserve extensions
+                )
+                return new_request  # Signal to retry with this new request
+        return None  # No retry needed
+
+    def enrich_request_sync(self, request) -> Any:
+        """Adds MFA token header if available."""
+        # This might be called before the *first* request too,
+        # but handle_response_sync sets the token *after* the first failure.
+        # The retry mechanism should use the request returned by handle_response_sync.
+        if self.mfa_token:
+            # Ensure headers exist and are mutable (or create new request)
+            if hasattr(request, 'headers') and isinstance(request.headers, dict):
+                request.headers["X-MFA-Token"] = self.mfa_token
+            else:
+                # This case indicates an incompatible Request object or missing headers attribute
+                pass  # Or raise TypeError("Request headers are not a mutable dict")
+        return request

@@ -26,8 +26,9 @@ def test_create_supplier(api):
     """
     Test creating a supplier.
     """
-    # Create a new supplier with a unique name
+    # Create a new supplier with a unique name and supplier number
     supplier_name = generate_unique_name()
+
     supplier_data = {
         "name": supplier_name,
         "email": "test@example.com",

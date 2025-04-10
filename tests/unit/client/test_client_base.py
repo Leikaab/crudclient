@@ -284,7 +284,5 @@ class TestClient:
         client.close()
 
         # THEN
-        # We assert that the session's close method was called.
-        # Since httpx.Client.close returns None, we check for that.
-        # A more robust check might involve mocking session.close and asserting it was called.
-        assert client.session.is_closed
+        # We assert that the session manager's is_closed attribute is set to True
+        assert client.http_client.session_manager.is_closed

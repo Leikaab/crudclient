@@ -74,8 +74,9 @@ class TestApiKeyAuthExamples:
         # Verify the auth param was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        # Assuming 'path' contains the full URL or path with params
-        assert "api_key=valid_api_key" in request['path']
+        # Verify the parameters dictionary contains the API key
+        assert "api_key" in request['params']
+        assert request['params']['api_key'] == "valid_api_key"
 
     def test_api_key_auth_failure_scenario(self):
         """Example of testing an API Key auth failure scenario."""

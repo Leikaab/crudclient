@@ -59,7 +59,7 @@ class TestCustomAuthExamples:
         assert "X-Timestamp" in request['headers']
         assert request['headers']["X-Timestamp"] == "12345678"
         # Assuming 'path' contains the full URL or path with params
-        assert "tenant=test_tenant" in request['path']
+        assert request['params'].get('tenant') == 'test_tenant'
 
     def test_custom_auth_failure_scenario(self):
         """Example of testing a Custom Auth failure scenario."""
@@ -74,7 +74,7 @@ class TestCustomAuthExamples:
 
         # Set up the auth strategy manually
         auth_mock = create_custom_auth_mock(header_callback=failing_header_callback)
-        client.config.auth_strategy = auth_mock.get_auth_strategy()
+        client.set_auth_strategy(auth_mock.get_auth_strategy())
 
         # Configure a response (though it won't be reached)
         client.with_response_pattern(

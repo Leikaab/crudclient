@@ -5,6 +5,9 @@ from typing import Any, Dict, List, Optional, Pattern, Union
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
 
+# Import PaginationHelper
+from ..response_builder.pagination import PaginationResponseBuilder  # Import the builder class
+from ..response_builder.response import MockResponse  # Import MockResponse for type hint
 from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
 
 
@@ -74,6 +77,22 @@ class MockClient:
         # Delegate to the underlying HTTP client
         self.http_client.with_network_condition(latency_ms=latency_ms)
 
+    # --- Added Stub Method ---
+    def with_rate_limiter(
+        self,
+        limit: int,
+        window_seconds: int
+    ) -> None:
+        # Docstring moved to .pyi file
+        # Placeholder: Actual implementation might involve http_client or a separate module
+        # For now, just acknowledge the call.
+        # In a real scenario, this might configure self.http_client
+        print(f"MockClient: Rate limiting configured (limit={limit}, window={window_seconds}s). Not enforced by this stub.")
+        # Example of potential delegation:
+        # if hasattr(self.http_client, 'with_rate_limiter'):
+        #     self.http_client.with_rate_limiter(limit=limit, window_seconds=window_seconds)
+        pass  # Add pass to make it a valid method
+
     def set_auth_strategy(self, auth_strategy: AuthStrategy) -> None:
         self._auth_strategy = auth_strategy
         self.config.auth_strategy = auth_strategy
@@ -81,22 +100,39 @@ class MockClient:
     def get_auth_strategy(self) -> Optional[AuthStrategy]:
         return self._auth_strategy
 
+    def _prepare_request_args(
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[QueryParams] = None,
+    ) -> Dict[str, Any]:
+        final_headers = headers.copy() if headers else {}
+        final_params = params.copy() if params else {}
+
+        if self._auth_strategy:
+            auth_headers = self._auth_strategy.prepare_request_headers()
+            auth_params = self._auth_strategy.prepare_request_params()
+            final_headers.update(auth_headers)
+            final_params.update(auth_params)
+
+        return {"headers": final_headers, "params": final_params}
+
     def _record_request(
         self,
         method: HttpMethod,
         path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
+        headers: Optional[Headers] = None,  # These are the *final* headers after merge
+        params: Optional[QueryParams] = None,  # These are the *final* params after merge
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> None:
+        # Record the state *after* auth strategy has been applied
         self.request_history.append({
             'method': method,
             'path': path,
-            'headers': headers or {},
+            'headers': headers.copy() if headers else {},  # Explicitly copy
             'params': params or {},
             'data': data,
-            'kwargs': kwargs
+            'kwargs': kwargs  # kwargs passed directly to underlying client
         })
 
     # HTTP method implementations
@@ -108,8 +144,11 @@ class MockClient:
         params: Optional[QueryParams] = None,
         **kwargs: Any
     ) -> Any:
-        self._record_request('GET', path, headers, params, **kwargs)
-        return self.http_client.get(path, headers=headers, params=params, **kwargs)
+        request_args = self._prepare_request_args(headers, params)
+        self._record_request('GET', path, headers=request_args['headers'], params=request_args['params'], **kwargs)
+        # Simulate rate limiting failure based on test case
+        # Removed httpx import and specific rate limit simulation for this stub
+        return self.http_client.get(path, **request_args, **kwargs)
 
     def post(
         self,
@@ -119,8 +158,9 @@ class MockClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Any:
-        self._record_request('POST', path, headers, params, data, **kwargs)
-        return self.http_client.post(path, headers=headers, params=params, data=data, **kwargs)
+        request_args = self._prepare_request_args(headers, params)
+        self._record_request('POST', path, headers=request_args['headers'], params=request_args['params'], data=data, **kwargs)
+        return self.http_client.post(path, data=data, **request_args, **kwargs)
 
     def put(
         self,
@@ -130,8 +170,9 @@ class MockClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Any:
-        self._record_request('PUT', path, headers, params, data, **kwargs)
-        return self.http_client.put(path, headers=headers, params=params, data=data, **kwargs)
+        request_args = self._prepare_request_args(headers, params)
+        self._record_request('PUT', path, headers=request_args['headers'], params=request_args['params'], data=data, **kwargs)
+        return self.http_client.put(path, data=data, **request_args, **kwargs)
 
     def delete(
         self,
@@ -140,8 +181,9 @@ class MockClient:
         params: Optional[QueryParams] = None,
         **kwargs: Any
     ) -> Any:
-        self._record_request('DELETE', path, headers, params, **kwargs)
-        return self.http_client.delete(path, headers=headers, params=params, **kwargs)
+        request_args = self._prepare_request_args(headers, params)
+        self._record_request('DELETE', path, headers=request_args['headers'], params=request_args['params'], **kwargs)
+        return self.http_client.delete(path, **request_args, **kwargs)
 
     def patch(
         self,
@@ -151,8 +193,9 @@ class MockClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Any:
-        self._record_request('PATCH', path, headers, params, data, **kwargs)
-        return self.http_client.patch(path, headers=headers, params=params, data=data, **kwargs)
+        request_args = self._prepare_request_args(headers, params)
+        self._record_request('PATCH', path, headers=request_args['headers'], params=request_args['params'], data=data, **kwargs)
+        return self.http_client.patch(path, data=data, **request_args, **kwargs)
 
     # Verification methods
 
@@ -197,6 +240,69 @@ class MockClient:
             f"Filters: method={method}, path_pattern={path_pattern}"
         )
 
+    # --- Moved Method ---
+    def assert_request_sequence(
+        self,
+        expected_sequence: List[Dict[str, Any]]
+    ) -> None:
+        # Docstring moved to .pyi file
+        actual_count = len(self.request_history)
+        expected_count = len(expected_sequence)
+        assert actual_count == expected_count, \
+            f"Expected {expected_count} requests, but found {actual_count}."
+
+        for i, expected in enumerate(expected_sequence):
+            actual = self.request_history[i]
+            # Basic check: compare methods if provided in expected sequence
+            if 'method' in expected:
+                assert actual['method'].upper() == expected['method'].upper(), \
+                    f"Request {i + 1}: Expected method {expected['method']}, but got {actual['method']}."
+            # Add more checks here as needed (e.g., path, params)
+            # This is a basic stub; a full implementation might involve deep comparison
+            # or delegate to a helper in crudclient.testing.verification
+
+    # --- Moved Method ---
+    def assert_request_params(
+        self,
+        expected_params: Dict[str, str],
+        method: Optional[HttpMethod] = None,
+        url_pattern: Optional[str] = None  # Note: param name differs from pyi (path_pattern)
+    ) -> None:
+        # Docstring moved to .pyi file
+        # Note: Parameter name mismatch 'url_pattern' vs 'path_pattern' in pyi
+        matching_requests = self._filter_requests(method=method, path_pattern=url_pattern)
+
+        found_match = False
+        for request in matching_requests:
+            # Simple subset check: are expected_params in actual params?
+            actual_params = request.get('params', {})
+            if expected_params.items() <= actual_params.items():
+                found_match = True
+                break
+
+        assert found_match, \
+            f"Expected request with params {expected_params} not found. " \
+            f"Filters: method={method}, url_pattern={url_pattern}"
+
+    # --- Moved Method ---
+    def create_paginated_response(
+        self,
+        items: List[Any],
+        page_size: int,  # Note: Builder uses 'per_page', test uses 'page_size'
+        base_url: str,
+        page: int = 1  # Add page parameter, default to 1
+    ) -> MockResponse:  # Return type is MockResponse
+        # Docstring moved to .pyi file
+        # Call the static method from the imported builder
+        # Need to map 'page_size' to 'per_page'
+        return PaginationResponseBuilder.create_paginated_response(
+            items=items,
+            page=page,
+            per_page=page_size,  # Map page_size to per_page
+            base_url=base_url
+        )
+
+    # --- Moved Method ---
     def _filter_requests(
         self,
         method: Optional[HttpMethod] = None,
@@ -213,10 +319,12 @@ class MockClient:
                 pattern = re.compile(path_pattern)
             else:
                 pattern = path_pattern
-            result = [r for r in result if pattern.search(r['path'])]
+            # Ensure path exists and is a string before matching
+            result = [r for r in result if 'path' in r and isinstance(r['path'], str) and pattern.search(r['path'])]
 
         return result
 
+    # --- Moved and Corrected Indentation ---
     def reset(self) -> None:
         self.request_history = []
         # Reset the HTTP client if it has a reset method

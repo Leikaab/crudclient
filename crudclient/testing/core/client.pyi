@@ -207,6 +207,27 @@ class MockClient:
         """
         ...
 
+    def _prepare_request_args(
+        self,
+        headers: Optional[Headers] = None,
+        params: Optional[QueryParams] = None,
+    ) -> Dict[str, Any]:
+        """
+        Applies auth strategy headers/params and merges with explicit ones.
+
+        Internal helper to consolidate request arguments before recording
+        and sending the request.
+
+        Args:
+            headers: Explicitly provided headers for the request.
+            params: Explicitly provided query parameters for the request.
+
+        Returns:
+            A dictionary containing the final 'headers' and 'params' after
+            applying the authentication strategy.
+        """
+        ...
+
     def _record_request(
         self,
         method: HttpMethod,
