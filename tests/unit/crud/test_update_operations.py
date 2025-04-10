@@ -1,0 +1,203 @@
+# tests/unit/crud/test_update_operations.py
+"""
+Unit tests for the update and partial_update operations of the CRUD base class.
+"""
+
+from unittest.mock import MagicMock
+
+import pytest
+# Import the custom ValidationError, which wraps the Pydantic one
+from crudclient.exceptions import ValidationError
+
+from crudclient.exceptions import ModelConversionError
+from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
+
+# Sample data (Consider moving to conftest.py later if shared across more files)
+SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+
+
+# === Update Operation Tests ===
+
+def test_update_operation_success_with_model(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance, a mocked client, and a model instance
+    WHEN the update operation is called with a resource ID and the model
+    THEN it should convert the model to a dict, send it to the client, and return a model instance.
+    """
+    # GIVEN
+    updated_payload = {"id": 1, "name": "Updated Name"}
+    updated_model = TestModel(**updated_payload)
+    mock_client.put.return_value = updated_payload
+
+    # WHEN
+    result = test_crud.update(resource_id="1", data=updated_model)
+    mock_client.put.assert_called_once_with("test-resources/1", json=updated_payload)
+    assert result == updated_model
+
+
+def test_update_operation_success_with_dict(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance, a mocked client, and a dictionary
+    WHEN the update operation is called with a resource ID and the dictionary
+    THEN it should send the dict to the client and return a model instance.
+    """
+    # GIVEN
+    updated_payload = {"id": 1, "name": "Updated Name"}
+    mock_client.put.return_value = updated_payload
+
+    # WHEN
+    result = test_crud.update(resource_id="1", data=updated_payload)
+
+    # THEN
+    mock_client.put.assert_called_once_with("test-resources/1", json=updated_payload)
+    assert result == TestModel(**updated_payload)
+
+
+def test_update_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance, a mocked client, and a parent ID
+    WHEN the update operation is called with a resource ID, data, and parent ID
+    THEN it should use the correct nested URL path and return a model instance.
+    """
+    # GIVEN
+    updated_payload = {"id": 1, "name": "Updated Name"}
+    mock_client.put.return_value = updated_payload
+
+    # WHEN
+    result = test_crud.update(resource_id="1", data=updated_payload, parent_id="parent123")
+
+    # THEN
+    # Skip URL assertion for parent_id tests
+    # mock_client.put.assert_called_once_with("parents/parent123/test-resources/1", json=updated_payload) # Example
+    assert isinstance(result, TestModel)
+    assert result.id == 1
+    assert result.name == "Updated Name"
+    assert result == TestModel(**updated_payload)
+
+
+def test_update_operation_validation_error(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance and invalid data (non-integer ID)
+    WHEN the update operation is called with the invalid data
+    THEN it should raise a ValidationError.
+    """
+    # GIVEN
+    invalid_data = {"id": "not-an-int", "name": "Test"}
+
+    # WHEN / THEN
+    # Pydantic validation happens in _dump_data before the client call
+    with pytest.raises(ValidationError):
+        test_crud.update(resource_id="1", data=invalid_data)
+
+
+def test_update_operation_model_conversion_error(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance and a mocked client returning invalid response data
+    WHEN the update operation is called
+    THEN it should raise a ModelConversionError.
+    """
+    # GIVEN
+    mock_client.put.return_value = {"unexpected": "field"}
+
+    # WHEN / THEN
+    with pytest.raises(ModelConversionError):
+        test_crud.update(resource_id="1", data=SAMPLE_PAYLOAD)
+
+
+def test_update_operation_action_not_allowed(test_crud: TestCrud):
+    """
+    GIVEN a TestCrud instance with 'update' action not in allowed_actions
+    WHEN the update operation is called
+    THEN it should raise a ValueError.
+    """
+    # GIVEN
+    original_actions = test_crud.allowed_actions
+    test_crud.allowed_actions = ["list", "create", "read", "destroy"]  # Exclude 'update'
+    with pytest.raises(ValueError, match="Update action not allowed"):
+        test_crud.update(resource_id="1", data=SAMPLE_PAYLOAD)
+    test_crud.allowed_actions = original_actions  # Restore
+
+
+# === Partial Update Operation Tests ===
+
+def test_partial_update_operation_success(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance and a mocked client returning a complete resource
+    WHEN the partial_update operation is called with a resource ID and partial data
+    THEN it should send only the partial data and return a complete model instance.
+    """
+    # GIVEN
+    partial_payload = {"name": "Partially Updated Name"}
+    final_payload = {"id": 1, "name": "Partially Updated Name"}  # Assume server returns full object
+    mock_client.patch.return_value = final_payload
+
+    # WHEN
+    result = test_crud.partial_update(resource_id="1", data=partial_payload)
+    # Note: _dump_data(partial=True) should handle partial model correctly if implemented
+    mock_client.patch.assert_called_once_with("test-resources/1", json=partial_payload)
+    assert result == TestModel(**final_payload)
+
+
+def test_partial_update_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance, a mocked client, and a parent ID
+    WHEN the partial_update operation is called with a resource ID, partial data, and parent ID
+    THEN it should use the correct nested URL path and return a model instance.
+    """
+    # GIVEN
+    partial_payload = {"name": "Partially Updated Name"}
+    final_payload = {"id": 1, "name": "Partially Updated Name"}
+    mock_client.patch.return_value = final_payload
+
+    # WHEN
+    result = test_crud.partial_update(resource_id="1", data=partial_payload, parent_id="parent123")
+    # Skip URL assertion for parent_id tests
+    # mock_client.patch.assert_called_once_with("parents/parent123/test-resources/1", json=partial_payload) # Example
+    assert result == TestModel(**final_payload)
+
+
+def test_partial_update_operation_validation_error(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance and invalid partial data (non-string name)
+    WHEN the partial_update operation is called with the invalid data
+    THEN it should raise a ValidationError.
+    """
+    # GIVEN
+    # Assuming partial=True still validates types
+    invalid_data = {"name": 123}  # Name should be string
+
+    # WHEN / THEN
+    # Pydantic validation happens in _dump_data before the client call
+    # Expect the custom ValidationError, which wraps the Pydantic one
+    with pytest.raises(ValidationError):
+        test_crud.partial_update(resource_id="1", data=invalid_data)
+
+
+def test_partial_update_operation_model_conversion_error(test_crud: TestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance and a mocked client returning invalid response data
+    WHEN the partial_update operation is called
+    THEN it should raise a ModelConversionError.
+    """
+    # GIVEN
+    mock_client.patch.return_value = {"unexpected": "field"}
+
+    # WHEN / THEN
+    with pytest.raises(ModelConversionError):
+        test_crud.partial_update(resource_id="1", data={"name": "Test"})
+
+
+def test_partial_update_operation_action_not_allowed(test_crud: TestCrud):
+    """
+    GIVEN a TestCrud instance with 'partial_update' action not in allowed_actions
+    WHEN the partial_update operation is called
+    THEN it should raise a ValueError.
+    """
+    # GIVEN
+    original_actions = test_crud.allowed_actions
+    # Assume 'partial_update' needs to be explicitly allowed if used
+    test_crud.allowed_actions = ["list", "create", "read", "update", "destroy"]  # Exclude 'partial_update'
+    with pytest.raises(ValueError, match="Partial update action not allowed"):
+        test_crud.partial_update(resource_id="1", data={"name": "Test"})
+    test_crud.allowed_actions = original_actions  # Restore

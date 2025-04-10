@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 import requests
+from pydantic import ValidationError as PydanticValidationError
 
 
 class APIError(Exception):
@@ -49,16 +50,20 @@ class ValidationError(CrudClientError):
         message: str,
         data: Any,
         response: Optional[requests.Response] = None,
-        errors: Optional[Dict[str, Any]] = None
+        errors: Optional[Dict[str, Any]] = None,
+        pydantic_error: Optional[PydanticValidationError] = None  # Added parameter
     ):
         self.data = data
         self.errors = errors or {}
+        self.pydantic_error = pydantic_error  # Store the Pydantic error
         super().__init__(message, response)
 
     def __repr__(self):
+        # Include pydantic_error in repr if it exists
+        pydantic_repr = f", pydantic_error={self.pydantic_error!r}" if self.pydantic_error else ""
         return (
             f"{self.__class__.__name__}(message={self.message!r}, "
-            f"response={self.response!r}, data={self.data!r}, errors={self.errors!r})"
+            f"response={self.response!r}, data={self.data!r}, errors={self.errors!r}{pydantic_repr})"
         )
 
 

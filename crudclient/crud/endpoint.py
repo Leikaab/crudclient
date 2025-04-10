@@ -74,10 +74,12 @@ def _get_endpoint(self, *args: Optional[Union[str, int]], parent_args: Optional[
     if parent_path:
         all_segments.append(parent_path)
 
-    # Add prefix segments before resource segments
-    if prefix_segments:
+    # Only add prefix segments if there's no parent path being used
+    # (Prefix is usually for static parts like /api/v1, not dynamic parent types)
+    elif prefix_segments:
         all_segments.append(self._join_path_segments(prefix_segments))
 
+    # Add the main resource segments
     all_segments.append(self._join_path_segments(resource_segments))
 
     # Join with slashes and ensure no double slashes

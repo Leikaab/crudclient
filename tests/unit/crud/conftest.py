@@ -23,6 +23,13 @@ class TestCrud(Crud[TestModel]):
     _resource_path = "test-resources"
     _datamodel = TestModel
 
+# Define a dummy Parent Crud class for nesting tests
+
+
+class ParentCrud(Crud[BaseModel]):  # Using BaseModel as a placeholder
+    _resource_path = "parents"
+    # No specific datamodel needed if only testing path generation
+
 
 @pytest.fixture
 def mock_client():
@@ -60,3 +67,16 @@ def simple_mock_client():
 def test_crud_with_simple_mock(simple_mock_client):
     """Return a TestCrud instance with a SimpleMockClient."""
     return TestCrud(simple_mock_client)
+
+
+@pytest.fixture
+def parent_crud(mock_client):
+    """Fixture for a parent CRUD resource instance."""
+    return ParentCrud(mock_client)
+
+
+@pytest.fixture
+def nested_test_crud(mock_client, parent_crud):
+    """Fixture for a TestCrud instance nested under ParentCrud."""
+    # Instantiate TestCrud with parent_crud as the parent
+    return TestCrud(mock_client, parent=parent_crud)

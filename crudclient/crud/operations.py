@@ -143,17 +143,31 @@ def custom_action_operation(
     if parent_id is not None and not isinstance(parent_id, str):
         raise TypeError(f"Parent ID must be a string or None, got {type(parent_id).__name__}")
 
-    endpoint = self._get_endpoint(parent_id, resource_id, action)
+    # Build endpoint arguments: only include non-None resource_id and action
+    endpoint_args = [arg for arg in [resource_id, action] if arg is not None]
+    endpoint = self._get_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
 
     kwargs = {}
     if params:
         kwargs["params"] = params
 
     try:
-        # Validate and convert input data if provided
-        if data:
-            converted_data: JSONDict = self._dump_data(data)
-            kwargs["json"] = converted_data
+        # Handle data payload for methods that use a request body
+        if method.lower() in ["post", "put", "patch"]:
+            if data is not None:
+                # If data is a model instance, dump it (assuming it has model_dump)
+                # Custom actions might use different models, so don't validate against self._datamodel here.
+                if hasattr(data, "model_dump") and callable(data.model_dump):  # type: ignore[attr-defined]
+                    kwargs["json"] = data.model_dump()  # type: ignore[attr-defined]
+                elif isinstance(data, dict):
+                    # Pass dictionaries directly for custom actions
+                    kwargs["json"] = data
+                else:
+                    # Raise error for unsupported data types
+                    raise TypeError(f"Unsupported data type for custom action payload: {type(data).__name__}")
+            else:
+                # Explicitly set json=None if no data is provided
+                kwargs["json"] = None
 
         # Make the API request
         response = getattr(self.client, method.lower())(endpoint, **kwargs)
