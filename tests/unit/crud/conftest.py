@@ -30,11 +30,6 @@ def mock_client():
     client = MagicMock(spec=Client)
 
     # Store original method references
-    original_get = client.get
-    original_post = client.post
-    original_put = client.put
-    original_patch = client.patch
-    original_delete = client.delete
 
     # Create a new mock client
     client = MagicMock(spec=Client)

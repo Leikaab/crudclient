@@ -65,7 +65,7 @@ class PartialResponseHelper:
 
             # Include fields but exclude some
             helper.get_partial_response(
-                fields=["user.*"], 
+                fields=["user.*"],
                 exclude_fields=["user.password"]
             )
 

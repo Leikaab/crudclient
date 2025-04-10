@@ -110,7 +110,7 @@ class ErrorResponseBuilder:
         headers based on the specified error type.
 
         Args:
-            error_type: Type of authentication error (e.g., "invalid_token", 
+            error_type: Type of authentication error (e.g., "invalid_token",
                        "expired_token", "insufficient_scope")
             status_code: HTTP status code (defaults to 401 Unauthorized)
 

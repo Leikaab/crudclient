@@ -84,7 +84,7 @@ class CreateMock(BaseCrudMock):
 
     def with_auto_increment_id(self, id_field: str = "id") -> 'CreateMock':
         # Override the post method to handle auto-increment IDs
-        original_post = self.post
+        _original_post = self.post
 
         def post_with_auto_increment(url: str, **kwargs: Any) -> Any:
             json_data = kwargs.get('json', {})

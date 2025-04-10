@@ -127,7 +127,7 @@ class AuthTokenVerification:
                 for scope in required_scopes:
                     if scope not in token_scopes:
                         raise AssertionError(f"Token missing required scope: {scope}")
-        except ValueError as e:
+        except ValueError:
             # Not a JWT token, could be an opaque token
             # In a real implementation, you would validate against the token introspection endpoint
             pass

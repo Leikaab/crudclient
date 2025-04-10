@@ -98,7 +98,7 @@ class EntityRelationshipBuilder:
         Args:
             entity_type: The type of entity being operated on (used in error messages)
             base_entities: The initial set of entities to use as the data source
-            operations: List of operations to include in the sequence ("list", "get", 
+            operations: List of operations to include in the sequence ("list", "get",
                        "create", "update", "delete")
             id_field: The field name used as the identifier in the entities
 
