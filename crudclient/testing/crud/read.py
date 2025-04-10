@@ -1,39 +1,21 @@
-"""
-Mock implementation for Read operations.
-
-This module provides a specialized mock for Read operations with support for
-filtering, sorting, field selection, and pagination.
-"""
-
 import copy
 import json
 import re
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from crudclient.exceptions import NotFoundError
 from crudclient.testing.response_builder.response import MockResponse
 
 from .base import BaseCrudMock
-from .request_record import RequestRecord
+
+if TYPE_CHECKING:
+    from .request_record import RequestRecord
 
 
 class ReadMock(BaseCrudMock):
-    """
-    Mock for Read operations.
-
-    Features:
-    - Support for filtering by field values
-    - Support for sorting by fields
-    - Support for field selection (partial responses)
-    - Pagination support
-    """
+    _parent_id_handling: bool  # Declare type for parent_id_handling
+    request_history: List['RequestRecord']  # Declare type for request_history
 
     def __init__(self):
-        """
-        Initialize the Read mock.
-
-        Sets up default response and storage for resources that can be queried.
-        """
         super().__init__()
         self.default_response = MockResponse(
             status_code=200,
@@ -42,16 +24,6 @@ class ReadMock(BaseCrudMock):
         self._stored_resources = []  # List of resources that can be queried
 
     def get(self, url: str, **kwargs: Any) -> Any:
-        """
-        Handle GET requests.
-
-        Args:
-            url: Request URL
-            **kwargs: Request parameters (params, data, json, headers, parent_id)
-
-        Returns:
-            Response data (dict, list, or string)
-        """
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop('parent_id', None)
         if parent_id and self._parent_id_handling:
@@ -85,13 +57,13 @@ class ReadMock(BaseCrudMock):
             # Ensure response_obj is a MockResponse
             if not isinstance(response_obj, MockResponse):
                 if isinstance(response_obj, dict):
-                    response_obj = MockResponse(json_data=response_obj)
+                    response_obj = MockResponse(status_code=200, json_data=response_obj)
                 elif isinstance(response_obj, list):
-                    response_obj = MockResponse(text=json.dumps(response_obj))
+                    response_obj = MockResponse(status_code=200, text=json.dumps(response_obj))
                 elif isinstance(response_obj, str):
-                    response_obj = MockResponse(text=response_obj)
+                    response_obj = MockResponse(status_code=200, text=response_obj)
                 else:
-                    response_obj = MockResponse(text=str(response_obj))
+                    response_obj = MockResponse(status_code=200, text=str(response_obj))
 
             record.response = response_obj
 
@@ -113,17 +85,6 @@ class ReadMock(BaseCrudMock):
         resource_data: Dict[str, Any],
         **kwargs: Any
     ) -> 'ReadMock':
-        """
-        Configure a single resource response.
-
-        Args:
-            url_pattern: URL pattern to match
-            resource_data: Resource data to return
-            **kwargs: Additional criteria for matching requests
-
-        Returns:
-            Self for method chaining
-        """
         self.with_response(
             url_pattern=url_pattern,
             response=MockResponse(
@@ -140,17 +101,6 @@ class ReadMock(BaseCrudMock):
         resources: List[Dict[str, Any]],
         **kwargs: Any
     ) -> 'ReadMock':
-        """
-        Configure a resource list response.
-
-        Args:
-            url_pattern: URL pattern to match
-            resources: List of resource data to return
-            **kwargs: Additional criteria for matching requests
-
-        Returns:
-            Self for method chaining
-        """
         self.with_response(
             url_pattern=url_pattern,
             response=MockResponse(
@@ -162,18 +112,6 @@ class ReadMock(BaseCrudMock):
         return self
 
     def with_stored_resources(self, resources: List[Dict[str, Any]]) -> 'ReadMock':
-        """
-        Configure the mock with a list of resources that can be queried.
-
-        This method sets up the mock to handle GET requests with filtering,
-        sorting, and field selection based on the provided resources.
-
-        Args:
-            resources: List of resource dictionaries
-
-        Returns:
-            Self for method chaining
-        """
         self._stored_resources = copy.deepcopy(resources)
 
         # Create a function to handle GET requests with filtering, sorting, and field selection
@@ -194,8 +132,8 @@ class ReadMock(BaseCrudMock):
                 # Resource not found
                 return MockResponse(
                     status_code=404,
-                    json_data={"error": "Resource not found"},
-                    error=NotFoundError("Resource not found")
+                    json_data={"error": "Resource not found"}
+                    # Removed invalid 'error' argument
                 )
 
             # This is a list request, apply filtering, sorting, and pagination
@@ -240,16 +178,6 @@ class ReadMock(BaseCrudMock):
         return self
 
     def with_field_selection(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
-        """
-        Configure the mock to support field selection via the 'fields' parameter.
-
-        Args:
-            url_pattern: URL pattern to match
-            **kwargs: Additional parameters for the response pattern
-
-        Returns:
-            Self for method chaining
-        """
         def field_selection_response(**request_kwargs):
             # Get the requested fields
             params = request_kwargs.get('params', {})
@@ -278,16 +206,6 @@ class ReadMock(BaseCrudMock):
         return self
 
     def with_filtering(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
-        """
-        Configure the mock to support filtering by field values.
-
-        Args:
-            url_pattern: URL pattern to match
-            **kwargs: Additional parameters for the response pattern
-
-        Returns:
-            Self for method chaining
-        """
         def filtering_response(**request_kwargs):
             # Get the filter parameters
             params = request_kwargs.get('params', {})
@@ -321,16 +239,6 @@ class ReadMock(BaseCrudMock):
         return self
 
     def with_sorting(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
-        """
-        Configure the mock to support sorting by fields.
-
-        Args:
-            url_pattern: URL pattern to match
-            **kwargs: Additional parameters for the response pattern
-
-        Returns:
-            Self for method chaining
-        """
         def sorting_response(**request_kwargs):
             # Get the sort parameter
             params = request_kwargs.get('params', {})
@@ -363,16 +271,6 @@ class ReadMock(BaseCrudMock):
         return self
 
     def with_pagination(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
-        """
-        Configure the mock to support pagination via page and limit parameters.
-
-        Args:
-            url_pattern: URL pattern to match
-            **kwargs: Additional parameters for the response pattern
-
-        Returns:
-            Self for method chaining
-        """
         def pagination_response(**request_kwargs):
             # Get the pagination parameters
             params = request_kwargs.get('params', {})

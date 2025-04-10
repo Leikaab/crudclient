@@ -1,37 +1,20 @@
-"""
-Basic authentication mock for testing.
-
-This module provides a mock for Basic Authentication strategy with support
-for username/password validation and various authentication scenarios.
-"""
 
 import base64
 import re
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, Tuple  # Added Tuple, TYPE_CHECKING
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.basic import BasicAuth
 
 from .base import AuthMockBase
 
+if TYPE_CHECKING:  # Added TYPE_CHECKING block
+    from ..response_builder import MockResponse
+
 
 class BasicAuthMock(AuthMockBase):
-    """
-    Mock for Basic Authentication strategy with enhanced validation capabilities.
-
-    This class provides a configurable mock implementation of the Basic Authentication
-    strategy, with support for username/password validation, pattern matching,
-    case sensitivity options, and attempt limiting.
-    """
 
     def __init__(self, username: str = "user", password: str = "pass"):
-        """
-        Initialize a Basic Authentication mock.
-
-        Args:
-            username: The default username
-            password: The default password
-        """
         super().__init__()
         self.username = username
         self.password = password
@@ -46,16 +29,6 @@ class BasicAuthMock(AuthMockBase):
         self.current_attempts = 0
 
     def with_credentials(self, username: str, password: str) -> 'BasicAuthMock':
-        """
-        Set the credentials for the Basic Auth mock.
-
-        Args:
-            username: The username to use
-            password: The password to use
-
-        Returns:
-            Self for method chaining
-        """
         self.username = username
         self.password = password
         self.auth_strategy = BasicAuth(username=username, password=password)
@@ -63,31 +36,10 @@ class BasicAuthMock(AuthMockBase):
         return self
 
     def with_additional_valid_credentials(self, username: str, password: str) -> 'BasicAuthMock':
-        """
-        Add additional valid credentials for the Basic Auth mock.
-
-        This allows the mock to accept multiple sets of valid credentials.
-
-        Args:
-            username: An additional valid username
-            password: The corresponding password
-
-        Returns:
-            Self for method chaining
-        """
         self.valid_credentials.append((username, password))
         return self
 
     def with_username_pattern(self, pattern: str) -> 'BasicAuthMock':
-        """
-        Set a regex pattern that valid usernames must match.
-
-        Args:
-            pattern: Regular expression pattern for username validation
-
-        Returns:
-            Self for method chaining
-        """
         self.username_pattern = re.compile(pattern)
         return self
 
@@ -96,54 +48,20 @@ class BasicAuthMock(AuthMockBase):
         min_length: Optional[int] = None,
         complexity: bool = False
     ) -> 'BasicAuthMock':
-        """
-        Set password requirements for validation.
-
-        Args:
-            min_length: Minimum password length (None for no minimum)
-            complexity: Whether to enforce password complexity rules
-
-        Returns:
-            Self for method chaining
-        """
         self.password_min_length = min_length
         self.password_complexity = complexity
         return self
 
     def with_case_insensitive_username(self) -> 'BasicAuthMock':
-        """
-        Configure the mock to validate usernames in a case-insensitive manner.
-
-        Returns:
-            Self for method chaining
-        """
         self.case_sensitive = False
         return self
 
     def with_max_attempts(self, max_attempts: int) -> 'BasicAuthMock':
-        """
-        Set the maximum number of authentication attempts before failing.
-
-        Args:
-            max_attempts: Maximum number of allowed authentication attempts
-
-        Returns:
-            Self for method chaining
-        """
         self.max_attempts = max_attempts
         self.current_attempts = 0
         return self
 
     def verify_auth_header(self, header_value: str) -> bool:
-        """
-        Verify that the Basic Auth header has the correct format and credentials.
-
-        Args:
-            header_value: The value of the Authorization header
-
-        Returns:
-            True if the header is valid, False otherwise
-        """
         if not header_value.startswith("Basic "):
             return False
 
@@ -159,16 +77,6 @@ class BasicAuthMock(AuthMockBase):
             return False
 
     def validate_credentials(self, username: str, password: str) -> bool:
-        """
-        Validate the provided username and password against configured rules.
-
-        Args:
-            username: The username to validate
-            password: The password to validate
-
-        Returns:
-            True if the credentials are valid, False otherwise
-        """
         # Track authentication attempts if max_attempts is set
         if self.max_attempts is not None:
             self.current_attempts += 1
@@ -205,21 +113,21 @@ class BasicAuthMock(AuthMockBase):
 
         return False
 
-    def get_auth_strategy(self) -> AuthStrategy:
-        """
-        Get the configured auth strategy.
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        if not self.username or self.password is None:
+            # Should ideally not happen due to __init__ defaults
+            return None
+        credentials = f"{self.username}:{self.password}"
+        encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        return ("Authorization", f"Basic {encoded_credentials}")
 
-        Returns:
-            The configured BasicAuth strategy
-        """
+    def handle_auth_error(self, response: 'MockResponse') -> bool:
+        # Basic auth typically fails outright, no refresh mechanism
+        return False
+
+    def get_auth_strategy(self) -> AuthStrategy:
         return self.auth_strategy
 
     def reset_attempts(self) -> 'BasicAuthMock':
-        """
-        Reset the authentication attempt counter.
-
-        Returns:
-            Self for method chaining
-        """
         self.current_attempts = 0
         return self

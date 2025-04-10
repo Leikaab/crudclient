@@ -137,6 +137,37 @@ class BaseCrudMock:
         """
         ...
 
+    def _filter_requests(
+        self, url_pattern: Optional[str] = None, method: Optional[str] = None
+    ) -> List[Any]:
+        """
+        Filter the request history based on URL pattern and method.
+
+        Args:
+            url_pattern: Optional URL pattern to filter requests.
+            method: Optional HTTP method to filter requests.
+
+        Returns:
+            A list of matching request objects.
+        """
+        ...
+
+    def _ensure_mock_response(
+        self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]
+    ) -> MockResponse:
+        """
+        Ensure the response is a MockResponse object.
+
+        Converts dict, list, or string inputs into a MockResponse.
+
+        Args:
+            response: The input response (MockResponse, dict, list, or str).
+
+        Returns:
+            A MockResponse object.
+        """
+        ...
+
     def assert_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
         """
         Assert that a specific number of matching requests were made.

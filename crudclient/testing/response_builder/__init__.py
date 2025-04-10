@@ -1,19 +1,8 @@
-"""
-Response builder module for creating mock responses.
-
-This module provides utilities for building mock responses for testing purposes.
-"""
 
 from .response import MockResponse
 
 
 class ResponseBuilder:
-    """
-    Utility class for building mock responses.
-
-    This class provides static methods for creating common types of mock responses
-    such as validation errors, rate limit errors, and authentication errors.
-    """
 
     @staticmethod
     def create_validation_error(
@@ -22,18 +11,6 @@ class ResponseBuilder:
         error_code="VALIDATION_ERROR",
         message="Validation failed"
     ):
-        """
-        Create a validation error response.
-
-        Args:
-            fields: Dictionary of field names to error messages
-            status_code: HTTP status code to return
-            error_code: Error code to include in the response
-            message: Error message to include in the response
-
-        Returns:
-            A MockResponse configured as a validation error
-        """
         if fields is None:
             fields = {"field": "Invalid value"}
 
@@ -58,18 +35,6 @@ class ResponseBuilder:
         reset_seconds=60,
         status_code=429
     ):
-        """
-        Create a rate limit error response.
-
-        Args:
-            limit: Rate limit maximum requests
-            remaining: Remaining requests allowed
-            reset_seconds: Seconds until rate limit resets
-            status_code: HTTP status code to return
-
-        Returns:
-            A MockResponse configured as a rate limit error
-        """
         data = {
             "error": {
                 "code": "RATE_LIMIT_EXCEEDED",
@@ -95,16 +60,6 @@ class ResponseBuilder:
         error_type="invalid_token",
         status_code=401
     ):
-        """
-        Create an authentication error response.
-
-        Args:
-            error_type: Type of authentication error
-            status_code: HTTP status code to return
-
-        Returns:
-            A MockResponse configured as an authentication error
-        """
         error_messages = {
             "invalid_token": "The access token is invalid or has expired",
             "invalid_credentials": "Invalid username or password",

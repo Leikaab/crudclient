@@ -23,9 +23,9 @@ class SimpleMockClientCore:
     ) -> 'SimpleMockClientCore':
         # Convert dict/string responses to MockResponse
         if isinstance(response, dict):
-            response = MockResponse(json_data=response)
+            response = MockResponse(status_code=200, json_data=response)
         elif isinstance(response, str):
-            response = MockResponse(text=response)
+            response = MockResponse(status_code=200, text=response)
 
         self.response_patterns.append({
             'method': method.upper(),
@@ -45,9 +45,9 @@ class SimpleMockClientCore:
         response: Union[MockResponse, Dict[str, Any], str]
     ) -> 'SimpleMockClientCore':
         if isinstance(response, dict):
-            self.default_response = MockResponse(json_data=response)
+            self.default_response = MockResponse(status_code=200, json_data=response)
         elif isinstance(response, str):
-            self.default_response = MockResponse(text=response)
+            self.default_response = MockResponse(status_code=200, text=response)
         else:
             self.default_response = response
         return self

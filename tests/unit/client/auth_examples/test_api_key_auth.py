@@ -5,7 +5,9 @@ This module demonstrates how to use the API Key Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import AuthenticationError, create_mock_client, pytest
+import pytest
+
+from .common import AuthenticationError, create_mock_client
 
 
 class TestApiKeyAuthExamples:
@@ -40,8 +42,8 @@ class TestApiKeyAuthExamples:
         # Verify the auth header was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "X-API-Key" in request.headers
-        assert request.headers["X-API-Key"] == "valid_api_key"
+        assert "X-API-Key" in request['headers']
+        assert request['headers']["X-API-Key"] == "valid_api_key"
 
     def test_api_key_param_auth_success_scenario(self):
         """Example of testing a successful API Key param auth scenario."""
@@ -72,7 +74,8 @@ class TestApiKeyAuthExamples:
         # Verify the auth param was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "api_key=valid_api_key" in request.url
+        # Assuming 'path' contains the full URL or path with params
+        assert "api_key=valid_api_key" in request['path']
 
     def test_api_key_auth_failure_scenario(self):
         """Example of testing an API Key auth failure scenario."""

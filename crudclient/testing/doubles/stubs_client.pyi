@@ -1,0 +1,259 @@
+import json
+from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union, overload
+
+from crudclient.client import Client
+from crudclient.config import ClientConfig
+
+from .stubs import StubResponse
+
+
+class StubClient(Client):
+    """
+    A stub implementation of the Client for testing purposes.
+
+    This client allows configuring responses based on request patterns (method and URL)
+    and simulates network conditions like latency and errors. It also records
+    request history for verification.
+    """
+
+    _default_response: Union[Dict[str, Any], List[Dict[str, Any]], str]
+    _response_map: Dict[str, Any]
+    _error_rate: float
+    _latency_ms: int
+    _request_history: List[Dict[str, Any]]
+
+    def configure_get(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
+        """
+        Configure the response or handler for GET requests matching a pattern.
+
+        Args:
+            response: The static response to return for matching GET requests.
+            handler: A callable function to generate the response dynamically.
+                     The handler should accept (endpoint, params) arguments.
+        """
+        ...
+
+    def configure_post(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
+        """
+        Configure the response or handler for POST requests matching a pattern.
+
+        Args:
+            response: The static response to return for matching POST requests.
+            handler: A callable function to generate the response dynamically.
+                     The handler should accept (endpoint, data, json, params) arguments.
+        """
+        ...
+
+    def __init__(
+        self,
+        config: Union[ClientConfig, Dict[str, Any]],
+        default_response: Optional[Union[Dict[str, Any], List[Dict[str, Any]], str]] = None,
+        response_map: Optional[Dict[str, Any]] = None,
+        error_rate: float = 0.0,
+        latency_ms: int = 0
+    ) -> None:
+        """
+        Initialize the StubClient.
+
+        Args:
+            config: Client configuration (ClientConfig object or dictionary).
+            default_response: The response to return if no pattern matches.
+                              Defaults to {"message": "Stub response"}.
+            response_map: A dictionary mapping regex patterns to responses or handlers.
+                          Patterns starting with '^METHOD:' (e.g., '^GET:') are method-specific.
+                          Other patterns match against the full URL.
+            error_rate: The probability (0.0 to 1.0) of simulating a connection error.
+            latency_ms: The simulated network latency in milliseconds.
+        """
+        ...
+
+    @overload
+    def _request(
+        self,
+        method: str,
+        endpoint: Optional[str] = None,
+        url: Optional[str] = None,
+        handle_response: Literal[True] = True,
+        **kwargs: Any
+    ) -> str: ...  # Stub always returns str, even if base might return other types
+
+    @overload
+    def _request(
+        self,
+        method: str,
+        endpoint: Optional[str] = None,
+        url: Optional[str] = None,
+        handle_response: Literal[False] = ...,
+        **kwargs: Any
+    ) -> str: ...  # Stub always returns str, even if base might return Response obj
+
+    def _request(
+        self,
+        method: str,
+        endpoint: Optional[str] = None,
+        url: Optional[str] = None,
+        handle_response: bool = True,
+        **kwargs: Any
+    ) -> str:
+        """
+        Internal method to handle requests, find responses, and simulate conditions.
+
+        Args:
+            method: The HTTP method (e.g., 'GET', 'POST').
+            endpoint: The API endpoint path.
+            url: The full URL (overrides endpoint if provided).
+            handle_response: If True, raise exceptions for simulated errors or bad status codes.
+                             (Note: Stub implementation might simplify behavior compared to base).
+            **kwargs: Additional request parameters (params, data, json, etc.).
+
+        Returns:
+            The response body as a string (usually JSON). The stub implementation
+            always returns a string, regardless of `handle_response`.
+
+        Raises:
+            requests.ConnectionError: If error simulation is triggered.
+            requests.HTTPError: If a StubResponse with a >= 400 status code is returned
+                                and handle_response is True.
+        """
+        ...
+
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Simulate a GET request.
+
+        Args:
+            endpoint: The API endpoint path.
+            params: Optional query parameters.
+
+        Returns:
+            The parsed JSON response or the raw response string if not valid JSON.
+        """
+        ...
+
+    def post(
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """
+        Simulate a POST request.
+
+        Args:
+            endpoint: The API endpoint path.
+            data: Optional form data.
+            json: Optional JSON payload.
+            files: Optional files to upload.
+
+        Returns:
+            The parsed JSON response or the raw response string if not valid JSON.
+        """
+        ...
+
+    def put(
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """
+        Simulate a PUT request.
+
+        Args:
+            endpoint: The API endpoint path.
+            data: Optional form data.
+            json: Optional JSON payload.
+            files: Optional files to upload.
+
+        Returns:
+            The parsed JSON response or the raw response string if not valid JSON.
+        """
+        ...
+
+    def delete(self, endpoint: str, **kwargs: Any) -> Any:
+        """
+        Simulate a DELETE request.
+
+        Args:
+            endpoint: The API endpoint path.
+            **kwargs: Additional request parameters.
+
+        Returns:
+            The parsed JSON response or the raw response string if not valid JSON.
+        """
+        ...
+
+    def patch(
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """
+        Simulate a PATCH request.
+
+        Args:
+            endpoint: The API endpoint path.
+            data: Optional form data.
+            json: Optional JSON payload.
+            files: Optional files to upload.
+
+        Returns:
+            The parsed JSON response or the raw response string if not valid JSON.
+        """
+        ...
+
+    def get_request_history(self) -> List[Dict[str, Any]]:
+        """
+        Retrieve the history of requests made to this client.
+
+        Returns:
+            A list of dictionaries, each representing a request with details like
+            method, url, endpoint, kwargs, and timestamp.
+        """
+        ...
+
+    def clear_request_history(self) -> None:
+        """Clear the recorded request history."""
+        ...
+
+    def add_response(self, pattern: str, response: Any) -> None:
+        """
+        Add or update a response mapping.
+
+        Args:
+            pattern: The regex pattern to match against the URL or '^METHOD:...' pattern.
+            response: The response object, dictionary, list, string, or callable handler.
+        """
+        ...
+
+    def set_default_response(self, response: Any) -> None:
+        """
+        Set the default response to return when no pattern matches.
+
+        Args:
+            response: The default response object, dictionary, list, string, or callable handler.
+        """
+        ...
+
+    def set_error_rate(self, error_rate: float) -> None:
+        """
+        Set the simulated connection error rate.
+
+        Args:
+            error_rate: The probability (0.0 to 1.0) of simulating an error.
+        """
+        ...
+
+    def set_latency(self, latency_ms: int) -> None:
+        """
+        Set the simulated network latency.
+
+        Args:
+            latency_ms: The latency in milliseconds.
+        """
+        ...

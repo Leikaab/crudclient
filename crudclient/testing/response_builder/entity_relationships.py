@@ -1,11 +1,3 @@
-"""
-Entity relationship simulation for mock responses.
-
-This module provides utilities for simulating consistent entity relationships
-in mock API responses. It allows for creating realistic data models with
-relationships between entities, supporting common patterns like one-to-many
-and many-to-many relationships.
-"""
 
 import random
 import uuid
@@ -16,14 +8,6 @@ from .response import MockResponse
 
 
 class EntityRelationshipBuilder:
-    """
-    Builder for creating mock responses with consistent entity relationships.
-
-    This class provides methods to create and manage relationships between entities
-    in mock API responses. It supports embedding related entities, creating entity
-    graphs with various relationship types, and generating consistent response
-    sequences for CRUD operations that maintain relationship integrity.
-    """
 
     @staticmethod
     def create_related_entities(
@@ -33,22 +17,6 @@ class EntityRelationshipBuilder:
         foreign_key: str = "id",
         embed: bool = False,
     ) -> Dict[str, Any]:
-        """
-        Create a response with related entities.
-
-        This method adds related entities to a primary entity, either by embedding
-        the full entities or by including references to them via their IDs.
-
-        Args:
-            primary_entity: The primary entity to which relationships will be added
-            related_entities: List of related entities to associate with the primary entity
-            relation_key: Key in primary entity where the relationship will be stored
-            foreign_key: Key in related entities to use for relationship references
-            embed: Whether to embed the full related entities or just their IDs
-
-        Returns:
-            Primary entity with related entities added according to the specified format
-        """
         result = primary_entity.copy()
 
         if embed:
@@ -68,20 +36,6 @@ class EntityRelationshipBuilder:
         entities_by_type: Dict[str, List[Dict[str, Any]]],
         relationships: Dict[str, Dict[str, Any]],
     ) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Create a consistent graph of related entities.
-
-        This method builds a network of entities with defined relationships between them,
-        creating a consistent data model that can be used for testing complex API interactions.
-
-        Args:
-            entities_by_type: Dictionary mapping entity types to lists of entities
-            relationships: Dictionary defining relationships between entity types,
-                           with configuration for cardinality, embedding, etc.
-
-        Returns:
-            Dictionary with updated entities including all specified relationships
-        """
         result = {k: [item.copy() for item in v] for k, v in entities_by_type.items()}
 
         # Process each relationship
@@ -133,22 +87,6 @@ class EntityRelationshipBuilder:
         operations: List[str],
         id_field: str = "id",
     ) -> List[Callable[..., MockResponse]]:
-        """
-        Create a sequence of consistent responses for CRUD operations.
-
-        This method generates response factories for a series of CRUD operations
-        that maintain consistency across multiple API calls. For example, if an entity
-        is created and then updated, subsequent read operations will reflect those changes.
-
-        Args:
-            entity_type: Type of entity (used for error messages)
-            base_entities: Initial set of entities to operate on
-            operations: List of operations to support ('create', 'read', 'update', 'delete')
-            id_field: Name of the ID field in entities
-
-        Returns:
-            List of response factories for each requested operation
-        """
         # Create a mutable copy of entities that will be modified by operations
         entities = [entity.copy() for entity in base_entities]
         entity_map = {str(entity.get(id_field)): entity for entity in entities if id_field in entity}

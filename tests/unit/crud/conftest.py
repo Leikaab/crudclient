@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from crudclient.client import Client
 from crudclient.crud.base import Crud
-from crudclient.testing.factory.simple_mock import SimpleMockClient
+from crudclient.testing.simple_mock import SimpleMockClient
 
 
 class TestModel(BaseModel):

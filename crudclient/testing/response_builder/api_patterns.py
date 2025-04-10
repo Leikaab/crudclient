@@ -1,10 +1,3 @@
-"""
-API patterns for mock client response configuration.
-
-This module provides pre-configured patterns for common API types like REST and GraphQL.
-These patterns can be used to quickly set up mock responses for different API architectures
-without having to manually configure each endpoint.
-"""
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -12,14 +5,6 @@ from .response import MockResponse
 
 
 class APIPatternBuilder:
-    """
-    Builder for creating common API response patterns.
-
-    This class provides static methods to generate response patterns for various
-    API architectures including REST resources, nested resources, batch operations,
-    GraphQL endpoints, and OAuth flows. These patterns can be used to configure
-    mock clients with realistic API behavior.
-    """
 
     @staticmethod
     def rest_resource(
@@ -34,29 +19,6 @@ class APIPatternBuilder:
         filter_response: Optional[Union[List[Dict[str, Any]], Callable[..., MockResponse]]] = None,
         patch_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Create patterns for a REST resource with standard CRUD operations.
-
-        This method generates response patterns for standard REST operations including
-        list, get, create, update, delete, search, filter, and patch. Each operation
-        can be configured with a specific response or response factory.
-
-        Args:
-            base_path: Base path for the resource (e.g., "/users")
-            resource_id_pattern: Regex pattern for resource IDs
-            list_response: Response for list operation (GET on collection)
-            get_response: Response for get operation (GET on resource)
-            create_response: Response for create operation (POST on collection)
-            update_response: Response for update operation (PUT on resource)
-            delete_response: Response for delete operation (DELETE on resource)
-            search_response: Response for search operation (GET with search params)
-            filter_response: Response for filter operation (GET with filter params)
-            patch_response: Response for partial update operation (PATCH on resource)
-
-        Returns:
-            List of response patterns for the resource that can be used to configure
-            a mock client.
-        """
         patterns = []
 
         # Ensure base_path starts with / and doesn't end with /
@@ -145,27 +107,6 @@ class APIPatternBuilder:
         update_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         delete_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Create patterns for a nested REST resource (e.g., /users/{id}/posts).
-
-        This method generates response patterns for nested resources, which are common
-        in RESTful APIs for representing hierarchical relationships between resources.
-
-        Args:
-            parent_path: Base path for the parent resource (e.g., "users")
-            child_path: Base path for the child resource (e.g., "posts")
-            parent_id_pattern: Regex pattern for parent resource IDs
-            child_id_pattern: Regex pattern for child resource IDs
-            list_response: Response for list operation (GET on child collection)
-            get_response: Response for get operation (GET on child resource)
-            create_response: Response for create operation (POST on child collection)
-            update_response: Response for update operation (PUT on child resource)
-            delete_response: Response for delete operation (DELETE on child resource)
-
-        Returns:
-            List of response patterns for the nested resource that can be used to
-            configure a mock client.
-        """
         patterns = []
 
         # Ensure paths are properly formatted
@@ -222,22 +163,6 @@ class APIPatternBuilder:
         batch_update_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         batch_delete_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Create patterns for batch operations on a resource.
-
-        This method generates response patterns for batch operations, which allow
-        clients to perform operations on multiple resources in a single request.
-
-        Args:
-            base_path: Base path for the resource (e.g., "/users")
-            batch_create_response: Response for batch create operation
-            batch_update_response: Response for batch update operation
-            batch_delete_response: Response for batch delete operation
-
-        Returns:
-            List of response patterns for batch operations that can be used to
-            configure a mock client.
-        """
         patterns = []
 
         # Ensure base_path starts with / and doesn't end with /
@@ -281,21 +206,6 @@ class APIPatternBuilder:
         query_matchers: Optional[Dict[str, Union[Dict[str, Any], Callable[..., MockResponse]]]] = None,
         default_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Create patterns for a GraphQL endpoint.
-
-        This method generates response patterns for GraphQL endpoints, allowing
-        different responses based on the query content.
-
-        Args:
-            url_pattern: Regex pattern for the GraphQL endpoint
-            query_matchers: Dict mapping query patterns to responses
-            default_response: Default response for unmatched queries
-
-        Returns:
-            List of response patterns for the GraphQL endpoint that can be used to
-            configure a mock client.
-        """
         patterns = []
 
         # Add patterns for specific queries
@@ -329,22 +239,6 @@ class APIPatternBuilder:
         error_response: Optional[Dict[str, Any]] = None,
         valid_credentials: Optional[Dict[str, str]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Create patterns for an OAuth 2.0 flow.
-
-        This method generates response patterns for OAuth 2.0 authentication flows,
-        including token requests and responses.
-
-        Args:
-            token_url_pattern: Regex pattern for the token endpoint
-            success_response: Response for successful token requests
-            error_response: Response for failed token requests
-            valid_credentials: Dict of valid credentials for authentication
-
-        Returns:
-            List of response patterns for the OAuth flow that can be used to
-            configure a mock client.
-        """
         if success_response is None:
             success_response = {
                 "access_token": "mock-access-token",

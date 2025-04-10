@@ -1,9 +1,12 @@
-from typing import Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple  # Added Tuple, TYPE_CHECKING
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
 
 from .base import AuthMockBase
+
+if TYPE_CHECKING:  # Added TYPE_CHECKING block
+    from ..response_builder import MockResponse
 
 
 class CustomAuthMock(AuthMockBase):
@@ -120,3 +123,14 @@ class CustomAuthMock(AuthMockBase):
 
     def get_auth_strategy(self) -> AuthStrategy:
         return self.auth_strategy
+
+    # --- Added Abstract Method Implementations ---
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        # Headers are applied via the header_callback in the actual strategy.
+        # This method signature in the mock base doesn't perfectly align.
+        return None
+
+    def handle_auth_error(self, response: 'MockResponse') -> bool:
+        # No standard refresh mechanism defined for generic custom auth mock
+        return False

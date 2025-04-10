@@ -1,9 +1,3 @@
-"""
-Authentication verification helpers for testing.
-
-This module provides helper methods for verifying authentication behavior,
-including header validation, error handling, and token refresh verification.
-"""
 
 from .auth_error_verification import AuthErrorVerification
 # Re-export the classes from their respective modules
@@ -13,12 +7,6 @@ from .auth_token_verification import AuthTokenVerification
 
 
 class AuthVerificationHelpers:
-    """
-    Helper methods for verifying authentication behavior with enhanced capabilities.
-
-    This class provides static methods for verifying various aspects of authentication,
-    including header validation, token validation, and error response validation.
-    """
 
     # Header verification methods
     verify_basic_auth_header = AuthHeaderVerification.verify_basic_auth_header

@@ -1,14 +1,11 @@
-"""
-Advanced test doubles for the crudclient testing framework.
-
-This module provides more sophisticated test doubles beyond simple mocks,
-including FakeAPI with an in-memory data store and specialized stubs.
-"""
-
-from .data_store import DataStore, ValidationException
-from .data_store_helpers import RelationshipType
+from .data_store import DataStore
+from .data_store_definitions import ValidationException  # Corrected import
+from .data_store_relationships import RelationshipType  # Updated import location
 from .fake_api import FakeAPI, FakeCrud
-from .stubs import CrudBase, Response, StubAPI, StubClient, StubCrud, StubResponse
+from .stubs import Response, StubResponse
+from .stubs_api import StubAPI
+from .stubs_client import StubClient
+from .stubs_crud import CrudBase, StubCrud
 
 __all__ = [
     'DataStore',

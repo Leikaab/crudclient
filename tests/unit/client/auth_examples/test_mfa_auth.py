@@ -5,7 +5,9 @@ This module demonstrates how to use the Multi-Factor Authentication mocking util
 in real-world testing scenarios.
 """
 
-from .common import AuthenticationError, create_mock_client, pytest
+import pytest
+
+from .common import AuthenticationError, create_mock_client
 
 
 class TestMultiFactorAuthExamples:
@@ -80,7 +82,7 @@ class TestMultiFactorAuthExamples:
             method="GET",
             url_pattern=r"/api/secure",
             response={"data": [{"id": 1, "name": "Secure Data"}]},
-            headers_matcher={"X-MFA-Verified": "true"}
+            # headers_matcher was removed as it's not a valid parameter
         )
 
         # First attempt will fail with 401

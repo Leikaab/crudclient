@@ -63,5 +63,6 @@ class AuthExtractionUtils:
 
         Raises:
             ValueError: If the token is not a valid JWT
+            TypeError: If the provided token is not a string
         """
         ...

@@ -1,31 +1,8 @@
-"""
-Partial response helper for the crudclient testing framework.
-
-This module provides utilities for simulating partial API responses where only
-specific fields are included in the response. It supports field selection using
-dot notation, wildcards, exclusions, and depth limiting, allowing tests to verify
-client behavior with different response structures.
-"""
-
 import copy
 from typing import Any, Dict, List, Optional, Set
 
 
 class PartialResponseHelper:
-    """
-    Helper for simulating partial responses in tests.
-
-    This class provides a flexible way to generate partial API responses by
-    selecting specific fields from a complete response object. It supports
-    advanced field selection using dot notation for nested fields, wildcards
-    for pattern matching, field exclusions, and depth limiting.
-
-    The helper is particularly useful for testing APIs that support field
-    filtering capabilities (like Google API's fields parameter or GraphQL-style
-    field selection), allowing tests to verify that clients correctly handle
-    responses with varying levels of completeness.
-    """
-
     def __init__(
         self,
         full_response: Dict[str, Any],
@@ -33,21 +10,6 @@ class PartialResponseHelper:
         wildcard_char: str = "*",
         default_fields: Optional[List[str]] = None
     ):
-        """
-        Initialize the partial response helper with configuration options.
-
-        This constructor sets up the partial response helper with a complete
-        response object and configuration for how field selection should be handled.
-        It supports customization of field path notation and default fields to include.
-
-        Args:
-            full_response: Complete response data that will be filtered
-            field_separator: Character used to separate nested fields in field paths
-                (e.g., "user.address.city" with "." as separator)
-            wildcard_char: Character used as wildcard in field paths
-                (e.g., "user.*.name" to select all name fields under user)
-            default_fields: Default fields to include if none specified in get_partial_response
-        """
         self.full_response = full_response
         self.field_separator = field_separator
         self.wildcard_char = wildcard_char
@@ -60,27 +22,6 @@ class PartialResponseHelper:
         max_depth: Optional[int] = None,
         include_metadata: bool = False
     ) -> Dict[str, Any]:
-        """
-        Get a partial response containing only the specified fields.
-
-        This method filters the full response to include only the requested fields,
-        applying any exclusions and depth limitations. It supports complex field
-        selection patterns including nested fields via dot notation and wildcards
-        for matching multiple fields.
-
-        Args:
-            fields: List of field paths to include (using dot notation for nested fields)
-                Example: ["id", "user.name", "items.*.id"]
-            exclude_fields: List of field paths to exclude from the result
-                Example: ["user.email", "sensitive_data"]
-            max_depth: Maximum depth of nested objects to include
-                (useful for limiting response complexity)
-            include_metadata: Whether to include metadata about the partial response
-                (adds a _metadata object with information about the filtering)
-
-        Returns:
-            Dict containing only the requested fields from the full response
-        """
         # Use default fields if none provided
         fields_to_use = fields or self.default_fields
 
@@ -154,17 +95,6 @@ class PartialResponseHelper:
         return result
 
     def _process_wildcard_field(self, result: Dict[str, Any], field_path: str) -> None:
-        """
-        Process a field path containing wildcards.
-
-        This method handles field paths that contain wildcard characters,
-        expanding them to match all applicable fields in the full response
-        and adding the matching fields to the result.
-
-        Args:
-            result: Result dictionary to update with matching fields
-            field_path: Field path with wildcards (e.g., "users.*.name")
-        """
         parts = field_path.split(self.field_separator)
 
         # Find all matching paths
@@ -191,21 +121,6 @@ class PartialResponseHelper:
                 current[path_parts[-1]] = value
 
     def _find_matching_paths(self, data: Dict[str, Any], pattern_parts: List[str], current_path: str = "") -> Set[str]:
-        """
-        Find all paths in the data that match the pattern.
-
-        This method recursively searches through the data structure to find
-        all paths that match the given pattern, handling wildcards by expanding
-        them to match all keys at that level.
-
-        Args:
-            data: Data structure to search through
-            pattern_parts: Parts of the pattern to match (split by separator)
-            current_path: Current path being built during recursion
-
-        Returns:
-            Set of matching field paths as strings
-        """
         if not isinstance(data, dict):
             return set()
 
@@ -241,17 +156,6 @@ class PartialResponseHelper:
         return result
 
     def _remove_field(self, data: Dict[str, Any], field_path: str) -> None:
-        """
-        Remove a field from the data structure.
-
-        This method removes a field specified by its path from the data structure,
-        handling nested fields by navigating through the structure using the
-        field separator.
-
-        Args:
-            data: Data structure to modify
-            field_path: Path of the field to remove (e.g., "user.address.phone")
-        """
         parts = field_path.split(self.field_separator)
 
         if len(parts) == 1:
@@ -274,21 +178,6 @@ class PartialResponseHelper:
                 del current[last_part]
 
     def _limit_depth(self, data: Dict[str, Any], max_depth: int, current_depth: int = 0) -> Dict[str, Any]:
-        """
-        Limit the depth of nested objects in the response.
-
-        This method recursively processes the data structure to ensure it doesn't
-        exceed the specified maximum depth, replacing deeper nested objects with
-        summary information.
-
-        Args:
-            data: Data structure to limit depth for
-            max_depth: Maximum depth to include (0 = top level only)
-            current_depth: Current depth in the recursion
-
-        Returns:
-            Data structure with depth limited to max_depth
-        """
         if not isinstance(data, dict) or current_depth >= max_depth:
             return data
 
@@ -312,21 +201,6 @@ class PartialResponseHelper:
         excluded_fields: Optional[List[str]],
         max_depth: Optional[int]
     ) -> Dict[str, Any]:
-        """
-        Add metadata about the partial response.
-
-        This method adds metadata to the response indicating that it's a partial
-        response and providing information about the filtering that was applied.
-
-        Args:
-            result: Result data to add metadata to
-            included_fields: Fields that were included in the filter
-            excluded_fields: Fields that were excluded from the filter
-            max_depth: Maximum depth that was applied
-
-        Returns:
-            Data structure with added metadata
-        """
         metadata = {
             "partial_response": True,
             "total_fields_in_full_response": self._count_fields(self.full_response),
@@ -343,19 +217,6 @@ class PartialResponseHelper:
         }
 
     def _count_fields(self, data: Dict[str, Any], prefix: str = "") -> int:
-        """
-        Count the total number of fields in the data structure.
-
-        This method recursively counts all fields in the data structure,
-        including nested fields, to provide an accurate count for metadata.
-
-        Args:
-            data: Data structure to count fields in
-            prefix: Current field prefix for recursion
-
-        Returns:
-            Total number of fields in the data structure
-        """
         if not isinstance(data, dict):
             return 1
 
@@ -370,16 +231,4 @@ class PartialResponseHelper:
         return count
 
     def _deep_copy(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Create a deep copy of the data structure.
-
-        This method creates a deep copy of the data structure to ensure that
-        modifications to the partial response don't affect the original data.
-
-        Args:
-            data: Data structure to copy
-
-        Returns:
-            Deep copy of the data structure
-        """
         return copy.deepcopy(data)

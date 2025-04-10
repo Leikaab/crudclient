@@ -5,7 +5,11 @@ This module demonstrates how to use the Custom Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import ClientConfig, create_custom_auth_mock, create_mock_client, pytest
+import pytest
+
+from crudclient.config import ClientConfig
+
+from .common import create_custom_auth_mock, create_mock_client
 
 
 class TestCustomAuthExamples:
@@ -50,11 +54,12 @@ class TestCustomAuthExamples:
         # Verify the auth headers and params were sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "X-Custom-Auth" in request.headers
-        assert request.headers["X-Custom-Auth"] == "custom_value"
-        assert "X-Timestamp" in request.headers
-        assert request.headers["X-Timestamp"] == "12345678"
-        assert "tenant=test_tenant" in request.url
+        assert "X-Custom-Auth" in request['headers']
+        assert request['headers']["X-Custom-Auth"] == "custom_value"
+        assert "X-Timestamp" in request['headers']
+        assert request['headers']["X-Timestamp"] == "12345678"
+        # Assuming 'path' contains the full URL or path with params
+        assert "tenant=test_tenant" in request['path']
 
     def test_custom_auth_failure_scenario(self):
         """Example of testing a Custom Auth failure scenario."""

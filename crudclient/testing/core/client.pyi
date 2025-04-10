@@ -79,38 +79,46 @@ class MockClient:
     def with_response_pattern(
         self,
         method: HttpMethod,
-        url_pattern: str,
-        response: Any = None,
+        path_pattern: Union[str, Pattern],
         status_code: StatusCode = 200,
+        data: Optional[ResponseBody] = None,
         headers: Optional[Headers] = None,
-        params: Optional[Dict[str, str]] = None
+        error: Optional[Exception] = None
     ) -> None:
         """
-        Configure a response pattern for the mock client.
+        Configure a response for requests matching a path pattern (regex).
+
+        Delegates to the underlying HTTP client's pattern configuration.
+        Patterns are checked in reverse order of addition (LIFO). The first
+        matching pattern for the given method and path will be used. Exact
+        matches configured with `configure_response` take precedence.
 
         Args:
-            method: The HTTP method to match.
-            url_pattern: The URL pattern to match.
-            response: The response data to return.
-            status_code: The status code to return.
-            headers: The headers to return.
-            params: The query parameters to match.
+            method: The HTTP method of the request (e.g., 'GET', 'POST').
+            path_pattern: A regex string or compiled pattern to match against the request path.
+            status_code: The HTTP status code to return (default: 200).
+            data: The data to return in the response body (default: None).
+            headers: The headers to return in the response (default: None).
+            error: An exception to raise instead of returning a response (default: None).
         """
         ...
 
     def with_network_condition(
         self,
-        latency_ms: int = 0,
-        packet_loss_percentage: float = 0,
-        error_rate_percentage: float = 0
+        latency_ms: float = 0.0
+        # Future: packet_loss_rate: float = 0.0
     ) -> None:
         """
-        Configure network conditions for the mock client.
+        Configure simulated network conditions for the mock client.
+
+        Delegates to the underlying HTTP client's network condition configuration.
+        Currently supports simulating latency.
 
         Args:
-            latency_ms: The simulated network latency in milliseconds.
-            packet_loss_percentage: The percentage of requests that will be dropped.
-            error_rate_percentage: The percentage of requests that will raise errors.
+            latency_ms: The delay in milliseconds to add before processing each request (default: 0.0).
+
+        Raises:
+            ValueError: If latency_ms is negative (raised by underlying HTTP client).
         """
         ...
 

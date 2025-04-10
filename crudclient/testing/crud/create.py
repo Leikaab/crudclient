@@ -1,10 +1,3 @@
-"""
-Mock implementation for Create operations.
-
-This module provides a specialized mock for Create operations with support for
-validation constraints, unique constraints, and auto-incrementing IDs.
-"""
-
 import copy
 import json
 from typing import Any, Callable, Dict, List, Optional
@@ -17,24 +10,7 @@ from .request_record import RequestRecord
 
 
 class CreateMock(BaseCrudMock):
-    """
-    Mock for Create operations.
-
-    Features:
-    - Support for validation constraints
-    - Support for unique constraints
-    - Simulation of validation errors
-    - Simulation of duplicate key errors
-    - Auto-incrementing IDs for created resources
-    """
-
     def __init__(self):
-        """
-        Initialize the Create mock.
-
-        Sets up default response, unique constraints, validation constraints,
-        and storage for created resources.
-        """
         super().__init__()
         self.default_response = MockResponse(
             status_code=201,
@@ -50,16 +26,6 @@ class CreateMock(BaseCrudMock):
         field_name: str,
         error_message: Optional[str] = None
     ) -> 'CreateMock':
-        """
-        Configure a unique constraint for a field.
-
-        Args:
-            field_name: The name of the field that must be unique
-            error_message: Custom error message for constraint violation
-
-        Returns:
-            Self for method chaining
-        """
         if field_name not in self._unique_constraints:
             self._unique_constraints[field_name] = set()
 
@@ -95,17 +61,6 @@ class CreateMock(BaseCrudMock):
         validator: Callable[[Any], bool],
         error_message: str
     ) -> 'CreateMock':
-        """
-        Configure a validation constraint for a field.
-
-        Args:
-            field_name: The name of the field to validate
-            validator: Function that takes the field value and returns True if valid
-            error_message: Error message for validation failure
-
-        Returns:
-            Self for method chaining
-        """
         self._validation_constraints[field_name] = (validator, error_message)
 
         # Override the post method to handle validation constraint violations
@@ -128,15 +83,6 @@ class CreateMock(BaseCrudMock):
         return self
 
     def with_auto_increment_id(self, id_field: str = "id") -> 'CreateMock':
-        """
-        Configure the mock to automatically assign incremental IDs to created resources.
-
-        Args:
-            id_field: The name of the ID field (default: "id")
-
-        Returns:
-            Self for method chaining
-        """
         # Override the post method to handle auto-increment IDs
         original_post = self.post
 
@@ -188,19 +134,9 @@ class CreateMock(BaseCrudMock):
         return self
 
     def post(self, url: str, **kwargs: Any) -> Any:
-        """
-        Handle POST requests.
-
-        Args:
-            url: Request URL
-            **kwargs: Request parameters (params, data, json, headers, parent_id)
-
-        Returns:
-            Response data (dict, list, or string)
-        """
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop('parent_id', None)
-        if parent_id and self._parent_id_handling:
+        if parent_id and self._parent_id_handling:  # type: ignore
             url = self._process_parent_id(url, parent_id)
 
         # Record the request
@@ -212,7 +148,7 @@ class CreateMock(BaseCrudMock):
             json=kwargs.get('json'),
             headers=kwargs.get('headers')
         )
-        self.request_history.append(record)
+        self.request_history.append(record)  # type: ignore
 
         # Find a matching pattern
         pattern = self._find_matching_pattern("POST", url, **kwargs)
@@ -231,13 +167,13 @@ class CreateMock(BaseCrudMock):
             # Ensure response_obj is a MockResponse
             if not isinstance(response_obj, MockResponse):
                 if isinstance(response_obj, dict):
-                    response_obj = MockResponse(json_data=response_obj)
+                    response_obj = MockResponse(status_code=201, json_data=response_obj)
                 elif isinstance(response_obj, list):
-                    response_obj = MockResponse(text=json.dumps(response_obj))
+                    response_obj = MockResponse(status_code=201, text=json.dumps(response_obj))
                 elif isinstance(response_obj, str):
-                    response_obj = MockResponse(text=response_obj)
+                    response_obj = MockResponse(status_code=201, text=response_obj)
                 else:
-                    response_obj = MockResponse(text=str(response_obj))
+                    response_obj = MockResponse(status_code=201, text=str(response_obj))
 
             record.response = response_obj
 
@@ -260,18 +196,6 @@ class CreateMock(BaseCrudMock):
         status_code: int = 201,
         **kwargs: Any
     ) -> 'CreateMock':
-        """
-        Configure a successful create response.
-
-        Args:
-            url_pattern: URL pattern to match
-            response_data: Data to return in the response
-            status_code: HTTP status code (default: 201)
-            **kwargs: Additional criteria for matching requests
-
-        Returns:
-            Self for method chaining
-        """
         # Store the response data directly in the mock
         # This ensures we return exactly what was configured
         if 'id' in response_data:
@@ -287,7 +211,7 @@ class CreateMock(BaseCrudMock):
             )
 
         # Add the response pattern with the exact response function
-        self.response_patterns.append({
+        self.response_patterns.append({  # type: ignore
             'url_pattern': url_pattern,
             'response': exact_response,
             'params': kwargs.get('params'),
@@ -301,12 +225,6 @@ class CreateMock(BaseCrudMock):
         return self
 
     def _add_request_preprocessor(self, processor: Callable[..., Optional[MockResponse]]):
-        """
-        Add a request preprocessor that can modify or override the response.
-
-        Args:
-            processor: Function that takes request kwargs and returns a MockResponse or None
-        """
         # Wrap the original post method to apply preprocessors
         original_post = self.post
 
@@ -325,7 +243,7 @@ class CreateMock(BaseCrudMock):
                     headers=kwargs.get('headers'),
                     response=response
                 )
-                self.request_history.append(record)
+                self.request_history.append(record)  # type: ignore
 
                 # Return the appropriate response format
                 if hasattr(response, '_json_data') and response._json_data is not None:
@@ -345,18 +263,6 @@ class CreateMock(BaseCrudMock):
         status_code: int = 422,
         **kwargs: Any
     ) -> 'CreateMock':
-        """
-        Configure a validation failure response.
-
-        Args:
-            url_pattern: URL pattern to match
-            validation_errors: Dict mapping field names to lists of error messages
-            status_code: HTTP status code (default: 422)
-            **kwargs: Additional criteria for matching requests
-
-        Returns:
-            Self for method chaining
-        """
         self.with_response(
             url_pattern=url_pattern,
             response=MockResponse(

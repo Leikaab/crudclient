@@ -3,19 +3,9 @@ from .api_spy import ApiSpy
 from .base import SpyBase
 from .client_spy import ClientSpy
 from .crud_spy import CrudSpy
-from .enhanced import (
-    CallRecord,
-    ClassSpy,
-    EnhancedSpyBase,
-    EnhancedSpyFactory,
-    FunctionSpy,
-    MethodSpy,
-    verify_call_arguments,
-    verify_call_sequence,
-    verify_call_timing,
-    verify_no_unexpected_calls,
-)
+from .enhanced import CallRecord, ClassSpy, EnhancedSpyBase, EnhancedSpyFactory, FunctionSpy, MethodSpy
 from .method_call import MethodCall
+from .verification_helpers import verify_call_arguments, verify_call_sequence, verify_call_timing, verify_no_unexpected_calls
 
 __all__ = [
     # Basic spy components

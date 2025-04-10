@@ -1,7 +1,7 @@
 
 import json
 import re
-from typing import Any
+from typing import Any, Optional
 
 from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse
@@ -10,7 +10,7 @@ from crudclient.testing.simple_mock.core import SimpleMockClientCore
 
 class SimpleMockClientRequestHandling(SimpleMockClientCore):
 
-    def _request(self, method: str, url: str, **kwargs: Any) -> str:
+    def _request(self, method: str, url: str, **kwargs: Any) -> Optional[str]:
         # Record the request
         record = RequestRecord(
             method=method,
@@ -79,14 +79,14 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                     # Ensure it's a MockResponse
                     if not isinstance(response_obj, MockResponse):
                         if isinstance(response_obj, dict):
-                            response_obj = MockResponse(json_data=response_obj)
+                            response_obj = MockResponse(status_code=200, json_data=response_obj)
                         elif isinstance(response_obj, list):
                             # Convert list to JSON string
-                            response_obj = MockResponse(text=json.dumps(response_obj))
+                            response_obj = MockResponse(status_code=200, text=json.dumps(response_obj))
                         elif isinstance(response_obj, str):
-                            response_obj = MockResponse(text=response_obj)
+                            response_obj = MockResponse(status_code=200, text=response_obj)
                         else:
-                            response_obj = MockResponse(text=str(response_obj))
+                            response_obj = MockResponse(status_code=200, text=str(response_obj))
 
                     record.response = response_obj
 
@@ -103,17 +103,17 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
             return json.dumps(self.default_response._json_data)
         return self.default_response.text
 
-    def get(self, url: str, **kwargs: Any) -> str:
+    def get(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('GET', url, **kwargs)
 
-    def post(self, url: str, **kwargs: Any) -> str:
+    def post(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('POST', url, **kwargs)
 
-    def put(self, url: str, **kwargs: Any) -> str:
+    def put(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('PUT', url, **kwargs)
 
-    def delete(self, url: str, **kwargs: Any) -> str:
+    def delete(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('DELETE', url, **kwargs)
 
-    def patch(self, url: str, **kwargs: Any) -> str:
+    def patch(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('PATCH', url, **kwargs)

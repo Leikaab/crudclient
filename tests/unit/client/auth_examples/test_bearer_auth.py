@@ -5,7 +5,9 @@ This module demonstrates how to use the Bearer Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import AuthenticationError, create_mock_client, pytest
+import pytest
+
+from .common import AuthenticationError, create_mock_client
 
 
 class TestBearerAuthExamples:
@@ -39,8 +41,8 @@ class TestBearerAuthExamples:
         # Verify the auth header was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "Authorization" in request.headers
-        assert request.headers["Authorization"] == "Bearer valid_token"
+        assert "Authorization" in request['headers']
+        assert request['headers']["Authorization"] == "Bearer valid_token"
 
     def test_bearer_auth_token_expiration_scenario(self):
         """Example of testing a Bearer Auth token expiration scenario."""
@@ -111,7 +113,7 @@ class TestBearerAuthExamples:
             method="GET",
             url_pattern=r"/api/resources",
             response={"data": [{"id": 1, "name": "Resource 1"}]},
-            headers_matcher={"Authorization": "Bearer new_token"}
+            # headers_matcher was removed as it's not a valid parameter
         )
 
         # In a real implementation, the client would handle token refresh automatically

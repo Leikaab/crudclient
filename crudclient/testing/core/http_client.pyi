@@ -6,7 +6,8 @@ that can be used in tests to simulate HTTP requests and responses without making
 actual network calls.
 """
 
-from typing import Any, Dict, Optional, Tuple
+import re  # Added
+from typing import Any, Dict, List, Optional, Pattern, Tuple, Union  # Added List, Pattern, Union
 from urllib.parse import urljoin
 
 import requests
@@ -21,11 +22,15 @@ class MockHTTPClient:
     Mock implementation of the crudclient.http.Client class.
 
     This class simulates HTTP requests and responses without making actual network calls.
-    It allows configuring expected requests and their responses for testing purposes.
+    It allows configuring expected requests and their responses for testing purposes,
+    including exact path matches and regex pattern matching. It also supports
+    simulating basic network conditions like latency.
     """
 
     base_url: str
     _configured_responses: Dict[Tuple[HttpMethod, str], Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]]
+    _configured_patterns: List[Tuple[HttpMethod, Pattern, Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]]]  # Added
+    _latency_ms: float  # Added
 
     def __init__(self, base_url: str = "https://api.example.com") -> None:
         """
@@ -37,7 +42,7 @@ class MockHTTPClient:
         ...
 
     def reset(self) -> None:
-        """Reset the mock HTTP client to its initial state."""
+        """Reset the mock HTTP client to its initial state, clearing all configurations."""
         ...
 
     def configure_response(
@@ -50,15 +55,62 @@ class MockHTTPClient:
         error: Optional[Exception] = None
     ) -> None:
         """
-        Configure a response for a specific request.
+        Configure a response for a specific request with an exact path match.
+
+        This configuration takes precedence over patterns defined with
+        `with_response_pattern`.
 
         Args:
-            method: The HTTP method of the request.
-            path: The path of the request.
-            status_code: The status code to return.
-            data: The data to return in the response body.
-            headers: The headers to return in the response.
-            error: An exception to raise instead of returning a response.
+            method: The HTTP method of the request (e.g., 'GET', 'POST').
+            path: The exact path of the request (e.g., '/users/1').
+            status_code: The HTTP status code to return (default: 200).
+            data: The data to return in the response body (default: None).
+            headers: The headers to return in the response (default: None).
+            error: An exception to raise instead of returning a response (default: None).
+        """
+        ...
+
+    def with_response_pattern(
+        self,
+        method: HttpMethod,
+        path_pattern: Union[str, Pattern],
+        status_code: StatusCode = 200,
+        data: Optional[ResponseBody] = None,
+        headers: Optional[Headers] = None,
+        error: Optional[Exception] = None
+    ) -> None:
+        """
+        Configure a response for requests matching a path pattern (regex).
+
+        Patterns are checked in reverse order of addition (LIFO). The first
+        matching pattern for the given method and path will be used. Exact
+        matches configured with `configure_response` take precedence.
+
+        Args:
+            method: The HTTP method of the request (e.g., 'GET', 'POST').
+            path_pattern: A regex string or compiled pattern to match against the request path.
+            status_code: The HTTP status code to return (default: 200).
+            data: The data to return in the response body (default: None).
+            headers: The headers to return in the response (default: None).
+            error: An exception to raise instead of returning a response (default: None).
+        """
+        ...
+
+    def with_network_condition(
+        self,
+        latency_ms: float = 0.0
+        # Future: packet_loss_rate: float = 0.0
+    ) -> None:
+        """
+        Configure simulated network conditions for all subsequent requests.
+
+        Currently supports simulating latency.
+
+        Args:
+            latency_ms: The delay in milliseconds to add before processing each request (default: 0.0).
+
+        Raises:
+            ValueError: If latency_ms is negative.
         """
         ...
 
@@ -68,7 +120,7 @@ class MockHTTPClient:
         path: str
     ) -> Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]:
         """
-        Get the configured response for a specific request.
+        Find a configured response, checking exact matches first, then patterns (LIFO).
 
         Args:
             method: The HTTP method of the request.
@@ -78,7 +130,8 @@ class MockHTTPClient:
             A tuple of (status_code, response_body, headers, error).
 
         Raises:
-            RequestNotConfiguredError: If no response is configured for the request.
+            RequestNotConfiguredError: If no response is configured for the request
+                                       (neither exact match nor pattern match).
         """
         ...
 
@@ -92,7 +145,7 @@ class MockHTTPClient:
         **kwargs: Any
     ) -> Response:
         """
-        Make a mock HTTP request.
+        Make a mock HTTP request, applying configured responses and network conditions.
 
         Args:
             method: The HTTP method of the request.
@@ -100,7 +153,7 @@ class MockHTTPClient:
             headers: Optional headers for the request.
             params: Optional query parameters for the request.
             data: Optional body for the request.
-            **kwargs: Additional keyword arguments (ignored).
+            **kwargs: Additional keyword arguments (ignored by mock, but captured).
 
         Returns:
             A Response object with the configured response.
@@ -108,6 +161,7 @@ class MockHTTPClient:
         Raises:
             RequestNotConfiguredError: If no response is configured for the request.
             Exception: If an error is configured for the request.
+            ValueError: If network conditions are invalid (e.g., negative latency).
         """
         ...
 

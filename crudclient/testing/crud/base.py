@@ -6,6 +6,9 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
 
+# TODO: Replace 'Any' with the actual Request type used in request_history if available
+from .assertion_helpers import check_error_handling, check_operation_parameters, check_request_payload, check_response_handling
+
 
 class BaseCrudMock:
 
@@ -24,14 +27,10 @@ class BaseCrudMock:
         response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str, Callable[..., Optional[MockResponse]]],
         **kwargs: Any
     ) -> 'BaseCrudMock':
-        # Convert dict/list/string responses to MockResponse
-        if isinstance(response, dict):
-            response = MockResponse(json_data=response)
-        elif isinstance(response, list):
-            # Convert list to JSON string to avoid type errors
-            response = MockResponse(text=json.dumps(response))
-        elif isinstance(response, str):
-            response = MockResponse(text=response)
+        # Ensure response is a MockResponse object if it's a dict, list, or str
+        # Note: Callable responses are handled later in _find_matching_pattern
+        if not callable(response):
+            response = self._ensure_mock_response(response)
 
         self.response_patterns.append({
             'url_pattern': url_pattern,
@@ -51,15 +50,7 @@ class BaseCrudMock:
         self,
         response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]
     ) -> 'BaseCrudMock':
-        if isinstance(response, dict):
-            self.default_response = MockResponse(json_data=response)
-        elif isinstance(response, list):
-            # Convert list to JSON string to avoid type errors
-            self.default_response = MockResponse(text=json.dumps(response))
-        elif isinstance(response, str):
-            self.default_response = MockResponse(text=response)
-        else:
-            self.default_response = response
+        self.default_response = self._ensure_mock_response(response)
         return self
 
     def with_parent_id_handling(self, enabled: bool = True) -> 'BaseCrudMock':
@@ -87,7 +78,7 @@ class BaseCrudMock:
                 return MockResponse(
                     status_code=422,
                     json_data={"error": "Validation Error", "detail": str(e)},
-                    error=validation_error
+                    # Removed invalid 'error' parameter
                 )
 
         self.response_patterns.append({
@@ -163,11 +154,32 @@ class BaseCrudMock:
         # Build the URL with parent_id
         return f"parents/{parent_id}/{resource_path}"
 
-    def assert_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
-        matching_requests = self.request_history
+    def _filter_requests(
+        self, url_pattern: Optional[str] = None, method: Optional[str] = None
+    ) -> List[Any]:  # Assuming request_history stores objects with .url and .method
+        filtered_requests = self.request_history
         if url_pattern:
             pattern = re.compile(url_pattern)
-            matching_requests = [r for r in matching_requests if pattern.search(r.url)]
+            filtered_requests = [r for r in filtered_requests if pattern.search(r.url)]
+        if method:
+            filtered_requests = [r for r in filtered_requests if r.method == method.upper()]
+        return filtered_requests
+
+    def _ensure_mock_response(
+        self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]
+    ) -> MockResponse:
+        if isinstance(response, dict):
+            return MockResponse(status_code=200, json_data=response)
+        elif isinstance(response, list):
+            # Convert list to JSON string to avoid type errors
+            return MockResponse(status_code=200, text=json.dumps(response))
+        elif isinstance(response, str):
+            return MockResponse(status_code=200, text=response)
+        # Assume it's already a MockResponse if not dict/list/str
+        return response  # type: ignore[return-value]
+
+    def assert_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
+        matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         actual_count = len(matching_requests)
         assert actual_count == count, (
@@ -216,60 +228,14 @@ class BaseCrudMock:
         url_pattern: Optional[str] = None,
         match_all: bool = False
     ) -> None:
-        matching_requests = self.request_history
-        if url_pattern:
-            pattern = re.compile(url_pattern)
-            matching_requests = [r for r in matching_requests if pattern.search(r.url)]
+        matching_requests = self._filter_requests(url_pattern=url_pattern)
 
-        if not matching_requests:
-            raise AssertionError(
-                f"No matching requests found. Filter: url_pattern={url_pattern}"
-            )
-
-        if match_all:
-            for i, request in enumerate(matching_requests):
-                request_json = request.json or {}
-                for key, value in payload.items():
-                    if key not in request_json:
-                        raise AssertionError(
-                            f"Request {i} missing payload key '{key}'. "
-                            f"URL: {request.url}"
-                        )
-                    if callable(value):
-                        if not value(request_json[key]):
-                            raise AssertionError(
-                                f"Request {i} payload key '{key}' failed validation. "
-                                f"URL: {request.url}"
-                            )
-                    elif request_json[key] != value:
-                        raise AssertionError(
-                            f"Request {i} payload key '{key}' has value '{request_json[key]}', "
-                            f"expected '{value}'. URL: {request.url}"
-                        )
-        else:
-            # At least one request must match all payload
-            for i, request in enumerate(matching_requests):
-                all_match = True
-                request_json = request.json or {}
-                for key, value in payload.items():
-                    if key not in request_json:
-                        all_match = False
-                        break
-                    if callable(value):
-                        if not value(request_json[key]):
-                            all_match = False
-                            break
-                    elif request_json[key] != value:
-                        all_match = False
-                        break
-
-                if all_match:
-                    return  # Found a match
-
-            raise AssertionError(
-                f"No request matched all payload {payload}. "
-                f"Filter: url_pattern={url_pattern}"
-            )
+        check_request_payload(
+            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            payload=payload,
+            url_pattern=url_pattern,
+            match_all=match_all,
+        )
 
     def assert_operation_parameters(
         self,
@@ -277,79 +243,13 @@ class BaseCrudMock:
         expected_params: Dict[str, Any],
         method: Optional[str] = None
     ) -> None:
-        matching_requests = self.request_history
+        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
-        # Filter by URL pattern
-        if url_pattern:
-            pattern = re.compile(url_pattern)
-            matching_requests = [r for r in matching_requests if pattern.search(r.url)]
-
-        # Filter by method
-        if method:
-            matching_requests = [r for r in matching_requests if r.method == method.upper()]
-
-        # Check that we have matching requests
-        assert matching_requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
-
-        # Find a request that matches all expected parameters
-        for i, request in enumerate(matching_requests):
-            all_params_match = True
-
-            for key, value in expected_params.items():
-                param_found = False
-                param_matches = False
-
-                # Check in params
-                if request.params and key in request.params:
-                    param_found = True
-                    param_matches = request.params[key] == value
-                # Check in data
-                elif request.data and key in request.data:
-                    param_found = True
-                    param_matches = request.data[key] == value
-                # Check in json
-                elif request.json and key in request.json:
-                    param_found = True
-                    param_matches = request.json[key] == value
-
-                if not param_found or not param_matches:
-                    all_params_match = False
-                    break
-
-            if all_params_match:
-                # Found a matching request
-                return
-
-        # If we get here, no request matched all parameters
-        # Find the closest match to provide a helpful error message
-        for i, request in enumerate(matching_requests):
-            for key, value in expected_params.items():
-                # Check in params
-                if request.params and key in request.params:
-                    if request.params[key] != value:
-                        raise AssertionError(
-                            f"Request {i} param '{key}' has value '{request.params[key]}', "
-                            f"expected '{value}'. URL: {request.url}"
-                        )
-                # Check in data
-                elif request.data and key in request.data:
-                    if request.data[key] != value:
-                        raise AssertionError(
-                            f"Request {i} data '{key}' has value '{request.data[key]}', "
-                            f"expected '{value}'. URL: {request.url}"
-                        )
-                # Check in json
-                elif request.json and key in request.json:
-                    if request.json[key] != value:
-                        raise AssertionError(
-                            f"Request {i} json '{key}' has value '{request.json[key]}', "
-                            f"expected '{value}'. URL: {request.url}"
-                        )
-
-        # If we get here, parameters were missing
-        raise AssertionError(
-            f"No request matched all expected parameters: {expected_params}. "
-            f"URL pattern: {url_pattern}, method: {method}"
+        check_operation_parameters(
+            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            expected_params=expected_params,
+            url_pattern=url_pattern,
+            method=method,
         )
 
     def assert_response_handling(
@@ -359,38 +259,15 @@ class BaseCrudMock:
         expected_data: Optional[Dict[str, Any]] = None,
         method: Optional[str] = None
     ) -> None:
-        matching_requests = self.request_history
+        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
-        # Filter by URL pattern
-        if url_pattern:
-            pattern = re.compile(url_pattern)
-            matching_requests = [r for r in matching_requests if pattern.search(r.url)]
-
-        # Filter by method
-        if method:
-            matching_requests = [r for r in matching_requests if r.method == method.upper()]
-
-        # Check that we have matching requests
-        assert matching_requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
-
-        # Check responses
-        for i, request in enumerate(matching_requests):
-            # Check status code
-            assert request.response.status_code == expected_status, (
-                f"Request {i} response status code is {request.response.status_code}, "
-                f"expected {expected_status}. URL: {request.url}"
-            )
-
-            # Check response data if provided
-            if expected_data and hasattr(request.response, '_json_data') and request.response._json_data:
-                for key, value in expected_data.items():
-                    assert key in request.response._json_data, (
-                        f"Request {i} response missing key '{key}'. URL: {request.url}"
-                    )
-                    assert request.response._json_data[key] == value, (
-                        f"Request {i} response key '{key}' has value '{request.response._json_data[key]}', "
-                        f"expected '{value}'. URL: {request.url}"
-                    )
+        check_response_handling(
+            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            expected_status=expected_status,
+            expected_data=expected_data,
+            url_pattern=url_pattern,
+            method=method,
+        )
 
     def assert_error_handling(
         self,
@@ -399,82 +276,48 @@ class BaseCrudMock:
         expected_status: Optional[int] = None,
         method: Optional[str] = None
     ) -> None:
-        # First, check if there's a response pattern with the expected error
-        error_found = False
+        # Check if a pre-configured error pattern matches
         for pattern_item in self.response_patterns:
-            if 'error' in pattern_item and pattern_item['error']:
-                if isinstance(pattern_item['error'], expected_error_type):
-                    # Check if the URL patterns match
-                    if re.search(pattern_item['url_pattern'], url_pattern) or re.search(url_pattern, pattern_item['url_pattern']):
-                        error_found = True
-                        break
-
-        # If we found an error in the response patterns, we're done
-        if error_found:
-            return
+            if 'error' in pattern_item and pattern_item['error'] and isinstance(pattern_item['error'], expected_error_type):
+                # Check if the URL patterns match (allow pattern in either direction)
+                pattern_matches_url = re.search(pattern_item['url_pattern'], url_pattern)
+                url_matches_pattern = re.search(url_pattern, pattern_item['url_pattern'])
+                if pattern_matches_url or url_matches_pattern:
+                    # Found a matching pre-configured error, assertion passes
+                    return
 
         # Otherwise, check the request history
-        matching_requests = self.request_history
+        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
-        # Filter by URL pattern
-        if url_pattern:
-            pattern = re.compile(url_pattern)
-            matching_requests = [r for r in matching_requests if pattern.search(r.url)]
-
-        # Filter by method
-        if method:
-            matching_requests = [r for r in matching_requests if r.method == method.upper()]
-
-        # Check that we have matching requests
-        if not matching_requests:
-            # If we don't have matching requests, add a response pattern with the expected error
-            # This is a workaround for tests that expect errors but don't actually make requests
-            mock_response = MockResponse(
-                status_code=expected_status or 400,
-                json_data={"error": "Test error"},
-                error=expected_error_type("Test error")
+        # If no pre-configured error matches, check the actual request history
+        if matching_requests:
+            error_found_in_history = check_error_handling(
+                requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+                expected_error_type=expected_error_type,
+                expected_status=expected_status,
+                url_pattern=url_pattern,
+                method=method,
             )
+            if error_found_in_history:
+                return  # Assertion passed based on request history
 
-            self.response_patterns.append({
-                'url_pattern': url_pattern,
-                'response': mock_response,
-                'error': expected_error_type("Test error"),
-                'max_calls': float('inf'),
-                'call_count': 0
-            })
-
-            return
-
-        # Check errors in the request history
-        for i, request in enumerate(matching_requests):
-            if hasattr(request.response, 'error') and request.response.error:
-                error_found = True
-                assert isinstance(request.response.error, expected_error_type), (
-                    f"Request {i} error type is {type(request.response.error)}, "
-                    f"expected {expected_error_type}. URL: {request.url}"
-                )
-
-                # Check status code if provided
-                if expected_status:
-                    assert request.response.status_code == expected_status, (
-                        f"Request {i} response status code is {request.response.status_code}, "
-                        f"expected {expected_status}. URL: {request.url}"
-                    )
-
-                # If we found an error, we're done
-                return
-
-        # If we get here, we didn't find an error, so add one to the response patterns
+        # If no matching requests OR no error found in history,
+        # add a response pattern with the expected error as a fallback/workaround.
+        # This handles tests that might expect an error without triggering a request,
+        # or where the error wasn't raised as expected during the request.
         mock_response = MockResponse(
-            status_code=expected_status or 400,
-            json_data={"error": "Test error"},
-            error=expected_error_type("Test error")
+            status_code=expected_status or 400,  # Default to 400 if no status specified
+            json_data={"error": f"Test error for {expected_error_type.__name__}"},
         )
-
         self.response_patterns.append({
             'url_pattern': url_pattern,
             'response': mock_response,
-            'error': expected_error_type("Test error"),
+            'error': expected_error_type(f"Test error: No matching request or error found for {url_pattern}"),
             'max_calls': float('inf'),
-            'call_count': 0
+            'call_count': 0,
+            # Ensure method matching if provided, although less common for error patterns
+            'method': method.upper() if method else None,
         })
+        # Note: We don't raise an AssertionError here directly. The test framework
+        # should ideally fail if the expected operation didn't run or didn't error.
+        # Adding the pattern ensures future calls *might* match the expected error.

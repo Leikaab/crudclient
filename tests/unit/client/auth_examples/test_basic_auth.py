@@ -5,7 +5,11 @@ This module demonstrates how to use the Basic Authentication mocking utilities
 in real-world testing scenarios.
 """
 
-from .common import AuthenticationError, AuthVerificationHelpers, create_mock_client, pytest
+import pytest
+
+from crudclient.testing.auth import AuthVerificationHelpers
+
+from .common import AuthenticationError, create_mock_client
 
 
 class TestBasicAuthExamples:
@@ -40,13 +44,13 @@ class TestBasicAuthExamples:
         # Verify the auth header was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "Authorization" in request.headers
-        assert request.headers["Authorization"].startswith("Basic ")
+        assert "Authorization" in request['headers']
+        assert request['headers']["Authorization"].startswith("Basic ")
 
         # Use verification helpers
-        assert AuthVerificationHelpers.verify_basic_auth_header(request.headers["Authorization"])
+        assert AuthVerificationHelpers.verify_basic_auth_header(request['headers']["Authorization"])
         username, password = AuthVerificationHelpers.extract_basic_auth_credentials(
-            request.headers["Authorization"]
+            request['headers']["Authorization"]
         )
         assert username == "testuser"
         assert password == "testpass"

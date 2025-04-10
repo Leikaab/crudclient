@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple  # Added Tuple, TYPE_CHECKING
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import ApiKeyAuth
@@ -9,6 +9,9 @@ from .api_key_rate_limiter import ApiKeyRateLimiter
 from .api_key_usage_tracker import ApiKeyUsageTracker
 from .api_key_validator import ApiKeyValidator
 from .base import AuthMockBase
+
+if TYPE_CHECKING:  # Added TYPE_CHECKING block
+    from ..response_builder import MockResponse
 
 
 class ApiKeyAuthMock(AuthMockBase):
@@ -178,3 +181,15 @@ class ApiKeyAuthMock(AuthMockBase):
 
     def get_auth_strategy(self) -> AuthStrategy:
         return self.auth_strategy
+
+    # --- Added Abstract Method Implementations ---
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        if self.header_name and self.api_key:
+            return (self.header_name, self.api_key)
+        # If using param_name, no standard header tuple is returned here.
+        return None
+
+    def handle_auth_error(self, response: 'MockResponse') -> bool:
+        # API keys generally don't have a refresh mechanism
+        return False

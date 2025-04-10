@@ -4,6 +4,8 @@ Tests for the MockHTTPClient class.
 This module tests the functionality of the MockHTTPClient class in crudclient.testing.core.http_client.
 """
 
+import json
+
 import pytest
 
 from crudclient.testing.core.http_client import MockHTTPClient
@@ -151,8 +153,9 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 200
-        # The response content is a dict, not JSON
-        assert response._content == {"key": "value"}
+        # Decode JSON byte string content for comparison
+        assert response._content is not None
+        assert json.loads(response._content.decode('utf-8')) == {"key": "value"}
         assert response.headers["Content-Type"] == "application/json"
         assert response.url == "https://test.example.com/test"
 
@@ -203,8 +206,9 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 200
-        # The response content is a dict, not JSON
-        assert response._content == {"key": "value"}
+        # Decode JSON byte string content for comparison
+        assert response._content is not None
+        assert json.loads(response._content.decode('utf-8')) == {"key": "value"}
 
     def test_post_method(self):
         """Test post method."""
@@ -227,8 +231,9 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 201
-        # The response content is a dict, not JSON
-        assert response._content == {"id": 1, "key": "value"}
+        # Decode JSON byte string content for comparison
+        assert response._content is not None
+        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "value"}
 
     def test_put_method(self):
         """Test put method."""
@@ -251,8 +256,9 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 200
-        # The response content is a dict, not JSON
-        assert response._content == {"id": 1, "key": "updated"}
+        # Decode JSON byte string content for comparison
+        assert response._content is not None
+        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "updated"}
 
     def test_delete_method(self):
         """Test delete method."""
@@ -295,8 +301,9 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 200
-        # The response content is a dict, not JSON
-        assert response._content == {"id": 1, "key": "patched"}
+        # Decode JSON byte string content for comparison
+        assert response._content is not None
+        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "patched"}
 
     def test_response_with_string_data(self):
         """Test response with string data."""
@@ -332,5 +339,5 @@ class TestMockHTTPClient:
 
         # Assert
         assert response.status_code == 204
-        # The implementation returns an empty dict, not bytes
-        assert response._content == {}
+        # When data is None, _content should be None
+        assert response._content is None
