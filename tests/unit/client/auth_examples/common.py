@@ -5,7 +5,6 @@ Common imports and utilities for authentication examples.
 from typing import Any, Dict, List, Optional, Union
 
 from requests.auth import AuthBase
-from crudclient.exceptions import AuthenticationError
 
 from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock
 from crudclient.testing.core.client import MockClient

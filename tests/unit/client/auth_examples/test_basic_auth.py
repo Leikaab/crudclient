@@ -7,9 +7,10 @@ in real-world testing scenarios.
 
 import pytest
 
+from crudclient.exceptions import AuthenticationError
 from crudclient.testing.auth import AuthVerificationHelpers
 
-from .common import AuthenticationError, create_mock_client
+from .common import create_mock_client
 
 
 class TestBasicAuthExamples:

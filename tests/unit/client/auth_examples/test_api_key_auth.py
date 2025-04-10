@@ -7,7 +7,9 @@ in real-world testing scenarios.
 
 import pytest
 
-from .common import AuthenticationError, create_mock_client
+from crudclient.exceptions import AuthenticationError
+
+from .common import create_mock_client
 
 
 class TestApiKeyAuthExamples:
