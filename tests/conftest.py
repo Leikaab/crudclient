@@ -11,6 +11,8 @@ import pytest
 
 # Consider adding 'import xml.etree.ElementTree as ET' if XML parsing/mocking is needed
 
+pytest_plugins = ["tests.unit.fixtures.mock_clients"]
+
 
 @pytest.fixture(scope="session")
 def base_url():

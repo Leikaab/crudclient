@@ -20,9 +20,6 @@ from crudclient.testing.response_builder.response import MockResponse
 from crudclient.testing.verification import Verifier
 
 # Make fixtures from other files available
-pytest_plugins = [
-    "tests.unit.fixtures.mock_clients",
-]
 
 # Update import paths to match the actual module structure
 
