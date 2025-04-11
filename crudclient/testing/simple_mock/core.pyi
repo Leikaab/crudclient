@@ -27,7 +27,7 @@ class SimpleMockClientCore:
     request_history: List[RequestRecord]
     default_response: MockResponse
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the simple mock client.
 

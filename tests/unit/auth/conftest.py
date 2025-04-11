@@ -54,8 +54,8 @@ class MockRefreshableTokenConfig(ClientConfig):
         # Store the auth mock for later access
         self.auth_mock = auth_mock
         self.auth_strategy = auth_mock.get_auth_strategy()
-        self.should_retry_on_403 = lambda: False
-        self.handle_403_retry = MagicMock()
+        self.should_retry_on_403 = lambda: False  # type: ignore[method-assign]
+        self.handle_403_retry = MagicMock()  # type: ignore[method-assign]
 
 
 class MockApiKeyHeaderConfig(ClientConfig):

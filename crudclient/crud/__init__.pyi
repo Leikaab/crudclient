@@ -37,4 +37,4 @@ from .response_conversion import (
     _dump_data,
 )
 
-__all__: list[str]
+__all__ = ["Crud"]

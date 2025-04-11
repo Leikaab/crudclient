@@ -4,7 +4,8 @@ Type definitions for the crudclient testing framework.
 This module provides type definitions and utility classes used throughout the testing framework.
 """
 
-from typing import Any, Dict, List, TypeAlias, Union
+from typing import Any, Dict, List, Union
+from typing_extensions import TypeAlias
 
 from crudclient.testing.response_builder.response import MockResponse
 

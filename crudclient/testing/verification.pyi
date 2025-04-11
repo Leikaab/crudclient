@@ -5,7 +5,8 @@ This module provides high-level verification functions and classes that might
 coordinate verification across different spies (client, auth, crud).
 """
 
-from typing import Any, TypeAlias
+from typing import Any
+from typing_extensions import TypeAlias
 
 from .exceptions import VerificationError
 from .types import SpyTarget

@@ -168,9 +168,6 @@ class Client:
     def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
                  handle_response: Literal[False] = False, **kwargs: Any) -> requests.Response: ...
 
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
-                 handle_response: bool = True, **kwargs: Any) -> Union[RawResponseSimple, requests.Response]: ...
-
     @property
     def session(self) -> requests.Session:
         """

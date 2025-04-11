@@ -82,7 +82,6 @@ class EntityRelationshipBuilder:
         ...
 
 
-@staticmethod
 def _extract_entity_id_from_url(url: str, entity_type: str) -> Tuple[str, Optional[MockResponse]]:
     """
     Extract entity ID from URL or return error response if not possible.
@@ -100,7 +99,6 @@ def _extract_entity_id_from_url(url: str, entity_type: str) -> Tuple[str, Option
     ...
 
 
-@staticmethod
 def _create_entity_not_found_response(entity_type: str, entity_id: str) -> MockResponse:
     """
     Create a standard 404 response for entity not found.
@@ -115,7 +113,6 @@ def _create_entity_not_found_response(entity_type: str, entity_id: str) -> MockR
     ...
 
 
-@staticmethod
 def _create_list_factory(
     entities: List[Dict[str, Any]],
     entity_type: str
@@ -133,7 +130,6 @@ def _create_list_factory(
     ...
 
 
-@staticmethod
 def _create_get_factory(
     entity_map: Dict[str, Dict[str, Any]],
     entity_type: str
@@ -152,7 +148,6 @@ def _create_get_factory(
     ...
 
 
-@staticmethod
 def _create_create_factory(
     entities: List[Dict[str, Any]],
     entity_map: Dict[str, Dict[str, Any]],
@@ -175,7 +170,6 @@ def _create_create_factory(
     ...
 
 
-@staticmethod
 def _create_update_factory(
     entity_map: Dict[str, Dict[str, Any]],
     entity_type: str
@@ -194,7 +188,6 @@ def _create_update_factory(
     ...
 
 
-@staticmethod
 def _create_delete_factory(
     entities: List[Dict[str, Any]],
     entity_map: Dict[str, Dict[str, Any]],
@@ -215,7 +208,6 @@ def _create_delete_factory(
     ...
 
 
-@staticmethod
 def create_consistent_response_sequence(
     entity_type: str,
     base_entities: List[Dict[str, Any]],
@@ -242,5 +234,4 @@ def create_consistent_response_sequence(
         - url: The URL of the request (used to extract IDs for get/update/delete)
         - json: The request body data (used for create/update operations)
     """
-    ...
     ...

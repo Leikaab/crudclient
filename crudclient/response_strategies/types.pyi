@@ -10,7 +10,8 @@ Type Aliases:
     - ResponseTransformer: Type alias for Callable[[Any], Any]
 """
 
-from typing import Any, Callable, Type, TypeAlias
+from typing import Any, Callable, Type
+from typing_extensions import TypeAlias
 
 from ..models import ApiResponse
 

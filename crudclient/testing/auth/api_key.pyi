@@ -51,7 +51,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def with_api_key(self, api_key: str) -> T:
+    def with_api_key(self, api_key: str) -> ApiKeyAuthMock:
         """
         Set the API key for the API Key Auth mock.
 
@@ -63,7 +63,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def with_additional_valid_key(self, api_key: str) -> T:
+    def with_additional_valid_key(self, api_key: str) -> ApiKeyAuthMock:
         """
         Add an additional valid API key.
 
@@ -82,7 +82,7 @@ class ApiKeyAuthMock(AuthMockBase):
         permissions: Optional[List[str]] = None,
         tier: Optional[str] = None,
         expires_in_seconds: Optional[int] = None
-    ) -> T:
+    ) -> ApiKeyAuthMock:
         """
         Set metadata for a specific API key or the current key.
 
@@ -98,7 +98,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def with_key_format_validation(self, pattern: str) -> T:
+    def with_key_format_validation(self, pattern: str) -> ApiKeyAuthMock:
         """
         Set a regex pattern that valid API keys must match.
 
@@ -110,7 +110,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def revoke_key(self, api_key: Optional[str] = None) -> T:
+    def revoke_key(self, api_key: Optional[str] = None) -> ApiKeyAuthMock:
         """
         Revoke a specific API key or the current key.
 
@@ -126,7 +126,7 @@ class ApiKeyAuthMock(AuthMockBase):
         self,
         requests_per_period: int = 100,
         period_seconds: int = 3600
-    ) -> T:
+    ) -> ApiKeyAuthMock:
         """
         Enable rate limiting for API keys.
 
@@ -139,7 +139,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def with_usage_tracking(self) -> T:
+    def with_usage_tracking(self) -> ApiKeyAuthMock:
         """
         Enable usage tracking for API keys.
 
@@ -148,7 +148,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def as_header(self, header_name: str = "X-API-Key") -> T:
+    def as_header(self, header_name: str = "X-API-Key") -> ApiKeyAuthMock:
         """
         Configure the API Key Auth to use a header.
 
@@ -160,7 +160,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def as_param(self, param_name: str = "api_key") -> T:
+    def as_param(self, param_name: str = "api_key") -> ApiKeyAuthMock:
         """
         Configure the API Key Auth to use a query parameter.
 

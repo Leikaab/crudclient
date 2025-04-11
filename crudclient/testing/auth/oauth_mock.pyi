@@ -143,7 +143,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_refresh_token(self, refresh_token: str) -> 'OAuthMock':
+    def with_refresh_token(self, refresh_token: str = ..., max_refresh_attempts: int = ...) -> 'OAuthMock':
         """
         Set the refresh token for the OAuth mock.
 
@@ -155,7 +155,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_expiration(self, expires_in_seconds: int) -> 'OAuthMock':
+    def with_token_expiration(self, expires_in_seconds: int = ...) -> 'OAuthMock':
         """
         Set the token expiration for the OAuth mock.
 

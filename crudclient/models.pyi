@@ -116,4 +116,3 @@ class ApiResponse(BaseModel, Generic[T]):
     def validate_count(cls, v: int) -> int:
         """Validate that count is non-negative."""
         ...
-    data: List[T]

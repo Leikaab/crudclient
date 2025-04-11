@@ -8,7 +8,7 @@ This should be excluded from the line count.
 # This is a comment that should be counted
 
 
-def function1():
+def function1() -> None:
     """
     This is a function docstring.
     It should be counted since it's not a module docstring.
@@ -22,7 +22,7 @@ def function1():
 class TestClass:
     """Class docstring should be counted."""
 
-    def method(self):
+    def method(self) -> bool:
         # This method should be counted
         return True
 

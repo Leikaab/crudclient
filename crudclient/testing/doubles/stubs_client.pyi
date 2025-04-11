@@ -1,9 +1,11 @@
 import json
+import requests
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union, overload
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.types import RawResponseSimple
 
 from .stubs import StubResponse
 
@@ -76,7 +78,7 @@ class StubClient(Client):
         url: Optional[str] = None,
         handle_response: Literal[True] = True,
         **kwargs: Any
-    ) -> str: ...  # Stub always returns str, even if base might return other types
+    ) -> RawResponseSimple: ...
 
     @overload
     def _request(
@@ -84,9 +86,9 @@ class StubClient(Client):
         method: str,
         endpoint: Optional[str] = None,
         url: Optional[str] = None,
-        handle_response: Literal[False] = ...,
+        handle_response: Literal[False] = False,
         **kwargs: Any
-    ) -> str: ...  # Stub always returns str, even if base might return Response obj
+    ) -> requests.Response: ...
 
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         """
@@ -191,38 +193,8 @@ class StubClient(Client):
         """
         ...
 
-    def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: bool = True,
-        **kwargs: Any
-    ) -> str:
-        """
-        Internal method to handle requests, find responses, and simulate conditions.
-
-        Args:
-            method: The HTTP method (e.g., 'GET', 'POST').
-            endpoint: The API endpoint path.
-            url: The full URL (overrides endpoint if provided).
-            handle_response: If True, raise exceptions for simulated errors or bad status codes.
-                             (Note: Stub implementation might simplify behavior compared to base).
-            **kwargs: Additional request parameters (params, data, json, etc.).
-
-        Returns:
-            The response body as a string (usually JSON). The stub implementation
-            always returns a string, regardless of `handle_response`.
-
-        Raises:
-            requests.ConnectionError: If error simulation is triggered.
-            requests.HTTPError: If a StubResponse with a >= 400 status code is returned
-                                and handle_response is True.
-        """
-        ...
-
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
-        """
+        def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+            """
         Simulate a GET request.
 
         Args:
