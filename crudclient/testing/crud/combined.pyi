@@ -1,124 +1,114 @@
 """
-Combined CRUD mock for testing.
+Combined mock implementation for all CRUD operations.
 
-This module provides a combined mock for all CRUD operations (Create, Read, Update, Delete),
-allowing for comprehensive testing of API clients with a single mock object.
+This module provides a unified mock implementation that combines
+the individual Create, Read, Update, and Delete mocks into a single
+interface for testing complete CRUD workflows.
 """
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from .create import CreateMock
 from .delete import DeleteMock
 from .read import ReadMock
 from .update import UpdateMock
+from .request_record import RequestRecord
 
 
 class CombinedCrudMock:
     """
-    Combined mock for all CRUD operations.
+    Combined mock implementation for all CRUD operations.
 
-    This class combines the functionality of CreateMock, ReadMock, UpdateMock, and DeleteMock
-    into a single mock object, allowing for comprehensive testing of API clients that use
-    multiple CRUD operations. It maintains a unified request history and provides methods
-    for asserting request patterns across all operation types.
+    This class provides a unified interface for mocking all CRUD operations,
+    delegating to specialized mocks for each operation type while maintaining
+    a combined request history.
     """
+
+    create_mock: CreateMock
+    read_mock: ReadMock
+    update_mock: UpdateMock
+    delete_mock: DeleteMock
+    request_history: List[RequestRecord]
+    _parent_id_handling: bool
 
     def __init__(self) -> None:
         """
         Initialize the combined CRUD mock.
 
-        Creates instances of all individual CRUD mocks and sets up a unified request history.
+        Creates individual mocks for each CRUD operation and sets up
+        a combined request history.
         """
-        self.create_mock: CreateMock
-        self.read_mock: ReadMock
-        self.update_mock: UpdateMock
-        self.delete_mock: DeleteMock
-        self.request_history: List[Any]
-        self._parent_id_handling: bool
         ...
 
     def get(self, url: str, **kwargs: Any) -> Any:
         """
-        Handle GET requests.
-
-        Delegates to the read_mock and adds the request to the unified history.
+        Handle GET requests by delegating to the read mock.
 
         Args:
-            url: The URL to request
-            **kwargs: Additional request parameters
+            url: The URL to send the GET request to
+            **kwargs: Additional arguments to pass to the request
 
         Returns:
-            The mock response data
+            The response from the read mock
         """
         ...
 
     def post(self, url: str, **kwargs: Any) -> Any:
         """
-        Handle POST requests.
-
-        Delegates to the create_mock and adds the request to the unified history.
+        Handle POST requests by delegating to the create mock.
 
         Args:
-            url: The URL to request
-            **kwargs: Additional request parameters
+            url: The URL to send the POST request to
+            **kwargs: Additional arguments to pass to the request
 
         Returns:
-            The mock response data
+            The response from the create mock
         """
         ...
 
     def put(self, url: str, **kwargs: Any) -> Any:
         """
-        Handle PUT requests.
-
-        Delegates to the update_mock and adds the request to the unified history.
+        Handle PUT requests by delegating to the update mock.
 
         Args:
-            url: The URL to request
-            **kwargs: Additional request parameters
+            url: The URL to send the PUT request to
+            **kwargs: Additional arguments to pass to the request
 
         Returns:
-            The mock response data
+            The response from the update mock
         """
         ...
 
     def patch(self, url: str, **kwargs: Any) -> Any:
         """
-        Handle PATCH requests.
-
-        Delegates to the update_mock and adds the request to the unified history.
+        Handle PATCH requests by delegating to the update mock.
 
         Args:
-            url: The URL to request
-            **kwargs: Additional request parameters
+            url: The URL to send the PATCH request to
+            **kwargs: Additional arguments to pass to the request
 
         Returns:
-            The mock response data
+            The response from the update mock
         """
         ...
 
     def delete(self, url: str, **kwargs: Any) -> Any:
         """
-        Handle DELETE requests.
-
-        Delegates to the delete_mock and adds the request to the unified history.
+        Handle DELETE requests by delegating to the delete mock.
 
         Args:
-            url: The URL to request
-            **kwargs: Additional request parameters
+            url: The URL to send the DELETE request to
+            **kwargs: Additional arguments to pass to the request
 
         Returns:
-            The mock response data
+            The response from the delete mock
         """
         ...
 
     def with_parent_id_handling(self, enabled: bool = True) -> 'CombinedCrudMock':
         """
-        Enable or disable parent_id handling for all CRUD mocks.
-
-        When enabled, the mocks will process parent_id parameters to build
-        URLs in the format 'parents/{parent_id}/{resource_path}'.
+        Enable or disable parent_id handling for all mocks.
 
         Args:
             enabled: Whether to enable parent_id handling
@@ -167,11 +157,8 @@ class CombinedCrudMock:
         """
         Assert that CRUD operations were performed in a specific sequence.
 
-        This method provides a higher-level way to assert operation sequences using
-        operation names like "create", "read", "update", "partial_update", and "delete".
-
         Args:
-            operations: List of operation names in expected sequence
+            operations: List of operation names ('create', 'read', 'update', 'partial_update', 'delete')
             resource_id: Optional resource ID to include in URL patterns for non-create operations
             url_pattern: Optional base URL pattern to match
 

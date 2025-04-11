@@ -160,8 +160,10 @@ def check_response_handling(
         )
 
         # Check response data if provided
-        if expected_data and hasattr(request.response, '_json_data') and request.response._json_data:
-            response_json = request.response._json_data  # Use the internal attribute if that's how it's stored
+        if expected_data:
+            response_json = request.response.json()  # Use the public json() method
+            if not response_json:
+                continue
             for key, value in expected_data.items():
                 assert key in response_json, (
                     f"Request {i} response missing key '{key}'. URL: {request.url}"

@@ -1,10 +1,43 @@
-from typing import Any, Callable, Dict, List, Optional, Type
+"""
+Helper functions for asserting conditions on CRUD mock requests.
+
+This module provides utility functions for checking request payloads,
+operation parameters, response handling, and error handling in CRUD mock tests.
+"""
+
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from crudclient.testing.response_builder.response import MockResponse
 
-# Placeholder for the actual Request object type
-# TODO: Replace 'Any' with the actual Request type if available
-Request = Any
+# Define a Request class that represents the structure of request objects
+# stored in request_history
+
+
+class Request:
+    """
+    Represents a request made to a mock API.
+
+    This class defines the structure of request objects stored in
+    the request_history of CRUD mocks.
+    """
+
+    url: str
+    """The URL of the request"""
+
+    method: str
+    """The HTTP method of the request (GET, POST, PUT, PATCH, DELETE)"""
+
+    params: Optional[Dict[str, Any]]
+    """Query parameters sent with the request"""
+
+    data: Optional[Dict[str, Any]]
+    """Form data sent with the request"""
+
+    json: Optional[Dict[str, Any]]
+    """JSON data sent with the request"""
+
+    response: MockResponse
+    """The response returned for this request"""
 
 
 def check_request_payload(
@@ -14,16 +47,16 @@ def check_request_payload(
     match_all: bool,
 ) -> None:
     """
-    Asserts that requests contain the specified payload.
+    Check that requests were made with a specific payload.
 
     Args:
-        requests: List of filtered request objects to check.
-        payload: Expected payload dictionary. Values can be literals or callables for validation.
-        url_pattern: The URL pattern used for filtering (for error messages).
-        match_all: If True, all requests must match. If False, at least one must match.
+        requests: List of requests to check
+        payload: Expected payload (key-value pairs)
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        match_all: If True, all requests must have the payload; otherwise, at least one must match
 
     Raises:
-        AssertionError: If the payload assertion fails.
+        AssertionError: If no matching request has the expected payload
     """
     ...
 
@@ -35,16 +68,16 @@ def check_operation_parameters(
     method: Optional[str],
 ) -> None:
     """
-    Asserts that requests contain the specified parameters in params, data, or json.
+    Check that operations were called with specific parameters.
 
     Args:
-        requests: List of filtered request objects to check.
-        expected_params: Dictionary of expected parameter key-value pairs.
-        url_pattern: The URL pattern used for filtering (for error messages).
-        method: The HTTP method used for filtering (for error messages).
+        requests: List of requests to check
+        expected_params: Expected parameters (can be in params, data, or json)
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        method: HTTP method used to filter the requests (for error messages)
 
     Raises:
-        AssertionError: If the parameter assertion fails.
+        AssertionError: If no matching requests or parameters don't match
     """
     ...
 
@@ -57,17 +90,17 @@ def check_response_handling(
     method: Optional[str],
 ) -> None:
     """
-    Asserts that requests resulted in responses with the expected status and data.
+    Check that responses were handled correctly.
 
     Args:
-        requests: List of filtered request objects to check.
-        expected_status: The expected HTTP status code.
-        expected_data: Optional dictionary of expected key-value pairs in the response JSON.
-        url_pattern: The URL pattern used for filtering (for error messages).
-        method: The HTTP method used for filtering (for error messages).
+        requests: List of requests to check
+        expected_status: Expected HTTP status code
+        expected_data: Expected response data (optional)
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        method: HTTP method used to filter the requests (for error messages)
 
     Raises:
-        AssertionError: If the response assertion fails.
+        AssertionError: If no matching requests or responses don't match
     """
     ...
 
@@ -80,19 +113,19 @@ def check_error_handling(
     method: Optional[str],
 ) -> bool:
     """
-    Checks if the expected error was handled correctly in the request history.
+    Check that errors were handled correctly.
 
     Args:
-        requests: List of filtered request objects to check.
-        expected_error_type: The expected type of exception.
-        expected_status: The expected HTTP status code associated with the error (optional).
-        url_pattern: The URL pattern used for filtering (for error messages).
-        method: The HTTP method used for filtering (for error messages).
+        requests: List of requests to check
+        expected_error_type: Expected exception type
+        expected_status: Expected HTTP status code (optional)
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        method: HTTP method used to filter the requests (for error messages)
 
     Returns:
-        True if a matching error was found in the request history, False otherwise.
+        True if a matching error was found in the request history, False otherwise
 
     Raises:
-        AssertionError: If an error is found but its type or status code doesn't match.
+        AssertionError: If no matching requests or errors don't match
     """
     ...

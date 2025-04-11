@@ -127,7 +127,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="endpoint must be a string"):
-            client.get(invalid_endpoint)  # type: ignore
+            client.get(invalid_endpoint)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_params", [123, "string", True, []])
     def test_get_invalid_params_type(self, client, invalid_params):
@@ -140,7 +140,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="params must be a dictionary or None"):
-            client.get("/users", params=invalid_params)  # type: ignore
+            client.get("/users", params=invalid_params)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_endpoint", [123, None, True, []])
     def test_post_invalid_endpoint_type(self, client, invalid_endpoint):
@@ -153,7 +153,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="endpoint must be a string"):
-            client.post(invalid_endpoint)  # type: ignore
+            client.post(invalid_endpoint)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_data", [123, "string", True, []])
     def test_post_invalid_data_type(self, client, invalid_data):
@@ -166,7 +166,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="data must be a dictionary or None"):
-            client.post("/users", data=invalid_data)  # type: ignore
+            client.post("/users", data=invalid_data)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_files", [123, "string", True, []])
     def test_post_invalid_files_type(self, client, invalid_files):
@@ -179,7 +179,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="files must be a dictionary or None"):
-            client.post("/users", files=invalid_files)  # type: ignore
+            client.post("/users", files=invalid_files)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_endpoint", [123, None, True, []])
     def test_put_invalid_endpoint_type(self, client, invalid_endpoint):
@@ -192,7 +192,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="endpoint must be a string"):
-            client.put(invalid_endpoint)  # type: ignore
+            client.put(invalid_endpoint)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_data", [123, "string", True, []])
     def test_put_invalid_data_type(self, client, invalid_data):
@@ -205,7 +205,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="data must be a dictionary or None"):
-            client.put("/users/1", data=invalid_data)  # type: ignore
+            client.put("/users/1", data=invalid_data)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_files", [123, "string", True, []])
     def test_put_invalid_files_type(self, client, invalid_files):
@@ -218,7 +218,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="files must be a dictionary or None"):
-            client.put("/users/1", files=invalid_files)  # type: ignore
+            client.put("/users/1", files=invalid_files)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_endpoint", [123, None, True, []])
     def test_delete_invalid_endpoint_type(self, client, invalid_endpoint):
@@ -231,7 +231,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="endpoint must be a string"):
-            client.delete(invalid_endpoint)  # type: ignore
+            client.delete(invalid_endpoint)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_endpoint", [123, None, True, []])
     def test_patch_invalid_endpoint_type(self, client, invalid_endpoint):
@@ -244,7 +244,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="endpoint must be a string"):
-            client.patch(invalid_endpoint)  # type: ignore
+            client.patch(invalid_endpoint)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_data", [123, "string", True, []])
     def test_patch_invalid_data_type(self, client, invalid_data):
@@ -257,7 +257,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="data must be a dictionary or None"):
-            client.patch("/users/1", data=invalid_data)  # type: ignore
+            client.patch("/users/1", data=invalid_data)  # type: ignore # pylance-only
 
     @pytest.mark.parametrize("invalid_files", [123, "string", True, []])
     def test_patch_invalid_files_type(self, client, invalid_files):
@@ -270,7 +270,7 @@ class TestClient:
 
         # WHEN / THEN
         with pytest.raises(TypeError, match="files must be a dictionary or None"):
-            client.patch("/users/1", files=invalid_files)  # type: ignore
+            client.patch("/users/1", files=invalid_files)  # type: ignore # pylance-only
 
     def test_close(self, client):
         """

@@ -46,7 +46,7 @@ class TestApiKeyAuth:
         assert params == {"api_key": "test_key"}
         assert auth.api_key == "test_key"
         assert auth.header_name is None
-        assert auth.param_name == "api_key"
+        assert auth.param_name == "api_key"  # type: ignore[unreachable]
 
     def test_both_header_and_param_auth_raises(self):
         """

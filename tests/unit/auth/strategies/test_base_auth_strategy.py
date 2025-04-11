@@ -18,9 +18,9 @@ class TestBaseAuthStrategy:
         # that the methods are marked as abstract
 
         # Check that prepare_request_headers is an abstract method
-        assert AuthStrategy.prepare_request_headers.__isabstractmethod__
+        assert AuthStrategy.prepare_request_headers.__isabstractmethod__  # type: ignore
 
         # Check that prepare_request_params is an abstract method
-        assert AuthStrategy.prepare_request_params.__isabstractmethod__
+        assert AuthStrategy.prepare_request_params.__isabstractmethod__  # type: ignore
 
         # No need for WHEN/THEN section since we're just checking if methods are abstract

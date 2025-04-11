@@ -68,15 +68,18 @@ class DeleteMock(BaseCrudMock):
             record.response = response_obj
 
             # Return the appropriate response format
-            if hasattr(response_obj, '_json_data') and response_obj._json_data is not None:
-                return response_obj._json_data
+            # Return the appropriate response format
+            json_content = response_obj.json()
+            if json_content is not None:
+                return json_content
             return response_obj.text
 
         # No pattern matched, use default response
         record.response = self.default_response
 
-        if hasattr(self.default_response, '_json_data') and self.default_response._json_data is not None:
-            return self.default_response._json_data
+        default_json = self.default_response.json()
+        if default_json is not None:
+            return default_json
         return self.default_response.text
 
     def with_success(
@@ -111,7 +114,7 @@ class DeleteMock(BaseCrudMock):
         )
 
         # Add to response patterns
-        self.response_patterns.append({  # type: ignore
+        self.response_patterns.append({
             'url_pattern': url_pattern,
             'response': mock_response,
             'error': error_instance,
@@ -219,7 +222,7 @@ class DeleteMock(BaseCrudMock):
         error = CrudClientError("Referential integrity violation: Cannot delete resource with dependencies")
 
         # Add the error response for this URL pattern with the error
-        self.response_patterns.append({  # type: ignore
+        self.response_patterns.append({
             'url_pattern': url_pattern,
             'response': MockResponse(
                 status_code=409,

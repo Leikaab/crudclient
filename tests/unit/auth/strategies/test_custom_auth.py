@@ -77,7 +77,7 @@ class TestCustomAuth:
         assert headers == {}
         assert params == {"custom_param": "param_value"}
         assert auth.header_callback is None
-        assert auth.param_callback == get_params
+        assert auth.param_callback == get_params  # type: ignore[unreachable]
 
     def test_no_callbacks_raises(self):
         """
@@ -97,7 +97,7 @@ class TestCustomAuth:
         """
         # GIVEN
         def get_headers_invalid() -> str:
-            return "not_a_dict"  # type: ignore
+            return "not_a_dict"
 
         auth = CustomAuth(header_callback=get_headers_invalid)  # type: ignore[arg-type]
 
@@ -113,7 +113,7 @@ class TestCustomAuth:
         """
         # GIVEN
         def get_params_invalid() -> list:
-            return ["not_a_dict"]  # type: ignore
+            return ["not_a_dict"]
 
         auth = CustomAuth(param_callback=get_params_invalid)  # type: ignore[call-arg, arg-type]
 

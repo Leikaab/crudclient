@@ -3,17 +3,18 @@ import json
 import re
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
+from requests import PreparedRequest  # Added
+
 from crudclient.testing.response_builder.response import MockResponse
 
-# TODO: Replace 'Any' with the actual Request type used in request_history if available
 from .assertion_helpers import check_error_handling, check_operation_parameters, check_request_payload, check_response_handling
 
 
 class BaseCrudMock:
 
     def __init__(self):
-        self.response_patterns = []
-        self.request_history = []
+        self.response_patterns: List[Dict[str, Any]] = []
+        self.request_history: List[PreparedRequest] = []
         self.default_response = MockResponse(
             status_code=404,
             json_data={"error": "No matching mock response configured"}
@@ -154,11 +155,11 @@ class BaseCrudMock:
 
     def _filter_requests(
         self, url_pattern: Optional[str] = None, method: Optional[str] = None
-    ) -> List[Any]:  # Assuming request_history stores objects with .url and .method
+    ) -> List[PreparedRequest]:
         filtered_requests = self.request_history
         if url_pattern:
             pattern = re.compile(url_pattern)
-            filtered_requests = [r for r in filtered_requests if pattern.search(r.url)]
+            filtered_requests = [r for r in filtered_requests if r.url and pattern.search(r.url)]
         if method:
             filtered_requests = [r for r in filtered_requests if r.method == method.upper()]
         return filtered_requests
@@ -208,7 +209,7 @@ class BaseCrudMock:
 
             url_match = True
             if 'url_pattern' in matcher:
-                url_match = bool(re.search(matcher['url_pattern'], request.url))
+                url_match = bool(request.url and re.search(matcher['url_pattern'], request.url))
 
             if url_match:
                 sequence_idx += 1
@@ -229,7 +230,7 @@ class BaseCrudMock:
         matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         check_request_payload(
-            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            requests=matching_requests,  # type: ignore[arg-type] # Re-add ignore temporarily if needed, but ideally assertion_helpers handles None
             payload=payload,
             url_pattern=url_pattern,
             match_all=match_all,
@@ -244,7 +245,7 @@ class BaseCrudMock:
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
         check_operation_parameters(
-            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            requests=matching_requests,  # type: ignore[arg-type] # Re-add ignore temporarily if needed
             expected_params=expected_params,
             url_pattern=url_pattern,
             method=method,
@@ -260,7 +261,7 @@ class BaseCrudMock:
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
         check_response_handling(
-            requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+            requests=matching_requests,  # type: ignore[arg-type] # Re-add ignore temporarily if needed
             expected_status=expected_status,
             expected_data=expected_data,
             url_pattern=url_pattern,
@@ -290,7 +291,7 @@ class BaseCrudMock:
         # If no pre-configured error matches, check the actual request history
         if matching_requests:
             error_found_in_history = check_error_handling(
-                requests=matching_requests,  # type: ignore[arg-type] # TODO: Fix Request type hint
+                requests=matching_requests,  # type: ignore[arg-type] # Re-add ignore temporarily if needed
                 expected_error_type=expected_error_type,
                 expected_status=expected_status,
                 url_pattern=url_pattern,

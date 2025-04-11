@@ -76,15 +76,15 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
         if isinstance(data, dict) and "custom_items" in data:
             items = data["custom_items"]
             if isinstance(items, list) and self.datamodel:
-                return [self.datamodel(**item) for item in items]  # type: ignore
+                return [self.datamodel(**item) for item in items]  # type: ignore # pylance-only
             return items if isinstance(items, list) else []
         if isinstance(data, list) and self.datamodel:
-            return [self.datamodel(**item) for item in data]  # type: ignore
+            return [self.datamodel(**item) for item in data]  # type: ignore # pylance-only
         if isinstance(data, list):
             return data
         if isinstance(data, dict) and self.api_response_model:
             return self.api_response_model(**data)
-        return [] if not isinstance(data, list) else data  # type: ignore[unreachable]
+        return [] if not isinstance(data, list) else data  # type: ignore[unreachable] # pylance-only
 
 
 class _TestCustomCrud(Crud[_TestModel]):

@@ -9,6 +9,8 @@ import json
 import re
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
+from requests import PreparedRequest  # Added
+
 from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
 
@@ -20,6 +22,9 @@ class BaseCrudMock:
     This class provides common functionality for all CRUD operation mocks,
     including request handling, response configuration, and assertion methods
     for verifying request patterns.
+
+    response_patterns: List[Dict[str, Any]]
+    request_history: List[PreparedRequest]
     """
 
     def __init__(self) -> None:
@@ -139,7 +144,7 @@ class BaseCrudMock:
 
     def _filter_requests(
         self, url_pattern: Optional[str] = None, method: Optional[str] = None
-    ) -> List[Any]:
+    ) -> List[PreparedRequest]:
         """
         Filter the request history based on URL pattern and method.
 
