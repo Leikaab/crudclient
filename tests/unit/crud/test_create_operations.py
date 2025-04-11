@@ -14,7 +14,7 @@ from .conftest import TestCrud, TestModel  # Import fixtures/classes from confte
 
 # Sample data (Consider moving to conftest.py later if shared across more files)
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 
 
 # === Create Operation Tests ===

@@ -5,9 +5,11 @@ This module provides a spy implementation of the Crud class that records
 all method calls for later verification.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from crudclient.crud.base import Crud as CrudBase
+from crudclient.crud.base import Crud as CrudBase, T
+from crudclient.models import ApiResponse
+from crudclient.types import JSONDict, JSONList
 
 from .base import SpyBase
 
@@ -41,7 +43,7 @@ class CrudSpy(CrudBase, SpyBase):
         """
         ...
 
-    def list(self, **kwargs: Any) -> Any:
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Any:  # Return type kept as Any for spy simplicity
         """
         Record and forward a call to list.
 
@@ -72,7 +74,7 @@ class CrudSpy(CrudBase, SpyBase):
         """
         ...
 
-    def create(self, data: Any, **kwargs: Any) -> Any:
+    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Any:  # Return type kept as Any
         """
         Record and forward a call to create.
 
@@ -88,7 +90,7 @@ class CrudSpy(CrudBase, SpyBase):
         """
         ...
 
-    def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
+    def update(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Any:  # Return type kept as Any
         """
         Record and forward a call to update.
 

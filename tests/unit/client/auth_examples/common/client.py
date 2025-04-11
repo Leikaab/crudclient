@@ -72,7 +72,7 @@ class BackwardCompatibleMockClient(MockClient):
         path: str,
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
         **kwargs: Any
     ) -> Any:
         """
@@ -96,7 +96,7 @@ class BackwardCompatibleMockClient(MockClient):
         path: str,
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
         **kwargs: Any
     ) -> Any:
         """
@@ -142,7 +142,7 @@ class BackwardCompatibleMockClient(MockClient):
         path: str,
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
         **kwargs: Any
     ) -> Any:
         """

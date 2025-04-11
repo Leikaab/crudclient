@@ -2,7 +2,7 @@
 Fixtures specific to response strategies tests.
 """
 
-from typing import List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,7 +18,7 @@ class TestModel(BaseModel):
     id: int
     name: str
 
-    def model_dump(self) -> dict:
+    def model_dump(self, **_kwargs: Any) -> dict:
         return {"id": self.id, "name": self.name}
 
 
@@ -39,7 +39,7 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
         # Add custom_items to list_return_keys
         self.list_return_keys = ["items", "data", "results", "custom_items"]
 
-    def convert_single(self, data: Union[JSONDict, JSONList, str]) -> Union[TestModel, JSONDict]:
+    def convert_single(self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]) -> Union[TestModel, JSONDict]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
@@ -58,7 +58,7 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
             return self.datamodel(**data)
         return data if isinstance(data, dict) else {}
 
-    def convert_list(self, data: Union[JSONDict, JSONList, str]) -> Union[List[TestModel], JSONList, ApiResponse]:
+    def convert_list(self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]) -> Union[List[TestModel], JSONList, ApiResponse]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:

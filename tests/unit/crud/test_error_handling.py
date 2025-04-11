@@ -4,6 +4,7 @@ Unit tests for error handling in the CRUD base class operations.
 Covers both generic client errors (network, timeouts) and API errors (4xx, 5xx).
 """
 
+from typing import Type
 from unittest.mock import MagicMock
 
 import pytest
@@ -12,9 +13,11 @@ from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidR
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
-# Sample data (Consider moving to conftest.py later if shared across more files)
+# Removed incorrect ExceptionInfo import
+
+
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 
 
 # === Error Handling Tests (Generic Client Errors) ===
@@ -48,7 +51,7 @@ def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock
 ])
 def test_crud_operation_client_error_4xx(
     test_crud: TestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict,
-    status_code: int, expected_exception: type[CrudClientError], error_payload: dict
+    status_code: int, expected_exception: Type[CrudClientError], error_payload: dict
 ):
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters

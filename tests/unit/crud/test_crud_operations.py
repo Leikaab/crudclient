@@ -28,8 +28,8 @@ from .conftest import TestModel  # Keep if constants use TestModel
 
 # Sample data (Consider moving to conftest.py)
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 SAMPLE_LIST_PAYLOAD = [{"id": 1, "name": "Resource 1"}, {"id": 2, "name": "Resource 2"}]
-SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
+SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]  # type: ignore[arg-type]
 
 # --- All test functions have been moved to separate files ---

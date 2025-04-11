@@ -24,11 +24,13 @@ from ..response_strategies import (
 )
 from ..types import JSONDict, JSONList, RawResponse
 
+# Type alias for path arguments used in endpoint methods
+PathArgs = Optional[Union[str, int]]
+
 T = TypeVar("T", bound=ModelDumpable)
 HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]
 CrudInstance: TypeAlias = "Crud[Any]"
 CrudType: TypeAlias = Type[CrudInstance]
-PathArgs = Optional[Union[str, int]]
 
 
 class Crud(Generic[T]):
@@ -69,33 +71,30 @@ class Crud(Generic[T]):
         """
         ...
 
-    # Methods imported from other modules
-    from .endpoint import (
-        _endpoint_prefix,
-        _validate_path_segments,
-        _get_parent_path,
-        _build_resource_path,
-        _get_prefix_segments,
-        _join_path_segments,
-        _get_endpoint,
-    )
+    # --- Endpoint Methods ---
+    def _endpoint_prefix(self: 'Crud') -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]: ...
+    def _validate_path_segments(self: 'Crud', *args: Optional[Union[str, int]]) -> None: ...
+    def _get_parent_path(self: 'Crud', parent_args: Optional[tuple] = None) -> str: ...
+    def _build_resource_path(self: 'Crud', *args: Optional[Union[str, int]]) -> List[str]: ...
+    def _get_prefix_segments(self: 'Crud') -> List[str]: ...
+    def _join_path_segments(self: 'Crud', segments: List[str]) -> str: ...
+    def _get_endpoint(self: 'Crud', *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str: ...
 
-    from .operations import (
-        list,
-        create,
-        read,
-        update,
-        partial_update,
-        destroy,
-        custom_action,
-    )
+    # --- Operations Methods ---
+    def list(self: 'Crud', parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, List[T], ApiResponse]: ...
+    def create(self: 'Crud', data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
+    def read(self: 'Crud', resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
+    def update(self: 'Crud', resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
+    def partial_update(self: 'Crud', resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
+    def destroy(self: 'Crud', resource_id: str, parent_id: Optional[str] = None) -> None: ...
+    def custom_action(self: 'Crud', action: str, method: str = "post", resource_id: Optional[str] = None, parent_id: Optional[str]
+                      = None, data: Optional[Union[JSONDict, T]] = None, params: Optional[JSONDict] = None) -> Union[T, JSONDict, List[JSONDict]]: ...
 
-    from .response_conversion import (
-        _init_response_strategy,
-        _validate_response,
-        _convert_to_model,
-        _convert_to_list_model,
-        _validate_list_return,
-        _fallback_list_conversion,
-        _dump_data,
-    )
+    # --- Response Conversion Methods ---
+    def _init_response_strategy(self: 'Crud') -> None: ...
+    def _validate_response(self: 'Crud', data: RawResponse) -> Union[JSONDict, JSONList]: ...
+    def _convert_to_model(self: 'Crud', data: RawResponse) -> Union[T, JSONDict]: ...
+    def _convert_to_list_model(self: 'Crud', data: JSONList) -> Union[List[T], JSONList]: ...
+    def _validate_list_return(self: 'Crud', data: RawResponse) -> Union[JSONList, List[T], ApiResponse]: ...
+    def _fallback_list_conversion(self: 'Crud', data: RawResponse) -> Union[JSONList, List[T], ApiResponse]: ...
+    def _dump_data(self: 'Crud', data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict: ...

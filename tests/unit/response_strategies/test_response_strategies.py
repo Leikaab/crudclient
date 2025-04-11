@@ -1,4 +1,4 @@
-from typing import List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ class _TestModel(BaseModel):
     id: int
     name: str
 
-    def model_dump(self) -> dict:
+    def model_dump(self, **_kwargs: Any) -> dict:
         return {"id": self.id, "name": self.name}
 
 
@@ -44,7 +44,7 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
         # Add custom_items to list_return_keys
         self.list_return_keys = ["items", "data", "results", "custom_items"]
 
-    def convert_single(self, data: Union[JSONDict, JSONList, str]) -> Union[_TestModel, JSONDict]:
+    def convert_single(self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]) -> Union[_TestModel, JSONDict]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
@@ -63,7 +63,7 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
             return self.datamodel(**data)
         return data if isinstance(data, dict) else {}
 
-    def convert_list(self, data: Union[JSONDict, JSONList, str]) -> Union[List[_TestModel], JSONList, _TestApiResponse]:
+    def convert_list(self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]) -> Union[List[_TestModel], JSONList, _TestApiResponse]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
@@ -84,7 +84,7 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
             return data
         if isinstance(data, dict) and self.api_response_model:
             return self.api_response_model(**data)
-        return [] if not isinstance(data, list) else data
+        return [] if not isinstance(data, list) else data  # type: ignore[unreachable]
 
 
 class _TestCustomCrud(Crud[_TestModel]):
@@ -95,7 +95,7 @@ class _TestCustomCrud(Crud[_TestModel]):
     def __init__(self, client):
         super().__init__(client)
         # Explicitly create and set the custom strategy
-        self._response_strategy = _TestCustomStrategy(datamodel=self._datamodel)
+        self._response_strategy = _TestCustomStrategy(datamodel=type(self)._datamodel)
 
 # Using client fixture from conftest.py
 
@@ -220,7 +220,7 @@ def test_fallback_to_original_behavior(client, mocker):
     # Create a strategy that will raise an exception
     mock_strategy = mocker.Mock()
     mock_strategy.convert_single.side_effect = ValueError("Test error")
-    crud._strategy = mock_strategy
+    crud._strategy = mock_strategy  # type: ignore[attr-defined]
     test_data = {"id": 1, "name": "Test Item"}
 
     # Act

@@ -193,7 +193,7 @@ class StubClient(Client):
         """
         ...
 
-        def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        def get(self: 'StubClient', endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
             """
         Simulate a GET request.
 

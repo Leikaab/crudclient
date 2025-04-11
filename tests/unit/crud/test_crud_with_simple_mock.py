@@ -7,9 +7,9 @@ from .conftest import TestModel
 
 # Sample data
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 SAMPLE_LIST_PAYLOAD = [{"id": 1, "name": "Resource 1"}, {"id": 2, "name": "Resource 2"}]
-SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
+SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]  # type: ignore[arg-type]
 
 
 def test_list_operation_success(test_crud_with_simple_mock, simple_mock_client):

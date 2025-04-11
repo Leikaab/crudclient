@@ -140,7 +140,7 @@ def rest_mock_client() -> MockClient:
             client.with_response_pattern(
                 method="GET",
                 path_pattern=f"{base_path}$",
-                data=resource_config['list_response']
+                data=resource_config['list_response']  # type: ignore[arg-type]
             )
 
         # Get endpoint
@@ -148,7 +148,7 @@ def rest_mock_client() -> MockClient:
             client.with_response_pattern(
                 method="GET",
                 path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['get_response']
+                data=resource_config['get_response']  # type: ignore[arg-type]
             )
 
         # Create endpoint
@@ -156,7 +156,7 @@ def rest_mock_client() -> MockClient:
             client.with_response_pattern(
                 method="POST",
                 path_pattern=f"{base_path}$",
-                data=resource_config['create_response']
+                data=resource_config['create_response']  # type: ignore[arg-type]
             )
 
         # Update endpoint
@@ -164,7 +164,7 @@ def rest_mock_client() -> MockClient:
             client.with_response_pattern(
                 method="PUT",
                 path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['update_response']
+                data=resource_config['update_response']  # type: ignore[arg-type]
             )
 
         # Delete endpoint
@@ -172,7 +172,7 @@ def rest_mock_client() -> MockClient:
             client.with_response_pattern(
                 method="DELETE",
                 path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['delete_response']
+                data=resource_config['delete_response']  # type: ignore[arg-type]
             )
 
     # Add error responses

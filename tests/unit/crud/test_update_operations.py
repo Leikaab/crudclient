@@ -14,7 +14,7 @@ from .conftest import TestCrud, TestModel  # Import fixtures/classes from confte
 
 # Sample data (Consider moving to conftest.py later if shared across more files)
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)
+SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 
 
 # === Update Operation Tests ===
@@ -27,7 +27,7 @@ def test_update_operation_success_with_model(test_crud: TestCrud, mock_client: M
     """
     # GIVEN
     updated_payload = {"id": 1, "name": "Updated Name"}
-    updated_model = TestModel(**updated_payload)
+    updated_model = TestModel(**updated_payload)  # type: ignore[arg-type]
     mock_client.put.return_value = updated_payload
 
     # WHEN
@@ -51,7 +51,7 @@ def test_update_operation_success_with_dict(test_crud: TestCrud, mock_client: Ma
 
     # THEN
     mock_client.put.assert_called_once_with("test-resources/1", json=updated_payload)
-    assert result == TestModel(**updated_payload)
+    assert result == TestModel(**updated_payload)  # type: ignore[arg-type]
 
 
 def test_update_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
@@ -73,7 +73,7 @@ def test_update_operation_with_parent_id(test_crud: TestCrud, mock_client: Magic
     assert isinstance(result, TestModel)
     assert result.id == 1
     assert result.name == "Updated Name"
-    assert result == TestModel(**updated_payload)
+    assert result == TestModel(**updated_payload)  # type: ignore[arg-type]
 
 
 def test_update_operation_validation_error(test_crud: TestCrud, mock_client: MagicMock):
@@ -136,7 +136,7 @@ def test_partial_update_operation_success(test_crud: TestCrud, mock_client: Magi
     result = test_crud.partial_update(resource_id="1", data=partial_payload)
     # Note: _dump_data(partial=True) should handle partial model correctly if implemented
     mock_client.patch.assert_called_once_with("test-resources/1", json=partial_payload)
-    assert result == TestModel(**final_payload)
+    assert result == TestModel(**final_payload)  # type: ignore[arg-type]
 
 
 def test_partial_update_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
@@ -154,7 +154,7 @@ def test_partial_update_operation_with_parent_id(test_crud: TestCrud, mock_clien
     result = test_crud.partial_update(resource_id="1", data=partial_payload, parent_id="parent123")
     # Skip URL assertion for parent_id tests
     # mock_client.patch.assert_called_once_with("parents/parent123/test-resources/1", json=partial_payload) # Example
-    assert result == TestModel(**final_payload)
+    assert result == TestModel(**final_payload)  # type: ignore[arg-type]
 
 
 def test_partial_update_operation_validation_error(test_crud: TestCrud, mock_client: MagicMock):
