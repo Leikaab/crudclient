@@ -1,16 +1,30 @@
-from typing import Any
+from typing import Any, List, TypeVar, Union, cast
 
 from .exceptions import VerificationError
-from .types import SpyTarget  # Keep the import for documentation purposes # noqa: F401
+from .types import SpyTarget  # Keep the import for documentation purposes
+
+# Type variable for target objects
+T = TypeVar('T', bound=Union[SpyTarget, object])
 
 
 class Verifier:
     @staticmethod
-    def verify_called_with(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def _check_target_has_calls(target: T) -> SpyTarget:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
+        return cast(SpyTarget, target)
 
-        for call in target.calls:
+    @staticmethod
+    def _format_args_string(*args: Any, **kwargs: Any) -> str:
+        args_str = ", ".join(str(arg) for arg in args)
+        kwargs_str = ", ".join(f"{key}={value}" for key, value in kwargs.items())
+        return ", ".join(filter(None, [args_str, kwargs_str]))
+
+    @staticmethod
+    def verify_called_with(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
+        spy_target = Verifier._check_target_has_calls(target)
+
+        for call in spy_target.calls:
             if call.method_name == method_name:
                 # Check positional arguments
                 if len(args) > 0 and call.args != args:
@@ -22,20 +36,16 @@ class Verifier:
 
                 return True
 
-        args_str = ", ".join(str(arg) for arg in args)
-        kwargs_str = ", ".join(f"{key}={value}" for key, value in kwargs.items())
-        all_args = ", ".join(filter(None, [args_str, kwargs_str]))
-
+        all_args = Verifier._format_args_string(*args, **kwargs)
         raise VerificationError(f"Method {method_name} was not called with arguments ({all_args})")
 
     @staticmethod
-    def verify_called_once_with(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
-        if not hasattr(target, "calls"):
-            raise VerificationError(f"Target object {target} does not have 'calls' attribute")
+    def verify_called_once_with(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
+        spy_target = Verifier._check_target_has_calls(target)
 
-        matching_calls = []
+        matching_calls: List[Any] = []
 
-        for call in target.calls:
+        for call in spy_target.calls:
             if call.method_name == method_name:
                 # Check positional arguments
                 if len(args) > 0 and call.args != args:
@@ -50,46 +60,41 @@ class Verifier:
         if len(matching_calls) == 1:
             return True
 
-        args_str = ", ".join(str(arg) for arg in args)
-        kwargs_str = ", ".join(f"{key}={value}" for key, value in kwargs.items())
-        all_args = ", ".join(filter(None, [args_str, kwargs_str]))
+        all_args = Verifier._format_args_string(*args, **kwargs)
 
         if len(matching_calls) == 0:
             raise VerificationError(f"Method {method_name} was not called with arguments ({all_args})")
         else:
             raise VerificationError(
-                f"Method {method_name} was called {len(matching_calls)} times with arguments ({all_args}), " f"expected exactly once"
+                f"Method {method_name} was called {len(matching_calls)} times with arguments ({all_args}), expected exactly once"
             )
 
     @staticmethod
-    def verify_not_called(target: Any, method_name: str) -> bool:
-        if not hasattr(target, "calls"):
-            raise VerificationError(f"Target object {target} does not have 'calls' attribute")
+    def verify_not_called(target: Union[SpyTarget, object], method_name: str) -> bool:
+        spy_target = Verifier._check_target_has_calls(target)
 
-        for call in target.calls:
+        for call in spy_target.calls:
             if call.method_name == method_name:
                 raise VerificationError(f"Method {method_name} was called")
 
         return True
 
     @staticmethod
-    def verify_call_count(target: Any, method_name: str, count: int) -> bool:
-        if not hasattr(target, "calls"):
-            raise VerificationError(f"Target object {target} does not have 'calls' attribute")
+    def verify_call_count(target: Union[SpyTarget, object], method_name: str, count: int) -> bool:
+        spy_target = Verifier._check_target_has_calls(target)
 
-        actual_count = sum(1 for call in target.calls if call.method_name == method_name)
+        actual_count = sum(1 for call in spy_target.calls if call.method_name == method_name)
 
         if actual_count != count:
-            raise VerificationError(f"Method {method_name} was called {actual_count} times, " f"expected {count} times")
+            raise VerificationError(f"Method {method_name} was called {actual_count} times, expected {count} times")
 
         return True
 
     @staticmethod
-    def verify_any_call(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
-        if not hasattr(target, "calls"):
-            raise VerificationError(f"Target object {target} does not have 'calls' attribute")
+    def verify_any_call(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
+        spy_target = Verifier._check_target_has_calls(target)
 
-        for call in target.calls:
+        for call in spy_target.calls:
             if call.method_name == method_name:
                 # Check positional arguments
                 if len(args) > 0 and call.args != args:
@@ -101,8 +106,5 @@ class Verifier:
 
                 return True
 
-        args_str = ", ".join(str(arg) for arg in args)
-        kwargs_str = ", ".join(f"{key}={value}" for key, value in kwargs.items())
-        all_args = ", ".join(filter(None, [args_str, kwargs_str]))
-
+        all_args = Verifier._format_args_string(*args, **kwargs)
         raise VerificationError(f"Method {method_name} was not called with arguments ({all_args})")
