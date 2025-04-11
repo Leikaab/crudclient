@@ -81,12 +81,7 @@ class MockClient:
         # Delegate to the underlying HTTP client
         self.http_client.with_network_condition(latency_ms=latency_ms)
 
-    # --- Added Stub Method ---
     def with_rate_limiter(self, limit: int, window_seconds: int) -> None:
-        # Docstring moved to .pyi file
-        # Placeholder: Actual implementation might involve http_client or a separate module
-        # For now, just acknowledge the call.
-        # In a real scenario, this might configure self.http_client
         print(f"MockClient: Rate limiting configured (limit={limit}, window={window_seconds}s). Not enforced by this stub.")
         # Example of potential delegation:
         # if hasattr(self.http_client, 'with_rate_limiter'):
@@ -193,9 +188,7 @@ class MockClient:
             f"Expected no matching requests, but found {actual_count}. " f"Filters: method={method}, path_pattern={path_pattern}"
         )
 
-    # --- Moved Method ---
     def assert_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
-        # Docstring moved to .pyi file
         actual_count = len(self.request_history)
         expected_count = len(expected_sequence)
         assert actual_count == expected_count, f"Expected {expected_count} requests, but found {actual_count}."
@@ -211,16 +204,13 @@ class MockClient:
             # This is a basic stub; a full implementation might involve deep comparison
             # or delegate to a helper in crudclient.testing.verification
 
-    # --- Moved Method ---
     def assert_request_params(
         self,
         expected_params: Dict[str, str],
         method: Optional[HttpMethod] = None,
-        url_pattern: Optional[str] = None,  # Note: param name differs from pyi (path_pattern)
+        path_pattern: Optional[str] = None,
     ) -> None:
-        # Docstring moved to .pyi file
-        # Note: Parameter name mismatch 'url_pattern' vs 'path_pattern' in pyi
-        matching_requests = self._filter_requests(method=method, path_pattern=url_pattern)
+        matching_requests = self._filter_requests(method=method, path_pattern=path_pattern)
 
         found_match = False
         for request in matching_requests:
@@ -230,24 +220,19 @@ class MockClient:
                 found_match = True
                 break
 
-        assert found_match, f"Expected request with params {expected_params} not found. " f"Filters: method={method}, url_pattern={url_pattern}"
+        assert found_match, f"Expected request with params {expected_params} not found. " f"Filters: method={method}, path_pattern={path_pattern}"
 
-    # --- Moved Method ---
     def create_paginated_response(
         self,
         items: List[Any],
-        page_size: int,  # Note: Builder uses 'per_page', test uses 'page_size'
+        per_page: int,
         base_url: str,
-        page: int = 1,  # Add page parameter, default to 1
-    ) -> MockResponse:  # Return type is MockResponse
-        # Docstring moved to .pyi file
-        # Call the static method from the imported builder
-        # Need to map 'page_size' to 'per_page'
+        page: int = 1,
+    ) -> MockResponse:
         return PaginationResponseBuilder.create_paginated_response(
-            items=items, page=page, per_page=page_size, base_url=base_url  # Map page_size to per_page
+            items=items, page=page, per_page=per_page, base_url=base_url
         )
 
-    # --- Moved Method ---
     def _filter_requests(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> List[Dict[str, Any]]:
         result = self.request_history
 
@@ -265,7 +250,6 @@ class MockClient:
 
         return result
 
-    # --- Moved and Corrected Indentation ---
     def reset(self) -> None:
         self.request_history = []
         # Reset the HTTP client if it has a reset method

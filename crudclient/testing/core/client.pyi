@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
 
+from ..response_builder.response import MockResponse
 from ..types import (
     Headers,
     HttpMethod,
@@ -20,6 +21,7 @@ from ..types import (
     ResponseBody,
     StatusCode,
 )
+
 
 class MockClient:
     """
@@ -42,13 +44,21 @@ class MockClient:
     _auth_strategy: Optional[AuthStrategy]
     request_history: List[Dict[str, Any]]
 
-    def __init__(self, http_client: Any, base_url: str = "https://api.example.com", enable_spy: bool = False, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        http_client: Any,
+        base_url: Optional[str] = None,
+        config: Optional[ClientConfig] = None,
+        enable_spy: bool = False,
+        **kwargs: Any
+    ) -> None:
         """
         Initialize a new MockClient.
 
         Args:
             http_client: The HTTP client to use for making requests.
-            base_url: The base URL for the mock client.
+            base_url: The base URL for the mock client. If not provided, it will be derived from http_client.
+            config: Optional configuration for the client. If not provided, a default one will be created.
             enable_spy: Whether to enable spying on the mock client.
             **kwargs: Additional keyword arguments.
         """
@@ -144,31 +154,32 @@ class MockClient:
         """
         ...
 
-    def assert_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, url_pattern: Optional[str] = None) -> None:
+    def assert_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, path_pattern: Optional[str] = None) -> None:
         """
         Assert that a request was made with the expected parameters.
 
         Args:
             expected_params: The expected query parameters.
             method: Optional HTTP method to filter by.
-            url_pattern: Optional URL pattern to filter by.
+            path_pattern: Optional path pattern to filter by.
 
         Raises:
             AssertionError: If no matching request was made with the expected parameters.
         """
         ...
 
-    def create_paginated_response(self, items: List[Any], page_size: int, base_url: str) -> Any:
+    def create_paginated_response(self, items: List[Any], per_page: int, base_url: str, page: int = 1) -> MockResponse:
         """
         Create a paginated response helper.
 
         Args:
             items: The items to paginate.
-            page_size: The number of items per page.
+            per_page: The number of items per page.
             base_url: The base URL for pagination links.
+            page: The current page number (default: 1).
 
         Returns:
-            A paginator object that can be used to get paginated responses.
+            A MockResponse object with paginated data.
         """
         ...
 
