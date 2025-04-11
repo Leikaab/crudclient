@@ -51,7 +51,7 @@ class MockHTTPClient:
         status_code: StatusCode = 200,
         data: Optional[ResponseBody] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         """
         Configure a response for a specific request with an exact path match.
@@ -76,7 +76,7 @@ class MockHTTPClient:
         status_code: StatusCode = 200,
         data: Optional[ResponseBody] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         """
         Configure a response for requests matching a path pattern (regex).
@@ -97,7 +97,7 @@ class MockHTTPClient:
 
     def with_network_condition(
         self,
-        latency_ms: float = 0.0
+        latency_ms: float = 0.0,
         # Future: packet_loss_rate: float = 0.0
     ) -> None:
         """
@@ -113,11 +113,7 @@ class MockHTTPClient:
         """
         ...
 
-    def _get_configured_response(
-        self,
-        method: HttpMethod,
-        path: str
-    ) -> Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]:
+    def _get_configured_response(self, method: HttpMethod, path: str) -> Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]:
         """
         Find a configured response, checking exact matches first, then patterns (LIFO).
 
@@ -141,7 +137,7 @@ class MockHTTPClient:
         headers: Optional[Headers] = None,
         params: Optional[QueryParams] = None,
         data: Optional[RequestBody] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Response:
         """
         Make a mock HTTP request, applying configured responses and network conditions.
@@ -163,16 +159,9 @@ class MockHTTPClient:
             ValueError: If network conditions are invalid (e.g., negative latency).
         """
         ...
-
     # Convenience methods for common HTTP methods
 
-    def get(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        **kwargs: Any
-    ) -> Response:
+    def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Response:
         """
         Make a mock GET request.
 
@@ -188,12 +177,7 @@ class MockHTTPClient:
         ...
 
     def post(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
         """
         Make a mock POST request.
@@ -211,12 +195,7 @@ class MockHTTPClient:
         ...
 
     def put(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
         """
         Make a mock PUT request.
@@ -233,13 +212,7 @@ class MockHTTPClient:
         """
         ...
 
-    def delete(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        **kwargs: Any
-    ) -> Response:
+    def delete(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Response:
         """
         Make a mock DELETE request.
 
@@ -255,12 +228,7 @@ class MockHTTPClient:
         ...
 
     def patch(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
         """
         Make a mock PATCH request.

@@ -30,11 +30,7 @@ def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     ...
 
-
-def _add_error_responses(
-    client: MockClient,
-    error_configs: Dict[str, Any]
-) -> None:
+def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> None:
     """
     Add common error responses to a mock client.
 
@@ -51,11 +47,7 @@ def _add_error_responses(
     """
     ...
 
-
-def _configure_auth_mock(
-    auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyAuthMock, CustomAuthMock, OAuthMock],
-    config: Dict[str, Any]
-) -> None:
+def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyAuthMock, CustomAuthMock, OAuthMock], config: Dict[str, Any]) -> None:
     """
     Configure an authentication mock with behavior settings.
 

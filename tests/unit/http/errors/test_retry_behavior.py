@@ -32,14 +32,8 @@ class TestHttpClientNetworkErrorRetries:
         retry_handler = RetryHandler(
             max_retries=3,
             retry_conditions=[
-                RetryCondition(
-                    exceptions=[
-                        requests.exceptions.ConnectionError,
-                        requests.exceptions.Timeout,
-                        requests.exceptions.SSLError
-                    ]
-                )
-            ]
+                RetryCondition(exceptions=[requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.SSLError])
+            ],
         )
 
         # Create an HTTP client with the custom retry handler
@@ -223,7 +217,7 @@ class TestHttpClientNetworkErrorRetries:
         mock_request.get(url, exc=requests.exceptions.ConnectionError("Connection refused"))
 
         # Patch the time.sleep function to track delays
-        with patch('time.sleep') as mock_sleep:
+        with patch("time.sleep") as mock_sleep:
             # Make a request that will fail all retry attempts
             with pytest.raises(CrudClientError):
                 retry_client.get("/users")

@@ -31,9 +31,7 @@ class CustomAuthMock(AuthMockBase):
     param_validators: Dict[str, Callable[[str], bool]]
 
     def __init__(
-        self,
-        header_callback: Optional[Callable[[], Dict[str, str]]] = None,
-        param_callback: Optional[Callable[[], Dict[str, str]]] = None
+        self, header_callback: Optional[Callable[[], Dict[str, str]]] = None, param_callback: Optional[Callable[[], Dict[str, str]]] = None
     ) -> None:
         """
         Initialize a Custom Authentication mock.
@@ -44,7 +42,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
+    def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
         """
         Set the header callback for the Custom Auth mock.
 
@@ -56,7 +54,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
+    def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
         """
         Set the parameter callback for the Custom Auth mock.
 
@@ -68,7 +66,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_expected_header(self, name: str, value: str) -> 'CustomAuthMock':
+    def with_expected_header(self, name: str, value: str) -> "CustomAuthMock":
         """
         Set an expected header for validation.
 
@@ -81,7 +79,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_expected_param(self, name: str, value: str) -> 'CustomAuthMock':
+    def with_expected_param(self, name: str, value: str) -> "CustomAuthMock":
         """
         Set an expected parameter for validation.
 
@@ -94,7 +92,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_required_header(self, name: str) -> 'CustomAuthMock':
+    def with_required_header(self, name: str) -> "CustomAuthMock":
         """
         Add a required header for validation.
 
@@ -106,7 +104,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_required_param(self, name: str) -> 'CustomAuthMock':
+    def with_required_param(self, name: str) -> "CustomAuthMock":
         """
         Add a required parameter for validation.
 
@@ -118,7 +116,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
+    def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
         """
         Add a custom validator for a header.
 
@@ -131,7 +129,7 @@ class CustomAuthMock(AuthMockBase):
         """
         ...
 
-    def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
+    def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
         """
         Add a custom validator for a parameter.
 

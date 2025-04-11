@@ -9,15 +9,8 @@ class SpyAssertionsMixin:
     def assert_not_called(self: Any, method_name: str) -> None:
         assert not self.was_called(method_name), f"Method {method_name} was called"
 
-    def assert_called_with(
-        self: Any,
-        method_name: str,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:
-        assert self.was_called_with(method_name, *args, **kwargs), (
-            f"Method {method_name} was not called with args={args}, kwargs={kwargs}"
-        )
+    def assert_called_with(self: Any, method_name: str, *args: Any, **kwargs: Any) -> None:
+        assert self.was_called_with(method_name, *args, **kwargs), f"Method {method_name} was not called with args={args}, kwargs={kwargs}"
 
     def assert_called_once(self: Any, method_name: str) -> None:
         call_count = self.get_call_count(method_name)
@@ -27,11 +20,7 @@ class SpyAssertionsMixin:
         call_count = self.get_call_count(method_name)
         assert call_count == count, f"Method {method_name} was called {call_count} times, expected {count}"
 
-    def assert_called_with_params_matching(
-        self: Any,
-        method_name: str,
-        param_matcher: Callable[[Dict[str, Any]], bool]
-    ) -> None:
+    def assert_called_with_params_matching(self: Any, method_name: str, param_matcher: Callable[[Dict[str, Any]], bool]) -> None:
         if not self.was_called(method_name):
             raise AssertionError(f"Method {method_name} was not called")
 
@@ -90,6 +79,4 @@ class SpyAssertionsMixin:
         # Use the public get_calls()
         for call in self.get_calls():
             if call.exception is not None:
-                raise AssertionError(
-                    f"Method {call.method_name} raised an exception: {call.exception}"
-                )
+                raise AssertionError(f"Method {call.method_name} raised an exception: {call.exception}")

@@ -14,16 +14,12 @@ class FakeCrud:
     Simulates database operations using an in-memory DataStore.
     Supports standard CRUD operations, filtering, pagination, and bulk operations.
     """
+
     database: DataStore
     collection: str
     model: Optional[Type[Any]]
 
-    def __init__(
-        self,
-        database: DataStore,
-        collection: str,
-        model: Optional[Type[Any]] = None
-    ) -> None:
+    def __init__(self, database: DataStore, collection: str, model: Optional[Type[Any]] = None) -> None:
         """
         Initialize a FakeCrud instance.
 
@@ -166,7 +162,6 @@ class FakeCrud:
         """
         ...
 
-
 class FakeAPI(API):
     """
     A mock implementation of the API class for testing purposes.
@@ -175,16 +170,12 @@ class FakeAPI(API):
     that operate on a DataStore. Useful for testing without making
     actual HTTP requests.
     """
+
     client_class: Type[Client]
     database: DataStore
     endpoints: Dict[str, FakeCrud]
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        client_config: Optional[ClientConfig] = None,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         """
         Initialize a FakeAPI instance.
 
@@ -195,13 +186,7 @@ class FakeAPI(API):
         """
         ...
 
-    def register_endpoint(
-        self,
-        name: str,
-        endpoint: str,
-        model: Optional[Type[Any]] = None,
-        **kwargs: Any
-    ) -> FakeCrud:
+    def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> FakeCrud:
         """
         Register a new endpoint with the API.
 
@@ -216,13 +201,7 @@ class FakeAPI(API):
         """
         ...
 
-    def define_relationship(
-        self,
-        source_collection: str,
-        target_collection: str,
-        relationship_type: str,
-        **kwargs: Any
-    ) -> 'FakeAPI':
+    def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "FakeAPI":
         """
         Define a relationship between two collections.
 
@@ -237,13 +216,7 @@ class FakeAPI(API):
         """
         ...
 
-    def add_validation_rule(
-        self,
-        field: str,
-        validator_func: Any,
-        error_message: str,
-        collection: Optional[str] = None
-    ) -> 'FakeAPI':
+    def add_validation_rule(self, field: str, validator_func: Any, error_message: str, collection: Optional[str] = None) -> "FakeAPI":
         """
         Add a validation rule for a field.
 
@@ -259,11 +232,8 @@ class FakeAPI(API):
         ...
 
     def add_unique_constraint(
-        self,
-        fields: Union[str, List[str]],
-        error_message: Optional[str] = None,
-        collection: Optional[str] = None
-    ) -> 'FakeAPI':
+        self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
+    ) -> "FakeAPI":
         """
         Add a unique constraint for one or more fields.
 
@@ -277,7 +247,7 @@ class FakeAPI(API):
         """
         ...
 
-    def set_timestamp_tracking(self, enabled: bool) -> 'FakeAPI':
+    def set_timestamp_tracking(self, enabled: bool) -> "FakeAPI":
         """
         Enable or disable automatic timestamp tracking.
 

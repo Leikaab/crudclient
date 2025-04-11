@@ -21,7 +21,7 @@ class OAuthMock(AuthMockBase):
         token_url: str = "https://example.com/oauth/token",
         authorize_url: Optional[str] = "https://example.com/oauth/authorize",
         redirect_uri: Optional[str] = "https://app.example.com/callback",
-        scope: Optional[str] = "read write"
+        scope: Optional[str] = "read write",
     ):
         super().__init__()
         self.client_id = client_id
@@ -40,36 +40,34 @@ class OAuthMock(AuthMockBase):
         self.token_manager.initialize_default_token(client_id, scope)
 
         # Create auth strategy
-        self.auth_strategy = CustomAuth(
-            header_callback=lambda: {"Authorization": f"Bearer {self.token_manager.current_access_token}"}
-        )
+        self.auth_strategy = CustomAuth(header_callback=lambda: {"Authorization": f"Bearer {self.token_manager.current_access_token}"})
 
-    def with_client_credentials(self, client_id: str, client_secret: str) -> 'OAuthMock':
+    def with_client_credentials(self, client_id: str, client_secret: str) -> "OAuthMock":
         self.client_id = client_id
         self.client_secret = client_secret
         return self
 
-    def with_token_url(self, token_url: str) -> 'OAuthMock':
+    def with_token_url(self, token_url: str) -> "OAuthMock":
         self.token_url = token_url
         return self
 
-    def with_authorize_url(self, authorize_url: str) -> 'OAuthMock':
+    def with_authorize_url(self, authorize_url: str) -> "OAuthMock":
         self.authorize_url = authorize_url
         return self
 
-    def with_redirect_uri(self, redirect_uri: str) -> 'OAuthMock':
+    def with_redirect_uri(self, redirect_uri: str) -> "OAuthMock":
         self.redirect_uri = redirect_uri
         return self
 
-    def with_scope(self, scope: str) -> 'OAuthMock':
+    def with_scope(self, scope: str) -> "OAuthMock":
         self.scope = scope
         return self
 
-    def with_grant_type(self, grant_type: str) -> 'OAuthMock':
+    def with_grant_type(self, grant_type: str) -> "OAuthMock":
         self.grant_handler.set_default_grant_type(grant_type)
         return self
 
-    def with_access_token(self, access_token: str) -> 'OAuthMock':
+    def with_access_token(self, access_token: str) -> "OAuthMock":
         # Create a new token with the specified value
         now = datetime.now()
         self.token_manager.access_tokens[access_token] = {
@@ -77,46 +75,44 @@ class OAuthMock(AuthMockBase):
             "scope": self.scope,
             "expires_at": now + timedelta(hours=1),
             "token_type": "Bearer",
-            "grant_type": self.grant_handler.grant_type
+            "grant_type": self.grant_handler.grant_type,
         }
 
         # Update the current token
         self.token_manager.current_access_token = access_token
 
         # Update the auth strategy
-        self.auth_strategy = CustomAuth(
-            header_callback=lambda: {"Authorization": f"Bearer {access_token}"}
-        )
+        self.auth_strategy = CustomAuth(header_callback=lambda: {"Authorization": f"Bearer {access_token}"})
 
         return self
 
-    def with_refresh_token(self, refresh_token: str) -> 'OAuthMock':
+    def with_refresh_token(self, refresh_token: str) -> "OAuthMock":
         # Link the refresh token to the current access token
         self.token_manager.refresh_tokens[refresh_token] = self.token_manager.current_access_token
         self.token_manager.current_refresh_token = refresh_token
 
         return self
 
-    def with_token_expiration(self, expires_in_seconds: int) -> 'OAuthMock':
+    def with_token_expiration(self, expires_in_seconds: int) -> "OAuthMock":
         # Update the expiration time for the current token
         token_data = self.token_manager.access_tokens[self.token_manager.current_access_token]
         token_data["expires_at"] = datetime.now() + timedelta(seconds=expires_in_seconds)
 
         return self
 
-    def with_expired_token(self) -> 'OAuthMock':
+    def with_expired_token(self) -> "OAuthMock":
         # Set the token to expire in the past
         return self.with_token_expiration(-3600)
 
-    def with_required_scopes(self, scopes: List[str]) -> 'OAuthMock':
+    def with_required_scopes(self, scopes: List[str]) -> "OAuthMock":
         self.scope_validator.set_required_scopes(scopes)
         return self
 
-    def with_available_scopes(self, scopes: List[str]) -> 'OAuthMock':
+    def with_available_scopes(self, scopes: List[str]) -> "OAuthMock":
         self.scope_validator.set_available_scopes(scopes)
         return self
 
-    def with_user(self, username: str, password: str, scopes: List[str]) -> 'OAuthMock':
+    def with_user(self, username: str, password: str, scopes: List[str]) -> "OAuthMock":
         self.token_manager.add_user(username, password, scopes)
         return self
 
@@ -145,7 +141,7 @@ class OAuthMock(AuthMockBase):
             return None
         return ("Authorization", f"Bearer {token}")
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         # Check if the error is likely due to token expiration and if we can refresh
         if self.is_token_expired() and self.can_refresh_token():
             # Attempt to refresh using the base class simulation

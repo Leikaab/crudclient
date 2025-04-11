@@ -2,11 +2,7 @@
 from typing import Any, Dict, List, Tuple, Union
 
 
-def apply_sorting(
-    data: List[Dict[str, Any]],
-    sort_by: Union[str, List[str]],
-    sort_desc: Union[bool, List[bool]]
-) -> List[Dict[str, Any]]:
+def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], sort_desc: Union[bool, List[bool]]) -> List[Dict[str, Any]]:
     # Docstring moved to .pyi
     if not data:
         return data
@@ -23,7 +19,7 @@ def apply_sorting(
             # Pad sort_desc with False if shorter than sort_by
             sort_desc_list = sort_desc + [False] * (len(sort_by_list) - len(sort_desc))
         else:
-            sort_desc_list = sort_desc[:len(sort_by_list)]  # Truncate if longer
+            sort_desc_list = sort_desc[: len(sort_by_list)]  # Truncate if longer
 
     # --- Define multi-level sort key function ---
     def get_sort_key(item: Dict[str, Any]) -> Tuple[Tuple[int, Any], ...]:
@@ -32,8 +28,8 @@ def apply_sorting(
         for field in sort_by_list:
             value: Any = None
             # Handle nested keys with dot notation
-            if '.' in field:
-                parts = field.split('.')
+            if "." in field:
+                parts = field.split(".")
                 current_val: Any = item
                 for part in parts:
                     if isinstance(current_val, dict) and part in current_val:
@@ -77,8 +73,8 @@ def apply_sorting(
             # Replicating part of get_sort_key logic for clarity and independence:
             field = sort_by_list[level]
             value: Any = None
-            if '.' in field:
-                parts = field.split('.')
+            if "." in field:
+                parts = field.split(".")
                 current_val: Any = item
                 for part in parts:
                     if isinstance(current_val, dict) and part in current_val:

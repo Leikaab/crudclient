@@ -9,26 +9,21 @@ from .data_store import DataStore
 
 class FakeCrud:
 
-    def __init__(
-        self,
-        database: DataStore,
-        collection: str,
-        model: Optional[Type[Any]] = None
-    ):
+    def __init__(self, database: DataStore, collection: str, model: Optional[Type[Any]] = None):
         self.database = database
         self.collection = collection
         self.model = model
 
     def list(self, **kwargs: Any) -> Any:
         # Extract pagination, sorting, and filtering parameters
-        filters = kwargs.pop('filters', {})
-        sort_by = kwargs.pop('sort_by', None)
-        sort_desc = kwargs.pop('sort_desc', False)
-        page = kwargs.pop('page', 1)
-        page_size = kwargs.pop('page_size', None)
-        include_deleted = kwargs.pop('include_deleted', False)
-        include_related = kwargs.pop('include_related', None)
-        fields = kwargs.pop('fields', None)
+        filters = kwargs.pop("filters", {})
+        sort_by = kwargs.pop("sort_by", None)
+        sort_desc = kwargs.pop("sort_desc", False)
+        page = kwargs.pop("page", 1)
+        page_size = kwargs.pop("page_size", None)
+        include_deleted = kwargs.pop("include_deleted", False)
+        include_related = kwargs.pop("include_related", None)
+        fields = kwargs.pop("fields", None)
 
         # Add remaining kwargs to filters
         filters.update(kwargs)
@@ -46,7 +41,7 @@ class FakeCrud:
             fields=fields,
         )
 
-        data = result['data']
+        data = result["data"]
 
         # Convert to model instances if model is provided
         if self.model:
@@ -55,9 +50,9 @@ class FakeCrud:
         return data
 
     def get(self, id: Any, **kwargs: Any) -> Any:
-        include_deleted = kwargs.pop('include_deleted', False)
-        include_related = kwargs.pop('include_related', None)
-        fields = kwargs.pop('fields', None)
+        include_deleted = kwargs.pop("include_deleted", False)
+        include_related = kwargs.pop("include_related", None)
+        fields = kwargs.pop("fields", None)
 
         data = self.database.get(
             self.collection,
@@ -77,19 +72,15 @@ class FakeCrud:
         return data
 
     def create(self, data: Any, **kwargs: Any) -> Any:
-        skip_validation = kwargs.pop('skip_validation', False)
+        skip_validation = kwargs.pop("skip_validation", False)
 
         # Convert model instance to dict if needed
-        if hasattr(data, '__dict__'):
-            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith('_')}
+        if hasattr(data, "__dict__"):
+            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith("_")}
         else:
             data_dict = data
 
-        created_data = self.database.create(
-            self.collection,
-            data_dict,
-            skip_validation=skip_validation
-        )
+        created_data = self.database.create(self.collection, data_dict, skip_validation=skip_validation)
 
         # Convert to model instance if model is provided
         if self.model:
@@ -98,22 +89,16 @@ class FakeCrud:
         return created_data
 
     def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
-        skip_validation = kwargs.pop('skip_validation', False)
-        check_version = kwargs.pop('check_version', True)
+        skip_validation = kwargs.pop("skip_validation", False)
+        check_version = kwargs.pop("check_version", True)
 
         # Convert model instance to dict if needed
-        if hasattr(data, '__dict__'):
-            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith('_')}
+        if hasattr(data, "__dict__"):
+            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith("_")}
         else:
             data_dict = data
 
-        updated_data = self.database.update(
-            self.collection,
-            id,
-            data_dict,
-            skip_validation=skip_validation,
-            check_version=check_version
-        )
+        updated_data = self.database.update(self.collection, id, data_dict, skip_validation=skip_validation, check_version=check_version)
 
         if updated_data is None:
             return None
@@ -125,34 +110,25 @@ class FakeCrud:
         return updated_data
 
     def delete(self, id: Any, **kwargs: Any) -> bool:
-        soft_delete = kwargs.pop('soft_delete', False)
-        cascade = kwargs.pop('cascade', False)
+        soft_delete = kwargs.pop("soft_delete", False)
+        cascade = kwargs.pop("cascade", False)
 
-        return self.database.delete(
-            self.collection,
-            id,
-            soft_delete=soft_delete,
-            cascade=cascade
-        )
+        return self.database.delete(self.collection, id, soft_delete=soft_delete, cascade=cascade)
 
     def bulk_create(self, data: List[Any], **kwargs: Any) -> List[Any]:
-        skip_validation = kwargs.pop('skip_validation', False)
+        skip_validation = kwargs.pop("skip_validation", False)
 
         # Convert model instances to dicts if needed
         data_dicts = []
         for item in data:
-            if hasattr(item, '__dict__'):
-                data_dict = {k: v for k, v in item.__dict__.items() if not k.startswith('_')}
+            if hasattr(item, "__dict__"):
+                data_dict = {k: v for k, v in item.__dict__.items() if not k.startswith("_")}
             else:
                 data_dict = item
 
             data_dicts.append(data_dict)
 
-        created_data = self.database.bulk_create(
-            self.collection,
-            data_dicts,
-            skip_validation=skip_validation
-        )
+        created_data = self.database.bulk_create(self.collection, data_dicts, skip_validation=skip_validation)
 
         # Convert to model instances if model is provided
         if self.model:
@@ -161,25 +137,20 @@ class FakeCrud:
         return created_data
 
     def bulk_update(self, data: List[Any], **kwargs: Any) -> List[Any]:
-        skip_validation = kwargs.pop('skip_validation', False)
-        check_version = kwargs.pop('check_version', True)
+        skip_validation = kwargs.pop("skip_validation", False)
+        check_version = kwargs.pop("check_version", True)
 
         # Convert model instances to dicts if needed
         data_dicts = []
         for item in data:
-            if hasattr(item, '__dict__'):
-                data_dict = {k: v for k, v in item.__dict__.items() if not k.startswith('_')}
+            if hasattr(item, "__dict__"):
+                data_dict = {k: v for k, v in item.__dict__.items() if not k.startswith("_")}
             else:
                 data_dict = item
 
             data_dicts.append(data_dict)
 
-        updated_data = self.database.bulk_update(
-            self.collection,
-            data_dicts,
-            skip_validation=skip_validation,
-            check_version=check_version
-        )
+        updated_data = self.database.bulk_update(self.collection, data_dicts, skip_validation=skip_validation, check_version=check_version)
 
         # Convert to model instances if model is provided
         if self.model:
@@ -188,88 +159,45 @@ class FakeCrud:
         return updated_data
 
     def bulk_delete(self, ids: List[Any], **kwargs: Any) -> int:
-        soft_delete = kwargs.pop('soft_delete', False)
-        cascade = kwargs.pop('cascade', False)
+        soft_delete = kwargs.pop("soft_delete", False)
+        cascade = kwargs.pop("cascade", False)
 
-        return self.database.bulk_delete(
-            self.collection,
-            ids,
-            soft_delete=soft_delete,
-            cascade=cascade
-        )
+        return self.database.bulk_delete(self.collection, ids, soft_delete=soft_delete, cascade=cascade)
 
 
 class FakeAPI(API):
     client_class = Client
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        client_config: Optional[ClientConfig] = None,
-        **kwargs: Any
-    ):
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
         if client_config is None:
             client_config = ClientConfig(hostname="https://api.example.com")
         super().__init__(client, client_config, **kwargs)
         self.database = DataStore()
         self.endpoints: Dict[str, FakeCrud] = {}
 
-    def register_endpoint(
-        self,
-        name: str,
-        endpoint: str,
-        model: Optional[Type[Any]] = None,
-        **kwargs: Any
-    ) -> FakeCrud:
+    def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> FakeCrud:
         crud = FakeCrud(self.database, name, model)
         self.endpoints[name] = crud
         setattr(self, name, crud)
         return crud
 
-    def define_relationship(
-        self,
-        source_collection: str,
-        target_collection: str,
-        relationship_type: str,
-        **kwargs: Any
-    ) -> 'FakeAPI':
+    def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "FakeAPI":
         self.database.define_relationship(
-            source_collection=source_collection,
-            target_collection=target_collection,
-            relationship_type=relationship_type,
-            **kwargs
+            source_collection=source_collection, target_collection=target_collection, relationship_type=relationship_type, **kwargs
         )
         return self
 
-    def add_validation_rule(
-        self,
-        field: str,
-        validator_func: Any,
-        error_message: str,
-        collection: Optional[str] = None
-    ) -> 'FakeAPI':
-        self.database.add_validation_rule(
-            field=field,
-            validator_func=validator_func,
-            error_message=error_message,
-            collection=collection
-        )
+    def add_validation_rule(self, field: str, validator_func: Any, error_message: str, collection: Optional[str] = None) -> "FakeAPI":
+        self.database.add_validation_rule(field=field, validator_func=validator_func, error_message=error_message, collection=collection)
         return self
 
     def add_unique_constraint(
-        self,
-        fields: Union[str, List[str]],
-        error_message: Optional[str] = None,
-        collection: Optional[str] = None
-    ) -> 'FakeAPI':
-        self.database.add_unique_constraint(
-            fields=fields,
-            error_message=error_message,
-            collection=collection
-        )
+        self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
+    ) -> "FakeAPI":
+        self.database.add_unique_constraint(fields=fields, error_message=error_message, collection=collection)
         return self
 
-    def set_timestamp_tracking(self, enabled: bool) -> 'FakeAPI':
+    def set_timestamp_tracking(self, enabled: bool) -> "FakeAPI":
         self.database.set_timestamp_tracking(enabled)
         return self
 

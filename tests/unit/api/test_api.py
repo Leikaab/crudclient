@@ -1,4 +1,3 @@
-
 import pytest
 
 from crudclient.api import API

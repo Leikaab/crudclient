@@ -84,6 +84,7 @@ class TestRetryCondition:
 
     def test_custom_retry_condition(self):
         """Test that custom retry conditions work correctly."""
+
         # Custom condition that retries if the response contains a specific header
         def custom_condition(response, exception):
             if response and response.headers.get("Retry-After"):
@@ -270,9 +271,7 @@ class TestRetryHandler:
         session.request.return_value = retry_response
 
         # Act
-        result = retry_handler.maybe_retry_after_403(
-            "GET", "https://example.com", {}, response_403, session, setup_auth_func
-        )
+        result = retry_handler.maybe_retry_after_403("GET", "https://example.com", {}, response_403, session, setup_auth_func)
 
         # Assert
         assert result == retry_response
@@ -290,9 +289,7 @@ class TestRetryHandler:
         response_404.status_code = 404
 
         # Act
-        result = retry_handler.maybe_retry_after_403(
-            "GET", "https://example.com", {}, response_404, session, setup_auth_func
-        )
+        result = retry_handler.maybe_retry_after_403("GET", "https://example.com", {}, response_404, session, setup_auth_func)
 
         # Assert
         assert result == response_404

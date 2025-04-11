@@ -24,13 +24,13 @@ from ..exceptions import CrudClientError
 
 class RetryEvent(Enum):
     """Enum representing different retry events."""
+
     FORBIDDEN = 403
     UNAUTHORIZED = 401
     SERVER_ERROR = 500
     TIMEOUT = "timeout"
     CONNECTION_ERROR = "connection_error"
     CUSTOM = "custom"
-
 
 class RetryStrategy(ABC):
     """
@@ -52,7 +52,6 @@ class RetryStrategy(ABC):
             float: The delay in seconds before the next retry.
         """
         ...
-
 
 class FixedRetryStrategy(RetryStrategy):
     """
@@ -84,7 +83,6 @@ class FixedRetryStrategy(RetryStrategy):
             float: The fixed delay in seconds.
         """
         ...
-
 
 class ExponentialBackoffStrategy(RetryStrategy):
     """
@@ -129,7 +127,6 @@ class ExponentialBackoffStrategy(RetryStrategy):
         """
         ...
 
-
 class RetryCondition:
     """
     Represents a condition for retrying a request.
@@ -162,9 +159,7 @@ class RetryCondition:
         """
         ...
 
-    def should_retry(
-        self, response: Optional[requests.Response] = ..., exception: Optional[Exception] = ...
-    ) -> bool:
+    def should_retry(self, response: Optional[requests.Response] = ..., exception: Optional[Exception] = ...) -> bool:
         """
         Determine whether a request should be retried.
 
@@ -176,7 +171,6 @@ class RetryCondition:
             bool: True if the request should be retried, False otherwise.
         """
         ...
-
 
 class RetryHandler:
     """
@@ -213,9 +207,7 @@ class RetryHandler:
         """
         ...
 
-    def should_retry(
-        self, attempt: int, response: Optional[requests.Response] = ..., exception: Optional[Exception] = ...
-    ) -> bool:
+    def should_retry(self, attempt: int, response: Optional[requests.Response] = ..., exception: Optional[Exception] = ...) -> bool:
         """
         Determine whether a request should be retried.
 

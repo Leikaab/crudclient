@@ -1,4 +1,3 @@
-
 from typing import Any, Dict, List, Optional
 
 from .response import MockResponse
@@ -29,22 +28,14 @@ class BasicResponseBuilder:
         if errors is not None:
             response_body["errors"] = errors
 
-        return MockResponse(
-            status_code=status_code,
-            json_data=response_body,
-            headers=headers or {"Content-Type": "application/json"}
-        )
+        return MockResponse(status_code=status_code, json_data=response_body, headers=headers or {"Content-Type": "application/json"})
 
     @staticmethod
     def create_nested_response(
         structure: Dict[str, Any],
         status_code: int = 200,
     ) -> MockResponse:
-        return MockResponse(
-            status_code=status_code,
-            json_data=structure,
-            headers={"Content-Type": "application/json"}
-        )
+        return MockResponse(status_code=status_code, json_data=structure, headers={"Content-Type": "application/json"})
 
     @staticmethod
     def create_graphql_response(
@@ -63,8 +54,4 @@ class BasicResponseBuilder:
         if extensions is not None:
             response_body["extensions"] = extensions
 
-        return MockResponse(
-            status_code=200 if not errors else 400,
-            json_data=response_body,
-            headers={"Content-Type": "application/json"}
-        )
+        return MockResponse(status_code=200 if not errors else 400, json_data=response_body, headers={"Content-Type": "application/json"})

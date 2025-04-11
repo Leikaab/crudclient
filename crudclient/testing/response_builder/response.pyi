@@ -6,6 +6,7 @@ class MockResponse:
 
     Used in testing scenarios to provide controlled response data without making actual network calls.
     """
+
     status_code: int
     text: Optional[str]
     headers: Dict[str, str]

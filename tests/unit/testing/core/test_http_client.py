@@ -42,13 +42,7 @@ class TestMockHTTPClient:
         client = MockHTTPClient()
 
         # Act
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data={"key": "value"},
-            headers={"Content-Type": "application/json"}
-        )
+        client.configure_response(method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"})
 
         # Assert
         key = ("GET", "test")
@@ -66,11 +60,7 @@ class TestMockHTTPClient:
         error = ValueError("Test error")
 
         # Act
-        client.configure_response(
-            method="GET",
-            path="/test",
-            error=error
-        )
+        client.configure_response(method="GET", path="/test", error=error)
 
         # Assert
         key = ("GET", "test")
@@ -87,28 +77,18 @@ class TestMockHTTPClient:
         client = MockHTTPClient()
 
         # Act
-        client.configure_response(
-            method="get",  # Lowercase
-            path="/test/",  # With trailing slash
-            status_code=200
-        )
+        client.configure_response(method="get", path="/test/", status_code=200)  # Lowercase  # With trailing slash
 
         # Assert
         # The implementation normalizes the path differently than expected
         # It keeps the trailing slash
-        assert ('GET', 'test/') in client._configured_responses
+        assert ("GET", "test/") in client._configured_responses
 
     def test_get_configured_response_success(self):
         """Test _get_configured_response when a response is configured."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data={"key": "value"},
-            headers={"Content-Type": "application/json"}
-        )
+        client.configure_response(method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"})
 
         # Act
         status_code, data, headers, error = client._get_configured_response("GET", "/test")
@@ -134,27 +114,16 @@ class TestMockHTTPClient:
         """Test request method with a successful response."""
         # Arrange
         client = MockHTTPClient(base_url="https://test.example.com")
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data={"key": "value"},
-            headers={"Content-Type": "application/json"}
-        )
+        client.configure_response(method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"})
 
         # Act
-        response = client.request(
-            method="GET",
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"}
-        )
+        response = client.request(method="GET", path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"})
 
         # Assert
         assert response.status_code == 200
         # Decode JSON byte string content for comparison
         assert response._content is not None
-        assert json.loads(response._content.decode('utf-8')) == {"key": "value"}
+        assert json.loads(response._content.decode("utf-8")) == {"key": "value"}
         assert response.headers["Content-Type"] == "application/json"
         assert response.url == "https://test.example.com/test"
 
@@ -163,11 +132,7 @@ class TestMockHTTPClient:
         # Arrange
         client = MockHTTPClient()
         error = ValueError("Test error")
-        client.configure_response(
-            method="GET",
-            path="/test",
-            error=error
-        )
+        client.configure_response(method="GET", path="/test", error=error)
 
         # Act & Assert
         with pytest.raises(ValueError) as excinfo:
@@ -189,92 +154,55 @@ class TestMockHTTPClient:
         """Test get method."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data={"key": "value"}
-        )
+        client.configure_response(method="GET", path="/test", status_code=200, data={"key": "value"})
 
         # Act
-        response = client.get(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"}
-        )
+        response = client.get(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"})
 
         # Assert
         assert response.status_code == 200
         # Decode JSON byte string content for comparison
         assert response._content is not None
-        assert json.loads(response._content.decode('utf-8')) == {"key": "value"}
+        assert json.loads(response._content.decode("utf-8")) == {"key": "value"}
 
     def test_post_method(self):
         """Test post method."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="POST",
-            path="/test",
-            status_code=201,
-            data={"id": 1, "key": "value"}
-        )
+        client.configure_response(method="POST", path="/test", status_code=201, data={"id": 1, "key": "value"})
 
         # Act
-        response = client.post(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"}
-        )
+        response = client.post(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"})
 
         # Assert
         assert response.status_code == 201
         # Decode JSON byte string content for comparison
         assert response._content is not None
-        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "value"}
+        assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "value"}
 
     def test_put_method(self):
         """Test put method."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="PUT",
-            path="/test",
-            status_code=200,
-            data={"id": 1, "key": "updated"}
-        )
+        client.configure_response(method="PUT", path="/test", status_code=200, data={"id": 1, "key": "updated"})
 
         # Act
-        response = client.put(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "updated"}
-        )
+        response = client.put(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "updated"})
 
         # Assert
         assert response.status_code == 200
         # Decode JSON byte string content for comparison
         assert response._content is not None
-        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "updated"}
+        assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "updated"}
 
     def test_delete_method(self):
         """Test delete method."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="DELETE",
-            path="/test",
-            status_code=204
-        )
+        client.configure_response(method="DELETE", path="/test", status_code=204)
 
         # Act
-        response = client.delete(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"}
-        )
+        response = client.delete(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"})
 
         # Assert
         assert response.status_code == 204
@@ -283,37 +211,22 @@ class TestMockHTTPClient:
         """Test patch method."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="PATCH",
-            path="/test",
-            status_code=200,
-            data={"id": 1, "key": "patched"}
-        )
+        client.configure_response(method="PATCH", path="/test", status_code=200, data={"id": 1, "key": "patched"})
 
         # Act
-        response = client.patch(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "patched"}
-        )
+        response = client.patch(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "patched"})
 
         # Assert
         assert response.status_code == 200
         # Decode JSON byte string content for comparison
         assert response._content is not None
-        assert json.loads(response._content.decode('utf-8')) == {"id": 1, "key": "patched"}
+        assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "patched"}
 
     def test_response_with_string_data(self):
         """Test response with string data."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data="string response"
-        )
+        client.configure_response(method="GET", path="/test", status_code=200, data="string response")
 
         # Act
         response = client.get("/test")
@@ -326,12 +239,7 @@ class TestMockHTTPClient:
         """Test response with None data."""
         # Arrange
         client = MockHTTPClient()
-        client.configure_response(
-            method="GET",
-            path="/test",
-            status_code=204,
-            data=None
-        )
+        client.configure_response(method="GET", path="/test", status_code=204, data=None)
 
         # Act
         response = client.get("/test")

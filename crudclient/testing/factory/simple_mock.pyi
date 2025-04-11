@@ -70,11 +70,7 @@ def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
     """
     ...
 
-
-def _add_error_responses_to_simple_mock(
-    client: SimpleMockClient,
-    error_configs: Dict[str, Any]
-) -> None:
+def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs: Dict[str, Any]) -> None:
     """
     Add common error responses to a SimpleMockClient.
 

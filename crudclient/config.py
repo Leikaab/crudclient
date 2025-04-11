@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
@@ -28,7 +27,7 @@ class ClientConfig:
         timeout: Optional[float] = None,
         retries: Optional[int] = None,
         auth_strategy: Optional[AuthStrategy] = None,
-        auth_type: Optional[str] = None
+        auth_type: Optional[str] = None,
     ) -> None:
         self.hostname = hostname or self.__class__.hostname
         self.version = version or self.__class__.version
@@ -112,11 +111,8 @@ class ClientConfig:
 
     def __add__(self, other: "ClientConfig") -> "ClientConfig":
         import warnings
-        warnings.warn(
-            "The __add__ method is deprecated. Use merge() instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
+
+        warnings.warn("The __add__ method is deprecated. Use merge() instead.", DeprecationWarning, stacklevel=2)
         return self.merge(other)
 
     @staticmethod

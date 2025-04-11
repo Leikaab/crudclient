@@ -8,6 +8,7 @@ class PaginationHelper:
     Supports offset-based, cursor-based, and link-based pagination with
     customizable metadata and link generation.
     """
+
     items: List[Any]
     page_size: int
     current_page: int
@@ -61,12 +62,7 @@ class PaginationHelper:
         """
         ...
 
-    def get_page(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
-        cursor: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def get_page(self, page: Optional[int] = None, page_size: Optional[int] = None, cursor: Optional[str] = None) -> Dict[str, Any]:
         """
         Get a paginated response for the specified page.
 

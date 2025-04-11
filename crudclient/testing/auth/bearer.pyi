@@ -45,7 +45,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token(self, token: str) -> 'BearerAuthMock':
+    def with_token(self, token: str) -> "BearerAuthMock":
         """
         Configure the mock with a specific token.
 
@@ -58,11 +58,8 @@ class BearerAuthMock(AuthMockBase):
         ...
 
     def with_token_metadata(
-        self,
-        user_id: Optional[str] = None,
-        client_id: Optional[str] = None,
-        scopes: Optional[List[str]] = None
-    ) -> 'BearerAuthMock':
+        self, user_id: Optional[str] = None, client_id: Optional[str] = None, scopes: Optional[List[str]] = None
+    ) -> "BearerAuthMock":
         """
         Configure the mock with token metadata.
 
@@ -76,11 +73,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_expiration(
-        self,
-        expires_in_seconds: int = 3600,
-        token: Optional[str] = None
-    ) -> 'BearerAuthMock':
+    def with_token_expiration(self, expires_in_seconds: int = 3600, token: Optional[str] = None) -> "BearerAuthMock":
         """
         Configure the mock with token expiration.
 
@@ -93,7 +86,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_format_validation(self, pattern: str) -> 'BearerAuthMock':
+    def with_token_format_validation(self, pattern: str) -> "BearerAuthMock":
         """
         Configure the mock with token format validation.
 
@@ -105,7 +98,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_valid_token_prefix(self, prefix: str) -> 'BearerAuthMock':
+    def with_valid_token_prefix(self, prefix: str) -> "BearerAuthMock":
         """
         Configure the mock with a valid token prefix.
 
@@ -117,7 +110,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_required_scopes(self, scopes: List[str]) -> 'BearerAuthMock':
+    def with_required_scopes(self, scopes: List[str]) -> "BearerAuthMock":
         """
         Configure the mock with required permission scopes.
 
@@ -129,7 +122,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_jwt_validation(self) -> 'BearerAuthMock':
+    def with_jwt_validation(self) -> "BearerAuthMock":
         """
         Configure the mock to validate tokens as JWTs.
 
@@ -138,7 +131,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_type(self, token_type: str) -> 'BearerAuthMock':
+    def with_token_type(self, token_type: str) -> "BearerAuthMock":
         """
         Configure the mock with a specific token type.
 
@@ -150,7 +143,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def revoke_token(self, token: str) -> 'BearerAuthMock':
+    def revoke_token(self, token: str) -> "BearerAuthMock":
         """
         Revoke a specific token.
 
@@ -228,7 +221,7 @@ class BearerAuthMock(AuthMockBase):
         """
         ...
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         """
         Handle an authentication error.
 

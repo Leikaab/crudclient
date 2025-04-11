@@ -2,7 +2,6 @@
 Tests for the BearerAuth strategy in the crudclient library.
 """
 
-
 from crudclient.auth.bearer import BearerAuth
 
 

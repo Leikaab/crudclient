@@ -15,8 +15,8 @@ class ConcurrencyError(CrudClientError):
     attempt to modify the same resource simultaneously, resulting in
     a conflict that prevents the operation from completing.
     """
-    ...
 
+    ...
 
 class ValidationFailedError(CrudClientError):
     """
@@ -26,4 +26,5 @@ class ValidationFailedError(CrudClientError):
     for a create or update operation fails validation checks, preventing
     the operation from completing.
     """
+
     ...

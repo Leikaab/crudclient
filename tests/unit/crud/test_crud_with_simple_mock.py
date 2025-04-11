@@ -2,7 +2,6 @@
 Tests for CRUD operations using SimpleMockClient.
 """
 
-
 from .conftest import TestModel
 
 # Sample data
@@ -19,11 +18,7 @@ def test_list_operation_success(test_crud_with_simple_mock, simple_mock_client):
     THEN it should return a list of TestModel instances.
     """
     # Configure the mock client
-    simple_mock_client.with_response_pattern(
-        method="GET",
-        url_pattern=r"test-resources$",
-        response=SAMPLE_LIST_PAYLOAD
-    )
+    simple_mock_client.with_response_pattern(method="GET", url_pattern=r"test-resources$", response=SAMPLE_LIST_PAYLOAD)
 
     # Call the list operation
     result = test_crud_with_simple_mock.list()
@@ -49,11 +44,7 @@ def test_create_operation_success(test_crud_with_simple_mock, simple_mock_client
     THEN it should return a model instance.
     """
     # Configure the mock client
-    simple_mock_client.with_response_pattern(
-        method="POST",
-        url_pattern=r"test-resources$",
-        response=SAMPLE_PAYLOAD
-    )
+    simple_mock_client.with_response_pattern(method="POST", url_pattern=r"test-resources$", response=SAMPLE_PAYLOAD)
 
     # Call the create operation
     result = test_crud_with_simple_mock.create(data=SAMPLE_MODEL)
@@ -77,11 +68,7 @@ def test_read_operation_success(test_crud_with_simple_mock, simple_mock_client):
     THEN it should return a model instance.
     """
     # Configure the mock client
-    simple_mock_client.with_response_pattern(
-        method="GET",
-        url_pattern=r"test-resources/1$",
-        response=SAMPLE_PAYLOAD
-    )
+    simple_mock_client.with_response_pattern(method="GET", url_pattern=r"test-resources/1$", response=SAMPLE_PAYLOAD)
 
     # Call the read operation
     result = test_crud_with_simple_mock.read(resource_id="1")
@@ -105,11 +92,7 @@ def test_update_operation_success(test_crud_with_simple_mock, simple_mock_client
     """
     # Configure the mock client
     updated_payload = {"id": 1, "name": "Updated Resource"}
-    simple_mock_client.with_response_pattern(
-        method="PUT",
-        url_pattern=r"test-resources/1$",
-        response=updated_payload
-    )
+    simple_mock_client.with_response_pattern(method="PUT", url_pattern=r"test-resources/1$", response=updated_payload)
 
     # Call the update operation
     result = test_crud_with_simple_mock.update(resource_id="1", data=updated_payload)
@@ -135,11 +118,7 @@ def test_partial_update_operation_success(test_crud_with_simple_mock, simple_moc
     # Configure the mock client
     partial_payload = {"name": "Partially Updated Resource"}
     final_payload = {"id": 1, "name": "Partially Updated Resource"}
-    simple_mock_client.with_response_pattern(
-        method="PATCH",
-        url_pattern=r"test-resources/1$",
-        response=final_payload
-    )
+    simple_mock_client.with_response_pattern(method="PATCH", url_pattern=r"test-resources/1$", response=final_payload)
 
     # Call the partial_update operation
     result = test_crud_with_simple_mock.partial_update(resource_id="1", data=partial_payload)
@@ -163,11 +142,7 @@ def test_destroy_operation_success(test_crud_with_simple_mock, simple_mock_clien
     THEN it should make a DELETE request.
     """
     # Configure the mock client
-    simple_mock_client.with_response_pattern(
-        method="DELETE",
-        url_pattern=r"test-resources/1$",
-        response={}  # Empty response for DELETE
-    )
+    simple_mock_client.with_response_pattern(method="DELETE", url_pattern=r"test-resources/1$", response={})  # Empty response for DELETE
 
     # Call the destroy operation
     test_crud_with_simple_mock.destroy(resource_id="1")
@@ -186,11 +161,7 @@ def test_custom_action_success(test_crud_with_simple_mock, simple_mock_client):
     """
     # Configure the mock client
     action_data = {"param": "value"}
-    simple_mock_client.with_response_pattern(
-        method="POST",
-        url_pattern=r"test-resources/do-something$",
-        response=SAMPLE_PAYLOAD
-    )
+    simple_mock_client.with_response_pattern(method="POST", url_pattern=r"test-resources/do-something$", response=SAMPLE_PAYLOAD)
 
     # Call the custom action
     result = test_crud_with_simple_mock.custom_action(action="do-something", data=action_data)

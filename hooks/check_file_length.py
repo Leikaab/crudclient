@@ -22,7 +22,7 @@ def count_file_lines(file_path: str) -> int:
         Number of non-blank, non-module-docstring lines in the file
     """
     # Read the file content
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
 
     # Check if the file has a module docstring using AST
@@ -32,15 +32,17 @@ def count_file_lines(file_path: str) -> int:
     try:
         tree = ast.parse(file_content, filename=file_path)
         # Check for module docstring
-        if (len(tree.body) > 0
-                and isinstance(tree.body[0], ast.Expr)
-                and isinstance(tree.body[0].value, ast.Constant)
-                and isinstance(tree.body[0].value.value, str)):
+        if (
+            len(tree.body) > 0
+            and isinstance(tree.body[0], ast.Expr)
+            and isinstance(tree.body[0].value, ast.Constant)
+            and isinstance(tree.body[0].value.value, str)
+        ):
             has_module_docstring = True
             module_docstring = tree.body[0].value.value
     except (SyntaxError, AttributeError):
         # If there's a syntax error or attribute error, fall back to counting all non-blank lines
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             return sum(1 for line in file if line.strip())
 
     # Count non-blank lines, excluding the module docstring
@@ -56,7 +58,7 @@ def count_file_lines(file_path: str) -> int:
         # Find the end line by counting newlines in the docstring
         docstring_text = module_docstring
         if docstring_text is not None:
-            docstring_line_count = docstring_text.count('\n') + 1
+            docstring_line_count = docstring_text.count("\n") + 1
         else:
             docstring_line_count = 1  # Default to 1 if docstring is None
 
@@ -87,11 +89,11 @@ def check_file_length(files: List[str], max_lines: int = 300) -> Dict[str, int]:
     too_long = {}
 
     for file_path in files:
-        if not file_path.endswith('.py'):
+        if not file_path.endswith(".py"):
             continue
 
         # Skip files in the hooks/ directory
-        if file_path.startswith('hooks/'):
+        if file_path.startswith("hooks/"):
             continue
 
         line_count = count_file_lines(file_path)
@@ -118,7 +120,7 @@ def main(files: List[str], max_lines: int = 300, verbose: bool = False) -> int:
     # Print line counts for all files if verbose is True
     if verbose:
         for file_path in files:
-            if file_path.endswith('.py'):
+            if file_path.endswith(".py"):
                 line_count = count_file_lines(file_path)
                 print(f"{file_path}: {line_count} lines of code (excluding module docstring and blank lines)")
 
@@ -137,11 +139,11 @@ def main(files: List[str], max_lines: int = 300, verbose: bool = False) -> int:
     return 0
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Check file length rules')
-    parser.add_argument('files', nargs='*', help='Files to check')
-    parser.add_argument('--max-lines', type=int, default=300, help='Maximum number of lines allowed in a file')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Print line counts for all files')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Check file length rules")
+    parser.add_argument("files", nargs="*", help="Files to check")
+    parser.add_argument("--max-lines", type=int, default=300, help="Maximum number of lines allowed in a file")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Print line counts for all files")
     args = parser.parse_args()
 
     sys.exit(main(args.files, args.max_lines, args.verbose))

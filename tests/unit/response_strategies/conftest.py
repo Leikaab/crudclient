@@ -15,6 +15,7 @@ from crudclient.types import JSONDict, JSONList
 
 class TestModel(BaseModel):
     """Test model for response strategy tests."""
+
     id: int
     name: str
 
@@ -44,6 +45,7 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 return self.convert_single(parsed_data)
             except json.JSONDecodeError:
@@ -63,6 +65,7 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 return self.convert_list(parsed_data)
             except json.JSONDecodeError:

@@ -19,20 +19,10 @@ class TestBasicAuthExamples:
     def test_basic_auth_success_scenario(self):
         """Example of testing a successful Basic Auth scenario."""
         # Create a mock client with Basic Auth
-        client = create_mock_client(
-            auth_type="basic",
-            auth_config={
-                "username": "testuser",
-                "password": "testpass"
-            }
-        )
+        client = create_mock_client(auth_type="basic", auth_config={"username": "testuser", "password": "testpass"})
 
         # Configure a successful response
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/users",
-            response={"data": [{"id": 1, "name": "Test User"}]}
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/api/users", response={"data": [{"id": 1, "name": "Test User"}]})
 
         # Make a request
         response = client.get("/api/users")
@@ -45,14 +35,12 @@ class TestBasicAuthExamples:
         # Verify the auth header was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "Authorization" in request['headers']
-        assert request['headers']["Authorization"].startswith("Basic ")
+        assert "Authorization" in request["headers"]
+        assert request["headers"]["Authorization"].startswith("Basic ")
 
         # Use verification helpers
-        assert AuthVerificationHelpers.verify_basic_auth_header(request['headers']["Authorization"])
-        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(
-            request['headers']["Authorization"]
-        )
+        assert AuthVerificationHelpers.verify_basic_auth_header(request["headers"]["Authorization"])
+        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(request["headers"]["Authorization"])
         assert username == "testuser"
         assert password == "testpass"
 
@@ -67,19 +55,13 @@ class TestBasicAuthExamples:
                 "should_fail": True,
                 "failure_type": "invalid_credentials",
                 "status_code": 401,
-                "message": "Invalid username or password"
-            }
+                "message": "Invalid username or password",
+            },
         )
 
         # Configure an auth error response
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/users",
-            response={
-                "error": "Unauthorized",
-                "message": "Invalid username or password"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/users", response={"error": "Unauthorized", "message": "Invalid username or password"}, status_code=401
         )
 
         # Make a request and expect it to fail

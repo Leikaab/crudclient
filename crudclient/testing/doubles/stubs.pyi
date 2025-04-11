@@ -11,7 +11,6 @@ class Response:
     """
 
     def __init__(self) -> None: ...
-
     @property
     def status_code(self) -> int:
         """The HTTP status code of the response."""
@@ -47,13 +46,13 @@ class Response:
         """
         ...
 
-
 class StubResponse(Response):
     """
     A concrete stub implementation of the Response interface for testing.
 
     Allows creating response objects with specific status codes, content, headers, etc.
     """
+
     _status_code: int
     _headers: Dict[str, str]
     _encoding: str
@@ -67,8 +66,8 @@ class StubResponse(Response):
         status_code: int = 200,
         content: Optional[Union[str, bytes, Dict[str, Any], List[Any]]] = None,
         headers: Optional[Dict[str, str]] = None,
-        encoding: str = 'utf-8',
-        elapsed: Optional[timedelta] = None
+        encoding: str = "utf-8",
+        elapsed: Optional[timedelta] = None,
     ) -> None:
         """
         Initialize the StubResponse.
@@ -84,16 +83,12 @@ class StubResponse(Response):
 
     @property
     def status_code(self) -> int: ...
-
     @property
     def content(self) -> bytes: ...
-
     @property
     def text(self) -> str: ...
-
     @property
     def headers(self) -> Dict[str, str]: ...
-
     @property
     def encoding(self) -> str:
         """The encoding used for text decoding."""
@@ -105,5 +100,4 @@ class StubResponse(Response):
         ...
 
     def json(self) -> Any: ...
-
     def raise_for_status(self) -> None: ...

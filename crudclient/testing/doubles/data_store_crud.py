@@ -52,12 +52,7 @@ def list_items(
     if page_size:
         data, pagination = apply_pagination(data, page, page_size)
     else:
-        pagination = {
-            "page": 1,
-            "page_size": total_count,
-            "total_count": total_count,
-            "total_pages": 1
-        }
+        pagination = {"page": 1, "page_size": total_count, "total_count": total_count, "total_pages": 1}
 
     # Apply field selection
     if fields:
@@ -65,16 +60,10 @@ def list_items(
 
     # Include related data if requested
     if include_related:
-        data = include_related_data(
-            collection, data, include_related,
-            data_store.relationships, data_store.collections, data_store.deleted_field
-        )
+        data = include_related_data(collection, data, include_related, data_store.relationships, data_store.collections, data_store.deleted_field)
 
     # Return a deep copy to prevent modification of the original data
-    return {
-        "data": copy.deepcopy(data),
-        "meta": pagination
-    }
+    return {"data": copy.deepcopy(data), "meta": pagination}
 
 
 def get_item(
@@ -89,7 +78,7 @@ def get_item(
     data = data_store.get_collection(collection)
 
     for item in data:
-        if item.get('id') == id:
+        if item.get("id") == id:
             # Check if item is soft-deleted
             if not include_deleted and item.get(data_store.deleted_field, False):
                 return None
@@ -99,8 +88,7 @@ def get_item(
             # Include related data if requested
             if include_related:
                 result = include_related_item(
-                    collection, result, include_related,
-                    data_store.relationships, data_store.collections, data_store.deleted_field
+                    collection, result, include_related, data_store.relationships, data_store.collections, data_store.deleted_field
                 )
 
             # Apply field selection
@@ -112,12 +100,7 @@ def get_item(
     return None
 
 
-def create_item(
-    data_store: "DataStore",
-    collection: str,
-    data: Dict[str, Any],
-    skip_validation: bool = False
-) -> Dict[str, Any]:
+def create_item(data_store: "DataStore", collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
     # Docstring moved to .pyi
     collection_data = data_store.get_collection(collection)
 
@@ -125,8 +108,8 @@ def create_item(
     new_item = copy.deepcopy(data)
 
     # Generate ID if not provided
-    if 'id' not in new_item:
-        new_item['id'] = str(uuid.uuid4())
+    if "id" not in new_item:
+        new_item["id"] = str(uuid.uuid4())
 
     # Add version if tracking is enabled
     if data_store.version_field:
@@ -150,18 +133,13 @@ def create_item(
 
 
 def update_item(
-    data_store: "DataStore",
-    collection: str,
-    id: Any,
-    data: Dict[str, Any],
-    skip_validation: bool = False,
-    check_version: bool = True
+    data_store: "DataStore", collection: str, id: Any, data: Dict[str, Any], skip_validation: bool = False, check_version: bool = True
 ) -> Optional[Dict[str, Any]]:
     # Docstring moved to .pyi
     collection_data = data_store.get_collection(collection)
 
     for i, item in enumerate(collection_data):
-        if item.get('id') == id:
+        if item.get("id") == id:
             # Check if item is soft-deleted
             if item.get(data_store.deleted_field, False):
                 return None
@@ -172,9 +150,7 @@ def update_item(
                 if data_store.version_field in data:
                     provided_version = data.get(data_store.version_field)
                     if provided_version != current_version:
-                        raise ValueError(
-                            f"Version conflict: expected {current_version}, got {provided_version}"
-                        )
+                        raise ValueError(f"Version conflict: expected {current_version}, got {provided_version}")
 
             # Create a copy of the original item
             updated_item = copy.deepcopy(item)
@@ -183,7 +159,7 @@ def update_item(
             updated_item.update(data)
 
             # Ensure ID is preserved
-            updated_item['id'] = id
+            updated_item["id"] = id
 
             # Update version if tracking is enabled
             if data_store.version_field:
@@ -211,18 +187,12 @@ def update_item(
     return None
 
 
-def delete_item(
-    data_store: "DataStore",
-    collection: str,
-    id: Any,
-    soft_delete: bool = False,
-    cascade: bool = False
-) -> bool:
+def delete_item(data_store: "DataStore", collection: str, id: Any, soft_delete: bool = False, cascade: bool = False) -> bool:
     # Docstring moved to .pyi
     collection_data = data_store.get_collection(collection)
 
     for i, item in enumerate(collection_data):
-        if item.get('id') == id:
+        if item.get("id") == id:
             # Check if already soft-deleted
             if item.get(data_store.deleted_field, False):
                 return False
@@ -230,8 +200,13 @@ def delete_item(
             # Handle cascading deletes if enabled
             if cascade:
                 cascade_delete(
-                    collection, item, data_store.relationships, data_store.collections,
-                    soft_delete, data_store.deleted_field, data_store.updated_at_field
+                    collection,
+                    item,
+                    data_store.relationships,
+                    data_store.collections,
+                    soft_delete,
+                    data_store.deleted_field,
+                    data_store.updated_at_field,
                 )
 
             if soft_delete:

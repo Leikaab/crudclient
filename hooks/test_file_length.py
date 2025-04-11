@@ -16,6 +16,7 @@ def function1() -> None:
     # This line should be counted
     pass  # This line should be counted
 
+
 # Blank line above should be excluded
 
 
@@ -25,5 +26,6 @@ class TestClass:
     def method(self) -> bool:
         # This method should be counted
         return True
+
 
 # Another comment that should be counted

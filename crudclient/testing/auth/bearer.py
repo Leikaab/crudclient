@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple  # Added Tuple, TYPE_CHECKING
 
@@ -25,7 +24,7 @@ class BearerAuthMock(AuthMockBase):
                 "expires_at": datetime.now() + timedelta(hours=1),
                 "scopes": ["read", "write"],
                 "user_id": "default_user",
-                "client_id": "default_client"
+                "client_id": "default_client",
             }
         }
         self.valid_token_prefixes: Set[str] = set()
@@ -34,7 +33,7 @@ class BearerAuthMock(AuthMockBase):
         self.jwt_validation = False
         self.token_type = "access_token"  # Can be "access_token", "id_token", "refresh_token"
 
-    def with_token(self, token: str) -> 'BearerAuthMock':
+    def with_token(self, token: str) -> "BearerAuthMock":
         self.token = token
         self.auth_strategy = BearerAuth(token=token)
         self.issued_tokens = [token]
@@ -44,24 +43,21 @@ class BearerAuthMock(AuthMockBase):
                 "expires_at": datetime.now() + timedelta(hours=1),
                 "scopes": ["read", "write"],
                 "user_id": "default_user",
-                "client_id": "default_client"
+                "client_id": "default_client",
             }
         }
         return self
 
     def with_token_metadata(
-        self,
-        user_id: Optional[str] = None,
-        client_id: Optional[str] = None,
-        scopes: Optional[List[str]] = None
-    ) -> 'BearerAuthMock':
+        self, user_id: Optional[str] = None, client_id: Optional[str] = None, scopes: Optional[List[str]] = None
+    ) -> "BearerAuthMock":
         if self.token not in self.token_metadata:
             self.token_metadata[self.token] = {
                 "issued_at": datetime.now(),
                 "expires_at": datetime.now() + timedelta(hours=1),
                 "scopes": ["read", "write"],
                 "user_id": "default_user",
-                "client_id": "default_client"
+                "client_id": "default_client",
             }
 
         metadata = self.token_metadata[self.token]
@@ -75,11 +71,7 @@ class BearerAuthMock(AuthMockBase):
 
         return self
 
-    def with_token_expiration(
-        self,
-        expires_in_seconds: int = 3600,
-        token: Optional[str] = None
-    ) -> 'BearerAuthMock':
+    def with_token_expiration(self, expires_in_seconds: int = 3600, token: Optional[str] = None) -> "BearerAuthMock":
         target_token = token or self.token
         if target_token not in self.token_metadata:
             self.token_metadata[target_token] = {
@@ -87,39 +79,38 @@ class BearerAuthMock(AuthMockBase):
                 "expires_at": datetime.now() + timedelta(seconds=expires_in_seconds),
                 "scopes": ["read", "write"],
                 "user_id": "default_user",
-                "client_id": "default_client"
+                "client_id": "default_client",
             }
         else:
-            self.token_metadata[target_token]["expires_at"] = (
-                datetime.now() + timedelta(seconds=expires_in_seconds)
-            )
+            self.token_metadata[target_token]["expires_at"] = datetime.now() + timedelta(seconds=expires_in_seconds)
 
         # Update the base class expiry time for compatibility
         super().with_token_expiration(expires_in_seconds)
         return self
 
-    def with_token_format_validation(self, pattern: str) -> 'BearerAuthMock':
+    def with_token_format_validation(self, pattern: str) -> "BearerAuthMock":
         import re
+
         self.token_format_pattern = re.compile(pattern)
         return self
 
-    def with_valid_token_prefix(self, prefix: str) -> 'BearerAuthMock':
+    def with_valid_token_prefix(self, prefix: str) -> "BearerAuthMock":
         self.valid_token_prefixes.add(prefix)
         return self
 
-    def with_required_scopes(self, scopes: List[str]) -> 'BearerAuthMock':
+    def with_required_scopes(self, scopes: List[str]) -> "BearerAuthMock":
         self.required_scopes = scopes
         return self
 
-    def with_jwt_validation(self) -> 'BearerAuthMock':
+    def with_jwt_validation(self) -> "BearerAuthMock":
         self.jwt_validation = True
         return self
 
-    def with_token_type(self, token_type: str) -> 'BearerAuthMock':
+    def with_token_type(self, token_type: str) -> "BearerAuthMock":
         self.token_type = token_type
         return self
 
-    def revoke_token(self, token: str) -> 'BearerAuthMock':
+    def revoke_token(self, token: str) -> "BearerAuthMock":
         if token in self.issued_tokens:
             self.revoked_tokens.add(token)
         return self
@@ -145,7 +136,7 @@ class BearerAuthMock(AuthMockBase):
                 "expires_at": datetime.now() + timedelta(hours=1),
                 "scopes": ["read", "write"],
                 "user_id": "default_user",
-                "client_id": "default_client"
+                "client_id": "default_client",
             }
 
         # Update token
@@ -194,7 +185,7 @@ class BearerAuthMock(AuthMockBase):
         if self.jwt_validation:
             # This would be a more complex validation in a real implementation
             # For now, we'll just check if the token looks like a JWT (has two dots)
-            if token.count('.') != 2:
+            if token.count(".") != 2:
                 return False
 
         return True
@@ -210,7 +201,7 @@ class BearerAuthMock(AuthMockBase):
             return None
         return ("Authorization", f"Bearer {self.token}")
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         # Check if the error is likely due to token expiration and if we can refresh
         if self.is_token_expired() and self.can_refresh_token():
             # Attempt to refresh the token

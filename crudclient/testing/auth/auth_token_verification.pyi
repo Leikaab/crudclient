@@ -24,7 +24,7 @@ class AuthTokenVerification:
         required_scopes: Optional[List[str]] = None,
         check_expiration: bool = True,
         expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        expected_user: Optional[str] = None,
     ) -> bool:
         """
         Verify that an OAuth token is valid and has the required scopes.
@@ -71,10 +71,7 @@ class AuthTokenVerification:
 
     @staticmethod
     def assert_token_usage(
-        token: str,
-        required_scopes: Optional[List[str]] = None,
-        expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         """
         Assert that a token is being used correctly.
@@ -91,11 +88,7 @@ class AuthTokenVerification:
         ...
 
     @staticmethod
-    def assert_refresh_behavior(
-        old_token: str,
-        new_token: str,
-        expected_client_id: Optional[str] = None
-    ) -> None:
+    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         """
         Assert that token refresh behavior is correct.
 

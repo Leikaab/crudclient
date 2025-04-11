@@ -15,6 +15,7 @@ class PlaceholderConfig(ClientConfig):
     """
     Configuration for JSONPlaceholder API client.
     """
+
     hostname: str = "https://jsonplaceholder.typicode.com"
     version: str = ""
 
@@ -29,6 +30,7 @@ class PostsCrud(Crud[Post]):
     - Better IDE autocompletion
     - Consistent data structure
     """
+
     _resource_path = "posts"
     _datamodel = Post
     _api_response_model = PostResponse
@@ -45,6 +47,7 @@ class CommentsCrud(Crud[Comment]):
     - Better IDE autocompletion
     - Consistent data structure
     """
+
     _resource_path = "comments"
     _datamodel = Comment
     _api_response_model = CommentResponse
@@ -70,6 +73,7 @@ class JsonplaceholderAPI(API):
     """
     API client for JSONPlaceholder.
     """
+
     client_class = Client
 
     def _register_endpoints(self):

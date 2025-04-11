@@ -1,4 +1,3 @@
-
 import logging
 from typing import List, Optional, Union
 
@@ -13,9 +12,7 @@ logger = logging.getLogger(__name__)
 # Import T from base module
 
 
-def list_operation(
-    self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None
-) -> Union[JSONList, List[T], ApiResponse]:
+def list_operation(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, List[T], ApiResponse]:
     if "list" not in self.allowed_actions:
         raise ValueError(f"List action not allowed for {self.__class__.__name__}")
 
@@ -24,9 +21,7 @@ def list_operation(
     return self._validate_list_return(response)
 
 
-def create_operation(
-    self, data: Union[JSONDict, T], parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def create_operation(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
     if "create" not in self.allowed_actions:
         raise ValueError(f"Create action not allowed for {self.__class__.__name__}")
 
@@ -50,9 +45,7 @@ def create_operation(
         raise
 
 
-def read_operation(
-    self, resource_id: str, parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def read_operation(self, resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:
     if "read" not in self.allowed_actions:
         raise ValueError(f"Read action not allowed for {self.__class__.__name__}")
 
@@ -61,9 +54,7 @@ def read_operation(
     return self._convert_to_model(response)
 
 
-def update_operation(
-    self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def update_operation(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
     if "update" not in self.allowed_actions:
         raise ValueError(f"Update action not allowed for {self.__class__.__name__}")
 
@@ -87,9 +78,7 @@ def update_operation(
         raise
 
 
-def partial_update_operation(
-    self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def partial_update_operation(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
     if "partial_update" not in self.allowed_actions:
         raise ValueError(f"Partial update action not allowed for {self.__class__.__name__}")
 
@@ -175,18 +164,14 @@ def custom_action_operation(
         # Handle the response
         try:
             # Check if the response is a list type
-            if hasattr(response, '__iter__') and not isinstance(response, (dict, str, bytes)):
+            if hasattr(response, "__iter__") and not isinstance(response, (dict, str, bytes)):
                 return response
             return self._convert_to_model(response)
         except Exception as e:
             logger.error(f"Failed to convert response to model: {e}")
             if isinstance(e, ModelConversionError):
                 raise
-            raise ModelConversionError(
-                f"Failed to convert response to model: {e}",
-                response=None,
-                data=response
-            ) from e
+            raise ModelConversionError(f"Failed to convert response to model: {e}", response=None, data=response) from e
 
     except ValidationError:
         # Re-raise validation errors

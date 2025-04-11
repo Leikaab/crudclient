@@ -32,18 +32,9 @@ class DataStore:
 
         return self.collections[name]
 
-    def define_relationship(
-        self,
-        source_collection: str,
-        target_collection: str,
-        relationship_type: str,
-        **kwargs: Any
-    ) -> 'DataStore':
+    def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "DataStore":
         relationship = Relationship(
-            source_collection=source_collection,
-            target_collection=target_collection,
-            relationship_type=relationship_type,
-            **kwargs
+            source_collection=source_collection, target_collection=target_collection, relationship_type=relationship_type, **kwargs
         )
         self.relationships.append(relationship)
 
@@ -54,32 +45,16 @@ class DataStore:
         return self
 
     def add_validation_rule(
-        self,
-        field: str,
-        validator_func: Callable[[Any], bool],
-        error_message: str,
-        collection: Optional[str] = None
-    ) -> 'DataStore':
-        rule = ValidationRule(
-            field=field,
-            validator_func=validator_func,
-            error_message=error_message,
-            collection=collection
-        )
+        self, field: str, validator_func: Callable[[Any], bool], error_message: str, collection: Optional[str] = None
+    ) -> "DataStore":
+        rule = ValidationRule(field=field, validator_func=validator_func, error_message=error_message, collection=collection)
         self.validation_rules.append(rule)
         return self
 
     def add_unique_constraint(
-        self,
-        fields: Union[str, List[str]],
-        error_message: Optional[str] = None,
-        collection: Optional[str] = None
-    ) -> 'DataStore':
-        constraint = UniqueConstraint(
-            fields=fields,
-            error_message=error_message,
-            collection=collection
-        )
+        self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
+    ) -> "DataStore":
+        constraint = UniqueConstraint(fields=fields, error_message=error_message, collection=collection)
         self.unique_constraints.append(constraint)
 
         # Initialize the constraint with existing values
@@ -94,7 +69,7 @@ class DataStore:
 
         return self
 
-    def set_timestamp_tracking(self, enabled: bool) -> 'DataStore':
+    def set_timestamp_tracking(self, enabled: bool) -> "DataStore":
         self.track_timestamps = enabled
         return self
 
@@ -144,12 +119,7 @@ class DataStore:
             fields=fields,
         )
 
-    def create(
-        self,
-        collection: str,
-        data: Dict[str, Any],
-        skip_validation: bool = False
-    ) -> Dict[str, Any]:
+    def create(self, collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
         # Docstring moved to .pyi
         # Note: create_item handles validation internally based on skip_validation
         return create_item(
@@ -160,12 +130,7 @@ class DataStore:
         )
 
     def update(
-        self,
-        collection: str,
-        id: Any,
-        data: Dict[str, Any],
-        skip_validation: bool = False,
-        check_version: bool = True
+        self, collection: str, id: Any, data: Dict[str, Any], skip_validation: bool = False, check_version: bool = True
     ) -> Optional[Dict[str, Any]]:
         # Docstring moved to .pyi
         # Note: update_item handles validation internally based on skip_validation
@@ -178,13 +143,7 @@ class DataStore:
             check_version=check_version,
         )
 
-    def delete(
-        self,
-        collection: str,
-        id: Any,
-        soft_delete: bool = False,
-        cascade: bool = False
-    ) -> bool:
+    def delete(self, collection: str, id: Any, soft_delete: bool = False, cascade: bool = False) -> bool:
         # Docstring moved to .pyi
         return delete_item(
             data_store=self,

@@ -20,7 +20,7 @@ from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
 def list_operation(  # Note: self type added below
-    self: 'Crud', parent_id: Optional[str] = None, params: Optional[JSONDict] = None
+    self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[JSONList, List[T], ApiResponse]:
     """
     Retrieve a list of resources.
@@ -37,10 +37,7 @@ def list_operation(  # Note: self type added below
     """
     ...
 
-
-def create_operation(  # Note: self type added below
-    self: 'Crud', data: Union[JSONDict, T], parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
     Create a new resource.
 
@@ -57,10 +54,7 @@ def create_operation(  # Note: self type added below
     """
     ...
 
-
-def read_operation(  # Note: self type added below
-    self: 'Crud', resource_id: str, parent_id: Optional[str] = None
-) -> Union[T, JSONDict]:
+def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
     Retrieve a specific resource.
 
@@ -76,9 +70,8 @@ def read_operation(  # Note: self type added below
     """
     ...
 
-
 def update_operation(  # Note: self type added below
-    self: 'Crud', resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
+    self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
 ) -> Union[T, JSONDict]:
     """
     Update a specific resource.
@@ -97,9 +90,8 @@ def update_operation(  # Note: self type added below
     """
     ...
 
-
 def partial_update_operation(  # Note: self type added below
-    self: 'Crud', resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
+    self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
 ) -> Union[T, JSONDict]:
     """
     Partially update a specific resource.
@@ -118,8 +110,7 @@ def partial_update_operation(  # Note: self type added below
     """
     ...
 
-
-def destroy_operation(self: 'Crud', resource_id: str, parent_id: Optional[str] = None) -> None:
+def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None:
     """
     Delete a specific resource.
 
@@ -132,9 +123,8 @@ def destroy_operation(self: 'Crud', resource_id: str, parent_id: Optional[str] =
     """
     ...
 
-
 def custom_action_operation(
-    self: 'Crud',
+    self: "Crud",
     action: str,
     method: str = "post",
     resource_id: Optional[str] = None,
@@ -163,7 +153,6 @@ def custom_action_operation(
         ModelConversionError: If the response data fails conversion.
     """
     ...
-
 
 # Aliases for the Crud class methods
 list = list_operation

@@ -10,16 +10,13 @@ if TYPE_CHECKING:  # Added TYPE_CHECKING block
 
 
 class CustomAuthMock(AuthMockBase):
-    def __init__(
-        self,
-        header_callback: Optional[Callable[[], Dict[str, str]]] = None,
-        param_callback: Optional[Callable[[], Dict[str, str]]] = None
-    ):
+    def __init__(self, header_callback: Optional[Callable[[], Dict[str, str]]] = None, param_callback: Optional[Callable[[], Dict[str, str]]] = None):
         super().__init__()
 
         # Default callbacks if none provided
         def default_header_callback():
             return {"X-Custom-Auth": "custom_value"}
+
         if header_callback is None and param_callback is None:
             header_callback = default_header_callback
 
@@ -28,10 +25,7 @@ class CustomAuthMock(AuthMockBase):
         # Create a safe header callback that handles None
         safe_header_callback = header_callback if header_callback else lambda: {}
 
-        self.auth_strategy = CustomAuth(
-            header_callback=safe_header_callback,
-            param_callback=param_callback
-        )
+        self.auth_strategy = CustomAuth(header_callback=safe_header_callback, param_callback=param_callback)
 
         # Additional properties for enhanced functionality
         self.expected_headers: Dict[str, str] = {}
@@ -41,48 +35,42 @@ class CustomAuthMock(AuthMockBase):
         self.header_validators: Dict[str, Callable[[str], bool]] = {}
         self.param_validators: Dict[str, Callable[[str], bool]] = {}
 
-    def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
+    def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
         self.header_callback = callback
-        self.auth_strategy = CustomAuth(
-            header_callback=callback,
-            param_callback=self.param_callback
-        )
+        self.auth_strategy = CustomAuth(header_callback=callback, param_callback=self.param_callback)
         return self
 
-    def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> 'CustomAuthMock':
+    def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
         self.param_callback = callback
         # Create a safe header callback that handles None
         safe_header_callback = self.header_callback if self.header_callback else lambda: {}
 
-        self.auth_strategy = CustomAuth(
-            header_callback=safe_header_callback,
-            param_callback=callback
-        )
+        self.auth_strategy = CustomAuth(header_callback=safe_header_callback, param_callback=callback)
         return self
 
-    def with_expected_header(self, name: str, value: str) -> 'CustomAuthMock':
+    def with_expected_header(self, name: str, value: str) -> "CustomAuthMock":
         self.expected_headers[name] = value
         return self
 
-    def with_expected_param(self, name: str, value: str) -> 'CustomAuthMock':
+    def with_expected_param(self, name: str, value: str) -> "CustomAuthMock":
         self.expected_params[name] = value
         return self
 
-    def with_required_header(self, name: str) -> 'CustomAuthMock':
+    def with_required_header(self, name: str) -> "CustomAuthMock":
         if name not in self.required_headers:
             self.required_headers.append(name)
         return self
 
-    def with_required_param(self, name: str) -> 'CustomAuthMock':
+    def with_required_param(self, name: str) -> "CustomAuthMock":
         if name not in self.required_params:
             self.required_params.append(name)
         return self
 
-    def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
+    def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
         self.header_validators[name] = validator
         return self
 
-    def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> 'CustomAuthMock':
+    def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
         self.param_validators[name] = validator
         return self
 
@@ -132,6 +120,6 @@ class CustomAuthMock(AuthMockBase):
         # This method signature in the mock base doesn't perfectly align.
         return None
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         # No standard refresh mechanism defined for generic custom auth mock
         return False

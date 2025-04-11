@@ -4,16 +4,13 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, TypeVar, Union
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DataGenerationBuilder:
 
     @staticmethod
-    def create_random_data(
-        schema: Dict[str, Any],
-        count: int = 1
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def create_random_data(schema: Dict[str, Any], count: int = 1) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         if count == 1:
             return DataGenerationBuilder._generate_item(schema)
         else:
@@ -52,31 +49,31 @@ class DataGenerationBuilder:
     @staticmethod
     def _generate_primitive(type_hint: Any) -> Any:
         # String types
-        if type_hint in ('string', str):
+        if type_hint in ("string", str):
             return DataGenerationBuilder._generate_random_string()
-        elif type_hint == 'email':
+        elif type_hint == "email":
             return DataGenerationBuilder._generate_email()
-        elif type_hint == 'name':
+        elif type_hint == "name":
             return DataGenerationBuilder._generate_name()
-        elif type_hint == 'url':
+        elif type_hint == "url":
             return DataGenerationBuilder._generate_url()
-        elif type_hint == 'ip':
+        elif type_hint == "ip":
             return DataGenerationBuilder._generate_ip()
         # Number types
-        elif type_hint in ('int', int):
+        elif type_hint in ("int", int):
             return random.randint(1, 1000)
-        elif type_hint in ('float', float):
+        elif type_hint in ("float", float):
             return round(random.uniform(1.0, 1000.0), 2)
         # Boolean type
-        elif type_hint in ('bool', bool):
+        elif type_hint in ("bool", bool):
             return random.choice([True, False])
         # Date and time types
-        elif type_hint == 'date':
+        elif type_hint == "date":
             return DataGenerationBuilder._generate_date()
-        elif type_hint == 'datetime':
+        elif type_hint == "datetime":
             return DataGenerationBuilder._generate_datetime()
         # ID types
-        elif type_hint == 'uuid':
+        elif type_hint == "uuid":
             return str(uuid.uuid4())
         # Default case
         else:
@@ -86,24 +83,24 @@ class DataGenerationBuilder:
     def _generate_random_string(length: Optional[int] = None) -> str:
         if length is None:
             length = random.randint(5, 10)
-        return ''.join(random.choices(string.ascii_letters, k=length))
+        return "".join(random.choices(string.ascii_letters, k=length))
 
     @staticmethod
     def _generate_email() -> str:
-        username = ''.join(random.choices(string.ascii_lowercase, k=8))
+        username = "".join(random.choices(string.ascii_lowercase, k=8))
         return f"{username}@example.com"
 
     @staticmethod
     def _generate_name() -> str:
-        first_names = ['John', 'Jane', 'Alice', 'Bob', 'Charlie', 'Diana', 'Edward', 'Fiona']
-        last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis']
+        first_names = ["John", "Jane", "Alice", "Bob", "Charlie", "Diana", "Edward", "Fiona"]
+        last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis"]
         return f"{random.choice(first_names)} {random.choice(last_names)}"
 
     @staticmethod
     def _generate_date() -> str:
         days = random.randint(0, 365 * 2)
         date = datetime.now() - timedelta(days=days)
-        return date.strftime('%Y-%m-%d')
+        return date.strftime("%Y-%m-%d")
 
     @staticmethod
     def _generate_datetime() -> str:
@@ -112,11 +109,11 @@ class DataGenerationBuilder:
         minutes = random.randint(0, 59)
         seconds = random.randint(0, 59)
         dt = datetime.now() - timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
-        return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @staticmethod
     def _generate_url() -> str:
-        path = ''.join(random.choices(string.ascii_lowercase, k=8))
+        path = "".join(random.choices(string.ascii_lowercase, k=8))
         return f"https://example.com/{path}"
 
     @staticmethod

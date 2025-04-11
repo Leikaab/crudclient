@@ -23,7 +23,6 @@ def get_current_time() -> float:
     """
     ...
 
-
 class RateLimitHelper:
     """
     Helper for simulating rate limiting behavior in tests.

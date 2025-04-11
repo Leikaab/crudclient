@@ -37,7 +37,7 @@ class StubClient(Client):
         default_response: Optional[Union[Dict[str, Any], List[Dict[str, Any]], str]] = None,
         response_map: Optional[Dict[str, Any]] = None,
         error_rate: float = 0.0,
-        latency_ms: int = 0
+        latency_ms: int = 0,
     ):
         super().__init__(config)
 
@@ -63,13 +63,7 @@ class StubClient(Client):
         return url or self.base_url
 
     def _record_request(self, method: str, url: str, endpoint: Optional[str], kwargs: Dict[str, Any]) -> None:
-        request_record = {
-            'method': method,
-            'url': url,
-            'endpoint': endpoint,
-            'kwargs': kwargs,
-            'timestamp': datetime.now().isoformat()
-        }
+        request_record = {"method": method, "url": url, "endpoint": endpoint, "kwargs": kwargs, "timestamp": datetime.now().isoformat()}
         self._request_history.append(request_record)
 
     def _simulate_network_conditions(self) -> None:
@@ -100,13 +94,12 @@ class StubClient(Client):
         # Use default response if no match found
         return self._default_response
 
-    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str],
-                                   url: str, kwargs: Dict[str, Any]) -> Any:
+    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str], url: str, kwargs: Dict[str, Any]) -> Any:
         if not callable(response):
             return response
 
         # Extract the endpoint from the URL if not provided
-        endpoint_value = endpoint or url.split('/')[-1]
+        endpoint_value = endpoint or url.split("/")[-1]
 
         # Handle different HTTP methods
         if method == "GET":
@@ -131,13 +124,13 @@ class StubClient(Client):
             if response.status_code >= 400 and handle_response:
                 response.raise_for_status()
 
-            if hasattr(response, '_json_data') and response._json_data:
+            if hasattr(response, "_json_data") and response._json_data:
                 return json.dumps(response._json_data)
 
             # Handle text response
             response_str = response.text
             # Try to parse as JSON if it looks like JSON
-            if response_str.strip().startswith('{') or response_str.strip().startswith('['):
+            if response_str.strip().startswith("{") or response_str.strip().startswith("["):
                 try:
                     json.loads(response_str)  # Just to validate it's valid JSON
                 except json.JSONDecodeError:
@@ -148,14 +141,7 @@ class StubClient(Client):
         else:
             return str(response)
 
-    def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: bool = True,
-        **kwargs: Any
-    ) -> str:
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> str:
         # Build the full URL
         url = self._build_full_url(endpoint, url)
 
@@ -182,7 +168,8 @@ class StubClient(Client):
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         import json as json_module
-        response_str = self._request('GET', endpoint=endpoint, params=params)
+
+        response_str = self._request("GET", endpoint=endpoint, params=params)
         try:
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:
@@ -196,7 +183,8 @@ class StubClient(Client):
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
         import json as json_module
-        response_str = self._request('POST', endpoint=endpoint, data=data, json=json_payload, files=files)
+
+        response_str = self._request("POST", endpoint=endpoint, data=data, json=json_payload, files=files)
         try:
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:
@@ -210,7 +198,8 @@ class StubClient(Client):
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
         import json as json_module
-        response_str = self._request('PUT', endpoint=endpoint, data=data, json=json_payload, files=files)
+
+        response_str = self._request("PUT", endpoint=endpoint, data=data, json=json_payload, files=files)
         try:
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:
@@ -218,7 +207,8 @@ class StubClient(Client):
 
     def delete(self, endpoint: str, **kwargs: Any) -> Any:
         import json as json_module
-        response_str = self._request('DELETE', endpoint=endpoint, **kwargs)
+
+        response_str = self._request("DELETE", endpoint=endpoint, **kwargs)
         try:
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:
@@ -232,7 +222,8 @@ class StubClient(Client):
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
         import json as json_module
-        response_str = self._request('PATCH', endpoint=endpoint, data=data, json=json_payload, files=files)
+
+        response_str = self._request("PATCH", endpoint=endpoint, data=data, json=json_payload, files=files)
         try:
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:

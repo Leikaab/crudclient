@@ -19,19 +19,10 @@ class TestBearerAuthExamples:
     def test_bearer_auth_success_scenario(self):
         """Example of testing a successful Bearer Auth scenario."""
         # Create a mock client with Bearer Auth
-        client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "valid_token"
-            }
-        )
+        client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token"})
 
         # Configure a successful response
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={"data": [{"id": 1, "name": "Resource 1"}]}
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/api/resources", response={"data": [{"id": 1, "name": "Resource 1"}]})
 
         # Make a request
         response = client.get("/api/resources")
@@ -44,29 +35,17 @@ class TestBearerAuthExamples:
         # Verify the auth header was sent correctly
         assert len(client.request_history) == 1
         request = client.request_history[0]
-        assert "Authorization" in request['headers']
-        assert request['headers']["Authorization"] == "Bearer valid_token"
+        assert "Authorization" in request["headers"]
+        assert request["headers"]["Authorization"] == "Bearer valid_token"
 
     def test_bearer_auth_token_expiration_scenario(self):
         """Example of testing a Bearer Auth token expiration scenario."""
         # Create a mock client with Bearer Auth configured with an expired token
-        client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "expired_token",
-                "token_expired": True
-            }
-        )
+        client = create_mock_client(auth_type="bearer", auth_config={"token": "expired_token", "token_expired": True})
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={
-                "error": "Unauthorized",
-                "message": "Token expired"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Make a request and expect it to fail
@@ -82,33 +61,19 @@ class TestBearerAuthExamples:
         # Create a mock client with Bearer Auth configured. The initial token value
         # doesn't matter much as the first request will be intercepted by the 401 pattern.
         client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "expired_token",
-                "refresh_token": "valid_refresh_token"  # May be needed by auth logic
-            }
+            auth_type="bearer", auth_config={"token": "expired_token", "refresh_token": "valid_refresh_token"}  # May be needed by auth logic
         )
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={
-                "error": "Unauthorized",
-                "message": "Token expired"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Configure the token refresh endpoint response
         client.with_response_pattern(
             method="POST",
             url_pattern=r"/oauth/token",
-            response={
-                "access_token": "new_token",
-                "refresh_token": "new_refresh_token",
-                "expires_in": 3600
-            }
+            response={"access_token": "new_token", "refresh_token": "new_refresh_token", "expires_in": 3600},
         )
 
         # In a real implementation, the client would handle token refresh automatically
@@ -124,17 +89,14 @@ class TestBearerAuthExamples:
 
         # Now simulate the token refresh process
         # In a real implementation, this would be handled by the client
-        refresh_response = client.post("/oauth/token", json={
-            "grant_type": "refresh_token",
-            "refresh_token": "valid_refresh_token"
-        })
+        refresh_response = client.post("/oauth/token", json={"grant_type": "refresh_token", "refresh_token": "valid_refresh_token"})
 
         # Update the token within the client's BearerAuth strategy instance
         auth_strategy = client.get_auth_strategy()
         assert auth_strategy is not None, "Auth strategy should be set"
         # Ensure it's a BearerAuth instance before accessing .token
         if isinstance(auth_strategy, BearerAuth):
-            auth_strategy.token = refresh_response['access_token']
+            auth_strategy.token = refresh_response["access_token"]
         else:
             pytest.fail(f"Expected BearerAuth strategy, but got {type(auth_strategy)}")
 
@@ -143,7 +105,7 @@ class TestBearerAuthExamples:
             method="GET",
             url_pattern=r"/api/resources",
             response={"data": [{"id": 1, "name": "Resource 1"}]},
-            status_code=200  # Ensure status code is set for success
+            status_code=200,  # Ensure status code is set for success
         )
 
         # Try the request again with the (hopefully) updated token
@@ -157,5 +119,5 @@ class TestBearerAuthExamples:
         # Optionally, verify the correct token was used in the second GET request header
         assert len(client.request_history) == 3  # Initial GET, POST refresh, Second GET
         second_get_request = client.request_history[2]
-        assert "Authorization" in second_get_request['headers']
-        assert second_get_request['headers']["Authorization"] == "Bearer new_token"
+        assert "Authorization" in second_get_request["headers"]
+        assert second_get_request["headers"]["Authorization"] == "Bearer new_token"

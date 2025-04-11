@@ -26,11 +26,7 @@ class CrudSpy(CrudBase, SpyBase):
     _resource_path: str
     delegate: CrudBase
 
-    def __init__(
-        self,
-        delegate: Optional[CrudBase] = None,
-        **kwargs: Any
-    ):
+    def __init__(self, delegate: Optional[CrudBase] = None, **kwargs: Any):
         """
         Initialize a CrudSpy instance.
 
@@ -170,7 +166,6 @@ class CrudSpy(CrudBase, SpyBase):
             Any exception raised by the delegate Crud
         """
         ...
-
     # Helper methods for verification
 
     def assert_resource_created(self, data: Any) -> None:

@@ -39,10 +39,10 @@ class MockMFAAuth(AuthBase):
                     method=request.method,
                     url=str(request.url),  # Ensure URL is string
                     params=request.params,
-                    json=getattr(request, 'json', None),  # Handle potential absence
-                    data=getattr(request, 'data', None),  # Handle potential absence
+                    json=getattr(request, "json", None),  # Handle potential absence
+                    data=getattr(request, "data", None),  # Handle potential absence
                     headers=new_headers,
-                    extensions=getattr(request, 'extensions', {}) or {},  # Preserve extensions
+                    extensions=getattr(request, "extensions", {}) or {},  # Preserve extensions
                 )
                 return new_request  # Signal to retry with this new request
         return None  # No retry needed
@@ -54,7 +54,7 @@ class MockMFAAuth(AuthBase):
         # The retry mechanism should use the request returned by handle_response_sync.
         if self.mfa_token:
             # Ensure headers exist and are mutable (or create new request)
-            if hasattr(request, 'headers') and isinstance(request.headers, dict):
+            if hasattr(request, "headers") and isinstance(request.headers, dict):
                 request.headers["X-MFA-Token"] = self.mfa_token
             else:
                 # This case indicates an incompatible Request object or missing headers attribute

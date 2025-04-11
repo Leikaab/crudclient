@@ -18,8 +18,7 @@ from ..types import JSONDict
 # Type alias for path arguments
 PathArgs = Optional[Union[str, int]]
 
-
-def _endpoint_prefix(self: 'Crud') -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
+def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
     """
     Construct the endpoint prefix.
 
@@ -30,8 +29,7 @@ def _endpoint_prefix(self: 'Crud') -> Union[Tuple[Optional[str], Optional[str]],
     """
     ...
 
-
-def _validate_path_segments(self: 'Crud', *args: PathArgs) -> None:
+def _validate_path_segments(self: "Crud", *args: PathArgs) -> None:
     """
     Validate the types of path segments.
 
@@ -43,8 +41,7 @@ def _validate_path_segments(self: 'Crud', *args: PathArgs) -> None:
     """
     ...
 
-
-def _get_parent_path(self: 'Crud', parent_args: Optional[tuple] = None) -> str:
+def _get_parent_path(self: "Crud", parent_args: Optional[tuple] = None) -> str:
     """
     Get the parent path if a parent exists.
 
@@ -56,8 +53,7 @@ def _get_parent_path(self: 'Crud', parent_args: Optional[tuple] = None) -> str:
     """
     ...
 
-
-def _build_resource_path(self: 'Crud', *args: PathArgs) -> List[str]:
+def _build_resource_path(self: "Crud", *args: PathArgs) -> List[str]:
     """
     Build the current resource path segments.
 
@@ -69,8 +65,7 @@ def _build_resource_path(self: 'Crud', *args: PathArgs) -> List[str]:
     """
     ...
 
-
-def _get_prefix_segments(self: 'Crud') -> List[str]:
+def _get_prefix_segments(self: "Crud") -> List[str]:
     """
     Get the prefix segments for the endpoint.
 
@@ -79,8 +74,7 @@ def _get_prefix_segments(self: 'Crud') -> List[str]:
     """
     ...
 
-
-def _join_path_segments(self: 'Crud', segments: List[str]) -> str:
+def _join_path_segments(self: "Crud", segments: List[str]) -> str:
     """
     Join path segments into a URL.
 
@@ -92,8 +86,7 @@ def _join_path_segments(self: 'Crud', segments: List[str]) -> str:
     """
     ...
 
-
-def _get_endpoint(self: 'Crud', *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str:
+def _get_endpoint(self: "Crud", *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str:
     """
     Construct the endpoint path.
 

@@ -38,11 +38,7 @@ class CreateMock(BaseCrudMock):
         self._auto_increment_id: int
         ...
 
-    def with_unique_constraint(
-        self,
-        field_name: str,
-        error_message: Optional[str] = None
-    ) -> 'CreateMock':
+    def with_unique_constraint(self, field_name: str, error_message: Optional[str] = None) -> "CreateMock":
         """
         Configure a unique constraint for a field.
 
@@ -58,12 +54,7 @@ class CreateMock(BaseCrudMock):
         """
         ...
 
-    def with_validation_constraint(
-        self,
-        field_name: str,
-        validator: Callable[[Any], bool],
-        error_message: str
-    ) -> 'CreateMock':
+    def with_validation_constraint(self, field_name: str, validator: Callable[[Any], bool], error_message: str) -> "CreateMock":
         """
         Configure a validation constraint for a field.
 
@@ -80,7 +71,7 @@ class CreateMock(BaseCrudMock):
         """
         ...
 
-    def with_auto_increment_id(self, id_field: str = "id") -> 'CreateMock':
+    def with_auto_increment_id(self, id_field: str = "id") -> "CreateMock":
         """
         Configure auto-incrementing IDs for created resources.
 
@@ -114,13 +105,7 @@ class CreateMock(BaseCrudMock):
         """
         ...
 
-    def with_success_response(
-        self,
-        url_pattern: str,
-        response_data: Dict[str, Any],
-        status_code: int = 201,
-        **kwargs: Any
-    ) -> 'CreateMock':
+    def with_success_response(self, url_pattern: str, response_data: Dict[str, Any], status_code: int = 201, **kwargs: Any) -> "CreateMock":
         """
         Configure a successful response for a specific URL pattern.
 
@@ -152,12 +137,8 @@ class CreateMock(BaseCrudMock):
         ...
 
     def with_validation_failure(
-        self,
-        url_pattern: str,
-        validation_errors: Dict[str, List[str]],
-        status_code: int = 422,
-        **kwargs: Any
-    ) -> 'CreateMock':
+        self, url_pattern: str, validation_errors: Dict[str, List[str]], status_code: int = 422, **kwargs: Any
+    ) -> "CreateMock":
         """
         Configure a validation failure response for a specific URL pattern.
 

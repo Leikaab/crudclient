@@ -13,12 +13,7 @@ class StubAPI(API):
     # Docstring moved to .pyi
     client_class = Client  # Can be overridden if needed, e.g., with StubClient
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        client_config: Optional[ClientConfig] = None,
-        **kwargs: Any
-    ):
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
         if client_config is None:
             # Provide a default config if none is given
             client_config = ClientConfig(hostname="https://stub.api.example.com")
@@ -27,13 +22,7 @@ class StubAPI(API):
         # Shared data store across all registered endpoints
         self._data_store: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
-    def register_endpoint(
-        self,
-        name: str,
-        endpoint: str,
-        model: Optional[Type[Any]] = None,
-        **kwargs: Any
-    ) -> StubCrud:
+    def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> StubCrud:
         # Docstring moved to .pyi
         # Initialize data store for this endpoint if it doesn't exist
         if name not in self._data_store:
@@ -41,11 +30,7 @@ class StubAPI(API):
 
         # Create a stub CRUD for this endpoint, passing the specific part of the shared store
         crud = StubCrud(
-            client_or_name=self.client,
-            endpoint=endpoint,
-            model=model,
-            data_store=self._data_store[name],  # Pass the specific store slice
-            **kwargs
+            client_or_name=self.client, endpoint=endpoint, model=model, data_store=self._data_store[name], **kwargs  # Pass the specific store slice
         )
 
         # Store the CRUD and make it accessible as an attribute
@@ -78,11 +63,7 @@ class StubAPI(API):
         for crud_instance in self.endpoints.values():
             crud_instance._next_id = 1  # Reset ID counter
 
-    def populate_data_store(
-        self,
-        endpoint_name: str,
-        data: List[Dict[str, Any]]
-    ) -> None:
+    def populate_data_store(self, endpoint_name: str, data: List[Dict[str, Any]]) -> None:
         # Docstring moved to .pyi
         if endpoint_name not in self._data_store:
             # If endpoint wasn't pre-registered, initialize its store part
@@ -95,10 +76,10 @@ class StubAPI(API):
         max_id = 0
         for item in data:
             item_copy = copy.deepcopy(item)  # Avoid modifying original data
-            if 'id' not in item_copy:
-                item_copy['id'] = str(uuid.uuid4())  # Use UUID if no ID
+            if "id" not in item_copy:
+                item_copy["id"] = str(uuid.uuid4())  # Use UUID if no ID
 
-            str_id = str(item_copy['id'])
+            str_id = str(item_copy["id"])
             self._data_store[endpoint_name][str_id] = item_copy
 
             # Track max numeric ID for potential next_id update

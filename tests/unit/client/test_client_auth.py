@@ -50,10 +50,7 @@ class TestClientAuth:
         # Arrange
         token = "my-secret-token"
         auth_strategy = BearerAuth(token=token)
-        config = ClientConfig(
-            hostname="https://bearer-test.com",
-            auth_strategy=auth_strategy
-        )
+        config = ClientConfig(hostname="https://bearer-test.com", auth_strategy=auth_strategy)
 
         # Act
         client = Client(config)

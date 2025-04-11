@@ -15,7 +15,6 @@ This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
 
-
 class Client:
     """
     Client class for making API requests.
@@ -161,13 +160,13 @@ class Client:
         ...
 
     @overload
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
-                 handle_response: Literal[True] = True, **kwargs: Any) -> RawResponseSimple: ...
-
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
+    ) -> RawResponseSimple: ...
     @overload
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
-                 handle_response: Literal[False] = False, **kwargs: Any) -> requests.Response: ...
-
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
+    ) -> requests.Response: ...
     @property
     def session(self) -> requests.Session:
         """
@@ -191,10 +190,7 @@ class Client:
         ...
 
     def _prepare_data(
-        self,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Any] = None,
-        files: Optional[Dict[str, Any]] = None
+        self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, str], Dict[str, Any]]:
         """
         Prepare request data based on the provided parameters.
@@ -214,9 +210,7 @@ class Client:
         """
         ...
 
-    def _maybe_retry_after_403(
-        self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response
-    ) -> requests.Response:
+    def _maybe_retry_after_403(self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response) -> requests.Response:
         """
         Retry a request after receiving a 403 Forbidden response.
 

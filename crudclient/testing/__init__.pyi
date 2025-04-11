@@ -4,6 +4,7 @@ Testing utilities for the crudclient library.
 This module provides a framework for creating test doubles (mocks, stubs, fakes, spies)
 for the crudclient library components (Client, API, CRUD, Auth, HTTPClient).
 """
+
 from .auth import (
     ApiKeyAuthMock,
     AuthMockBase,
@@ -42,53 +43,51 @@ from .verification import Verifier
 
 class RequestVerifier:
     """Placeholder for RequestVerifier class referenced in tests."""
-    ...
 
+    ...
 
 class ResponseVerifier:
     """Placeholder for ResponseVerifier class referenced in tests."""
-    ...
 
+    ...
 
 __all__ = [
     # Main classes
-    'MockClient',
-    'MockHTTPClient',
-    'MockClientFactory',
-    'Verifier',
-    'FakeAPI',
-    'DataStore',
-    'MethodCall',
-    'SpyBase',
-    'MockResponse',
-    'SimpleMockClient',
-    'APIPatternBuilder',
-    'ResponseBuilder',
-    'RequestVerifier',
-    'ResponseVerifier',
-
+    "MockClient",
+    "MockHTTPClient",
+    "MockClientFactory",
+    "Verifier",
+    "FakeAPI",
+    "DataStore",
+    "MethodCall",
+    "SpyBase",
+    "MockResponse",
+    "SimpleMockClient",
+    "APIPatternBuilder",
+    "ResponseBuilder",
+    "RequestVerifier",
+    "ResponseVerifier",
     # Auth mocks
-    'ApiKeyAuthMock',
-    'AuthMockBase',
-    'AuthVerificationHelpers',
-    'BasicAuthMock',
-    'BearerAuthMock',
-    'CustomAuthMock',
-    'OAuthMock',
-    'create_api_key_auth_mock',
-    'create_basic_auth_mock',
-    'create_bearer_auth_mock',
-    'create_custom_auth_mock',
-    'create_oauth_mock',
-
+    "ApiKeyAuthMock",
+    "AuthMockBase",
+    "AuthVerificationHelpers",
+    "BasicAuthMock",
+    "BearerAuthMock",
+    "CustomAuthMock",
+    "OAuthMock",
+    "create_api_key_auth_mock",
+    "create_basic_auth_mock",
+    "create_bearer_auth_mock",
+    "create_custom_auth_mock",
+    "create_oauth_mock",
     # Exceptions
-    'TestingError',
-    'MockConfigurationError',
-    'VerificationError',
-    'RequestNotConfiguredError',
-    'AuthStrategyError',
-    'CRUDOperationError',
-    'DataStoreError',
-    'ResourceNotFoundError',
-    'SpyError',
+    "TestingError",
+    "MockConfigurationError",
+    "VerificationError",
+    "RequestNotConfiguredError",
+    "AuthStrategyError",
+    "CRUDOperationError",
+    "DataStoreError",
+    "ResourceNotFoundError",
+    "SpyError",
 ]

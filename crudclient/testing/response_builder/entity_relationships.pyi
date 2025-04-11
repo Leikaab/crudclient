@@ -80,7 +80,6 @@ class EntityRelationshipBuilder:
         """
         ...
 
-
 def _extract_entity_id_from_url(url: str, entity_type: str) -> Tuple[str, Optional[MockResponse]]:
     """
     Extract entity ID from URL or return error response if not possible.
@@ -97,7 +96,6 @@ def _extract_entity_id_from_url(url: str, entity_type: str) -> Tuple[str, Option
     """
     ...
 
-
 def _create_entity_not_found_response(entity_type: str, entity_id: str) -> MockResponse:
     """
     Create a standard 404 response for entity not found.
@@ -111,11 +109,7 @@ def _create_entity_not_found_response(entity_type: str, entity_id: str) -> MockR
     """
     ...
 
-
-def _create_list_factory(
-    entities: List[Dict[str, Any]],
-    entity_type: str
-) -> Callable[..., MockResponse]:
+def _create_list_factory(entities: List[Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
     """
     Create a factory function for list operation.
 
@@ -128,11 +122,7 @@ def _create_list_factory(
     """
     ...
 
-
-def _create_get_factory(
-    entity_map: Dict[str, Dict[str, Any]],
-    entity_type: str
-) -> Callable[..., MockResponse]:
+def _create_get_factory(entity_map: Dict[str, Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
     """
     Create a factory function for get operation.
 
@@ -146,12 +136,8 @@ def _create_get_factory(
     """
     ...
 
-
 def _create_create_factory(
-    entities: List[Dict[str, Any]],
-    entity_map: Dict[str, Dict[str, Any]],
-    entity_type: str,
-    id_field: str
+    entities: List[Dict[str, Any]], entity_map: Dict[str, Dict[str, Any]], entity_type: str, id_field: str
 ) -> Callable[..., MockResponse]:
     """
     Create a factory function for create operation.
@@ -168,11 +154,7 @@ def _create_create_factory(
     """
     ...
 
-
-def _create_update_factory(
-    entity_map: Dict[str, Dict[str, Any]],
-    entity_type: str
-) -> Callable[..., MockResponse]:
+def _create_update_factory(entity_map: Dict[str, Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
     """
     Create a factory function for update operation.
 
@@ -186,12 +168,7 @@ def _create_update_factory(
     """
     ...
 
-
-def _create_delete_factory(
-    entities: List[Dict[str, Any]],
-    entity_map: Dict[str, Dict[str, Any]],
-    entity_type: str
-) -> Callable[..., MockResponse]:
+def _create_delete_factory(entities: List[Dict[str, Any]], entity_map: Dict[str, Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
     """
     Create a factory function for delete operation.
 
@@ -205,7 +182,6 @@ def _create_delete_factory(
         MockResponse with a 204 status code
     """
     ...
-
 
 def create_consistent_response_sequence(
     entity_type: str,

@@ -4,13 +4,12 @@ from typing import TYPE_CHECKING, Any, Dict, List
 if TYPE_CHECKING:
     from .data_store_definitions import Relationship
 
-
 class RelationshipType:
     """Defines the types of relationships between collections."""
+
     ONE_TO_ONE: str
     ONE_TO_MANY: str
     MANY_TO_MANY: str
-
 
 def include_related_data(
     collection: str,
@@ -18,11 +17,10 @@ def include_related_data(
     include_related: List[str],
     relationships: List["Relationship"],
     collections: Dict[str, List[Dict[str, Any]]],
-    deleted_field: str = "_deleted"
+    deleted_field: str = "_deleted",
 ) -> List[Dict[str, Any]]:
     """Includes related data for a list of items based on defined relationships."""
     ...
-
 
 def include_related_item(
     collection: str,
@@ -30,11 +28,10 @@ def include_related_item(
     include_related: List[str],
     relationships: List["Relationship"],
     collections: Dict[str, List[Dict[str, Any]]],
-    deleted_field: str = "_deleted"
+    deleted_field: str = "_deleted",
 ) -> Dict[str, Any]:
     """Includes related data for a single item based on defined relationships."""
     ...
-
 
 def cascade_delete(
     collection: str,
@@ -43,7 +40,7 @@ def cascade_delete(
     collections: Dict[str, List[Dict[str, Any]]],
     soft_delete: bool = False,
     deleted_field: str = "_deleted",
-    updated_at_field: str = "_updated_at"
+    updated_at_field: str = "_updated_at",
 ) -> None:
     """
     Performs cascading deletes based on relationship definitions.

@@ -32,14 +32,12 @@ def include_related_data(
     include_related: List[str],
     relationships: List[Relationship],  # Use imported Relationship
     collections: Dict[str, List[Dict[str, Any]]],
-    deleted_field: str = "_deleted"
+    deleted_field: str = "_deleted",
 ) -> List[Dict[str, Any]]:
     # Docstring moved to .pyi
     result = []
     for item in data:
-        result.append(include_related_item(
-            collection, item, include_related, relationships, collections, deleted_field
-        ))
+        result.append(include_related_item(collection, item, include_related, relationships, collections, deleted_field))
     return result
 
 
@@ -49,7 +47,7 @@ def include_related_item(
     include_related: List[str],
     relationships: List[Relationship],  # Use imported Relationship
     collections: Dict[str, List[Dict[str, Any]]],
-    deleted_field: str = "_deleted"
+    deleted_field: str = "_deleted",
 ) -> Dict[str, Any]:
     # Docstring moved to .pyi
     result = copy.deepcopy(item)
@@ -59,8 +57,9 @@ def include_related_item(
         relationship = None
         for rel in relationships:
             # Check both forward and bidirectional reverse relationships
-            if (rel.source_collection == collection and rel.target_collection == related_name) or \
-               (rel.bidirectional and rel.target_collection == collection and rel.source_collection == related_name):
+            if (rel.source_collection == collection and rel.target_collection == related_name) or (
+                rel.bidirectional and rel.target_collection == collection and rel.source_collection == related_name
+            ):
                 relationship = rel
                 break
 
@@ -73,24 +72,18 @@ def include_related_item(
 
         # Get the related data based on relationship type
         if relationship.relationship_type == RelationshipType.ONE_TO_ONE:
-            related_items = _get_related_one_to_one(
-                item, relationship, collections, deleted_field, is_forward_relation, related_name
-            )
+            related_items = _get_related_one_to_one(item, relationship, collections, deleted_field, is_forward_relation, related_name)
             result[related_name] = copy.deepcopy(related_items[0]) if related_items else None
 
         elif relationship.relationship_type == RelationshipType.ONE_TO_MANY:
-            related_items = _get_related_one_to_many(
-                item, relationship, collections, deleted_field, is_forward_relation, related_name
-            )
+            related_items = _get_related_one_to_many(item, relationship, collections, deleted_field, is_forward_relation, related_name)
             if is_forward_relation:  # one-to-many returns a list
                 result[related_name] = copy.deepcopy(related_items)
             else:  # many-to-one returns a single item or None
                 result[related_name] = copy.deepcopy(related_items[0]) if related_items else None
 
         elif relationship.relationship_type == RelationshipType.MANY_TO_MANY:
-            related_items = _get_related_many_to_many(
-                item, relationship, collections, deleted_field, is_forward_relation, related_name
-            )
+            related_items = _get_related_many_to_many(item, relationship, collections, deleted_field, is_forward_relation, related_name)
             result[related_name] = copy.deepcopy(related_items)
 
     return result
@@ -98,13 +91,14 @@ def include_related_item(
 
 # --- Helper functions for include_related_item ---
 
+
 def _get_related_one_to_one(
     item: Dict[str, Any],
     relationship: Relationship,
     collections: Dict[str, List[Dict[str, Any]]],
     deleted_field: str,
     is_forward_relation: bool,
-    related_name: str
+    related_name: str,
 ) -> List[Dict[str, Any]]:
     # Docstring moved to .pyi
     if is_forward_relation:
@@ -122,11 +116,7 @@ def _get_related_one_to_one(
         return []
 
     target_items = collections[target_collection_name]
-    return [
-        i for i in target_items
-        if i.get(target_key) == item_key_value
-        and not i.get(deleted_field, False)
-    ]
+    return [i for i in target_items if i.get(target_key) == item_key_value and not i.get(deleted_field, False)]
 
 
 def _get_related_one_to_many(
@@ -135,7 +125,7 @@ def _get_related_one_to_many(
     collections: Dict[str, List[Dict[str, Any]]],
     deleted_field: str,
     is_forward_relation: bool,
-    related_name: str
+    related_name: str,
 ) -> List[Dict[str, Any]]:
     # Docstring moved to .pyi
     if is_forward_relation:  # one(item)-to-many(related_name)
@@ -153,11 +143,7 @@ def _get_related_one_to_many(
         return []
 
     target_items = collections[target_collection_name]
-    return [
-        i for i in target_items
-        if i.get(target_key) == item_key_value
-        and not i.get(deleted_field, False)
-    ]
+    return [i for i in target_items if i.get(target_key) == item_key_value and not i.get(deleted_field, False)]
 
 
 def _get_related_many_to_many(
@@ -166,7 +152,7 @@ def _get_related_many_to_many(
     collections: Dict[str, List[Dict[str, Any]]],
     deleted_field: str,
     is_forward_relation: bool,
-    related_name: str
+    related_name: str,
 ) -> List[Dict[str, Any]]:
     # Docstring moved to .pyi
     if not relationship.junction_collection or relationship.junction_collection not in collections:
@@ -193,11 +179,7 @@ def _get_related_many_to_many(
         return []
 
     # Find matching entries in the junction table
-    junction_matches = [
-        i for i in junction_items
-        if i.get(junction_source_key or "") == item_key_value
-        and not i.get(deleted_field, False)
-    ]
+    junction_matches = [i for i in junction_items if i.get(junction_source_key or "") == item_key_value and not i.get(deleted_field, False)]
 
     # Get the IDs of the related items from the junction table
     related_ids = {i.get(junction_target_key or "") for i in junction_matches if i.get(junction_target_key or "") is not None}
@@ -207,11 +189,7 @@ def _get_related_many_to_many(
 
     # Get the actual related items
     target_items = collections[target_collection_name]
-    return [
-        i for i in target_items
-        if i.get(target_key) in related_ids
-        and not i.get(deleted_field, False)
-    ]
+    return [i for i in target_items if i.get(target_key) in related_ids and not i.get(deleted_field, False)]
 
 
 def cascade_delete(
@@ -221,7 +199,7 @@ def cascade_delete(
     collections: Dict[str, List[Dict[str, Any]]],
     soft_delete: bool = False,
     deleted_field: str = "_deleted",
-    updated_at_field: str = "_updated_at"
+    updated_at_field: str = "_updated_at",
 ) -> None:
     # Docstring moved to .pyi
     # Find relationships where this collection is the source
@@ -240,16 +218,10 @@ def cascade_delete(
         target_items = collections[target_collection]
 
         if relationship.relationship_type == RelationshipType.ONE_TO_ONE:
-            handle_one_to_one_cascade(
-                source_key_value, relationship, target_items,
-                soft_delete, deleted_field, updated_at_field
-            )
+            handle_one_to_one_cascade(source_key_value, relationship, target_items, soft_delete, deleted_field, updated_at_field)
 
         elif relationship.relationship_type == RelationshipType.ONE_TO_MANY:
-            handle_one_to_many_cascade(
-                source_key_value, relationship, target_items,
-                soft_delete, deleted_field, updated_at_field
-            )
+            handle_one_to_many_cascade(source_key_value, relationship, target_items, soft_delete, deleted_field, updated_at_field)
 
         elif relationship.relationship_type == RelationshipType.MANY_TO_MANY:
             # For many-to-many, we need to handle the junction table
@@ -263,14 +235,8 @@ def cascade_delete(
             junction_items = collections[junction_collection]
 
             # Process junction table and get target IDs
-            target_ids = handle_many_to_many_junction(
-                source_key_value, relationship, junction_items,
-                soft_delete, deleted_field, updated_at_field
-            )
+            target_ids = handle_many_to_many_junction(source_key_value, relationship, junction_items, soft_delete, deleted_field, updated_at_field)
 
             # Handle target items if needed
             if relationship.cascade_delete and target_ids:
-                handle_many_to_many_targets(
-                    target_ids, relationship, target_items,
-                    soft_delete, deleted_field, updated_at_field
-                )
+                handle_many_to_many_targets(target_ids, relationship, target_items, soft_delete, deleted_field, updated_at_field)

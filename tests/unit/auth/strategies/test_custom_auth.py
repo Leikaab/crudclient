@@ -16,6 +16,7 @@ class TestCustomAuth:
         WHEN prepare_request_headers and prepare_request_params are called
         THEN the header callback is used, params are empty, and attributes match.
         """
+
         # GIVEN
         def get_headers() -> Dict[str, str]:
             return {"X-Custom-Auth": "custom_value"}
@@ -38,6 +39,7 @@ class TestCustomAuth:
         WHEN prepare_request_headers and prepare_request_params are called
         THEN both callbacks are used correctly and attributes match.
         """
+
         # GIVEN
         def get_headers() -> Dict[str, str]:
             return {"X-Custom-Auth": "custom_value"}
@@ -63,6 +65,7 @@ class TestCustomAuth:
         WHEN prepare_request_headers and prepare_request_params are called
         THEN headers are empty, the param callback is used, and attributes match.
         """
+
         # GIVEN
         def get_params() -> Dict[str, str]:
             return {"custom_param": "param_value"}
@@ -95,6 +98,7 @@ class TestCustomAuth:
         WHEN prepare_request_headers is called
         THEN a TypeError is raised.
         """
+
         # GIVEN
         def get_headers_invalid() -> str:
             return "not_a_dict"
@@ -111,6 +115,7 @@ class TestCustomAuth:
         WHEN prepare_request_params is called
         THEN a TypeError is raised.
         """
+
         # GIVEN
         def get_params_invalid() -> list:
             return ["not_a_dict"]

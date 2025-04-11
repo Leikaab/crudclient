@@ -21,11 +21,7 @@ class CustomAuth(AuthStrategy):
     header_callback: Callable[[], Dict[str, str]]
     param_callback: Optional[Callable[[], Dict[str, str]]]
 
-    def __init__(
-        self,
-        header_callback: Callable[[], Dict[str, str]],
-        param_callback: Optional[Callable[[], Dict[str, str]]] = None
-    ) -> None:
+    def __init__(self, header_callback: Callable[[], Dict[str, str]], param_callback: Optional[Callable[[], Dict[str, str]]] = None) -> None:
         """
         Initialize a CustomAuth strategy.
 
@@ -58,7 +54,6 @@ class CustomAuth(AuthStrategy):
         """
         ...
 
-
 class ApiKeyAuth(AuthStrategy):
     """
     API key authentication strategy.
@@ -76,12 +71,7 @@ class ApiKeyAuth(AuthStrategy):
     header_name: str
     param_name: Optional[str]
 
-    def __init__(
-        self,
-        api_key: str,
-        header_name: str = "X-API-Key",
-        param_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, api_key: str, header_name: str = "X-API-Key", param_name: Optional[str] = None) -> None:
         """
         Initialize an ApiKeyAuth strategy.
 

@@ -5,10 +5,7 @@ from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth
 
 
-def create_auth_strategy(
-    auth_type: str,
-    token=None
-) -> Optional[AuthStrategy]:
+def create_auth_strategy(auth_type: str, token=None) -> Optional[AuthStrategy]:
     if auth_type == "none" or token is None:
         return None
 

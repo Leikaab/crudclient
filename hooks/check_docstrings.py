@@ -21,7 +21,7 @@ def has_docstrings(file_path: str) -> List[Tuple[int, str, str]]:
     Returns:
         List of tuples containing (line_number, node_type, docstring) for each docstring found
     """
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         try:
             tree = ast.parse(file.read(), filename=file_path)
         except SyntaxError as e:
@@ -31,20 +31,24 @@ def has_docstrings(file_path: str) -> List[Tuple[int, str, str]]:
     docstrings = []
 
     # Check module docstring
-    if (isinstance(tree, ast.Module)
-            and len(tree.body) > 0
-            and isinstance(tree.body[0], ast.Expr)
-            and isinstance(tree.body[0].value, ast.Constant)
-            and isinstance(tree.body[0].value.value, str)):
+    if (
+        isinstance(tree, ast.Module)
+        and len(tree.body) > 0
+        and isinstance(tree.body[0], ast.Expr)
+        and isinstance(tree.body[0].value, ast.Constant)
+        and isinstance(tree.body[0].value.value, str)
+    ):
         docstrings.append((1, "module", tree.body[0].value.value))
 
     # Check class, function, and method docstrings
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            if (len(node.body) > 0
-                    and isinstance(node.body[0], ast.Expr)
-                    and isinstance(node.body[0].value, ast.Constant)
-                    and isinstance(node.body[0].value.value, str)):
+            if (
+                len(node.body) > 0
+                and isinstance(node.body[0], ast.Expr)
+                and isinstance(node.body[0].value, ast.Constant)
+                and isinstance(node.body[0].value.value, str)
+            ):
                 node_type = "class" if isinstance(node, ast.ClassDef) else "function"
                 docstrings.append((node.lineno, node_type, node.body[0].value.value))
 
@@ -64,22 +68,21 @@ def main(files: List[str]) -> int:
     errors = []
 
     for file_path in files:
-        if not (file_path.endswith('.py') or file_path.endswith('.pyi')):
+        if not (file_path.endswith(".py") or file_path.endswith(".pyi")):
             continue
 
         # Skip files in the hooks/ and tests/ directories
-        if file_path.startswith('hooks/') or file_path.startswith('tests/'):
+        if file_path.startswith("hooks/") or file_path.startswith("tests/"):
             continue
 
-        is_stub = file_path.endswith('.pyi')
+        is_stub = file_path.endswith(".pyi")
         docstrings = has_docstrings(file_path)
 
         if not is_stub and docstrings:
             # .py files should not have docstrings
             for line, node_type, docstring in docstrings:
                 print(f"DEBUG: Found docstring in {file_path} at line {line}, type {node_type}, content: {docstring[:50]}...")
-                errors.append(f"{file_path}:{line}: {node_type} docstring found in .py file. "
-                              f"Docstrings should be in .pyi files only.")
+                errors.append(f"{file_path}:{line}: {node_type} docstring found in .py file. " f"Docstrings should be in .pyi files only.")
 
     if errors:
         for error in errors:
@@ -92,9 +95,9 @@ def main(files: List[str]) -> int:
     return 0
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Check docstring rules')
-    parser.add_argument('files', nargs='*', help='Files to check')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Check docstring rules")
+    parser.add_argument("files", nargs="*", help="Files to check")
     args = parser.parse_args()
 
     sys.exit(main(args.files))

@@ -15,12 +15,7 @@ class MethodCall:
     exception: Optional[Exception]
 
     def __init__(
-        self,
-        method_name: str,
-        args: Tuple[Any, ...],
-        kwargs: Dict[str, Any],
-        return_value: Any = None,
-        exception: Optional[Exception] = None
+        self, method_name: str, args: Tuple[Any, ...], kwargs: Dict[str, Any], return_value: Any = None, exception: Optional[Exception] = None
     ):
         """
         Initialize a method call record.

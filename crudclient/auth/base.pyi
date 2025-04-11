@@ -38,7 +38,6 @@ class AuthStrategy(ABC):
         """
         ...
 
-
 def create_auth_strategy(auth_type: str, api_key: Optional[str] = None) -> AuthStrategy:
     """
     Create an authentication strategy based on the specified type.

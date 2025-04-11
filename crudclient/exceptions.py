@@ -51,7 +51,7 @@ class ValidationError(CrudClientError):
         data: Any,
         response: Optional[requests.Response] = None,
         errors: Optional[Dict[str, Any]] = None,
-        pydantic_error: Optional[PydanticValidationError] = None  # Added parameter
+        pydantic_error: Optional[PydanticValidationError] = None,  # Added parameter
     ):
         self.data = data
         self.errors = errors or {}

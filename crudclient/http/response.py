@@ -13,7 +13,11 @@ class ResponseHandler:
 
     def handle_response(self, response: requests.Response) -> RawResponseSimple:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         if not response.ok:
             # Let the caller handle error responses
@@ -40,7 +44,11 @@ class ResponseHandler:
 
     def parse_json_response(self, response: requests.Response) -> Union[dict, list, str]:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         logger.debug("Parsing JSON response")
         try:
@@ -56,14 +64,22 @@ class ResponseHandler:
 
     def parse_binary_response(self, response: requests.Response) -> bytes:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         logger.debug("Parsing binary response")
         return response.content
 
     def parse_text_response(self, response: requests.Response) -> str:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         logger.debug("Parsing text response")
         return response.text

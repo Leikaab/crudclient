@@ -14,6 +14,7 @@ from crudclient.config import ClientConfig
 
 class MockBearerAuthConfig(ClientConfig):
     """Mock config with Bearer Authentication."""
+
     headers = {"X-Custom-Header": "custom-value"}
     api_key = "supersecret"
 

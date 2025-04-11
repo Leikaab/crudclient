@@ -35,13 +35,7 @@ class MockClient:
     _auth_strategy: Optional[AuthStrategy]
     request_history: List[Dict[str, Any]]
 
-    def __init__(
-        self,
-        http_client: Any,
-        base_url: str = "https://api.example.com",
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, http_client: Any, base_url: str = "https://api.example.com", enable_spy: bool = False, **kwargs: Any) -> None:
         """
         Initialize a new MockClient.
 
@@ -60,7 +54,7 @@ class MockClient:
         status_code: StatusCode = 200,
         data: Optional[ResponseBody] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         """
         Configure a response for a specific request.
@@ -82,7 +76,7 @@ class MockClient:
         status_code: StatusCode = 200,
         data: Optional[ResponseBody] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         """
         Configure a response for requests matching a path pattern (regex).
@@ -104,7 +98,7 @@ class MockClient:
 
     def with_network_condition(
         self,
-        latency_ms: float = 0.0
+        latency_ms: float = 0.0,
         # Future: packet_loss_rate: float = 0.0
     ) -> None:
         """
@@ -121,11 +115,7 @@ class MockClient:
         """
         ...
 
-    def with_rate_limiter(
-        self,
-        limit: int,
-        window_seconds: int
-    ) -> None:
+    def with_rate_limiter(self, limit: int, window_seconds: int) -> None:
         """
         Configure rate limiting for the mock client.
 
@@ -135,10 +125,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_sequence(
-        self,
-        expected_sequence: List[Dict[str, Any]]
-    ) -> None:
+    def assert_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
         """
         Assert that requests were made in the expected sequence.
 
@@ -150,12 +137,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_params(
-        self,
-        expected_params: Dict[str, str],
-        method: Optional[HttpMethod] = None,
-        url_pattern: Optional[str] = None
-    ) -> None:
+    def assert_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, url_pattern: Optional[str] = None) -> None:
         """
         Assert that a request was made with the expected parameters.
 
@@ -169,12 +151,7 @@ class MockClient:
         """
         ...
 
-    def create_paginated_response(
-        self,
-        items: List[Any],
-        page_size: int,
-        base_url: str
-    ) -> Any:
+    def create_paginated_response(self, items: List[Any], page_size: int, base_url: str) -> Any:
         """
         Create a paginated response helper.
 
@@ -234,7 +211,7 @@ class MockClient:
         headers: Optional[Headers] = None,
         params: Optional[QueryParams] = None,
         data: Optional[RequestBody] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Record a request in the request history.
@@ -248,16 +225,9 @@ class MockClient:
             **kwargs: Additional keyword arguments.
         """
         ...
-
     # HTTP method implementations
 
-    def get(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        **kwargs: Any
-    ) -> Any:
+    def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
         """
         Make a mock GET request.
 
@@ -273,12 +243,7 @@ class MockClient:
         ...
 
     def post(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
         """
         Make a mock POST request.
@@ -296,12 +261,7 @@ class MockClient:
         ...
 
     def put(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
         """
         Make a mock PUT request.
@@ -318,13 +278,7 @@ class MockClient:
         """
         ...
 
-    def delete(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        **kwargs: Any
-    ) -> Any:
+    def delete(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
         """
         Make a mock DELETE request.
 
@@ -340,12 +294,7 @@ class MockClient:
         ...
 
     def patch(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[QueryParams] = None,
-        data: Optional[RequestBody] = None,
-        **kwargs: Any
+        self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
         """
         Make a mock PATCH request.
@@ -361,14 +310,9 @@ class MockClient:
             The response from the mock HTTP client.
         """
         ...
-
     # Verification methods
 
-    def get_request_count(
-        self,
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[Union[str, Pattern]] = None
-    ) -> int:
+    def get_request_count(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> int:
         """
         Get the number of requests matching the given criteria.
 
@@ -381,12 +325,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_count(
-        self,
-        count: int,
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[Union[str, Pattern]] = None
-    ) -> None:
+    def assert_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that a specific number of matching requests were made.
 
@@ -400,11 +339,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_made(
-        self,
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[Union[str, Pattern]] = None
-    ) -> None:
+    def assert_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that at least one matching request was made.
 
@@ -417,11 +352,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_not_made(
-        self,
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[Union[str, Pattern]] = None
-    ) -> None:
+    def assert_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that no matching requests were made.
 
@@ -434,11 +365,7 @@ class MockClient:
         """
         ...
 
-    def _filter_requests(
-        self,
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[Union[str, Pattern]] = None
-    ) -> List[Dict[str, Any]]:
+    def _filter_requests(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> List[Dict[str, Any]]:
         """
         Filter request history by method and path pattern.
 

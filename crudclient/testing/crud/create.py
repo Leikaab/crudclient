@@ -12,20 +12,13 @@ from .request_record import RequestRecord
 class CreateMock(BaseCrudMock):
     def __init__(self):
         super().__init__()
-        self.default_response = MockResponse(
-            status_code=201,
-            json_data={"id": 1, "name": "Created Resource"}
-        )
+        self.default_response = MockResponse(status_code=201, json_data={"id": 1, "name": "Created Resource"})
         self._unique_constraints = {}  # field_name -> set of values that must be unique
         self._validation_constraints = {}  # field_name -> validation function
         self._stored_resources = []  # List of resources that have been "created"
         self._auto_increment_id = 1  # For auto-incrementing IDs
 
-    def with_unique_constraint(
-        self,
-        field_name: str,
-        error_message: Optional[str] = None
-    ) -> 'CreateMock':
+    def with_unique_constraint(self, field_name: str, error_message: Optional[str] = None) -> "CreateMock":
         if field_name not in self._unique_constraints:
             self._unique_constraints[field_name] = set()
 
@@ -36,7 +29,7 @@ class CreateMock(BaseCrudMock):
         original_post = self.post
 
         def post_with_unique_constraint(url: str, **kwargs: Any) -> Any:
-            json_data = kwargs.get('json', {})
+            json_data = kwargs.get("json", {})
 
             # Check for unique constraint violation
             if field_name in json_data:
@@ -55,19 +48,14 @@ class CreateMock(BaseCrudMock):
 
         return self
 
-    def with_validation_constraint(
-        self,
-        field_name: str,
-        validator: Callable[[Any], bool],
-        error_message: str
-    ) -> 'CreateMock':
+    def with_validation_constraint(self, field_name: str, validator: Callable[[Any], bool], error_message: str) -> "CreateMock":
         self._validation_constraints[field_name] = (validator, error_message)
 
         # Override the post method to handle validation constraint violations
         original_post = self.post
 
         def post_with_validation_constraint(url: str, **kwargs: Any) -> Any:
-            json_data = kwargs.get('json', {})
+            json_data = kwargs.get("json", {})
             if field_name in json_data:
                 value = json_data[field_name]
                 validator_func, msg = self._validation_constraints[field_name]
@@ -82,16 +70,16 @@ class CreateMock(BaseCrudMock):
 
         return self
 
-    def with_auto_increment_id(self, id_field: str = "id") -> 'CreateMock':
+    def with_auto_increment_id(self, id_field: str = "id") -> "CreateMock":
         # Override the post method to handle auto-increment IDs
 
         def post_with_auto_increment(url: str, **kwargs: Any) -> Any:
-            json_data = kwargs.get('json', {})
+            json_data = kwargs.get("json", {})
 
             # Find a matching pattern first
             pattern = self._find_matching_pattern("POST", url, **kwargs)
             if pattern:
-                response_obj = pattern['response']
+                response_obj = pattern["response"]
 
                 # Handle callable responses
                 if callable(response_obj):
@@ -134,18 +122,13 @@ class CreateMock(BaseCrudMock):
 
     def post(self, url: str, **kwargs: Any) -> Any:
         # Process parent_id if present in kwargs
-        parent_id = kwargs.pop('parent_id', None)
+        parent_id = kwargs.pop("parent_id", None)
         if parent_id and self._parent_id_handling:  # type: ignore
             url = self._process_parent_id(url, parent_id)
 
         # Record the request
         record = RequestRecord(
-            method="POST",
-            url=url,
-            params=kwargs.get('params'),
-            data=kwargs.get('data'),
-            json=kwargs.get('json'),
-            headers=kwargs.get('headers')
+            method="POST", url=url, params=kwargs.get("params"), data=kwargs.get("data"), json=kwargs.get("json"), headers=kwargs.get("headers")
         )
         self.request_history.append(record)  # type: ignore
 
@@ -153,15 +136,15 @@ class CreateMock(BaseCrudMock):
         pattern = self._find_matching_pattern("POST", url, **kwargs)
 
         if pattern:
-            response_obj = pattern['response']
+            response_obj = pattern["response"]
 
             # Handle callable responses
             if callable(response_obj):
                 response_obj = response_obj(**kwargs)
 
             # Handle errors
-            if 'error' in pattern and pattern['error']:
-                raise pattern['error']
+            if "error" in pattern and pattern["error"]:
+                raise pattern["error"]
 
             # Ensure response_obj is a MockResponse
             if not isinstance(response_obj, MockResponse):
@@ -194,38 +177,31 @@ class CreateMock(BaseCrudMock):
             return default_json
         return self.default_response.text
 
-    def with_success_response(
-        self,
-        url_pattern: str,
-        response_data: Dict[str, Any],
-        status_code: int = 201,
-        **kwargs: Any
-    ) -> 'CreateMock':
+    def with_success_response(self, url_pattern: str, response_data: Dict[str, Any], status_code: int = 201, **kwargs: Any) -> "CreateMock":
         # Store the response data directly in the mock
         # This ensures we return exactly what was configured
-        if 'id' in response_data:
+        if "id" in response_data:
             # Set the auto-increment ID to the response ID + 1
             # This ensures the next auto-generated ID will be higher
-            self._auto_increment_id = response_data['id'] + 1
+            self._auto_increment_id = response_data["id"] + 1
 
         # Create a function that returns the exact response data
         def exact_response(**request_kwargs):
-            return MockResponse(
-                status_code=status_code,
-                json_data=response_data
-            )
+            return MockResponse(status_code=status_code, json_data=response_data)
 
         # Add the response pattern with the exact response function
-        self.response_patterns.append({
-            'url_pattern': url_pattern,
-            'response': exact_response,
-            'params': kwargs.get('params'),
-            'data': kwargs.get('data'),
-            'json': kwargs.get('json'),
-            'headers': kwargs.get('headers'),
-            'max_calls': kwargs.get('max_calls', 1),  # Default to 1 call
-            'call_count': 0
-        })
+        self.response_patterns.append(
+            {
+                "url_pattern": url_pattern,
+                "response": exact_response,
+                "params": kwargs.get("params"),
+                "data": kwargs.get("data"),
+                "json": kwargs.get("json"),
+                "headers": kwargs.get("headers"),
+                "max_calls": kwargs.get("max_calls", 1),  # Default to 1 call
+                "call_count": 0,
+            }
+        )
 
         return self
 
@@ -242,11 +218,11 @@ class CreateMock(BaseCrudMock):
                 record = RequestRecord(
                     method="POST",
                     url=url,
-                    params=kwargs.get('params'),
-                    data=kwargs.get('data'),
-                    json=kwargs.get('json'),
-                    headers=kwargs.get('headers'),
-                    response=response
+                    params=kwargs.get("params"),
+                    data=kwargs.get("data"),
+                    json=kwargs.get("json"),
+                    headers=kwargs.get("headers"),
+                    response=response,
                 )
                 self.request_history.append(record)  # type: ignore
 
@@ -264,18 +240,7 @@ class CreateMock(BaseCrudMock):
         self.post = wrapped_post
 
     def with_validation_failure(
-        self,
-        url_pattern: str,
-        validation_errors: Dict[str, List[str]],
-        status_code: int = 422,
-        **kwargs: Any
-    ) -> 'CreateMock':
-        self.with_response(
-            url_pattern=url_pattern,
-            response=MockResponse(
-                status_code=status_code,
-                json_data={"errors": validation_errors}
-            ),
-            **kwargs
-        )
+        self, url_pattern: str, validation_errors: Dict[str, List[str]], status_code: int = 422, **kwargs: Any
+    ) -> "CreateMock":
+        self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=status_code, json_data={"errors": validation_errors}), **kwargs)
         return self

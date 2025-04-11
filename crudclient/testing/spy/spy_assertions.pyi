@@ -3,19 +3,18 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 if TYPE_CHECKING:
     from .enhanced import CallRecord  # Avoid circular import
 
-
 class SpyProtocol(Protocol):
     """
     Defines the protocol required by SpyAssertionsMixin.
     """
-    _calls: List['CallRecord']
-    _method_calls: Dict[str, List['CallRecord']]
+
+    _calls: List["CallRecord"]
+    _method_calls: Dict[str, List["CallRecord"]]
 
     def was_called(self, method_name: str) -> bool: ...
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool: ...
     def get_call_count(self, method_name: Optional[str] = None) -> int: ...
-    def get_calls(self, method_name: Optional[str] = None) -> List['CallRecord']: ...
-
+    def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]: ...
 
 class SpyAssertionsMixin:
     """
@@ -49,12 +48,7 @@ class SpyAssertionsMixin:
         """
         ...
 
-    def assert_called_with(
-        self: SpyProtocol,
-        method_name: str,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:
+    def assert_called_with(self: SpyProtocol, method_name: str, *args: Any, **kwargs: Any) -> None:
         """
         Asserts that the specified method was called at least once with the exact
         arguments provided.
@@ -94,11 +88,7 @@ class SpyAssertionsMixin:
         """
         ...
 
-    def assert_called_with_params_matching(
-        self: SpyProtocol,
-        method_name: str,
-        param_matcher: Callable[[Dict[str, Any]], bool]
-    ) -> None:
+    def assert_called_with_params_matching(self: SpyProtocol, method_name: str, param_matcher: Callable[[Dict[str, Any]], bool]) -> None:
         """
         Asserts that the specified method was called at least once with parameters
         that satisfy the provided matcher function.

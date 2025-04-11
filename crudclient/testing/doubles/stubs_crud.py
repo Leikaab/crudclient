@@ -6,12 +6,7 @@ from crudclient.client import Client
 
 class CrudBase:
     # Docstring moved to .pyi
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        endpoint: str = '',
-        model: Optional[Type[Any]] = None
-    ):
+    def __init__(self, client: Optional[Client] = None, endpoint: str = "", model: Optional[Type[Any]] = None):
         self.client = client
         self.endpoint = endpoint
         self.model = model
@@ -54,10 +49,10 @@ class StubCrud(CrudBase):
     def __init__(
         self,
         client_or_name: Union[Client, str, None] = None,
-        endpoint: str = '',
+        endpoint: str = "",
         model: Optional[Type[Any]] = None,
         default_data: Optional[Dict[str, Any]] = None,
-        data_store: Optional[Dict[str, Dict[str, Any]]] = None
+        data_store: Optional[Dict[str, Dict[str, Any]]] = None,
     ):
         # Handle the case where the first argument is a string (name)
         if isinstance(client_or_name, str):
@@ -120,24 +115,21 @@ class StubCrud(CrudBase):
         filtered_data = list(self._data_store.values())
 
         for key, value in kwargs.items():
-            if key in ('sort_by', 'sort_desc', 'page', 'page_size'):
+            if key in ("sort_by", "sort_desc", "page", "page_size"):
                 continue
 
             filtered_data = [item for item in filtered_data if item.get(key) == value]
 
         # Apply sorting
-        sort_by = kwargs.get('sort_by')
-        sort_desc = kwargs.get('sort_desc', False)
+        sort_by = kwargs.get("sort_by")
+        sort_desc = kwargs.get("sort_desc", False)
 
         if sort_by:
-            filtered_data.sort(
-                key=lambda x: x.get(sort_by, ''),
-                reverse=sort_desc
-            )
+            filtered_data.sort(key=lambda x: x.get(sort_by, ""), reverse=sort_desc)
 
         # Apply pagination
-        page = kwargs.get('page', 1)
-        page_size = kwargs.get('page_size')
+        page = kwargs.get("page", 1)
+        page_size = kwargs.get("page_size")
 
         if page_size:
             start = (page - 1) * page_size
@@ -208,18 +200,18 @@ class StubCrud(CrudBase):
             return self._create_response
 
         # Convert model instance to dict if needed
-        if hasattr(data, '__dict__'):
-            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith('_')}
+        if hasattr(data, "__dict__"):
+            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith("_")}
         else:
             data_dict = copy.deepcopy(data)
 
         # Generate ID if not provided
-        if 'id' not in data_dict:
-            data_dict['id'] = self._next_id
+        if "id" not in data_dict:
+            data_dict["id"] = self._next_id
             self._next_id += 1
 
         # Store the resource
-        str_id = str(data_dict['id'])
+        str_id = str(data_dict["id"])
         self._data_store[str_id] = data_dict
 
         # Convert to model instance if model is provided
@@ -244,8 +236,8 @@ class StubCrud(CrudBase):
             return None
 
         # Convert model instance to dict if needed
-        if hasattr(data, '__dict__'):
-            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith('_')}
+        if hasattr(data, "__dict__"):
+            data_dict = {k: v for k, v in data.__dict__.items() if not k.startswith("_")}
         else:
             data_dict = copy.deepcopy(data)
 
@@ -255,7 +247,7 @@ class StubCrud(CrudBase):
         updated_data.update(data_dict)
 
         # Ensure ID is preserved
-        updated_data['id'] = id
+        updated_data["id"] = id
 
         # Store the updated resource
         self._data_store[str_id] = updated_data

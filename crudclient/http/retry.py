@@ -1,4 +1,3 @@
-
 import logging
 import time
 from abc import ABC, abstractmethod
@@ -101,11 +100,14 @@ class RetryCondition:
                 elif event.value == "connection_error":
                     self.exceptions.append(requests.ConnectionError)
 
-    def should_retry(
-        self, response: Optional[requests.Response] = None, exception: Optional[Exception] = None
-    ) -> bool:
+    def should_retry(self, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if response is not None and not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            response is not None
+            and not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object or None, got {type(response).__name__}")
 
         if exception is not None and not isinstance(exception, Exception):
@@ -151,17 +153,25 @@ class RetryHandler:
         else:
             self.retry_conditions = retry_conditions
 
-    def should_retry(
-        self, attempt: int, response: Optional[requests.Response] = None, exception: Optional[Exception] = None
-    ) -> bool:
+    def should_retry(self, attempt: int, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
         # Runtime type checks
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
-        if response is not None and not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            response is not None
+            and not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object or None, got {type(response).__name__}")
 
-        if exception is not None and not isinstance(exception, Exception) and not hasattr(exception, '_mock_spec') and Exception not in getattr(exception, '_mock_spec', []):
+        if (
+            exception is not None
+            and not isinstance(exception, Exception)
+            and not hasattr(exception, "_mock_spec")
+            and Exception not in getattr(exception, "_mock_spec", [])
+        ):
             raise TypeError(f"exception must be an Exception object or None, got {type(exception).__name__}")
 
         # Check if we've exceeded the maximum number of retries
@@ -194,7 +204,12 @@ class RetryHandler:
         if not callable(request_func):
             raise TypeError(f"request_func must be callable, got {type(request_func).__name__}")
 
-        if session is not None and not isinstance(session, requests.Session) and not hasattr(session, '_mock_spec') and requests.Session not in getattr(session, '_mock_spec', []):
+        if (
+            session is not None
+            and not isinstance(session, requests.Session)
+            and not hasattr(session, "_mock_spec")
+            and requests.Session not in getattr(session, "_mock_spec", [])
+        ):
             raise TypeError(f"session must be a requests.Session object or None, got {type(session).__name__}")
 
         if setup_auth_func is not None and not callable(setup_auth_func):
@@ -273,10 +288,18 @@ class RetryHandler:
         if not isinstance(kwargs, dict):
             raise TypeError(f"kwargs must be a dictionary, got {type(kwargs).__name__}")
 
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
 
-        if not isinstance(session, requests.Session) and not hasattr(session, '_mock_spec') and requests.Session not in getattr(session, '_mock_spec', []):
+        if (
+            not isinstance(session, requests.Session)
+            and not hasattr(session, "_mock_spec")
+            and requests.Session not in getattr(session, "_mock_spec", [])
+        ):
             raise TypeError(f"session must be a requests.Session object, got {type(session).__name__}")
 
         if not callable(setup_auth_func):

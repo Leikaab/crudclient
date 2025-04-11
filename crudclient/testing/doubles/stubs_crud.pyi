@@ -12,16 +12,12 @@ class CrudBase:
         endpoint: The base API endpoint path for the resource.
         model: The Pydantic model or class used to represent the resource data.
     """
+
     client: Optional[Client]
     endpoint: str
     model: Optional[Type[Any]]
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        endpoint: str = '',
-        model: Optional[Type[Any]] = None
-    ) -> None:
+    def __init__(self, client: Optional[Client] = None, endpoint: str = "", model: Optional[Type[Any]] = None) -> None:
         """
         Initialize the CrudBase.
 
@@ -115,7 +111,6 @@ class CrudBase:
         """
         raise NotImplementedError
 
-
 class StubCrud(CrudBase):
     """
     A stub implementation of CrudBase for testing, using an in-memory data store.
@@ -131,6 +126,7 @@ class StubCrud(CrudBase):
         _before_list_hook, _after_list_hook, ...: Optional hooks for operations.
         _list_response, _list_handler, ...: Configured static responses or dynamic handlers.
     """
+
     _default_data: Dict[str, Any]
     _data_store: Dict[str, Dict[str, Any]]
     _next_id: int
@@ -184,10 +180,10 @@ class StubCrud(CrudBase):
     def __init__(
         self,
         client_or_name: Union[Client, str, None] = None,
-        endpoint: str = '',
+        endpoint: str = "",
         model: Optional[Type[Any]] = None,
         default_data: Optional[Dict[str, Any]] = None,
-        data_store: Optional[Dict[str, Dict[str, Any]]] = None
+        data_store: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> None:
         """
         Initialize the StubCrud instance.

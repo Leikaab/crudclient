@@ -16,11 +16,7 @@ def verify_call_sequence(spy: EnhancedSpyBase, *method_names: str) -> None:
     """
     ...
 
-
-def verify_no_unexpected_calls(
-    spy: EnhancedSpyBase,
-    expected_methods: List[str]
-) -> None:
+def verify_no_unexpected_calls(spy: EnhancedSpyBase, expected_methods: List[str]) -> None:
     """
     Verifies that only the specified methods were called on the spy.
 
@@ -33,12 +29,7 @@ def verify_no_unexpected_calls(
     """
     ...
 
-
-def verify_call_timing(
-    spy: EnhancedSpyBase,
-    method_name: str,
-    max_duration: float
-) -> None:
+def verify_call_timing(spy: EnhancedSpyBase, method_name: str, max_duration: float) -> None:
     """
     Verifies that a specific method was called and that all its calls completed
     within a maximum duration.
@@ -55,12 +46,7 @@ def verify_call_timing(
     """
     ...
 
-
-def verify_call_arguments(
-    spy: EnhancedSpyBase,
-    method_name: str,
-    expected_args: Dict[str, Any]
-) -> None:
+def verify_call_arguments(spy: EnhancedSpyBase, method_name: str, expected_args: Dict[str, Any]) -> None:
     """
     Verifies that a specific method was called with arguments matching the expected
     dictionary.

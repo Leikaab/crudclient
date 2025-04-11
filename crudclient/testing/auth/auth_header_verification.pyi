@@ -58,11 +58,7 @@ class AuthHeaderVerification:
         ...
 
     @staticmethod
-    def assert_auth_header_format(
-        headers: Dict[str, str],
-        auth_type: str,
-        header_name: str = "Authorization"
-    ) -> None:
+    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         """
         Assert that an authentication header has the correct format.
 

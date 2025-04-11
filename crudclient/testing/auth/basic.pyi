@@ -17,7 +17,6 @@ from .base import AuthMockBase
 if TYPE_CHECKING:
     from ..response_builder import MockResponse
 
-
 class BasicAuthMock(AuthMockBase):
     """
     Mock implementation of Basic authentication.
@@ -49,7 +48,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_credentials(self, username: str, password: str) -> 'BasicAuthMock':
+    def with_credentials(self, username: str, password: str) -> "BasicAuthMock":
         """
         Configure the mock with specific credentials.
 
@@ -62,7 +61,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_additional_valid_credentials(self, username: str, password: str) -> 'BasicAuthMock':
+    def with_additional_valid_credentials(self, username: str, password: str) -> "BasicAuthMock":
         """
         Add additional valid credentials.
 
@@ -75,7 +74,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_username_pattern(self, pattern: str) -> 'BasicAuthMock':
+    def with_username_pattern(self, pattern: str) -> "BasicAuthMock":
         """
         Configure the mock with username pattern validation.
 
@@ -87,11 +86,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_password_requirements(
-        self,
-        min_length: Optional[int] = None,
-        complexity: bool = False
-    ) -> 'BasicAuthMock':
+    def with_password_requirements(self, min_length: Optional[int] = None, complexity: bool = False) -> "BasicAuthMock":
         """
         Configure the mock with password requirements.
 
@@ -104,7 +99,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_case_insensitive_username(self) -> 'BasicAuthMock':
+    def with_case_insensitive_username(self) -> "BasicAuthMock":
         """
         Configure the mock to use case-insensitive username matching.
 
@@ -113,7 +108,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def with_max_attempts(self, max_attempts: int) -> 'BasicAuthMock':
+    def with_max_attempts(self, max_attempts: int) -> "BasicAuthMock":
         """
         Configure the mock with a maximum number of authentication attempts.
 
@@ -159,7 +154,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         """
         Handle an authentication error.
 
@@ -180,7 +175,7 @@ class BasicAuthMock(AuthMockBase):
         """
         ...
 
-    def reset_attempts(self) -> 'BasicAuthMock':
+    def reset_attempts(self) -> "BasicAuthMock":
         """
         Reset the authentication attempt counter.
 

@@ -1,4 +1,3 @@
-
 import re
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -63,12 +62,12 @@ class ResponsePattern:
 
         # Check additional conditions
         request_context = {
-            'method': method,
-            'url': url,
-            'params': params or {},
-            'data': data or {},
-            'json': json or {},
-            'headers': headers or {},
+            "method": method,
+            "url": url,
+            "params": params or {},
+            "data": data or {},
+            "json": json or {},
+            "headers": headers or {},
         }
 
         for condition in self.conditions:

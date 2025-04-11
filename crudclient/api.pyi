@@ -47,8 +47,7 @@ from .config import ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
 
-T = TypeVar('T', bound=Crud)
-
+T = TypeVar("T", bound=Crud)
 
 class API(ABC):
     """

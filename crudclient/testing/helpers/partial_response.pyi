@@ -10,17 +10,14 @@ class PartialResponseHelper:
     and improving performance. Supports field selection using dot notation,
     wildcards, exclusions, and depth limiting.
     """
+
     full_response: Dict[str, Any]
     field_separator: str
     wildcard_char: str
     default_fields: List[str]
 
     def __init__(
-        self,
-        full_response: Dict[str, Any],
-        field_separator: str = ".",
-        wildcard_char: str = "*",
-        default_fields: Optional[List[str]] = None
+        self, full_response: Dict[str, Any], field_separator: str = ".", wildcard_char: str = "*", default_fields: Optional[List[str]] = None
     ) -> None:
         """
         Initialize a PartialResponseHelper instance.
@@ -38,7 +35,7 @@ class PartialResponseHelper:
         fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
         max_depth: Optional[int] = None,
-        include_metadata: bool = False
+        include_metadata: bool = False,
     ) -> Dict[str, Any]:
         """
         Generate a partial response containing only the requested fields.
@@ -127,12 +124,7 @@ class PartialResponseHelper:
         """
         ...
 
-    def _build_nested_structure(
-        self,
-        result: Dict[str, Any],
-        parts: List[str],
-        final_value: Any
-    ) -> None:
+    def _build_nested_structure(self, result: Dict[str, Any], parts: List[str], final_value: Any) -> None:
         """
         Build a nested structure in the result dictionary.
 
@@ -194,11 +186,7 @@ class PartialResponseHelper:
         ...
 
     def _add_metadata(
-        self,
-        result: Dict[str, Any],
-        included_fields: Optional[List[str]],
-        excluded_fields: Optional[List[str]],
-        max_depth: Optional[int]
+        self, result: Dict[str, Any], included_fields: Optional[List[str]], excluded_fields: Optional[List[str]], max_depth: Optional[int]
     ) -> Dict[str, Any]:
         """
         Add metadata about the partial response.

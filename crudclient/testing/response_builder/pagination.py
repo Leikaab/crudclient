@@ -1,4 +1,3 @@
-
 from typing import Any, List, Optional
 
 from .basic import BasicResponseBuilder
@@ -28,7 +27,7 @@ class PaginationResponseBuilder:
         # If we have actual items, paginate them
         page_items = []
         if items and start_idx < len(items):
-            page_items = items[start_idx:min(end_idx, len(items))]
+            page_items = items[start_idx : min(end_idx, len(items))]
 
         # Create metadata
         metadata = {
@@ -55,9 +54,4 @@ class PaginationResponseBuilder:
             if page < _total_pages:
                 links["next"] = f"{base_url}?page={page + 1}&per_page={per_page}"
 
-        return BasicResponseBuilder.create_response(
-            status_code=200,
-            data=page_items,
-            metadata=metadata,
-            links=links
-        )
+        return BasicResponseBuilder.create_response(status_code=200, data=page_items, metadata=metadata, links=links)

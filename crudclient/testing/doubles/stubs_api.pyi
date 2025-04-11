@@ -23,16 +23,12 @@ class StubAPI(API):
                      partitioned by endpoint name. The structure is:
                      `{endpoint_name: {resource_id: resource_dict}}`.
     """
+
     client_class: Type[Client]
     endpoints: Dict[str, StubCrud]
     _data_store: Dict[str, Dict[str, Dict[str, Any]]]
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        client_config: Optional[ClientConfig] = None,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         """
         Initialize the StubAPI.
 
@@ -45,13 +41,7 @@ class StubAPI(API):
         """
         ...
 
-    def register_endpoint(
-        self,
-        name: str,
-        endpoint: str,
-        model: Optional[Type[Any]] = None,
-        **kwargs: Any
-    ) -> StubCrud:
+    def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> StubCrud:
         """
         Register a new stubbed CRUD endpoint associated with this API instance.
 
@@ -105,11 +95,7 @@ class StubAPI(API):
         """
         ...
 
-    def populate_data_store(
-        self,
-        endpoint_name: str,
-        data: List[Dict[str, Any]]
-    ) -> None:
+    def populate_data_store(self, endpoint_name: str, data: List[Dict[str, Any]]) -> None:
         """
         Populate the data store for a specific registered endpoint with initial data.
 

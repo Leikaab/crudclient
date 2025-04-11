@@ -22,11 +22,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 400 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=400,
-            json={"error": "Bad Request", "message": "Invalid parameters"}
-        )
+        mock_request.get(url, status_code=400, json={"error": "Bad Request", "message": "Invalid parameters"})
 
         # Make a request that will receive a 400 response
         with pytest.raises(CrudClientError) as excinfo:
@@ -45,11 +41,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 401 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=401,
-            json={"error": "Unauthorized", "message": "Authentication required"}
-        )
+        mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Authentication required"})
 
         # Make a request that will receive a 401 response
         with pytest.raises(AuthenticationError) as excinfo:
@@ -68,11 +60,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 403 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=403,
-            json={"error": "Forbidden", "message": "Insufficient permissions"}
-        )
+        mock_request.get(url, status_code=403, json={"error": "Forbidden", "message": "Insufficient permissions"})
 
         # Make a request that will receive a 403 response
         with pytest.raises(AuthenticationError) as excinfo:
@@ -91,11 +79,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 404 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=404,
-            json={"error": "Not Found", "message": "Resource not found"}
-        )
+        mock_request.get(url, status_code=404, json={"error": "Not Found", "message": "Resource not found"})
 
         # Make a request that will receive a 404 response
         with pytest.raises(NotFoundError) as excinfo:
@@ -114,11 +98,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 422 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=422,
-            json={"error": "Unprocessable Entity", "message": "Validation failed"}
-        )
+        mock_request.get(url, status_code=422, json={"error": "Unprocessable Entity", "message": "Validation failed"})
 
         # Make a request that will receive a 422 response
         with pytest.raises(InvalidResponseError) as excinfo:
@@ -137,11 +117,7 @@ class TestHttpClientClientErrors:
         """
         # Mock a 429 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=429,
-            json={"error": "Too Many Requests", "message": "Rate limit exceeded"}
-        )
+        mock_request.get(url, status_code=429, json={"error": "Too Many Requests", "message": "Rate limit exceeded"})
 
         # Make a request that will receive a 429 response
         with pytest.raises(CrudClientError) as excinfo:

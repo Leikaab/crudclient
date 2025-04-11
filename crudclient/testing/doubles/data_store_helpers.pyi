@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 if TYPE_CHECKING:
     from .data_store_definitions import UniqueConstraint, ValidationRule
 
-
 def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     Applies various filters to a list of dictionaries.
@@ -13,7 +12,6 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
     regex, and nested key filters.
     """
     ...
-
 
 def _op_eq(value: Any, op_value: Any) -> bool:
     """
@@ -28,7 +26,6 @@ def _op_eq(value: Any, op_value: Any) -> bool:
     """
     ...
 
-
 def _op_ne(value: Any, op_value: Any) -> bool:
     """
     Check if value does not equal op_value.
@@ -41,7 +38,6 @@ def _op_ne(value: Any, op_value: Any) -> bool:
         bool: True if value does not equal op_value, False otherwise
     """
     ...
-
 
 def _op_gt(value: Any, op_value: Any) -> bool:
     """
@@ -56,7 +52,6 @@ def _op_gt(value: Any, op_value: Any) -> bool:
     """
     ...
 
-
 def _op_gte(value: Any, op_value: Any) -> bool:
     """
     Check if value is greater than or equal to op_value.
@@ -69,7 +64,6 @@ def _op_gte(value: Any, op_value: Any) -> bool:
         bool: True if value is greater than or equal to op_value, False otherwise
     """
     ...
-
 
 def _op_lt(value: Any, op_value: Any) -> bool:
     """
@@ -84,7 +78,6 @@ def _op_lt(value: Any, op_value: Any) -> bool:
     """
     ...
 
-
 def _op_lte(value: Any, op_value: Any) -> bool:
     """
     Check if value is less than or equal to op_value.
@@ -97,7 +90,6 @@ def _op_lte(value: Any, op_value: Any) -> bool:
         bool: True if value is less than or equal to op_value, False otherwise
     """
     ...
-
 
 def _op_in(value: Any, op_value: Any) -> bool:
     """
@@ -112,7 +104,6 @@ def _op_in(value: Any, op_value: Any) -> bool:
     """
     ...
 
-
 def _op_nin(value: Any, op_value: Any) -> bool:
     """
     Check if value is not in op_value.
@@ -125,7 +116,6 @@ def _op_nin(value: Any, op_value: Any) -> bool:
         bool: True if value is not in op_value, False otherwise
     """
     ...
-
 
 def _op_exists(value: Any, op_value: bool) -> bool:
     """
@@ -141,7 +131,6 @@ def _op_exists(value: Any, op_value: bool) -> bool:
     """
     ...
 
-
 def _op_regex(value: Any, op_value: str) -> bool:
     """
     Check if value matches the regex pattern in op_value.
@@ -154,7 +143,6 @@ def _op_regex(value: Any, op_value: str) -> bool:
         bool: True if value is a string and matches the pattern, False otherwise
     """
     ...
-
 
 def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
     """
@@ -181,12 +169,7 @@ def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
     """
     ...
 
-
-def apply_pagination(
-    data: List[Dict[str, Any]],
-    page: int,
-    page_size: int
-) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+def apply_pagination(data: List[Dict[str, Any]], page: int, page_size: int) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """
     Applies pagination to a list of data.
 
@@ -194,23 +177,18 @@ def apply_pagination(
     """
     ...
 
-
-def apply_field_selection(
-    data: List[Dict[str, Any]],
-    fields: List[str]
-) -> List[Dict[str, Any]]:
+def apply_field_selection(data: List[Dict[str, Any]], fields: List[str]) -> List[Dict[str, Any]]:
     """
     Selects only the specified fields from a list of dictionaries.
     """
     ...
-
 
 def validate_item(
     collection: str,
     item: Dict[str, Any],
     validation_rules: List["ValidationRule"],
     unique_constraints: List["UniqueConstraint"],
-    add_to_constraints: bool = True
+    add_to_constraints: bool = True,
 ) -> None:
     """
     Validates an item against defined rules and unique constraints.

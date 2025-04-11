@@ -1,4 +1,3 @@
-
 from typing import Any, Dict, Optional, Union
 
 from crudclient.client import Client
@@ -20,7 +19,7 @@ class MockClientFactory:
         base_url: str = "https://api.example.com",
         enable_spy: bool = False,
         config: Optional[ClientConfig] = None,  # Add optional config parameter
-        **kwargs: Any
+        **kwargs: Any,
     ) -> MockClient:
         # Docstring moved to .pyi file
         # Create a mock HTTP client
@@ -28,31 +27,19 @@ class MockClientFactory:
 
         # Create a mock client with the mock HTTP client
         mock_client = MockClient(
-            http_client=http_client,
-            config=config,  # Pass config to MockClient constructor
-            enable_spy=enable_spy,
-            **kwargs  # Pass other kwargs
+            http_client=http_client, config=config, enable_spy=enable_spy, **kwargs  # Pass config to MockClient constructor  # Pass other kwargs
         )
 
         return mock_client
 
     @classmethod
-    def from_client_config(
-        cls,
-        config: ClientConfig,
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> MockClient:
+    def from_client_config(cls, config: ClientConfig, enable_spy: bool = False, **kwargs: Any) -> MockClient:
         # Docstring moved to .pyi file
         # Extract the base URL from the config
         base_url = config.hostname or "https://api.example.com"
 
         # Create a mock client with the base URL
-        mock_client = cls.create(
-            base_url=base_url,
-            enable_spy=enable_spy,
-            **kwargs
-        )
+        mock_client = cls.create(base_url=base_url, enable_spy=enable_spy, **kwargs)
 
         # Configure the mock client with the auth strategy from the config
         if config.auth_strategy is not None:
@@ -61,22 +48,13 @@ class MockClientFactory:
         return mock_client
 
     @classmethod
-    def from_real_client(
-        cls,
-        client: Client,
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> MockClient:
+    def from_real_client(cls, client: Client, enable_spy: bool = False, **kwargs: Any) -> MockClient:
         # Docstring moved to .pyi file
         # Extract the config from the real client
         config = client.config
 
         # Create a mock client from the config
-        mock_client = cls.from_client_config(
-            config=config,
-            enable_spy=enable_spy,
-            **kwargs
-        )
+        mock_client = cls.from_client_config(config=config, enable_spy=enable_spy, **kwargs)
 
         return mock_client
 
@@ -88,16 +66,10 @@ class MockClientFactory:
         path: str,
         data: Optional[ResponseData] = None,
         status_code: StatusCode = 200,
-        headers: Optional[Headers] = None
+        headers: Optional[Headers] = None,
     ) -> None:
         # Docstring moved to .pyi file
-        mock_client.configure_response(
-            method=method,
-            path=path,
-            status_code=status_code,
-            data=data,
-            headers=headers
-        )
+        mock_client.configure_response(method=method, path=path, status_code=status_code, data=data, headers=headers)
 
     @classmethod
     def configure_error_response(
@@ -108,30 +80,16 @@ class MockClientFactory:
         status_code: StatusCode = 400,
         data: Optional[ResponseData] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         # Docstring moved to .pyi file
         if error is not None:
-            mock_client.configure_response(
-                method=method,
-                path=path,
-                error=error
-            )
+            mock_client.configure_response(method=method, path=path, error=error)
         else:
-            mock_client.configure_response(
-                method=method,
-                path=path,
-                status_code=status_code,
-                data=data,
-                headers=headers
-            )
+            mock_client.configure_response(method=method, path=path, status_code=status_code, data=data, headers=headers)
 
     @classmethod
-    def create_mock_client(
-        cls,
-        config: Optional[Union[ClientConfig, Dict[str, Any]]] = None,
-        **kwargs: Any
-    ) -> MockClient:
+    def create_mock_client(cls, config: Optional[Union[ClientConfig, Dict[str, Any]]] = None, **kwargs: Any) -> MockClient:
         # Docstring moved to .pyi file
         # Import helpers locally at the start of the method to avoid circular import at module level
         from crudclient.testing.factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns
@@ -143,81 +101,64 @@ class MockClientFactory:
             config = ClientConfig(**config)
 
         # Configure authentication if specified
-        if 'auth_strategy' in kwargs:
+        if "auth_strategy" in kwargs:
             # Use the provided auth strategy directly
-            config.auth_strategy = kwargs['auth_strategy']
-        elif 'auth_type' in kwargs:
+            config.auth_strategy = kwargs["auth_strategy"]
+        elif "auth_type" in kwargs:
             # Create an auth strategy based on the type
-            auth_type = kwargs['auth_type'].lower()
-            auth_config = kwargs.get('auth_config', {})
+            auth_type = kwargs["auth_type"].lower()
+            auth_config = kwargs.get("auth_config", {})
 
-            if auth_type == 'basic':
-                auth_mock = create_basic_auth_mock(
-                    username=auth_config.get('username', 'user'),
-                    password=auth_config.get('password', 'pass')
-                )
+            if auth_type == "basic":
+                auth_mock = create_basic_auth_mock(username=auth_config.get("username", "user"), password=auth_config.get("password", "pass"))
 
                 # Apply any auth behavior configurations
                 _configure_auth_mock(auth_mock, auth_config)
                 config.auth_strategy = auth_mock.get_auth_strategy()
 
-            elif auth_type == 'bearer':
-                auth_mock = create_bearer_auth_mock(
-                    token=auth_config.get('token', 'valid_token')
-                )
+            elif auth_type == "bearer":
+                auth_mock = create_bearer_auth_mock(token=auth_config.get("token", "valid_token"))
 
                 # Apply any auth behavior configurations
                 _configure_auth_mock(auth_mock, auth_config)
                 config.auth_strategy = auth_mock.get_auth_strategy()
 
-            elif auth_type == 'apikey':
-                header_name = auth_config.get('header_name')
-                param_name = auth_config.get('param_name')
+            elif auth_type == "apikey":
+                header_name = auth_config.get("header_name")
+                param_name = auth_config.get("param_name")
 
                 if header_name:
-                    auth_mock = create_api_key_auth_mock(
-                        api_key=auth_config.get('api_key', 'valid_api_key'),
-                        header_name=header_name
-                    )
+                    auth_mock = create_api_key_auth_mock(api_key=auth_config.get("api_key", "valid_api_key"), header_name=header_name)
                 elif param_name:
-                    auth_mock = create_api_key_auth_mock(
-                        api_key=auth_config.get('api_key', 'valid_api_key'),
-                        header_name=None,
-                        param_name=param_name
-                    )
+                    auth_mock = create_api_key_auth_mock(api_key=auth_config.get("api_key", "valid_api_key"), header_name=None, param_name=param_name)
                 else:
                     # Default to header auth
-                    auth_mock = create_api_key_auth_mock(
-                        api_key=auth_config.get('api_key', 'valid_api_key')
-                    )
+                    auth_mock = create_api_key_auth_mock(api_key=auth_config.get("api_key", "valid_api_key"))
 
                 # Apply any auth behavior configurations
                 _configure_auth_mock(auth_mock, auth_config)
                 config.auth_strategy = auth_mock.get_auth_strategy()
 
-            elif auth_type == 'custom':
-                header_callback = auth_config.get('header_callback')
-                param_callback = auth_config.get('param_callback')
+            elif auth_type == "custom":
+                header_callback = auth_config.get("header_callback")
+                param_callback = auth_config.get("param_callback")
 
-                auth_mock = create_custom_auth_mock(
-                    header_callback=header_callback,
-                    param_callback=param_callback
-                )
+                auth_mock = create_custom_auth_mock(header_callback=header_callback, param_callback=param_callback)
 
                 # Apply any auth behavior configurations
                 _configure_auth_mock(auth_mock, auth_config)
                 config.auth_strategy = auth_mock.get_auth_strategy()
 
-            elif auth_type == 'oauth':
+            elif auth_type == "oauth":
                 auth_mock = create_oauth_mock(
-                    client_id=auth_config.get('client_id', 'client_id'),
-                    client_secret=auth_config.get('client_secret', 'client_secret'),
-                    token_url=auth_config.get('token_url', 'https://example.com/oauth/token'),
-                    authorize_url=auth_config.get('authorize_url'),
-                    grant_type=auth_config.get('grant_type', 'authorization_code'),
-                    scope=auth_config.get('scope', 'read write'),
-                    access_token=auth_config.get('access_token'),
-                    refresh_token=auth_config.get('refresh_token')
+                    client_id=auth_config.get("client_id", "client_id"),
+                    client_secret=auth_config.get("client_secret", "client_secret"),
+                    token_url=auth_config.get("token_url", "https://example.com/oauth/token"),
+                    authorize_url=auth_config.get("authorize_url"),
+                    grant_type=auth_config.get("grant_type", "authorization_code"),
+                    scope=auth_config.get("scope", "read write"),
+                    access_token=auth_config.get("access_token"),
+                    refresh_token=auth_config.get("refresh_token"),
                 )
 
                 # Apply any auth behavior configurations
@@ -225,14 +166,14 @@ class MockClientFactory:
                 config.auth_strategy = auth_mock.get_auth_strategy()
 
         # Extract enable_spy from kwargs
-        enable_spy = kwargs.pop('enable_spy', False)
+        enable_spy = kwargs.pop("enable_spy", False)
 
         # Create the mock client, passing the finalized config object
         mock_client = cls.create(
             base_url=config.hostname or "https://api.example.com",
             enable_spy=enable_spy,
             config=config,  # Pass the config object
-            **kwargs  # Pass remaining kwargs
+            **kwargs,  # Pass remaining kwargs
         )
 
         # Configure the mock client with the auth strategy from the config
@@ -252,20 +193,20 @@ class MockClientFactory:
         # - default_response: Default response for unmatched requests
 
         # Add API-specific patterns based on api_type
-        api_type = kwargs.get('api_type')
+        api_type = kwargs.get("api_type")
         if api_type:
             # Exclude api_type itself from kwargs passed to the helper
-            helper_kwargs = {k: v for k, v in kwargs.items() if k != 'api_type'}
+            helper_kwargs = {k: v for k, v in kwargs.items() if k != "api_type"}
             patterns = _create_api_patterns(api_type, **helper_kwargs)
             for pattern in patterns:
                 mock_client.configure_response(**pattern)
 
         # Add common error responses if specified
-        if 'error_responses' in kwargs:
-            _add_error_responses(mock_client, kwargs['error_responses'])
+        if "error_responses" in kwargs:
+            _add_error_responses(mock_client, kwargs["error_responses"])
 
         # Add response patterns if specified
-        patterns = kwargs.get('response_patterns', [])
+        patterns = kwargs.get("response_patterns", [])
         for pattern in patterns:
             mock_client.configure_response(**pattern)
 

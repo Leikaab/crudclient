@@ -23,10 +23,7 @@ class EntityRelationshipBuilder:
             result[relation_key] = related_entities
         else:
             # Just include the IDs of related entities
-            result[relation_key] = [
-                entity[foreign_key] for entity in related_entities
-                if foreign_key in entity
-            ]
+            result[relation_key] = [entity[foreign_key] for entity in related_entities if foreign_key in entity]
 
         return result
 
@@ -72,10 +69,7 @@ class EntityRelationshipBuilder:
                         if embed:
                             source_entity[relation_key] = related
                         else:
-                            source_entity[relation_key] = [
-                                entity.get(foreign_key) for entity in related
-                                if foreign_key in entity
-                            ]
+                            source_entity[relation_key] = [entity.get(foreign_key) for entity in related if foreign_key in entity]
 
         return result
 
@@ -84,38 +78,24 @@ class EntityRelationshipBuilder:
         # Docstring moved to .pyi
         parts = url.rstrip("/").split("/")
         if not parts:
-            return "", MockResponse(
-                status_code=404,
-                json_data={"error": f"{entity_type} not found"}
-            )
+            return "", MockResponse(status_code=404, json_data={"error": f"{entity_type} not found"})
         return parts[-1], None
 
     @staticmethod
     def _create_entity_not_found_response(entity_type: str, entity_id: str) -> MockResponse:
         # Docstring moved to .pyi
-        return MockResponse(
-            status_code=404,
-            json_data={"error": f"{entity_type} not found with id {entity_id}"}
-        )
+        return MockResponse(status_code=404, json_data={"error": f"{entity_type} not found with id {entity_id}"})
 
     @staticmethod
-    def _create_list_factory(
-        entities: List[Dict[str, Any]],
-        entity_type: str
-    ) -> Callable[..., MockResponse]:
+    def _create_list_factory(entities: List[Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
         # Docstring moved to .pyi
         def list_factory(**kwargs: Any) -> MockResponse:
-            return MockResponse(
-                status_code=200,
-                json_data={"data": entities, "count": len(entities)}
-            )
+            return MockResponse(status_code=200, json_data={"data": entities, "count": len(entities)})
+
         return list_factory
 
     @staticmethod
-    def _create_get_factory(
-        entity_map: Dict[str, Dict[str, Any]],
-        entity_type: str
-    ) -> Callable[..., MockResponse]:
+    def _create_get_factory(entity_map: Dict[str, Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
         # Docstring moved to .pyi
         def get_factory(**kwargs: Any) -> MockResponse:
             url = kwargs.get("url", "")
@@ -124,29 +104,21 @@ class EntityRelationshipBuilder:
                 return error_response
 
             if entity_id in entity_map:
-                return MockResponse(
-                    status_code=200,
-                    json_data=entity_map[entity_id]
-                )
+                return MockResponse(status_code=200, json_data=entity_map[entity_id])
             else:
                 return EntityRelationshipBuilder._create_entity_not_found_response(entity_type, entity_id)
+
         return get_factory
 
     @staticmethod
     def _create_create_factory(
-        entities: List[Dict[str, Any]],
-        entity_map: Dict[str, Dict[str, Any]],
-        entity_type: str,
-        id_field: str
+        entities: List[Dict[str, Any]], entity_map: Dict[str, Dict[str, Any]], entity_type: str, id_field: str
     ) -> Callable[..., MockResponse]:
         # Docstring moved to .pyi
         def create_factory(**kwargs: Any) -> MockResponse:
             json_data = kwargs.get("json", {})
             if not json_data:
-                return MockResponse(
-                    status_code=400,
-                    json_data={"error": f"Invalid {entity_type} data"}
-                )
+                return MockResponse(status_code=400, json_data={"error": f"Invalid {entity_type} data"})
 
             # Generate a new ID if not provided
             if id_field not in json_data:
@@ -161,17 +133,12 @@ class EntityRelationshipBuilder:
             entity_map[entity_id] = json_data
             entities.append(json_data)
 
-            return MockResponse(
-                status_code=201,
-                json_data=json_data
-            )
+            return MockResponse(status_code=201, json_data=json_data)
+
         return create_factory
 
     @staticmethod
-    def _create_update_factory(
-        entity_map: Dict[str, Dict[str, Any]],
-        entity_type: str
-    ) -> Callable[..., MockResponse]:
+    def _create_update_factory(entity_map: Dict[str, Dict[str, Any]], entity_type: str) -> Callable[..., MockResponse]:
         # Docstring moved to .pyi
         def update_factory(**kwargs: Any) -> MockResponse:
             url = kwargs.get("url", "")
@@ -191,17 +158,13 @@ class EntityRelationshipBuilder:
             # Add updated_at timestamp
             entity["updated_at"] = datetime.now().isoformat()
 
-            return MockResponse(
-                status_code=200,
-                json_data=entity
-            )
+            return MockResponse(status_code=200, json_data=entity)
+
         return update_factory
 
     @staticmethod
     def _create_delete_factory(
-        entities: List[Dict[str, Any]],
-        entity_map: Dict[str, Dict[str, Any]],
-        entity_type: str
+        entities: List[Dict[str, Any]], entity_map: Dict[str, Dict[str, Any]], entity_type: str
     ) -> Callable[..., MockResponse]:
         # Docstring moved to .pyi
         def delete_factory(**kwargs: Any) -> MockResponse:
@@ -218,10 +181,8 @@ class EntityRelationshipBuilder:
             entity = entity_map.pop(entity_id)
             entities.remove(entity)
 
-            return MockResponse(
-                status_code=204,
-                json_data=None
-            )
+            return MockResponse(status_code=204, json_data=None)
+
         return delete_factory
 
     @staticmethod
@@ -241,7 +202,7 @@ class EntityRelationshipBuilder:
             "get": lambda: EntityRelationshipBuilder._create_get_factory(entity_map, entity_type),
             "create": lambda: EntityRelationshipBuilder._create_create_factory(entities, entity_map, entity_type, id_field),
             "update": lambda: EntityRelationshipBuilder._create_update_factory(entity_map, entity_type),
-            "delete": lambda: EntityRelationshipBuilder._create_delete_factory(entities, entity_map, entity_type)
+            "delete": lambda: EntityRelationshipBuilder._create_delete_factory(entities, entity_map, entity_type),
         }
 
         # Create response factories for each requested operation

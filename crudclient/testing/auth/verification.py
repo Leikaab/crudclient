@@ -1,4 +1,3 @@
-
 from .auth_error_verification import AuthErrorVerification
 # Re-export the classes from their respective modules
 from .auth_extraction_utils import AuthExtractionUtils
@@ -33,5 +32,4 @@ class AuthVerificationHelpers:
 
 
 # For backward compatibility
-__all__ = ['AuthVerificationHelpers', 'AuthExtractionUtils', 'AuthHeaderVerification',
-           'AuthTokenVerification', 'AuthErrorVerification']
+__all__ = ["AuthVerificationHelpers", "AuthExtractionUtils", "AuthHeaderVerification", "AuthTokenVerification", "AuthErrorVerification"]

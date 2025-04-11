@@ -9,14 +9,14 @@ from .request_record import RequestRecord
 from .update import UpdateMock
 
 __all__ = [
-    'BaseCrudMock',
-    'CreateMock',
-    'ReadMock',
-    'UpdateMock',
-    'DeleteMock',
-    'CombinedCrudMock',
-    'CrudMockFactory',
-    'ConcurrencyError',
-    'ValidationFailedError',
-    'RequestRecord',
+    "BaseCrudMock",
+    "CreateMock",
+    "ReadMock",
+    "UpdateMock",
+    "DeleteMock",
+    "CombinedCrudMock",
+    "CrudMockFactory",
+    "ConcurrencyError",
+    "ValidationFailedError",
+    "RequestRecord",
 ]

@@ -1,4 +1,3 @@
-
 import pytest
 
 from crudclient.exceptions import AuthenticationError, CrudClientError, NotFoundError
@@ -144,7 +143,7 @@ class TestHttpClient:
     def test_close(self, http_client, mocker):
         """Test that the close method closes the session."""
         # Arrange
-        mock_close = mocker.patch.object(http_client.session_manager, 'close')
+        mock_close = mocker.patch.object(http_client.session_manager, "close")
 
         # Act
         http_client.close()

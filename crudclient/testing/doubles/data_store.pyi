@@ -11,6 +11,7 @@ class DataStore:
     and bulk operations. Mimics common database features like filtering,
     sorting, pagination, soft deletes, versioning, and timestamps.
     """
+
     collections: Dict[str, List[Dict[str, Any]]]
     relationships: List[Relationship]
     validation_rules: List[ValidationRule]
@@ -38,13 +39,7 @@ class DataStore:
         """
         ...
 
-    def define_relationship(
-        self,
-        source_collection: str,
-        target_collection: str,
-        relationship_type: str,
-        **kwargs: Any
-    ) -> 'DataStore':
+    def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "DataStore":
         """
         Defines a relationship between two collections.
 
@@ -60,12 +55,8 @@ class DataStore:
         ...
 
     def add_validation_rule(
-        self,
-        field: str,
-        validator_func: Callable[[Any], bool],
-        error_message: str,
-        collection: Optional[str] = None
-    ) -> 'DataStore':
+        self, field: str, validator_func: Callable[[Any], bool], error_message: str, collection: Optional[str] = None
+    ) -> "DataStore":
         """
         Adds a validation rule for a specific field.
 
@@ -81,11 +72,8 @@ class DataStore:
         ...
 
     def add_unique_constraint(
-        self,
-        fields: Union[str, List[str]],
-        error_message: Optional[str] = None,
-        collection: Optional[str] = None
-    ) -> 'DataStore':
+        self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
+    ) -> "DataStore":
         """
         Adds a unique constraint across one or more fields.
 
@@ -99,7 +87,7 @@ class DataStore:
         """
         ...
 
-    def set_timestamp_tracking(self, enabled: bool) -> 'DataStore':
+    def set_timestamp_tracking(self, enabled: bool) -> "DataStore":
         """
         Enables or disables automatic timestamp tracking (_created_at, _updated_at).
 
@@ -110,7 +98,6 @@ class DataStore:
             The DataStore instance for chaining.
         """
         ...
-
     # --- Core CRUD Operations ---
 
     def list(
@@ -168,12 +155,7 @@ class DataStore:
         """
         ...
 
-    def create(
-        self,
-        collection: str,
-        data: Dict[str, Any],
-        skip_validation: bool = False
-    ) -> Dict[str, Any]:
+    def create(self, collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
         """
         Creates a new item in the specified collection.
 
@@ -188,12 +170,7 @@ class DataStore:
         ...
 
     def update(
-        self,
-        collection: str,
-        id: Any,
-        data: Dict[str, Any],
-        skip_validation: bool = False,
-        check_version: bool = True
+        self, collection: str, id: Any, data: Dict[str, Any], skip_validation: bool = False, check_version: bool = True
     ) -> Optional[Dict[str, Any]]:
         """
         Updates an existing item by its ID.
@@ -210,13 +187,7 @@ class DataStore:
         """
         ...
 
-    def delete(
-        self,
-        collection: str,
-        id: Any,
-        soft_delete: bool = False,
-        cascade: bool = False
-    ) -> bool:
+    def delete(self, collection: str, id: Any, soft_delete: bool = False, cascade: bool = False) -> bool:
         """
         Deletes an item by its ID.
 
@@ -230,7 +201,6 @@ class DataStore:
             True if the item was deleted, False otherwise.
         """
         ...
-
     # --- Bulk Operations ---
 
     def bulk_create(

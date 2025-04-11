@@ -13,10 +13,7 @@ from .bearer import BearerAuthMock
 from .custom import CustomAuthMock, OAuthMock
 
 def create_basic_auth_mock(
-    username: str = "user",
-    password: str = "pass",
-    case_sensitive: bool = True,
-    max_attempts: Optional[int] = None
+    username: str = "user", password: str = "pass", case_sensitive: bool = True, max_attempts: Optional[int] = None
 ) -> BasicAuthMock:
     """
     Create a Basic Authentication mock with enhanced validation.
@@ -35,13 +32,12 @@ def create_basic_auth_mock(
     """
     ...
 
-
 def create_bearer_auth_mock(
     token: str = "valid_token",
     expires_in_seconds: Optional[int] = None,
     scopes: Optional[List[str]] = None,
     user_id: Optional[str] = None,
-    client_id: Optional[str] = None
+    client_id: Optional[str] = None,
 ) -> BearerAuthMock:
     """
     Create a Bearer Authentication mock with token validation and expiration.
@@ -61,7 +57,6 @@ def create_bearer_auth_mock(
     """
     ...
 
-
 def create_api_key_auth_mock(
     api_key: str = "valid_api_key",
     header_name: Optional[str] = "X-API-Key",
@@ -70,7 +65,7 @@ def create_api_key_auth_mock(
     requests_per_period: int = 100,
     period_seconds: int = 3600,
     track_usage: bool = False,
-    expires_in_seconds: Optional[int] = None
+    expires_in_seconds: Optional[int] = None,
 ) -> ApiKeyAuthMock:
     """
     Create an API Key Authentication mock with validation and rate limiting.
@@ -93,12 +88,11 @@ def create_api_key_auth_mock(
     """
     ...
 
-
 def create_custom_auth_mock(
     header_callback: Optional[Callable[[], Dict[str, str]]] = None,
     param_callback: Optional[Callable[[], Dict[str, str]]] = None,
     required_headers: Optional[List[str]] = None,
-    required_params: Optional[List[str]] = None
+    required_params: Optional[List[str]] = None,
 ) -> CustomAuthMock:
     """
     Create a Custom Authentication mock with enhanced validation.
@@ -117,7 +111,6 @@ def create_custom_auth_mock(
     """
     ...
 
-
 def create_oauth_mock(
     client_id: str = "client_id",
     client_secret: str = "client_secret",
@@ -126,7 +119,7 @@ def create_oauth_mock(
     token_url: str = "https://example.com/oauth/token",
     authorize_url: Optional[str] = "https://example.com/oauth/authorize",
     access_token: Optional[str] = None,
-    refresh_token: Optional[str] = None
+    refresh_token: Optional[str] = None,
 ) -> OAuthMock:
     """
     Create an OAuth Authentication mock with support for different grant types and scopes.

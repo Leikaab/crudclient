@@ -28,8 +28,4 @@ class ApiKeyUsageTracker:
             self.usage_by_endpoint[endpoint] += 1
 
     def get_usage_stats(self) -> Dict:
-        return {
-            "by_key": self.usage_by_key,
-            "by_endpoint": self.usage_by_endpoint,
-            "total_requests": sum(self.usage_by_key.values())
-        }
+        return {"by_key": self.usage_by_key, "by_endpoint": self.usage_by_endpoint, "total_requests": sum(self.usage_by_key.values())}

@@ -5,11 +5,7 @@ from crudclient.auth.base import AuthStrategy
 
 class CustomAuth(AuthStrategy):
 
-    def __init__(
-        self,
-        header_callback: Optional[Callable[[], Dict[str, str]]] = None,
-        param_callback: Optional[Callable[[], Dict[str, str]]] = None
-    ):
+    def __init__(self, header_callback: Optional[Callable[[], Dict[str, str]]] = None, param_callback: Optional[Callable[[], Dict[str, str]]] = None):
         if header_callback is None and param_callback is None:
             raise ValueError("At least one callback must be provided")
         self.header_callback = header_callback
@@ -34,12 +30,7 @@ class CustomAuth(AuthStrategy):
 
 class ApiKeyAuth(AuthStrategy):
 
-    def __init__(
-        self,
-        api_key: str,
-        header_name: Optional[str] = None,
-        param_name: Optional[str] = None
-    ):
+    def __init__(self, api_key: str, header_name: Optional[str] = None, param_name: Optional[str] = None):
         self.api_key = api_key
         self.header_name = header_name
         self.param_name = param_name

@@ -14,6 +14,7 @@ from .conftest import TestCrud  # Import fixtures/classes from conftest
 
 # === Destroy Operation Tests ===
 
+
 def test_destroy_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client

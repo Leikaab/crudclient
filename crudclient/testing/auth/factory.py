@@ -1,4 +1,3 @@
-
 from typing import Callable, Dict, List, Optional
 
 from .api_key import ApiKeyAuthMock
@@ -8,10 +7,7 @@ from .custom import CustomAuthMock, OAuthMock
 
 
 def create_basic_auth_mock(
-    username: str = "user",
-    password: str = "pass",
-    case_sensitive: bool = True,
-    max_attempts: Optional[int] = None
+    username: str = "user", password: str = "pass", case_sensitive: bool = True, max_attempts: Optional[int] = None
 ) -> BasicAuthMock:
     mock = BasicAuthMock(username=username, password=password)
 
@@ -29,7 +25,7 @@ def create_bearer_auth_mock(
     expires_in_seconds: Optional[int] = None,
     scopes: Optional[List[str]] = None,
     user_id: Optional[str] = None,
-    client_id: Optional[str] = None
+    client_id: Optional[str] = None,
 ) -> BearerAuthMock:
     mock = BearerAuthMock(token=token)
 
@@ -50,7 +46,7 @@ def create_api_key_auth_mock(
     requests_per_period: int = 100,
     period_seconds: int = 3600,
     track_usage: bool = False,
-    expires_in_seconds: Optional[int] = None
+    expires_in_seconds: Optional[int] = None,
 ) -> ApiKeyAuthMock:
     mock = ApiKeyAuthMock(api_key=api_key, header_name=header_name, param_name=param_name)
 
@@ -70,7 +66,7 @@ def create_custom_auth_mock(
     header_callback: Optional[Callable[[], Dict[str, str]]] = None,
     param_callback: Optional[Callable[[], Dict[str, str]]] = None,
     required_headers: Optional[List[str]] = None,
-    required_params: Optional[List[str]] = None
+    required_params: Optional[List[str]] = None,
 ) -> CustomAuthMock:
     mock = CustomAuthMock(header_callback=header_callback, param_callback=param_callback)
 
@@ -91,15 +87,9 @@ def create_oauth_mock(
     token_url: str = "https://example.com/oauth/token",
     authorize_url: Optional[str] = "https://example.com/oauth/authorize",
     access_token: Optional[str] = None,
-    refresh_token: Optional[str] = None
+    refresh_token: Optional[str] = None,
 ) -> OAuthMock:
-    mock = OAuthMock(
-        client_id=client_id,
-        client_secret=client_secret,
-        token_url=token_url,
-        authorize_url=authorize_url,
-        scope=scope
-    )
+    mock = OAuthMock(client_id=client_id, client_secret=client_secret, token_url=token_url, authorize_url=authorize_url, scope=scope)
 
     mock.with_grant_type(grant_type)
 

@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, List, Optional, Type, Union
 
@@ -19,7 +18,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         api_response_model: Optional[ApiResponseType] = None,
         single_item_path: Optional[str] = None,
         list_item_path: Optional[str] = None,
-        pre_transform: Optional[ResponseTransformer] = None
+        pre_transform: Optional[ResponseTransformer] = None,
     ):
         self.datamodel = datamodel
         self.api_response_model = api_response_model
@@ -32,7 +31,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
             return data
 
         current = data
-        for part in path.split('.'):
+        for part in path.split("."):
             if not isinstance(current, dict) or part not in current:
                 raise ValueError(f"Could not find '{part}' in path '{path}' in response data")
             current = current[part]
@@ -47,6 +46,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 # Continue processing with the parsed data
                 data = parsed_data
@@ -57,7 +57,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, bytes):
             try:
                 # Try to decode and parse as JSON
-                decoded = data.decode('utf-8')
+                decoded = data.decode("utf-8")
                 return self.convert_single(decoded)
             except UnicodeDecodeError:
                 raise ValueError("Could not decode binary data as UTF-8")
@@ -86,6 +86,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 # Continue processing with the parsed data
                 data = parsed_data
@@ -96,7 +97,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, bytes):
             try:
                 # Try to decode and parse as JSON
-                decoded = data.decode('utf-8')
+                decoded = data.decode("utf-8")
                 return self.convert_list(decoded)
             except UnicodeDecodeError:
                 raise ValueError("Could not decode binary data as UTF-8")

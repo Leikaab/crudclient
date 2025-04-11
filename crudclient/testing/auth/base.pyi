@@ -44,12 +44,7 @@ class AuthMockBase:
         """Initialize the base authentication mock with default settings."""
         ...
 
-    def with_failure(
-        self,
-        failure_type: str = "invalid_token",
-        status_code: int = 401,
-        message: str = "Authentication failed"
-    ) -> 'AuthMockBase':
+    def with_failure(self, failure_type: str = "invalid_token", status_code: int = 401, message: str = "Authentication failed") -> "AuthMockBase":
         """
         Configure the mock to simulate authentication failure.
 
@@ -63,7 +58,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_success(self) -> 'AuthMockBase':
+    def with_success(self) -> "AuthMockBase":
         """
         Configure the mock to simulate authentication success.
 
@@ -72,10 +67,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_token_expiration(
-        self,
-        expires_in_seconds: int = 3600
-    ) -> 'AuthMockBase':
+    def with_token_expiration(self, expires_in_seconds: int = 3600) -> "AuthMockBase":
         """
         Configure the mock to simulate token expiration.
 
@@ -87,7 +79,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_expired_token(self) -> 'AuthMockBase':
+    def with_expired_token(self) -> "AuthMockBase":
         """
         Configure the mock to simulate an already expired token.
 
@@ -96,11 +88,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_refresh_token(
-        self,
-        refresh_token: str = "refresh_token",
-        max_refresh_attempts: int = 3
-    ) -> 'AuthMockBase':
+    def with_refresh_token(self, refresh_token: str = "refresh_token", max_refresh_attempts: int = 3) -> "AuthMockBase":
         """
         Configure the mock with a refresh token.
 
@@ -113,7 +101,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_expired_refresh_token(self) -> 'AuthMockBase':
+    def with_expired_refresh_token(self) -> "AuthMockBase":
         """
         Configure the mock with an expired refresh token.
 
@@ -122,7 +110,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_mfa_required(self, verified: bool = False) -> 'AuthMockBase':
+    def with_mfa_required(self, verified: bool = False) -> "AuthMockBase":
         """
         Configure the mock to require multi-factor authentication.
 
@@ -134,7 +122,7 @@ class AuthMockBase:
         """
         ...
 
-    def fail_after(self, request_count: int) -> 'AuthMockBase':
+    def fail_after(self, request_count: int) -> "AuthMockBase":
         """
         Configure the mock to fail after a specific number of requests.
 
@@ -146,7 +134,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_custom_header(self, name: str, value: str) -> 'AuthMockBase':
+    def with_custom_header(self, name: str, value: str) -> "AuthMockBase":
         """
         Add a custom header to the auth strategy.
 
@@ -159,7 +147,7 @@ class AuthMockBase:
         """
         ...
 
-    def with_custom_param(self, name: str, value: str) -> 'AuthMockBase':
+    def with_custom_param(self, name: str, value: str) -> "AuthMockBase":
         """
         Add a custom parameter to the auth strategy.
 

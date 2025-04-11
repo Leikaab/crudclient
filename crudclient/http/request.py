@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, Dict, Optional, Tuple
 
@@ -9,10 +8,7 @@ logger = logging.getLogger(__name__)
 class RequestFormatter:
 
     def prepare_data(
-        self,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Any] = None,
-        files: Optional[Dict[str, Any]] = None
+        self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, Any], Dict[str, str]]:
         # Runtime type checks for critical parameters
         if data is not None and not isinstance(data, dict):
@@ -40,11 +36,7 @@ class RequestFormatter:
         headers = self.get_content_type_header("application/x-www-form-urlencoded")
         return {"data": data}, headers
 
-    def prepare_multipart(
-        self,
-        files: Dict[str, Any],
-        data: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    def prepare_multipart(self, files: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], Dict[str, str]]:
         # Runtime type checks
         if not isinstance(files, dict):
             raise TypeError(f"files must be a dictionary, got {type(files).__name__}")

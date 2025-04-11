@@ -1,4 +1,3 @@
-
 from typing import Any, Callable, Dict, List, Optional
 
 from .response import MockResponse
@@ -18,10 +17,7 @@ class ValidationErrorBuilder:
             response_data = {
                 "error": error_code,
                 "message": message,
-                "errors": [
-                    {"field": field, "message": error_msg}
-                    for field, error_msg in invalid_fields.items()
-                ]
+                "errors": [{"field": field, "message": error_msg} for field, error_msg in invalid_fields.items()],
             }
         elif error_format == "json_api":
             response_data = {
@@ -31,7 +27,7 @@ class ValidationErrorBuilder:
                         "code": error_code,
                         "title": message,
                         "source": {"pointer": f"/data/attributes/{field}"},
-                        "detail": error_msg
+                        "detail": error_msg,
                     }
                     for field, error_msg in invalid_fields.items()
                 ]
@@ -42,26 +38,15 @@ class ValidationErrorBuilder:
                     "code": error_code,
                     "message": message,
                     "details": [
-                        {
-                            "field": field,
-                            "message": error_msg,
-                            "code": f"{error_code}_{field.upper()}"
-                        }
-                        for field, error_msg in invalid_fields.items()
-                    ]
+                        {"field": field, "message": error_msg, "code": f"{error_code}_{field.upper()}"} for field, error_msg in invalid_fields.items()
+                    ],
                 }
             }
         else:
             # Simple format
-            response_data = {
-                "error": message,
-                "fields": invalid_fields
-            }
+            response_data = {"error": message, "fields": invalid_fields}
 
-        return MockResponse(
-            status_code=status_code,
-            json_data=response_data
-        )
+        return MockResponse(status_code=status_code, json_data=response_data)
 
     @staticmethod
     def create_field_validator(
@@ -74,18 +59,12 @@ class ValidationErrorBuilder:
         def validator_function(data: Dict[str, Any]) -> Optional[MockResponse]:
             if not isinstance(data, dict):
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {field_name: "Invalid data format"},
-                    status_code=status_code,
-                    error_code=error_code,
-                    error_format=error_format
+                    {field_name: "Invalid data format"}, status_code=status_code, error_code=error_code, error_format=error_format
                 )
 
             if field_name not in data:
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {field_name: "Field is required"},
-                    status_code=status_code,
-                    error_code=error_code,
-                    error_format=error_format
+                    {field_name: "Field is required"}, status_code=status_code, error_code=error_code, error_format=error_format
                 )
 
             field_value = data[field_name]
@@ -94,10 +73,7 @@ class ValidationErrorBuilder:
                 error_message = validator(field_value)
                 if error_message:
                     return ValidationErrorBuilder.create_schema_validation_error(
-                        {field_name: error_message},
-                        status_code=status_code,
-                        error_code=error_code,
-                        error_format=error_format
+                        {field_name: error_message}, status_code=status_code, error_code=error_code, error_format=error_format
                     )
 
             return None  # No validation errors
@@ -116,11 +92,7 @@ class ValidationErrorBuilder:
         def validator_function(data: Dict[str, Any]) -> Optional[MockResponse]:
             if not isinstance(data, dict):
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {"_general": "Invalid data format"},
-                    status_code=status_code,
-                    error_code=error_code,
-                    message=message,
-                    error_format=error_format
+                    {"_general": "Invalid data format"}, status_code=status_code, error_code=error_code, message=message, error_format=error_format
                 )
 
             invalid_fields = {}
@@ -141,11 +113,7 @@ class ValidationErrorBuilder:
 
             if invalid_fields:
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    invalid_fields,
-                    status_code=status_code,
-                    error_code=error_code,
-                    message=message,
-                    error_format=error_format
+                    invalid_fields, status_code=status_code, error_code=error_code, message=message, error_format=error_format
                 )
 
             return None  # No validation errors
@@ -163,19 +131,12 @@ class BusinessLogicConstraintBuilder:
         error_code: str = "BUSINESS_RULE_VIOLATION",
         details: Optional[Dict[str, Any]] = None,
     ) -> MockResponse:
-        response_data: Dict[str, Any] = {
-            "error": error_code,
-            "message": message,
-            "rule": rule_name
-        }
+        response_data: Dict[str, Any] = {"error": error_code, "message": message, "rule": rule_name}
 
         if details:
             response_data["details"] = details
 
-        return MockResponse(
-            status_code=status_code,
-            json_data=response_data
-        )
+        return MockResponse(status_code=status_code, json_data=response_data)
 
     @staticmethod
     def create_unique_constraint_error(
@@ -187,15 +148,7 @@ class BusinessLogicConstraintBuilder:
     ) -> MockResponse:
         message = f"A {entity_type} with {field_name} '{value}' already exists"
 
-        return MockResponse(
-            status_code=status_code,
-            json_data={
-                "error": error_code,
-                "message": message,
-                "field": field_name,
-                "value": value
-            }
-        )
+        return MockResponse(status_code=status_code, json_data={"error": error_code, "message": message, "field": field_name, "value": value})
 
     @staticmethod
     def create_foreign_key_constraint_error(
@@ -209,13 +162,7 @@ class BusinessLogicConstraintBuilder:
 
         return MockResponse(
             status_code=status_code,
-            json_data={
-                "error": error_code,
-                "message": message,
-                "field": field_name,
-                "value": value,
-                "referenced_entity": referenced_entity
-            }
+            json_data={"error": error_code, "message": message, "field": field_name, "value": value, "referenced_entity": referenced_entity},
         )
 
     @staticmethod
@@ -236,8 +183,8 @@ class BusinessLogicConstraintBuilder:
                 "message": message,
                 "current_state": current_state,
                 "target_state": target_state,
-                "allowed_transitions": allowed_transitions
-            }
+                "allowed_transitions": allowed_transitions,
+            },
         )
 
     @staticmethod
@@ -257,8 +204,8 @@ class BusinessLogicConstraintBuilder:
                 "message": message,
                 "entity_type": entity_type,
                 "entity_id": entity_id,
-                "dependencies": dependent_entities
-            }
+                "dependencies": dependent_entities,
+            },
         )
 
     @staticmethod
@@ -277,11 +224,7 @@ class BusinessLogicConstraintBuilder:
                     details = details_function(data)
 
                 return BusinessLogicConstraintBuilder.create_business_rule_error(
-                    rule_name=rule_name,
-                    message=error_message,
-                    status_code=status_code,
-                    error_code=error_code,
-                    details=details
+                    rule_name=rule_name, message=error_message, status_code=status_code, error_code=error_code, details=details
                 )
 
             return None  # Rule satisfied

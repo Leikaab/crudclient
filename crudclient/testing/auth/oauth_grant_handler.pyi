@@ -24,11 +24,7 @@ class OAuthGrantHandler:
     grant_type: str
     supported_grant_types: Set[str]
 
-    def __init__(
-        self,
-        token_manager: OAuthTokenManager,
-        scope_validator: OAuthScopeValidator
-    ) -> None:
+    def __init__(self, token_manager: OAuthTokenManager, scope_validator: OAuthScopeValidator) -> None:
         """
         Initialize an OAuth grant handler.
 
@@ -69,7 +65,7 @@ class OAuthGrantHandler:
         redirect_uri: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        refresh_token: Optional[str] = None
+        refresh_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Handle a token request based on the grant type.
@@ -91,12 +87,7 @@ class OAuthGrantHandler:
         ...
 
     def _handle_authorization_code_grant(
-        self,
-        client_id: str,
-        client_secret: str,
-        code: Optional[str],
-        redirect_uri: Optional[str],
-        scope: Optional[str]
+        self, client_id: str, client_secret: str, code: Optional[str], redirect_uri: Optional[str], scope: Optional[str]
     ) -> Dict[str, Any]:
         """
         Handle authorization_code grant type.
@@ -113,12 +104,7 @@ class OAuthGrantHandler:
         """
         ...
 
-    def _handle_client_credentials_grant(
-        self,
-        client_id: str,
-        client_secret: str,
-        scope: Optional[str]
-    ) -> Dict[str, Any]:
+    def _handle_client_credentials_grant(self, client_id: str, client_secret: str, scope: Optional[str]) -> Dict[str, Any]:
         """
         Handle client_credentials grant type.
 
@@ -133,12 +119,7 @@ class OAuthGrantHandler:
         ...
 
     def _handle_password_grant(
-        self,
-        client_id: str,
-        client_secret: str,
-        username: Optional[str],
-        password: Optional[str],
-        scope: Optional[str]
+        self, client_id: str, client_secret: str, username: Optional[str], password: Optional[str], scope: Optional[str]
     ) -> Dict[str, Any]:
         """
         Handle password grant type.
@@ -155,13 +136,7 @@ class OAuthGrantHandler:
         """
         ...
 
-    def _handle_refresh_token_grant(
-        self,
-        client_id: str,
-        client_secret: str,
-        refresh_token: Optional[str],
-        scope: Optional[str]
-    ) -> Dict[str, Any]:
+    def _handle_refresh_token_grant(self, client_id: str, client_secret: str, refresh_token: Optional[str], scope: Optional[str]) -> Dict[str, Any]:
         """
         Handle refresh_token grant type.
 

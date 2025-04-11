@@ -53,11 +53,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_success(
-        self,
-        url_pattern: str,
-        **kwargs: Any
-    ) -> 'DeleteMock':
+    def with_success(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
         """
         Configure a successful deletion response.
 
@@ -70,11 +66,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_resource_in_use_error(
-        self,
-        url_pattern: str,
-        **kwargs: Any
-    ) -> 'DeleteMock':
+    def with_resource_in_use_error(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
         """
         Configure a resource-in-use error response.
 
@@ -90,7 +82,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> 'DeleteMock':
+    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> "DeleteMock":
         """
         Add a resource to the mock's stored resources.
 
@@ -103,11 +95,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_dependency(
-        self,
-        resource_id: Union[str, int],
-        dependent_id: Union[str, int]
-    ) -> 'DeleteMock':
+    def with_dependency(self, resource_id: Union[str, int], dependent_id: Union[str, int]) -> "DeleteMock":
         """
         Configure a dependency relationship between resources.
 
@@ -120,7 +108,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_cascading_delete(self, enabled: bool = True) -> 'DeleteMock':
+    def with_cascading_delete(self, enabled: bool = True) -> "DeleteMock":
         """
         Enable or disable cascading deletes.
 
@@ -134,7 +122,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_soft_delete(self, enabled: bool = True) -> 'DeleteMock':
+    def with_soft_delete(self, enabled: bool = True) -> "DeleteMock":
         """
         Enable or disable soft deletes.
 
@@ -149,7 +137,7 @@ class DeleteMock(BaseCrudMock):
         """
         ...
 
-    def with_referential_integrity_check(self, url_pattern: str) -> 'DeleteMock':
+    def with_referential_integrity_check(self, url_pattern: str) -> "DeleteMock":
         """
         Configure referential integrity checking for deletions.
 

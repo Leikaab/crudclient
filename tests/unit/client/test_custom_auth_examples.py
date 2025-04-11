@@ -11,31 +11,19 @@ class TestCustomAuthExamples:
     @pytest.mark.skip(reason="Test needs to be updated to work with the new testing module")
     def test_custom_auth_success_scenario(self):
         """Example of testing a successful Custom Auth scenario."""
+
         # Define custom auth callbacks
         def header_callback():
-            return {
-                "X-Custom-Auth": "custom_value",
-                "X-Timestamp": "12345678"
-            }
+            return {"X-Custom-Auth": "custom_value", "X-Timestamp": "12345678"}
 
         def param_callback():
             return {"tenant": "test_tenant"}
 
         # Create a mock client with Custom Auth
-        client = create_mock_client(
-            auth_type="custom",
-            auth_config={
-                "header_callback": header_callback,
-                "param_callback": param_callback
-            }
-        )
+        client = create_mock_client(auth_type="custom", auth_config={"header_callback": header_callback, "param_callback": param_callback})
 
         # Configure a successful response
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/custom",
-            response={"data": [{"id": 1, "name": "Custom Data"}]}
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/api/custom", response={"data": [{"id": 1, "name": "Custom Data"}]})
 
         # Make a request
         response = client.get("/api/custom")
@@ -57,25 +45,20 @@ class TestCustomAuthExamples:
     @pytest.mark.skip(reason="Test needs to be updated to work with the new testing module")
     def test_custom_auth_failure_scenario(self):
         """Example of testing a Custom Auth failure scenario."""
+
         # Define a custom auth callback that will fail
         def failing_header_callback():
             raise ValueError("Failed to generate auth headers")
 
         # Create a mock client with failing Custom Auth
-        client = create_mock_client(
-            config=ClientConfig(hostname="https://api.example.com", version="v1")
-        )
+        client = create_mock_client(config=ClientConfig(hostname="https://api.example.com", version="v1"))
 
         # Set up the auth strategy manually
         auth_mock = create_custom_auth_mock(header_callback=failing_header_callback)
         client.config.auth_strategy = auth_mock.get_auth_strategy()
 
         # Configure a response (though it won't be reached)
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/custom",
-            response={"data": [{"id": 1, "name": "Custom Data"}]}
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/api/custom", response={"data": [{"id": 1, "name": "Custom Data"}]})
 
         # Make a request and expect it to fail
         with pytest.raises(ValueError) as excinfo:

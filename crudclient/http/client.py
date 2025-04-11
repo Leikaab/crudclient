@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, Dict, Optional
 
@@ -37,14 +36,7 @@ class HttpClient:
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler()
 
-    def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: bool = True,
-        **kwargs: Any
-    ) -> Any:
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Any:
         # Runtime type checks for critical parameters
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
@@ -67,17 +59,11 @@ class HttpClient:
 
         # Define a function to make the request
         def make_request() -> requests.Response:
-            return self.session_manager.session.request(
-                method, url, timeout=self.session_manager.timeout, **kwargs
-            )
+            return self.session_manager.session.request(method, url, timeout=self.session_manager.timeout, **kwargs)
 
         # Execute the request with retry logic
         try:
-            response = self.retry_handler.execute_with_retry(
-                make_request,
-                self.session_manager.session,
-                self.session_manager.refresh_auth
-            )
+            response = self.retry_handler.execute_with_retry(make_request, self.session_manager.session, self.session_manager.refresh_auth)
         except requests.HTTPError as e:
             # Handle error responses
             self.error_handler.handle_error_response(e.response)
@@ -99,9 +85,7 @@ class HttpClient:
             # If handle_error_response doesn't raise an exception, return the response
             return response
 
-    def get(
-        self, endpoint: str, params: Optional[Dict[str, Any]] = None
-    ) -> RawResponseSimple:
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         # Runtime type checks
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -193,13 +177,7 @@ class HttpClient:
 
         return prepared_data
 
-    def request_raw(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        **kwargs: Any
-    ) -> requests.Response:
+    def request_raw(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, **kwargs: Any) -> requests.Response:
         # Runtime type checks
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")

@@ -3,20 +3,13 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 
-def perform_soft_delete(
-    item: Dict[str, Any],
-    deleted_field: str = "_deleted",
-    updated_at_field: str = "_updated_at"
-) -> None:
+def perform_soft_delete(item: Dict[str, Any], deleted_field: str = "_deleted", updated_at_field: str = "_updated_at") -> None:
     # Docstring moved to .pyi
     item[deleted_field] = True
     item[updated_at_field] = datetime.now().isoformat()
 
 
-def delete_items_by_indices(
-    items: List[Dict[str, Any]],
-    indices: List[int]
-) -> None:
+def delete_items_by_indices(items: List[Dict[str, Any]], indices: List[int]) -> None:
     # Docstring moved to .pyi
     for i in reversed(indices):
         del items[i]
@@ -28,7 +21,7 @@ def handle_one_to_one_cascade(
     target_items: List[Dict[str, Any]],
     soft_delete: bool,
     deleted_field: str,
-    updated_at_field: str
+    updated_at_field: str,
 ) -> None:
     # Docstring moved to .pyi
     for i, target_item in enumerate(target_items):
@@ -46,7 +39,7 @@ def handle_one_to_many_cascade(
     target_items: List[Dict[str, Any]],
     soft_delete: bool,
     deleted_field: str,
-    updated_at_field: str
+    updated_at_field: str,
 ) -> None:
     # Docstring moved to .pyi
     indices_to_delete = []
@@ -68,7 +61,7 @@ def handle_many_to_many_junction(
     junction_items: List[Dict[str, Any]],
     soft_delete: bool,
     deleted_field: str,
-    updated_at_field: str
+    updated_at_field: str,
 ) -> List[Any]:
     # Docstring moved to .pyi
     junction_indices_to_delete = []
@@ -100,7 +93,7 @@ def handle_many_to_many_targets(
     target_items: List[Dict[str, Any]],
     soft_delete: bool,
     deleted_field: str,
-    updated_at_field: str
+    updated_at_field: str,
 ) -> None:
     # Docstring moved to .pyi
     target_indices_to_delete = []

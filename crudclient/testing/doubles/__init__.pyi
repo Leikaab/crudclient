@@ -15,15 +15,15 @@ from .stubs_client import StubClient
 from .stubs_crud import CrudBase, StubCrud
 
 __all__ = [
-    'DataStore',
-    'ValidationException',
-    'RelationshipType',
-    'FakeAPI',
-    'FakeCrud',
-    'Response',
-    'CrudBase',
-    'StubResponse',
-    'StubClient',
-    'StubCrud',
-    'StubAPI',
+    "DataStore",
+    "ValidationException",
+    "RelationshipType",
+    "FakeAPI",
+    "FakeCrud",
+    "Response",
+    "CrudBase",
+    "StubResponse",
+    "StubClient",
+    "StubCrud",
+    "StubAPI",
 ]

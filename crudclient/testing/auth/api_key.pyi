@@ -16,8 +16,7 @@ from .api_key_usage_tracker import ApiKeyUsageTracker
 from .api_key_validator import ApiKeyValidator
 from .base import AuthMockBase
 
-T = TypeVar('T', bound='ApiKeyAuthMock')
-
+T = TypeVar("T", bound="ApiKeyAuthMock")
 
 class ApiKeyAuthMock(AuthMockBase):
     """
@@ -35,12 +34,7 @@ class ApiKeyAuthMock(AuthMockBase):
     usage_tracker: ApiKeyUsageTracker
     auth_strategy: ApiKeyAuth
 
-    def __init__(
-        self,
-        api_key: str = "valid_api_key",
-        header_name: Optional[str] = "X-API-Key",
-        param_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, api_key: str = "valid_api_key", header_name: Optional[str] = "X-API-Key", param_name: Optional[str] = None) -> None:
         """
         Initialize an API Key Authentication mock.
 
@@ -81,7 +75,7 @@ class ApiKeyAuthMock(AuthMockBase):
         owner: Optional[str] = None,
         permissions: Optional[List[str]] = None,
         tier: Optional[str] = None,
-        expires_in_seconds: Optional[int] = None
+        expires_in_seconds: Optional[int] = None,
     ) -> ApiKeyAuthMock:
         """
         Set metadata for a specific API key or the current key.
@@ -122,11 +116,7 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         ...
 
-    def with_rate_limiting(
-        self,
-        requests_per_period: int = 100,
-        period_seconds: int = 3600
-    ) -> ApiKeyAuthMock:
+    def with_rate_limiting(self, requests_per_period: int = 100, period_seconds: int = 3600) -> ApiKeyAuthMock:
         """
         Enable rate limiting for API keys.
 

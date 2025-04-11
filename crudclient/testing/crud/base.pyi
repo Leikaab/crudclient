@@ -38,8 +38,8 @@ class BaseCrudMock:
         self,
         url_pattern: str,
         response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str, Callable[..., Optional[MockResponse]]],
-        **kwargs: Any
-    ) -> 'BaseCrudMock':
+        **kwargs: Any,
+    ) -> "BaseCrudMock":
         """
         Add a response pattern to the mock.
 
@@ -57,10 +57,7 @@ class BaseCrudMock:
         """
         ...
 
-    def with_default_response(
-        self,
-        response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]
-    ) -> 'BaseCrudMock':
+    def with_default_response(self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]) -> "BaseCrudMock":
         """
         Set the default response for unmatched requests.
 
@@ -72,7 +69,7 @@ class BaseCrudMock:
         """
         ...
 
-    def with_parent_id_handling(self, enabled: bool = True) -> 'BaseCrudMock':
+    def with_parent_id_handling(self, enabled: bool = True) -> "BaseCrudMock":
         """
         Enable or disable parent_id handling.
 
@@ -87,13 +84,7 @@ class BaseCrudMock:
         """
         ...
 
-    def with_validation_error(
-        self,
-        url_pattern: str,
-        model_class: Type,
-        invalid_data: Dict[str, Any],
-        **kwargs: Any
-    ) -> 'BaseCrudMock':
+    def with_validation_error(self, url_pattern: str, model_class: Type, invalid_data: Dict[str, Any], **kwargs: Any) -> "BaseCrudMock":
         """
         Configure a validation error response.
 
@@ -141,9 +132,7 @@ class BaseCrudMock:
         """
         ...
 
-    def _filter_requests(
-        self, url_pattern: Optional[str] = None, method: Optional[str] = None
-    ) -> List[PreparedRequest]:
+    def _filter_requests(self, url_pattern: Optional[str] = None, method: Optional[str] = None) -> List[PreparedRequest]:
         """
         Filter the request history based on URL pattern and method.
 
@@ -156,9 +145,7 @@ class BaseCrudMock:
         """
         ...
 
-    def _ensure_mock_response(
-        self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]
-    ) -> MockResponse:
+    def _ensure_mock_response(self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]) -> MockResponse:
         """
         Ensure the response is a MockResponse object.
 
@@ -185,11 +172,7 @@ class BaseCrudMock:
         """
         ...
 
-    def assert_request_sequence(
-        self,
-        sequence: List[Dict[str, Any]],
-        strict: bool = False
-    ) -> None:
+    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         """
         Assert that requests were made in a specific sequence.
 
@@ -202,12 +185,7 @@ class BaseCrudMock:
         """
         ...
 
-    def assert_request_payload(
-        self,
-        payload: Dict[str, Any],
-        url_pattern: Optional[str] = None,
-        match_all: bool = False
-    ) -> None:
+    def assert_request_payload(self, payload: Dict[str, Any], url_pattern: Optional[str] = None, match_all: bool = False) -> None:
         """
         Assert that requests were made with specific payload.
 
@@ -221,12 +199,7 @@ class BaseCrudMock:
         """
         ...
 
-    def assert_operation_parameters(
-        self,
-        url_pattern: str,
-        expected_params: Dict[str, Any],
-        method: Optional[str] = None
-    ) -> None:
+    def assert_operation_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
         """
         Assert that operations were called with specific parameters.
 
@@ -241,11 +214,7 @@ class BaseCrudMock:
         ...
 
     def assert_response_handling(
-        self,
-        url_pattern: str,
-        expected_status: int,
-        expected_data: Optional[Dict[str, Any]] = None,
-        method: Optional[str] = None
+        self, url_pattern: str, expected_status: int, expected_data: Optional[Dict[str, Any]] = None, method: Optional[str] = None
     ) -> None:
         """
         Assert that responses were handled correctly.
@@ -262,11 +231,7 @@ class BaseCrudMock:
         ...
 
     def assert_error_handling(
-        self,
-        url_pattern: str,
-        expected_error_type: Type[Exception],
-        expected_status: Optional[int] = None,
-        method: Optional[str] = None
+        self, url_pattern: str, expected_error_type: Type[Exception], expected_status: Optional[int] = None, method: Optional[str] = None
     ) -> None:
         """
         Assert that errors were handled correctly.

@@ -1,4 +1,3 @@
-
 from typing import Any, Callable, Type, TypeAlias
 
 from ..models import ApiResponse

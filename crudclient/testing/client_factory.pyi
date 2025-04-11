@@ -21,12 +21,7 @@ class MockClientFactory:
     """Factory for creating and configuring mock client instances."""
 
     @classmethod
-    def create(
-        cls,
-        base_url: str = "https://api.example.com",
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> MockClient:
+    def create(cls, base_url: str = "https://api.example.com", enable_spy: bool = False, **kwargs: Any) -> MockClient:
         """
         Create a new mock client instance.
 
@@ -41,12 +36,7 @@ class MockClientFactory:
         ...
 
     @classmethod
-    def from_client_config(
-        cls,
-        config: ClientConfig,
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> MockClient:
+    def from_client_config(cls, config: ClientConfig, enable_spy: bool = False, **kwargs: Any) -> MockClient:
         """
         Create a new mock client instance from a ClientConfig.
 
@@ -61,12 +51,7 @@ class MockClientFactory:
         ...
 
     @classmethod
-    def from_real_client(
-        cls,
-        client: Client,
-        enable_spy: bool = False,
-        **kwargs: Any
-    ) -> MockClient:
+    def from_real_client(cls, client: Client, enable_spy: bool = False, **kwargs: Any) -> MockClient:
         """
         Create a new mock client instance that mimics a real client.
 
@@ -88,7 +73,7 @@ class MockClientFactory:
         path: str,
         data: Optional[ResponseData] = None,
         status_code: StatusCode = 200,
-        headers: Optional[Headers] = None
+        headers: Optional[Headers] = None,
     ) -> None:
         """
         Configure a successful response for a specific request.
@@ -112,7 +97,7 @@ class MockClientFactory:
         status_code: StatusCode = 400,
         data: Optional[ResponseData] = None,
         headers: Optional[Headers] = None,
-        error: Optional[Exception] = None
+        error: Optional[Exception] = None,
     ) -> None:
         """
         Configure an error response for a specific request.
@@ -129,11 +114,7 @@ class MockClientFactory:
         ...
 
     @classmethod
-    def create_mock_client(
-        cls,
-        config: Optional[Union[ClientConfig, Dict[str, Any]]] = None,
-        **kwargs: Any
-    ) -> MockClient:
+    def create_mock_client(cls, config: Optional[Union[ClientConfig, Dict[str, Any]]] = None, **kwargs: Any) -> MockClient:
         """
         Create a pre-configured MockClient instance with advanced configuration options.
 

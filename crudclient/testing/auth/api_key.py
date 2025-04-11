@@ -15,12 +15,7 @@ if TYPE_CHECKING:  # Added TYPE_CHECKING block
 
 
 class ApiKeyAuthMock(AuthMockBase):
-    def __init__(
-        self,
-        api_key: str = "valid_api_key",
-        header_name: Optional[str] = "X-API-Key",
-        param_name: Optional[str] = None
-    ):
+    def __init__(self, api_key: str = "valid_api_key", header_name: Optional[str] = "X-API-Key", param_name: Optional[str] = None):
         super().__init__()
         self.api_key = api_key
         self.header_name = header_name
@@ -33,12 +28,7 @@ class ApiKeyAuthMock(AuthMockBase):
 
         # Add initial key
         self.validator.add_valid_key(api_key)
-        self.validator.set_key_metadata(
-            api_key=api_key,
-            owner="default_user",
-            permissions=["read", "write"],
-            tier="standard"
-        )
+        self.validator.set_key_metadata(api_key=api_key, owner="default_user", permissions=["read", "write"], tier="standard")
         self.rate_limiter.initialize_key(api_key)
         self.usage_tracker.initialize_key(api_key)
 
@@ -50,15 +40,10 @@ class ApiKeyAuthMock(AuthMockBase):
         else:
             raise ValueError("Either header_name or param_name must be provided")
 
-    def with_api_key(self, api_key: str) -> 'ApiKeyAuthMock':
+    def with_api_key(self, api_key: str) -> "ApiKeyAuthMock":
         self.api_key = api_key
         self.validator.add_valid_key(api_key)
-        self.validator.set_key_metadata(
-            api_key=api_key,
-            owner="default_user",
-            permissions=["read", "write"],
-            tier="standard"
-        )
+        self.validator.set_key_metadata(api_key=api_key, owner="default_user", permissions=["read", "write"], tier="standard")
         self.rate_limiter.initialize_key(api_key)
         self.usage_tracker.initialize_key(api_key)
 
@@ -70,14 +55,9 @@ class ApiKeyAuthMock(AuthMockBase):
 
         return self
 
-    def with_additional_valid_key(self, api_key: str) -> 'ApiKeyAuthMock':
+    def with_additional_valid_key(self, api_key: str) -> "ApiKeyAuthMock":
         self.validator.add_valid_key(api_key)
-        self.validator.set_key_metadata(
-            api_key=api_key,
-            owner="default_user",
-            permissions=["read", "write"],
-            tier="standard"
-        )
+        self.validator.set_key_metadata(api_key=api_key, owner="default_user", permissions=["read", "write"], tier="standard")
         self.rate_limiter.initialize_key(api_key)
         self.usage_tracker.initialize_key(api_key)
         return self
@@ -88,53 +68,40 @@ class ApiKeyAuthMock(AuthMockBase):
         owner: Optional[str] = None,
         permissions: Optional[List[str]] = None,
         tier: Optional[str] = None,
-        expires_in_seconds: Optional[int] = None
-    ) -> 'ApiKeyAuthMock':
+        expires_in_seconds: Optional[int] = None,
+    ) -> "ApiKeyAuthMock":
         target_key = api_key or self.api_key
         expires_at = None
         if expires_in_seconds is not None:
             expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
 
-        self.validator.set_key_metadata(
-            api_key=target_key,
-            owner=owner,
-            permissions=permissions,
-            tier=tier,
-            expires_at=expires_at
-        )
+        self.validator.set_key_metadata(api_key=target_key, owner=owner, permissions=permissions, tier=tier, expires_at=expires_at)
         return self
 
-    def with_key_format_validation(self, pattern: str) -> 'ApiKeyAuthMock':
+    def with_key_format_validation(self, pattern: str) -> "ApiKeyAuthMock":
         self.validator.set_key_format_pattern(re.compile(pattern))
         return self
 
-    def revoke_key(self, api_key: Optional[str] = None) -> 'ApiKeyAuthMock':
+    def revoke_key(self, api_key: Optional[str] = None) -> "ApiKeyAuthMock":
         target_key = api_key or self.api_key
         self.validator.revoke_key(target_key)
         return self
 
-    def with_rate_limiting(
-        self,
-        requests_per_period: int = 100,
-        period_seconds: int = 3600
-    ) -> 'ApiKeyAuthMock':
-        self.rate_limiter.enable_rate_limiting(
-            requests_per_period=requests_per_period,
-            period_seconds=period_seconds
-        )
+    def with_rate_limiting(self, requests_per_period: int = 100, period_seconds: int = 3600) -> "ApiKeyAuthMock":
+        self.rate_limiter.enable_rate_limiting(requests_per_period=requests_per_period, period_seconds=period_seconds)
         return self
 
-    def with_usage_tracking(self) -> 'ApiKeyAuthMock':
+    def with_usage_tracking(self) -> "ApiKeyAuthMock":
         self.usage_tracker.enable_usage_tracking()
         return self
 
-    def as_header(self, header_name: str = "X-API-Key") -> 'ApiKeyAuthMock':
+    def as_header(self, header_name: str = "X-API-Key") -> "ApiKeyAuthMock":
         self.header_name = header_name
         self.param_name = None
         self.auth_strategy = ApiKeyAuth(api_key=self.api_key, header_name=header_name)
         return self
 
-    def as_param(self, param_name: str = "api_key") -> 'ApiKeyAuthMock':
+    def as_param(self, param_name: str = "api_key") -> "ApiKeyAuthMock":
         self.header_name = None
         self.param_name = param_name
         self.auth_strategy = ApiKeyAuth(api_key=self.api_key, param_name=param_name)
@@ -190,6 +157,6 @@ class ApiKeyAuthMock(AuthMockBase):
         # If using param_name, no standard header tuple is returned here.
         return None
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         # API keys generally don't have a refresh mechanism
         return False

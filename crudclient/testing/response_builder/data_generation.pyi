@@ -10,10 +10,7 @@ class DataGenerationBuilder:
     """
 
     @staticmethod
-    def create_random_data(
-        schema: Dict[str, Any],
-        count: int = 1
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def create_random_data(schema: Dict[str, Any], count: int = 1) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Generate random data based on a schema definition.
 

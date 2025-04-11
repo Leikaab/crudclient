@@ -1,4 +1,3 @@
-
 import logging
 from typing import List, Optional, Type, Union
 
@@ -17,7 +16,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         self,
         datamodel: Optional[Type[T]] = None,
         api_response_model: Optional[ApiResponseType] = None,
-        list_return_keys: List[str] = ["data", "results", "items"]
+        list_return_keys: List[str] = ["data", "results", "items"],
     ):
         self.datamodel = datamodel
         self.api_response_model = api_response_model
@@ -31,6 +30,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 if isinstance(parsed_data, dict):
                     return self.datamodel(**parsed_data) if self.datamodel else parsed_data
@@ -43,7 +43,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, bytes):
             try:
                 # Try to decode and parse as JSON
-                decoded = data.decode('utf-8')
+                decoded = data.decode("utf-8")
                 return self.convert_single(decoded)
             except UnicodeDecodeError:
                 raise ValueError("Could not decode binary data as UTF-8")
@@ -61,6 +61,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 # Recursively call convert_list with the parsed data
                 return self.convert_list(parsed_data)
@@ -71,7 +72,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, bytes):
             try:
                 # Try to decode and parse as JSON
-                decoded = data.decode('utf-8')
+                decoded = data.decode("utf-8")
                 return self.convert_list(decoded)
             except UnicodeDecodeError:
                 raise ValueError("Could not decode binary data as UTF-8")

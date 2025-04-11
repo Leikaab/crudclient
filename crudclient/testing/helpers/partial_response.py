@@ -4,11 +4,7 @@ from typing import Any, Dict, List, Optional, Set
 
 class PartialResponseHelper:
     def __init__(
-        self,
-        full_response: Dict[str, Any],
-        field_separator: str = ".",
-        wildcard_char: str = "*",
-        default_fields: Optional[List[str]] = None
+        self, full_response: Dict[str, Any], field_separator: str = ".", wildcard_char: str = "*", default_fields: Optional[List[str]] = None
     ):
         self.full_response = full_response
         self.field_separator = field_separator
@@ -20,7 +16,7 @@ class PartialResponseHelper:
         fields: Optional[List[str]] = None,
         exclude_fields: Optional[List[str]] = None,
         max_depth: Optional[int] = None,
-        include_metadata: bool = False
+        include_metadata: bool = False,
     ) -> Dict[str, Any]:
         # Use default fields if none provided
         fields_to_use = fields or self.default_fields
@@ -91,12 +87,7 @@ class PartialResponseHelper:
             # Skip fields that don't exist or can't be accessed
             pass
 
-    def _build_nested_structure(
-        self,
-        result: Dict[str, Any],
-        parts: List[str],
-        final_value: Any
-    ) -> None:
+    def _build_nested_structure(self, result: Dict[str, Any], parts: List[str], final_value: Any) -> None:
         current = result
         for i, part in enumerate(parts[:-1]):
             if part not in current:
@@ -202,11 +193,7 @@ class PartialResponseHelper:
         return result
 
     def _add_metadata(
-        self,
-        result: Dict[str, Any],
-        included_fields: Optional[List[str]],
-        excluded_fields: Optional[List[str]],
-        max_depth: Optional[int]
+        self, result: Dict[str, Any], included_fields: Optional[List[str]], excluded_fields: Optional[List[str]], max_depth: Optional[int]
     ) -> Dict[str, Any]:
         metadata = {
             "partial_response": True,
@@ -218,10 +205,7 @@ class PartialResponseHelper:
         if max_depth is not None:
             metadata["max_depth"] = max_depth
 
-        return {
-            "data": result,
-            "_metadata": metadata
-        }
+        return {"data": result, "_metadata": metadata}
 
     def _count_fields(self, data: Any, prefix: str = "") -> int:
         if not isinstance(data, dict):

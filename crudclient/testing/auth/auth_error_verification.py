@@ -1,4 +1,3 @@
-
 from typing import Any, Dict, Optional
 
 
@@ -6,10 +5,7 @@ class AuthErrorVerification:
 
     @staticmethod
     def assert_auth_error_response(
-        response: Dict[str, Any],
-        expected_status: int = 401,
-        expected_error: Optional[str] = None,
-        expected_error_description: Optional[str] = None
+        response: Dict[str, Any], expected_status: int = 401, expected_error: Optional[str] = None, expected_error_description: Optional[str] = None
     ) -> None:
         # Check status code
         if "status_code" in response:
@@ -28,17 +24,10 @@ class AuthErrorVerification:
 
     @staticmethod
     def assert_rate_limit_headers(
-        headers: Dict[str, str],
-        expected_limit: Optional[int] = None,
-        expected_remaining: Optional[int] = None,
-        expected_reset: Optional[int] = None
+        headers: Dict[str, str], expected_limit: Optional[int] = None, expected_remaining: Optional[int] = None, expected_reset: Optional[int] = None
     ) -> None:
         # Check for standard rate limit headers
-        rate_limit_headers = {
-            "X-RateLimit-Limit": expected_limit,
-            "X-RateLimit-Remaining": expected_remaining,
-            "X-RateLimit-Reset": expected_reset
-        }
+        rate_limit_headers = {"X-RateLimit-Limit": expected_limit, "X-RateLimit-Remaining": expected_remaining, "X-RateLimit-Reset": expected_reset}
 
         for header, expected_value in rate_limit_headers.items():
             if expected_value is not None:

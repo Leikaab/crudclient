@@ -18,24 +18,11 @@ class TestMultiFactorAuthExamples:
     def test_mfa_required_scenario(self):
         """Example of testing an MFA required scenario."""
         # Create a mock client with Bearer Auth that requires MFA
-        client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "valid_token",
-                "mfa_required": True,
-                "mfa_verified": False
-            }
-        )
+        client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token", "mfa_required": True, "mfa_verified": False})
 
         # Configure an MFA required response
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/secure",
-            response={
-                "error": "Unauthorized",
-                "message": "MFA verification required"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/secure", response={"error": "Unauthorized", "message": "MFA verification required"}, status_code=401
         )
 
         # Make a request and expect it to fail
@@ -65,7 +52,7 @@ class TestMultiFactorAuthExamples:
             url_pattern=r"/protected-resource",
             response={"detail": "MFA required"},
             status_code=401,
-            headers={"WWW-Authenticate": mfa_challenge_header}
+            headers={"WWW-Authenticate": mfa_challenge_header},
         )
 
         # Make the first request which should fail with 401
@@ -81,16 +68,10 @@ class TestMultiFactorAuthExamples:
         client.http_client.reset()
 
         # Configure only the success response for the second attempt
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/protected-resource",
-            response={"data": "sensitive info"},
-            status_code=200
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/protected-resource", response={"data": "sensitive info"}, status_code=200)
 
         # Try the request again (simulating that MFA is now verified)
-        response = client.get("/protected-resource",
-                              headers={"X-MFA-Token": "mock-mfa-12345"})
+        response = client.get("/protected-resource", headers={"X-MFA-Token": "mock-mfa-12345"})
 
         # Verify the response
         assert response == {"data": "sensitive info"}

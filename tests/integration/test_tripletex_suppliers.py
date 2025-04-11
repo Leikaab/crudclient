@@ -29,12 +29,7 @@ def test_create_supplier(api):
     # Create a new supplier with a unique name and supplier number
     supplier_name = generate_unique_name()
 
-    supplier_data = {
-        "name": supplier_name,
-        "email": "test@example.com",
-        "isSupplier": True,
-        "isCustomer": False
-    }
+    supplier_data = {"name": supplier_name, "email": "test@example.com", "isSupplier": True, "isCustomer": False}
 
     # Create the supplier
     supplier = api.suppliers.create(supplier_data)
@@ -58,10 +53,7 @@ def test_read_supplier(api):
     """
     # Create a new supplier with a unique name
     supplier_name = generate_unique_name()
-    supplier_data = {
-        "name": supplier_name,
-        "email": "test@example.com"
-    }
+    supplier_data = {"name": supplier_name, "email": "test@example.com"}
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -86,10 +78,7 @@ def test_update_supplier(api):
     """
     # Create a new supplier with a unique name
     supplier_name = generate_unique_name()
-    supplier_data = {
-        "name": supplier_name,
-        "email": "test@example.com"
-    }
+    supplier_data = {"name": supplier_name, "email": "test@example.com"}
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -100,7 +89,7 @@ def test_update_supplier(api):
         "version": created_supplier["version"],
         "name": supplier_name,
         "email": "updated@example.com",
-        "description": "Updated description"
+        "description": "Updated description",
     }
 
     updated_supplier = api.suppliers.update(created_supplier["id"], updated_data)
@@ -125,10 +114,7 @@ def test_list_suppliers(api):
     created_suppliers = []
 
     for name in supplier_names:
-        supplier_data = {
-            "name": name,
-            "email": f"{name.replace(' ', '').lower()}@example.com"
-        }
+        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com"}
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
 
@@ -156,10 +142,7 @@ def test_destroy_supplier(api):
     """
     # Create a new supplier with a unique name
     supplier_name = generate_unique_name()
-    supplier_data = {
-        "name": supplier_name,
-        "email": "test@example.com"
-    }
+    supplier_data = {"name": supplier_name, "email": "test@example.com"}
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -187,11 +170,7 @@ def test_listcreate_suppliers(api):
     suppliers_data = []
 
     for name in supplier_names:
-        supplier_data = {
-            "name": name,
-            "email": f"{name.replace(' ', '').lower()}@example.com",
-            "isSupplier": True
-        }
+        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com", "isSupplier": True}
         suppliers_data.append(supplier_data)
 
     # Create the suppliers using listcreate
@@ -220,10 +199,7 @@ def test_listupdate_suppliers(api):
     created_suppliers = []
 
     for name in supplier_names:
-        supplier_data = {
-            "name": name,
-            "email": f"{name.replace(' ', '').lower()}@example.com"
-        }
+        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com"}
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
 
@@ -235,7 +211,7 @@ def test_listupdate_suppliers(api):
             "version": supplier["version"],
             "name": supplier["name"],
             "email": f"updated_{supplier['email']}",
-            "description": f"Updated description for {supplier['name']}"
+            "description": f"Updated description for {supplier['name']}",
         }
         update_data.append(supplier_update)
 

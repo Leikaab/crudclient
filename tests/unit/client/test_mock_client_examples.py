@@ -14,11 +14,7 @@ class TestMockClientExamples:
     def test_basic_response_pattern(self, mock_client: MockClient):
         """Test basic response pattern matching."""
         # Configure the mock client with a response pattern
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/users/\d+",
-            data={"id": 123, "name": "Test User"}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/users/\d+", data={"id": 123, "name": "Test User"})
 
         # Make a request that matches the pattern
         response = mock_client.get("/users/123")
@@ -29,23 +25,11 @@ class TestMockClientExamples:
     def test_multiple_response_patterns(self, mock_client: MockClient):
         """Test multiple response patterns with different HTTP methods."""
         # Configure the mock client with multiple response patterns
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/users$",
-            data={"users": [{"id": 1}, {"id": 2}]}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/users$", data={"users": [{"id": 1}, {"id": 2}]})
 
-        mock_client.with_response_pattern(
-            method="POST",
-            path_pattern=r"/users$",
-            data={"id": 3, "created": True}
-        )
+        mock_client.with_response_pattern(method="POST", path_pattern=r"/users$", data={"id": 3, "created": True})
 
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/users/1$",
-            data={"id": 1, "name": "User One"}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/users/1$", data={"id": 1, "name": "User One"})
 
         # Make requests that match the patterns
         users_response = mock_client.get("/users")
@@ -64,7 +48,7 @@ class TestMockClientExamples:
             method="GET",
             path_pattern=r"/search$",
             # params={"q": "test"}, # Parameter matching not implemented yet
-            data={"results": ["test result"]}
+            data={"results": ["test result"]},
         )
 
         # Parameter matching is not fully implemented in the underlying mock http client yet.
@@ -74,7 +58,7 @@ class TestMockClientExamples:
             method="GET",
             path_pattern=r"/search$",
             # params={"q": "other"}, # Parameter matching not implemented yet
-            data={"results": ["test result"]}  # Return same data due to lack of param matching
+            data={"results": ["test result"]},  # Return same data due to lack of param matching
         )
 
         # Make requests with different parameters
@@ -94,11 +78,7 @@ class TestMockClientExamples:
             # error_rate_percentage=50  # Error rate not implemented yet
         )
 
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/data$",
-            data={"data": "success"}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/data$", data={"data": "success"})
 
         # Make multiple requests to test error rate
         # Note: This is probabilistic, so we can't assert exact behavior
@@ -114,11 +94,7 @@ class TestMockClientExamples:
         # Configure the mock client with rate limiting
         mock_client.with_rate_limiter(limit=2, window_seconds=60)
 
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/api$",
-            data={"status": "ok"}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/api$", data={"status": "ok"})
 
         # First two requests should succeed
         response1 = mock_client.get("/api")
@@ -139,17 +115,9 @@ class TestMockClientExamples:
     def test_request_verification(self, mock_client: MockClient):
         """Test request verification helpers."""
         # Configure the mock client
-        mock_client.with_response_pattern(
-            method="GET",
-            path_pattern=r"/users$",
-            data={"users": []}
-        )
+        mock_client.with_response_pattern(method="GET", path_pattern=r"/users$", data={"users": []})
 
-        mock_client.with_response_pattern(
-            method="POST",
-            path_pattern=r"/users$",
-            data={"id": 1}
-        )
+        mock_client.with_response_pattern(method="POST", path_pattern=r"/users$", data={"id": 1})
 
         # Make some requests
         mock_client.get("/users", params={"page": "1"})
@@ -162,18 +130,10 @@ class TestMockClientExamples:
         mock_client.assert_request_count(1, method="POST")
 
         # Verify request sequence
-        mock_client.assert_request_sequence([
-            {"method": "GET"},
-            {"method": "POST"},
-            {"method": "GET"}
-        ])
+        mock_client.assert_request_sequence([{"method": "GET"}, {"method": "POST"}, {"method": "GET"}])
 
         # Verify request parameters
-        mock_client.assert_request_params(
-            {"page": "1"},
-            method="GET",
-            url_pattern=r"/users$"
-        )
+        mock_client.assert_request_params({"page": "1"}, method="GET", url_pattern=r"/users$")
 
     def test_pagination_helper(self, mock_client: MockClient, create_user_data):
         """Test pagination helper."""
@@ -195,14 +155,14 @@ class TestMockClientExamples:
             method="GET",
             path_pattern=r"/api/users$",  # Use simple path pattern
             # params={"page": "2"}, # Parameter matching not implemented yet
-            data=page2_data_expected  # Pass the expected data dict directly
+            data=page2_data_expected,  # Pass the expected data dict directly
         )
         # Configure page 1 response last (LIFO matching without param support)
         mock_client.with_response_pattern(
             method="GET",
             path_pattern=r"/api/users$",  # Use simple path pattern
             # params={"page": "1"}, # Parameter matching not implemented yet
-            data=page1_data_expected  # Pass the expected data dict directly
+            data=page1_data_expected,  # Pass the expected data dict directly
         )
 
         # Make paginated requests

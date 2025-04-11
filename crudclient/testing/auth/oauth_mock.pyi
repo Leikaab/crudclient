@@ -42,7 +42,7 @@ class OAuthMock(AuthMockBase):
         token_url: str = "https://example.com/oauth/token",
         authorize_url: Optional[str] = "https://example.com/oauth/authorize",
         redirect_uri: Optional[str] = "https://app.example.com/callback",
-        scope: Optional[str] = "read write"
+        scope: Optional[str] = "read write",
     ) -> None:
         """
         Initialize an OAuth Authentication mock.
@@ -57,7 +57,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_client_credentials(self, client_id: str, client_secret: str) -> 'OAuthMock':
+    def with_client_credentials(self, client_id: str, client_secret: str) -> "OAuthMock":
         """
         Set the client credentials for the OAuth mock.
 
@@ -70,7 +70,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_url(self, token_url: str) -> 'OAuthMock':
+    def with_token_url(self, token_url: str) -> "OAuthMock":
         """
         Set the token URL for the OAuth mock.
 
@@ -82,7 +82,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_authorize_url(self, authorize_url: str) -> 'OAuthMock':
+    def with_authorize_url(self, authorize_url: str) -> "OAuthMock":
         """
         Set the authorize URL for the OAuth mock.
 
@@ -94,7 +94,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_redirect_uri(self, redirect_uri: str) -> 'OAuthMock':
+    def with_redirect_uri(self, redirect_uri: str) -> "OAuthMock":
         """
         Set the redirect URI for the OAuth mock.
 
@@ -106,7 +106,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_scope(self, scope: str) -> 'OAuthMock':
+    def with_scope(self, scope: str) -> "OAuthMock":
         """
         Set the scope for the OAuth mock.
 
@@ -118,7 +118,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_grant_type(self, grant_type: str) -> 'OAuthMock':
+    def with_grant_type(self, grant_type: str) -> "OAuthMock":
         """
         Set the grant type for the OAuth mock.
 
@@ -130,7 +130,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_access_token(self, access_token: str) -> 'OAuthMock':
+    def with_access_token(self, access_token: str) -> "OAuthMock":
         """
         Set the access token for the OAuth mock.
 
@@ -142,7 +142,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_refresh_token(self, refresh_token: str = ..., max_refresh_attempts: int = ...) -> 'OAuthMock':
+    def with_refresh_token(self, refresh_token: str = ..., max_refresh_attempts: int = ...) -> "OAuthMock":
         """
         Set the refresh token for the OAuth mock.
 
@@ -154,7 +154,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_token_expiration(self, expires_in_seconds: int = ...) -> 'OAuthMock':
+    def with_token_expiration(self, expires_in_seconds: int = ...) -> "OAuthMock":
         """
         Set the token expiration for the OAuth mock.
 
@@ -166,7 +166,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_expired_token(self) -> 'OAuthMock':
+    def with_expired_token(self) -> "OAuthMock":
         """
         Set the token to be expired.
 
@@ -175,7 +175,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_required_scopes(self, scopes: List[str]) -> 'OAuthMock':
+    def with_required_scopes(self, scopes: List[str]) -> "OAuthMock":
         """
         Set the required scopes for the OAuth mock.
 
@@ -187,7 +187,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_available_scopes(self, scopes: List[str]) -> 'OAuthMock':
+    def with_available_scopes(self, scopes: List[str]) -> "OAuthMock":
         """
         Set the available scopes for the OAuth mock.
 
@@ -199,7 +199,7 @@ class OAuthMock(AuthMockBase):
         """
         ...
 
-    def with_user(self, username: str, password: str, scopes: List[str]) -> 'OAuthMock':
+    def with_user(self, username: str, password: str, scopes: List[str]) -> "OAuthMock":
         """
         Add a user for password grant type.
 

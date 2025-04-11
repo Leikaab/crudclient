@@ -25,8 +25,8 @@ def bulk_create_items(
         try:
             for item in items:
                 item_copy = copy.deepcopy(item)
-                if 'id' not in item_copy:
-                    item_copy['id'] = str(uuid.uuid4())
+                if "id" not in item_copy:
+                    item_copy["id"] = str(uuid.uuid4())
 
                 # Validate using temporary constraints to check for conflicts within the batch
                 validate_item(
@@ -72,11 +72,11 @@ def bulk_update_items(
     # First validate all items to ensure atomicity
     if not skip_validation:
         temp_unique_constraints = copy.deepcopy(data_store.unique_constraints)
-        original_items_map = {item['id']: item for item in data_store.get_collection(collection) if 'id' in item}
+        original_items_map = {item["id"]: item for item in data_store.get_collection(collection) if "id" in item}
 
         try:
             for item_update_data in items:
-                item_id = item_update_data.get('id')
+                item_id = item_update_data.get("id")
                 if item_id is None:
                     # Cannot update without ID, mark as None in results later
                     continue
@@ -110,12 +110,12 @@ def bulk_update_items(
             raise e
     else:
         # Skip validation, prepare all updates with IDs
-        updates_to_perform = [(item.get('id'), item) for item in items if item.get('id') is not None]
+        updates_to_perform = [(item.get("id"), item) for item in items if item.get("id") is not None]
 
     # Then perform all updates
     update_map = {item_id: data for item_id, data in updates_to_perform}
     for item_data in items:  # Iterate original request order to maintain result order
-        item_id = item_data.get('id')
+        item_id = item_data.get("id")
         if item_id is None or item_id not in update_map:
             updated_items_results.append(None)
             continue

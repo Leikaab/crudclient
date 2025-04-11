@@ -13,10 +13,7 @@ from .request_record import RequestRecord
 class DeleteMock(BaseCrudMock):
     def __init__(self):
         super().__init__()
-        self.default_response = MockResponse(
-            status_code=204,
-            json_data=None
-        )
+        self.default_response = MockResponse(status_code=204, json_data=None)
         self._stored_resources = {}  # id -> resource dict
         self._dependencies = {}  # id -> list of dependent resource IDs
         self._soft_deleted_resources = {}  # id -> resource dict (for soft deletes)
@@ -25,18 +22,13 @@ class DeleteMock(BaseCrudMock):
 
     def delete(self, url: str, **kwargs: Any) -> Any:
         # Process parent_id if present in kwargs
-        parent_id = kwargs.pop('parent_id', None)
+        parent_id = kwargs.pop("parent_id", None)
         if parent_id and self._parent_id_handling:  # type: ignore
             url = self._process_parent_id(url, parent_id)
 
         # Record the request
         record = RequestRecord(
-            method="DELETE",
-            url=url,
-            params=kwargs.get('params'),
-            data=kwargs.get('data'),
-            json=kwargs.get('json'),
-            headers=kwargs.get('headers')
+            method="DELETE", url=url, params=kwargs.get("params"), data=kwargs.get("data"), json=kwargs.get("json"), headers=kwargs.get("headers")
         )
         self.request_history.append(record)  # type: ignore
 
@@ -44,15 +36,15 @@ class DeleteMock(BaseCrudMock):
         pattern = self._find_matching_pattern("DELETE", url, **kwargs)
 
         if pattern:
-            response_obj = pattern['response']
+            response_obj = pattern["response"]
 
             # Handle callable responses
             if callable(response_obj):
                 response_obj = response_obj(**kwargs)
 
             # Handle errors
-            if 'error' in pattern and pattern['error']:
-                raise pattern['error']
+            if "error" in pattern and pattern["error"]:
+                raise pattern["error"]
 
             # Ensure response_obj is a MockResponse
             if not isinstance(response_obj, MockResponse):
@@ -82,61 +74,39 @@ class DeleteMock(BaseCrudMock):
             return default_json
         return self.default_response.text
 
-    def with_success(
-        self,
-        url_pattern: str,
-        **kwargs: Any
-    ) -> 'DeleteMock':
-        self.with_response(
-            url_pattern=url_pattern,
-            response=MockResponse(
-                status_code=204,
-                json_data=None
-            ),
-            **kwargs
-        )
+    def with_success(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
+        self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=204, json_data=None), **kwargs)
         return self
 
-    def with_resource_in_use_error(
-        self,
-        url_pattern: str,
-        **kwargs: Any
-    ) -> 'DeleteMock':
+    def with_resource_in_use_error(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
         # Create a mock response for resource in use error
-        mock_response = MockResponse(
-            status_code=409,
-            json_data={"error": "Resource is in use and cannot be deleted"}
-        )
+        mock_response = MockResponse(status_code=409, json_data={"error": "Resource is in use and cannot be deleted"})
 
         # Create the error instance
-        error_instance = CrudClientError(
-            "HTTP error occurred: 409, Resource is in use and cannot be deleted"
-        )
+        error_instance = CrudClientError("HTTP error occurred: 409, Resource is in use and cannot be deleted")
 
         # Add to response patterns
-        self.response_patterns.append({
-            'url_pattern': url_pattern,
-            'response': mock_response,
-            'error': error_instance,
-            'params': kwargs.get('params'),
-            'data': kwargs.get('data'),
-            'json': kwargs.get('json'),
-            'headers': kwargs.get('headers'),
-            'max_calls': kwargs.get('max_calls', float('inf')),
-            'call_count': 0
-        })
+        self.response_patterns.append(
+            {
+                "url_pattern": url_pattern,
+                "response": mock_response,
+                "error": error_instance,
+                "params": kwargs.get("params"),
+                "data": kwargs.get("data"),
+                "json": kwargs.get("json"),
+                "headers": kwargs.get("headers"),
+                "max_calls": kwargs.get("max_calls", float("inf")),
+                "call_count": 0,
+            }
+        )
         return self
 
-    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> 'DeleteMock':
+    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> "DeleteMock":
         str_id = str(resource_id)
         self._stored_resources[str_id] = copy.deepcopy(resource)
         return self
 
-    def with_dependency(
-        self,
-        resource_id: Union[str, int],
-        dependent_id: Union[str, int]
-    ) -> 'DeleteMock':
+    def with_dependency(self, resource_id: Union[str, int], dependent_id: Union[str, int]) -> "DeleteMock":
         str_id = str(resource_id)
         if str_id not in self._dependencies:
             self._dependencies[str_id] = []
@@ -144,7 +114,7 @@ class DeleteMock(BaseCrudMock):
         self._dependencies[str_id].append(str(dependent_id))
         return self
 
-    def with_cascading_delete(self, enabled: bool = True) -> 'DeleteMock':
+    def with_cascading_delete(self, enabled: bool = True) -> "DeleteMock":
         self._cascade_enabled = enabled
 
         # Override the delete method to handle cascading deletes
@@ -152,7 +122,7 @@ class DeleteMock(BaseCrudMock):
 
         def delete_with_cascading(url: str, **kwargs: Any) -> Any:
             # Extract the resource ID from the URL
-            id_match = re.search(r'/([^/]+)$', url)
+            id_match = re.search(r"/([^/]+)$", url)
             if id_match:
                 resource_id = id_match.group(1)
 
@@ -187,7 +157,7 @@ class DeleteMock(BaseCrudMock):
 
         return self
 
-    def with_soft_delete(self, enabled: bool = True) -> 'DeleteMock':
+    def with_soft_delete(self, enabled: bool = True) -> "DeleteMock":
         self._soft_delete_enabled = enabled
 
         # Override the delete method to handle soft deletes
@@ -195,7 +165,7 @@ class DeleteMock(BaseCrudMock):
 
         def delete_with_soft_delete(url: str, **kwargs: Any) -> Any:
             # Extract the resource ID from the URL
-            id_match = re.search(r'/([^/]+)$', url)
+            id_match = re.search(r"/([^/]+)$", url)
             if id_match:
                 resource_id = id_match.group(1)
 
@@ -217,24 +187,22 @@ class DeleteMock(BaseCrudMock):
 
         return self
 
-    def with_referential_integrity_check(self, url_pattern: str) -> 'DeleteMock':
+    def with_referential_integrity_check(self, url_pattern: str) -> "DeleteMock":
         # Create a CrudClientError with a specific message
         error = CrudClientError("Referential integrity violation: Cannot delete resource with dependencies")
 
         # Add the error response for this URL pattern with the error
-        self.response_patterns.append({
-            'url_pattern': url_pattern,
-            'response': MockResponse(
-                status_code=409,
-                json_data={
-                    "error": "Referential integrity violation",
-                    "message": "Cannot delete resource with dependencies"
-                }
-            ),
-            'error': error,
-            'max_calls': float('inf'),
-            'call_count': 0
-        })
+        self.response_patterns.append(
+            {
+                "url_pattern": url_pattern,
+                "response": MockResponse(
+                    status_code=409, json_data={"error": "Referential integrity violation", "message": "Cannot delete resource with dependencies"}
+                ),
+                "error": error,
+                "max_calls": float("inf"),
+                "call_count": 0,
+            }
+        )
 
         # Override the delete method to raise the error
         original_delete = self.delete
@@ -243,7 +211,7 @@ class DeleteMock(BaseCrudMock):
             # Check if this URL matches the pattern
             if re.search(url_pattern, url):
                 # Extract the resource ID from the URL
-                id_match = re.search(r'/([^/]+)$', url)
+                id_match = re.search(r"/([^/]+)$", url)
                 if id_match:
                     resource_id = id_match.group(1)
                     # Check if the resource has dependencies
@@ -255,14 +223,11 @@ class DeleteMock(BaseCrudMock):
                         record = RequestRecord(
                             method="DELETE",
                             url=url,
-                            params=kwargs.get('params'),
-                            data=kwargs.get('data'),
-                            json=kwargs.get('json'),
-                            headers=kwargs.get('headers'),
-                            response=MockResponse(
-                                status_code=409,
-                                json_data={"error": "Referential integrity violation"}
-                            )
+                            params=kwargs.get("params"),
+                            data=kwargs.get("data"),
+                            json=kwargs.get("json"),
+                            headers=kwargs.get("headers"),
+                            response=MockResponse(status_code=409, json_data={"error": "Referential integrity violation"}),
                         )
                         self.request_history.append(record)  # type: ignore
 

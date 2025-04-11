@@ -49,6 +49,7 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 return self.convert_single(parsed_data)
             except json.JSONDecodeError:
@@ -63,11 +64,14 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
             return self.datamodel(**data)
         return data if isinstance(data, dict) else {}
 
-    def convert_list(self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]) -> Union[List[_TestModel], JSONList, _TestApiResponse]:
+    def convert_list(
+        self, data: Union[Dict[str, Any], List[Dict[str, Any]], bytes, str, None]
+    ) -> Union[List[_TestModel], JSONList, _TestApiResponse]:
         # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 return self.convert_list(parsed_data)
             except json.JSONDecodeError:
@@ -96,6 +100,7 @@ class _TestCustomCrud(Crud[_TestModel]):
         super().__init__(client)
         # Explicitly create and set the custom strategy
         self._response_strategy = _TestCustomStrategy(datamodel=type(self)._datamodel)
+
 
 # Using client fixture from conftest.py
 

@@ -24,7 +24,7 @@ class SimpleMockClient(SimpleMockClientAssertions):
     to isolate your code from actual HTTP interactions and verify that your
     code makes the expected API calls.
     """
+
     ...
 
-
-__all__ = ['SimpleMockClient']
+__all__ = ["SimpleMockClient"]

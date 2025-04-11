@@ -22,29 +22,20 @@ def check_request_payload(
     match_all: bool,
 ) -> None:
     if not requests:
-        raise AssertionError(
-            f"No matching requests found. Filter: url_pattern={url_pattern}"
-        )
+        raise AssertionError(f"No matching requests found. Filter: url_pattern={url_pattern}")
 
     if match_all:
         for i, request in enumerate(requests):
             request_json = request.json or {}
             for key, value in payload.items():
                 if key not in request_json:
-                    raise AssertionError(
-                        f"Request {i} missing payload key '{key}'. "
-                        f"URL: {request.url}"
-                    )
+                    raise AssertionError(f"Request {i} missing payload key '{key}'. " f"URL: {request.url}")
                 if callable(value):
                     if not value(request_json[key]):
-                        raise AssertionError(
-                            f"Request {i} payload key '{key}' failed validation. "
-                            f"URL: {request.url}"
-                        )
+                        raise AssertionError(f"Request {i} payload key '{key}' failed validation. " f"URL: {request.url}")
                 elif request_json[key] != value:
                     raise AssertionError(
-                        f"Request {i} payload key '{key}' has value '{request_json[key]}', "
-                        f"expected '{value}'. URL: {request.url}"
+                        f"Request {i} payload key '{key}' has value '{request_json[key]}', " f"expected '{value}'. URL: {request.url}"
                     )
     else:
         # At least one request must match all payload
@@ -69,10 +60,7 @@ def check_request_payload(
                 break
 
         if not found_match:
-            raise AssertionError(
-                f"No request matched all payload {payload}. "
-                f"Filter: url_pattern={url_pattern}"
-            )
+            raise AssertionError(f"No request matched all payload {payload}. " f"Filter: url_pattern={url_pattern}")
 
 
 def check_operation_parameters(
@@ -119,28 +107,16 @@ def check_operation_parameters(
         for key, value in expected_params.items():
             if request.params and key in request.params:
                 if request.params[key] != value:
-                    raise AssertionError(
-                        f"Request {i} param '{key}' has value '{request.params[key]}', "
-                        f"expected '{value}'. URL: {request.url}"
-                    )
+                    raise AssertionError(f"Request {i} param '{key}' has value '{request.params[key]}', " f"expected '{value}'. URL: {request.url}")
             elif request.data and key in request.data:
                 if request.data[key] != value:
-                    raise AssertionError(
-                        f"Request {i} data '{key}' has value '{request.data[key]}', "
-                        f"expected '{value}'. URL: {request.url}"
-                    )
+                    raise AssertionError(f"Request {i} data '{key}' has value '{request.data[key]}', " f"expected '{value}'. URL: {request.url}")
             elif request.json and key in request.json:
                 if request.json[key] != value:
-                    raise AssertionError(
-                        f"Request {i} json '{key}' has value '{request.json[key]}', "
-                        f"expected '{value}'. URL: {request.url}"
-                    )
+                    raise AssertionError(f"Request {i} json '{key}' has value '{request.json[key]}', " f"expected '{value}'. URL: {request.url}")
 
     # If we get here, parameters were missing in all requests
-    raise AssertionError(
-        f"No request matched all expected parameters: {expected_params}. "
-        f"URL pattern: {url_pattern}, method: {method}"
-    )
+    raise AssertionError(f"No request matched all expected parameters: {expected_params}. " f"URL pattern: {url_pattern}, method: {method}")
 
 
 def check_response_handling(
@@ -155,8 +131,7 @@ def check_response_handling(
     for i, request in enumerate(requests):
         # Check status code
         assert request.response.status_code == expected_status, (
-            f"Request {i} response status code is {request.response.status_code}, "
-            f"expected {expected_status}. URL: {request.url}"
+            f"Request {i} response status code is {request.response.status_code}, " f"expected {expected_status}. URL: {request.url}"
         )
 
         # Check response data if provided
@@ -165,12 +140,9 @@ def check_response_handling(
             if not response_json:
                 continue
             for key, value in expected_data.items():
-                assert key in response_json, (
-                    f"Request {i} response missing key '{key}'. URL: {request.url}"
-                )
+                assert key in response_json, f"Request {i} response missing key '{key}'. URL: {request.url}"
                 assert response_json[key] == value, (
-                    f"Request {i} response key '{key}' has value '{response_json[key]}', "
-                    f"expected '{value}'. URL: {request.url}"
+                    f"Request {i} response key '{key}' has value '{response_json[key]}', " f"expected '{value}'. URL: {request.url}"
                 )
 
 
@@ -186,7 +158,7 @@ def check_error_handling(
     error_found_in_history = False
     for i, request in enumerate(requests):
         # Check if the response associated with the request has an error attribute
-        if hasattr(request.response, 'error') and request.response.error:  # type: ignore[attr-defined]
+        if hasattr(request.response, "error") and request.response.error:  # type: ignore[attr-defined]
             error_found_in_history = True
             assert isinstance(request.response.error, expected_error_type), (  # type: ignore[attr-defined]
                 f"Request {i} error type is {type(request.response.error)}, "  # type: ignore[attr-defined]
@@ -196,8 +168,7 @@ def check_error_handling(
             # Check status code if provided
             if expected_status:
                 assert request.response.status_code == expected_status, (
-                    f"Request {i} response status code is {request.response.status_code}, "
-                    f"expected {expected_status}. URL: {request.url}"
+                    f"Request {i} response status code is {request.response.status_code}, " f"expected {expected_status}. URL: {request.url}"
                 )
             # If we found a matching error in history, we can stop checking history
             break

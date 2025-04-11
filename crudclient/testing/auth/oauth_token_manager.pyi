@@ -46,7 +46,7 @@ class OAuthTokenManager:
         expires_in: int = 3600,
         token_type: str = "Bearer",
         grant_type: str = "client_credentials",
-        user: Optional[str] = None
+        user: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Create a new access token and refresh token pair.
@@ -64,13 +64,7 @@ class OAuthTokenManager:
         """
         ...
 
-    def create_authorization_code(
-        self,
-        client_id: str,
-        redirect_uri: str,
-        scope: Optional[str] = None,
-        state: Optional[str] = None
-    ) -> str:
+    def create_authorization_code(self, client_id: str, redirect_uri: str, scope: Optional[str] = None, state: Optional[str] = None) -> str:
         """
         Create a new authorization code.
 

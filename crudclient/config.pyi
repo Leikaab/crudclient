@@ -17,9 +17,9 @@ Features:
 Classes:
     - ClientConfig: Base configuration class for API clients.
 """
+
 from typing import Any, Dict, Literal, Optional
 from crudclient.auth.base import AuthStrategy
-
 
 class ClientConfig:
     """
@@ -71,7 +71,6 @@ class ClientConfig:
         auth_strategy: Optional[AuthStrategy] = ...,
         auth_type: Optional[str] = ...,
     ) -> None: ...
-
     def merge(self, other: "ClientConfig") -> "ClientConfig":
         """
         Merges two configuration objects, creating a new instance.

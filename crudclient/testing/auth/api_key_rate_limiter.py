@@ -9,11 +9,7 @@ class ApiKeyRateLimiter:
         self.rate_limit_period = 3600  # seconds (1 hour)
         self.request_history: Dict[str, List[datetime]] = {}
 
-    def enable_rate_limiting(
-        self,
-        requests_per_period: int = 100,
-        period_seconds: int = 3600
-    ) -> None:
+    def enable_rate_limiting(self, requests_per_period: int = 100, period_seconds: int = 3600) -> None:
         self.rate_limit_enabled = True
         self.rate_limit_requests = requests_per_period
         self.rate_limit_period = period_seconds
@@ -33,9 +29,7 @@ class ApiKeyRateLimiter:
         if self.rate_limit_enabled:
             # Clean up old requests outside the current period
             period_start = now - timedelta(seconds=self.rate_limit_period)
-            self.request_history[api_key] = [
-                t for t in self.request_history[api_key] if t >= period_start
-            ]
+            self.request_history[api_key] = [t for t in self.request_history[api_key] if t >= period_start]
 
             # Check if rate limit exceeded
             return len(self.request_history[api_key]) <= self.rate_limit_requests
@@ -51,15 +45,13 @@ class ApiKeyRateLimiter:
                 "enabled": True,
                 "limit": self.rate_limit_requests,
                 "remaining": self.rate_limit_requests,
-                "reset": datetime.now() + timedelta(seconds=self.rate_limit_period)
+                "reset": datetime.now() + timedelta(seconds=self.rate_limit_period),
             }
 
         # Clean up old requests
         now = datetime.now()
         period_start = now - timedelta(seconds=self.rate_limit_period)
-        self.request_history[api_key] = [
-            t for t in self.request_history[api_key] if t >= period_start
-        ]
+        self.request_history[api_key] = [t for t in self.request_history[api_key] if t >= period_start]
 
         # Calculate remaining requests
         used = len(self.request_history[api_key])
@@ -72,10 +64,4 @@ class ApiKeyRateLimiter:
         else:
             reset = now + timedelta(seconds=self.rate_limit_period)
 
-        return {
-            "enabled": True,
-            "limit": self.rate_limit_requests,
-            "remaining": remaining,
-            "reset": reset,
-            "used": used
-        }
+        return {"enabled": True, "limit": self.rate_limit_requests, "remaining": remaining, "reset": reset, "used": used}

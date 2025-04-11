@@ -15,6 +15,7 @@ class Post(BaseModel):
     - Self-documenting code
     - Consistent data structure
     """
+
     id: Optional[int] = None
     title: str
     body: str
@@ -37,6 +38,7 @@ class Comment(BaseModel):
     - Self-documenting code
     - Consistent data structure
     """
+
     id: Optional[int] = None
     postId: int
     name: str

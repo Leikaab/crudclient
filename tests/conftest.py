@@ -30,6 +30,7 @@ def mock_response_factory():
         mock_resp_text = mock_response_factory(status_code=200, text_data='Success')
         mock_resp_error = mock_response_factory(status_code=404, reason='Not Found')
     """
+
     def _create_mock_response(
         status_code=200,
         json_data=None,
@@ -37,7 +38,7 @@ def mock_response_factory():
         headers=None,
         reason=None,
         url=None,
-        content=None  # Add content for raw bytes
+        content=None,  # Add content for raw bytes
     ):
         mock = Mock()
         mock.status_code = status_code
@@ -66,7 +67,7 @@ def mock_response_factory():
         mock.text = text_data if text_data is not None else ""
 
         # Set content (bytes) based on text_data if not provided directly
-        mock.content = content if content is not None else mock.text.encode('utf-8')
+        mock.content = content if content is not None else mock.text.encode("utf-8")
 
         # Add raise_for_status mock
         def raise_for_status():
@@ -76,6 +77,7 @@ def mock_response_factory():
                 if mock.url:
                     error_msg += f" for url: {mock.url}"
                 raise Exception(error_msg)
+
         mock.raise_for_status = Mock(side_effect=raise_for_status)
 
         return mock
@@ -118,6 +120,7 @@ def manage_env_vars(monkeypatch):
             # ... test logic ...
             del_var('MY_API_KEY') # Optional: explicitly delete if needed before test end
     """
+
     def _set_var(key, value):
         monkeypatch.setenv(key, str(value))  # Ensure value is string
 

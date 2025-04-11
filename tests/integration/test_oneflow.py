@@ -18,6 +18,7 @@ def test_api_configuration(api):
     assert api.client.config.auth_strategy is not None
     # Check that the auth strategy is an ApiKeyAuth
     from crudclient.auth.custom import ApiKeyAuth
+
     assert isinstance(api.client.config.auth_strategy, ApiKeyAuth)
     # Check that the API key is set correctly
     assert api.client.config.auth_strategy.api_key == os.getenv("ONEFLOW_API_KEY")

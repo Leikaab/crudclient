@@ -20,6 +20,7 @@ SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]  # type:
 
 # === List Operation Tests ===
 
+
 def test_list_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client returning a list payload
@@ -87,6 +88,7 @@ def test_list_operation_action_not_allowed(test_crud: TestCrud):
     with pytest.raises(ValueError, match="List action not allowed"):
         test_crud.list()
     test_crud.allowed_actions = original_actions  # Restore
+
 
 # Note: ModelConversionError tests for list might be needed if the response structure varies.
 # Adding a basic one for completeness, assuming conversion happens on list items.

@@ -16,5 +16,5 @@ __all__ = [
     "FixedRetryStrategy",
     "ExponentialBackoffStrategy",
     "RetryCondition",
-    "RetryEvent"
+    "RetryEvent",
 ]

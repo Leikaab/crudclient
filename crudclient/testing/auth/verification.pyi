@@ -62,11 +62,7 @@ class AuthVerificationHelpers:
         ...
 
     @staticmethod
-    def assert_auth_header_format(
-        headers: Dict[str, str],
-        auth_type: str,
-        header_name: str = "Authorization"
-    ) -> None:
+    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         """
         Assert that an authentication header has the correct format.
 
@@ -79,7 +75,6 @@ class AuthVerificationHelpers:
             AssertionError: If the header is missing or has an invalid format
         """
         ...
-
     # Token verification methods
     @staticmethod
     def verify_oauth_token(
@@ -87,7 +82,7 @@ class AuthVerificationHelpers:
         required_scopes: Optional[List[str]] = None,
         check_expiration: bool = True,
         expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        expected_user: Optional[str] = None,
     ) -> bool:
         """
         Verify that an OAuth token is valid and has the required scopes.
@@ -134,10 +129,7 @@ class AuthVerificationHelpers:
 
     @staticmethod
     def assert_token_usage(
-        token: str,
-        required_scopes: Optional[List[str]] = None,
-        expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         """
         Assert that a token is being used correctly.
@@ -154,11 +146,7 @@ class AuthVerificationHelpers:
         ...
 
     @staticmethod
-    def assert_refresh_behavior(
-        old_token: str,
-        new_token: str,
-        expected_client_id: Optional[str] = None
-    ) -> None:
+    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         """
         Assert that token refresh behavior is correct.
 
@@ -185,7 +173,6 @@ class AuthVerificationHelpers:
             AssertionError: If the token does not have the required scopes
         """
         ...
-
     # Extraction utilities
     @staticmethod
     def extract_basic_auth_credentials(header_value: str) -> Tuple[str, str]:
@@ -234,14 +221,10 @@ class AuthVerificationHelpers:
             ValueError: If the token is not a valid JWT
         """
         ...
-
     # Error verification methods
     @staticmethod
     def assert_auth_error_response(
-        response: Dict[str, Any],
-        expected_status: int = 401,
-        expected_error: Optional[str] = None,
-        expected_error_description: Optional[str] = None
+        response: Dict[str, Any], expected_status: int = 401, expected_error: Optional[str] = None, expected_error_description: Optional[str] = None
     ) -> None:
         """
         Assert that an authentication error response is correct.
@@ -259,10 +242,7 @@ class AuthVerificationHelpers:
 
     @staticmethod
     def assert_rate_limit_headers(
-        headers: Dict[str, str],
-        expected_limit: Optional[int] = None,
-        expected_remaining: Optional[int] = None,
-        expected_reset: Optional[int] = None
+        headers: Dict[str, str], expected_limit: Optional[int] = None, expected_remaining: Optional[int] = None, expected_reset: Optional[int] = None
     ) -> None:
         """
         Assert that rate limit headers are correct.
@@ -278,7 +258,5 @@ class AuthVerificationHelpers:
         """
         ...
 
-
 # For backward compatibility
-__all__ = ['AuthVerificationHelpers', 'AuthExtractionUtils', 'AuthHeaderVerification',
-           'AuthTokenVerification', 'AuthErrorVerification']
+__all__ = ["AuthVerificationHelpers", "AuthExtractionUtils", "AuthHeaderVerification", "AuthTokenVerification", "AuthErrorVerification"]

@@ -53,7 +53,7 @@ class StubClient(Client):
         default_response: Optional[Union[Dict[str, Any], List[Dict[str, Any]], str]] = None,
         response_map: Optional[Dict[str, Any]] = None,
         error_rate: float = 0.0,
-        latency_ms: int = 0
+        latency_ms: int = 0,
     ) -> None:
         """
         Initialize the StubClient.
@@ -72,24 +72,12 @@ class StubClient(Client):
 
     @overload
     def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: Literal[True] = True,
-        **kwargs: Any
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
-
     @overload
     def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: Literal[False] = False,
-        **kwargs: Any
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
-
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         """
         Build the full URL from endpoint or use provided URL.
@@ -155,8 +143,7 @@ class StubClient(Client):
         """
         ...
 
-    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str],
-                                   url: str, kwargs: Dict[str, Any]) -> Any:
+    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str], url: str, kwargs: Dict[str, Any]) -> Any:
         """
         Process response if it's a callable.
 

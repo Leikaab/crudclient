@@ -18,6 +18,7 @@ SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 
 # === Read Operation Tests ===
 
+
 def test_read_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client returning a resource payload

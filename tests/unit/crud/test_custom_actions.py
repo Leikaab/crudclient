@@ -20,6 +20,7 @@ SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]  # type:
 
 # === Custom Action Tests ===
 
+
 def test_custom_action_post_success(test_crud: TestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client

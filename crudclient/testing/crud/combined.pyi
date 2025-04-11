@@ -105,7 +105,7 @@ class CombinedCrudMock:
         """
         ...
 
-    def with_parent_id_handling(self, enabled: bool = True) -> 'CombinedCrudMock':
+    def with_parent_id_handling(self, enabled: bool = True) -> "CombinedCrudMock":
         """
         Enable or disable parent_id handling for all mocks.
 
@@ -130,11 +130,7 @@ class CombinedCrudMock:
         """
         ...
 
-    def assert_request_sequence(
-        self,
-        sequence: List[Dict[str, Any]],
-        strict: bool = False
-    ) -> None:
+    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         """
         Assert that requests were made in a specific sequence.
 
@@ -147,12 +143,7 @@ class CombinedCrudMock:
         """
         ...
 
-    def assert_crud_operation_sequence(
-        self,
-        operations: List[str],
-        resource_id: Optional[str] = None,
-        url_pattern: Optional[str] = None
-    ) -> None:
+    def assert_crud_operation_sequence(self, operations: List[str], resource_id: Optional[str] = None, url_pattern: Optional[str] = None) -> None:
         """
         Assert that CRUD operations were performed in a specific sequence.
 

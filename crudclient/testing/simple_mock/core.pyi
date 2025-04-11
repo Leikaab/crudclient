@@ -36,12 +36,8 @@ class SimpleMockClientCore:
         ...
 
     def with_response_pattern(
-        self,
-        method: str,
-        url_pattern: str,
-        response: Union[MockResponse, Dict[str, Any], str, Callable[..., MockResponse]],
-        **kwargs: Any
-    ) -> 'SimpleMockClientCore':
+        self, method: str, url_pattern: str, response: Union[MockResponse, Dict[str, Any], str, Callable[..., MockResponse]], **kwargs: Any
+    ) -> "SimpleMockClientCore":
         """
         Add a response pattern to the mock client.
 
@@ -61,10 +57,7 @@ class SimpleMockClientCore:
         """
         ...
 
-    def with_default_response(
-        self,
-        response: Union[MockResponse, Dict[str, Any], str]
-    ) -> 'SimpleMockClientCore':
+    def with_default_response(self, response: Union[MockResponse, Dict[str, Any], str]) -> "SimpleMockClientCore":
         """
         Set the default response for unmatched requests.
 

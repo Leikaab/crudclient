@@ -57,7 +57,6 @@ ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
 
-
 class Crud(Generic[T]):
     """
     Base class for CRUD operations on API resources, supporting both top-level and nested resources.

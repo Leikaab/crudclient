@@ -1,4 +1,3 @@
-
 import base64
 import re
 from typing import TYPE_CHECKING, Optional, Tuple  # Added Tuple, TYPE_CHECKING
@@ -28,35 +27,31 @@ class BasicAuthMock(AuthMockBase):
         self.max_attempts = None
         self.current_attempts = 0
 
-    def with_credentials(self, username: str, password: str) -> 'BasicAuthMock':
+    def with_credentials(self, username: str, password: str) -> "BasicAuthMock":
         self.username = username
         self.password = password
         self.auth_strategy = BasicAuth(username=username, password=password)
         self.valid_credentials = [(username, password)]
         return self
 
-    def with_additional_valid_credentials(self, username: str, password: str) -> 'BasicAuthMock':
+    def with_additional_valid_credentials(self, username: str, password: str) -> "BasicAuthMock":
         self.valid_credentials.append((username, password))
         return self
 
-    def with_username_pattern(self, pattern: str) -> 'BasicAuthMock':
+    def with_username_pattern(self, pattern: str) -> "BasicAuthMock":
         self.username_pattern = re.compile(pattern)
         return self
 
-    def with_password_requirements(
-        self,
-        min_length: Optional[int] = None,
-        complexity: bool = False
-    ) -> 'BasicAuthMock':
+    def with_password_requirements(self, min_length: Optional[int] = None, complexity: bool = False) -> "BasicAuthMock":
         self.password_min_length = min_length
         self.password_complexity = complexity
         return self
 
-    def with_case_insensitive_username(self) -> 'BasicAuthMock':
+    def with_case_insensitive_username(self) -> "BasicAuthMock":
         self.case_sensitive = False
         return self
 
-    def with_max_attempts(self, max_attempts: int) -> 'BasicAuthMock':
+    def with_max_attempts(self, max_attempts: int) -> "BasicAuthMock":
         self.max_attempts = max_attempts
         self.current_attempts = 0
         return self
@@ -67,7 +62,7 @@ class BasicAuthMock(AuthMockBase):
 
         try:
             encoded_part = header_value[6:]  # Skip "Basic "
-            decoded = base64.b64decode(encoded_part).decode('utf-8')
+            decoded = base64.b64decode(encoded_part).decode("utf-8")
             if ":" not in decoded:
                 return False
 
@@ -95,18 +90,20 @@ class BasicAuthMock(AuthMockBase):
         if self.password_complexity:
             # Simple complexity check: must contain at least one uppercase, one lowercase,
             # one digit, and one special character
-            if not (re.search(r'[A-Z]', password)
-                    and re.search(r'[a-z]', password)
-                    and re.search(r'[0-9]', password)
-                    and re.search(r'[^A-Za-z0-9]', password)):
+            if not (
+                re.search(r"[A-Z]", password)
+                and re.search(r"[a-z]", password)
+                and re.search(r"[0-9]", password)
+                and re.search(r"[^A-Za-z0-9]", password)
+            ):
                 return False
 
         # Check against valid credentials
         for valid_username, valid_password in self.valid_credentials:
             if self.case_sensitive:
-                username_match = (username == valid_username)
+                username_match = username == valid_username
             else:
-                username_match = (username.lower() == valid_username.lower())
+                username_match = username.lower() == valid_username.lower()
 
             if username_match and password == valid_password:
                 return True
@@ -118,16 +115,16 @@ class BasicAuthMock(AuthMockBase):
             # Should ideally not happen due to __init__ defaults
             return None
         credentials = f"{self.username}:{self.password}"
-        encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
         return ("Authorization", f"Basic {encoded_credentials}")
 
-    def handle_auth_error(self, response: 'MockResponse') -> bool:
+    def handle_auth_error(self, response: "MockResponse") -> bool:
         # Basic auth typically fails outright, no refresh mechanism
         return False
 
     def get_auth_strategy(self) -> AuthStrategy:
         return self.auth_strategy
 
-    def reset_attempts(self) -> 'BasicAuthMock':
+    def reset_attempts(self) -> "BasicAuthMock":
         self.current_attempts = 0
         return self

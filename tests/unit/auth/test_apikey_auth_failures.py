@@ -14,11 +14,7 @@ def test_apikey_header_auth_failure(apikey_header_client, mock_request):
     """Test handling of API Key Header Authentication failures."""
     # Arrange
     url = f"{apikey_header_client.base_url}/items"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid API Key"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid API Key"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:

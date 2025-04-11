@@ -38,11 +38,7 @@ class AuthHeaderVerification:
         return True
 
     @staticmethod
-    def assert_auth_header_format(
-        headers: Dict[str, str],
-        auth_type: str,
-        header_name: str = "Authorization"
-    ) -> None:
+    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         # Check if the header exists
         if header_name not in headers:
             raise AssertionError(f"Missing {header_name} header")

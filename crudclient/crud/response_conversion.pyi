@@ -23,8 +23,7 @@ from ..types import JSONDict, JSONList, RawResponse
 # Define T type variable
 T = TypeVar("T")
 
-
-def _init_response_strategy(self: 'Crud') -> None:
+def _init_response_strategy(self: "Crud") -> None:
     """
     Initialize the response model strategy.
 
@@ -35,8 +34,7 @@ def _init_response_strategy(self: 'Crud') -> None:
     """
     ...
 
-
-def _validate_response(self: 'Crud', data: RawResponse) -> Union[JSONDict, JSONList]:
+def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONList]:
     """
     Validate the API response data.
 
@@ -51,8 +49,7 @@ def _validate_response(self: 'Crud', data: RawResponse) -> Union[JSONDict, JSONL
     """
     ...
 
-
-def _convert_to_model(self: 'Crud', data: RawResponse) -> Union[T, JSONDict]:
+def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
     """
     Convert the API response to the datamodel type.
 
@@ -71,8 +68,7 @@ def _convert_to_model(self: 'Crud', data: RawResponse) -> Union[T, JSONDict]:
     """
     ...
 
-
-def _convert_to_list_model(self: 'Crud', data: JSONList) -> Union[List[T], JSONList]:
+def _convert_to_list_model(self: "Crud", data: JSONList) -> Union[List[T], JSONList]:
     """
     Convert the API response to a list of datamodel types.
 
@@ -87,8 +83,7 @@ def _convert_to_list_model(self: 'Crud', data: JSONList) -> Union[List[T], JSONL
     """
     ...
 
-
-def _validate_list_return(self: 'Crud', data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _validate_list_return(self: "Crud", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
     """
     Validate and convert the list response data.
 
@@ -108,9 +103,8 @@ def _validate_list_return(self: 'Crud', data: RawResponse) -> Union[JSONList, Li
     """
     ...
 
-
 def _fallback_list_conversion(  # Note: self type added below
-    self: 'Crud', data: RawResponse
+    self: "Crud", data: RawResponse
 ) -> Union[JSONList, List[T], ApiResponse]:  # Note: self added in the line above
     """
     Fallback conversion logic for list responses when the strategy fails.
@@ -128,8 +122,7 @@ def _fallback_list_conversion(  # Note: self type added below
     """
     ...
 
-
-def _dump_data(self: 'Crud', data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
+def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
     """
     Dump the data model to a JSON-serializable dictionary.
 

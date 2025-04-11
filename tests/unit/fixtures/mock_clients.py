@@ -22,12 +22,13 @@ def create_mock_client(create_mock_client_config: Callable[..., ClientConfig]) -
     This fixture provides a factory function that creates a MockClient instance
     with configurable behavior for testing.
     """
+
     def _factory(
         config: Optional[Union[ClientConfig, Dict[str, Any]]] = None,
         response_patterns: Optional[List[Dict[str, Any]]] = None,
         network_conditions: Optional[Dict[str, Any]] = None,
         rate_limit: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> MockClient:
         # Use provided config or create a default one
         if isinstance(config, ClientConfig):
@@ -35,7 +36,7 @@ def create_mock_client(create_mock_client_config: Callable[..., ClientConfig]) -
         elif isinstance(config, dict):
             client_config = create_mock_client_config(**config)
         else:
-            client_config = create_mock_client_config(**kwargs.get('config_options', {}))
+            client_config = create_mock_client_config(**kwargs.get("config_options", {}))
 
         # Create the mock HTTP client and the main mock client
         # Provide a default hostname if None
@@ -99,28 +100,22 @@ def rest_mock_client() -> MockClient:
     This fixture creates a MockClient with REST API patterns for common resources.
     """
     resources = {
-        'users': {
-            'base_path': '/users',
-            'list_response': [
-                {'id': 1, 'name': 'User 1'},
-                {'id': 2, 'name': 'User 2'}
-            ],
-            'get_response': {'id': 1, 'name': 'User 1', 'email': 'user1@example.com'},
-            'create_response': {'id': 3, 'name': 'New User', 'created': True},
-            'update_response': {'id': 1, 'name': 'Updated User', 'updated': True},
-            'delete_response': {'success': True}
+        "users": {
+            "base_path": "/users",
+            "list_response": [{"id": 1, "name": "User 1"}, {"id": 2, "name": "User 2"}],
+            "get_response": {"id": 1, "name": "User 1", "email": "user1@example.com"},
+            "create_response": {"id": 3, "name": "New User", "created": True},
+            "update_response": {"id": 1, "name": "Updated User", "updated": True},
+            "delete_response": {"success": True},
         },
-        'posts': {
-            'base_path': '/posts',
-            'list_response': [
-                {'id': 1, 'title': 'Post 1', 'user_id': 1},
-                {'id': 2, 'title': 'Post 2', 'user_id': 2}
-            ],
-            'get_response': {'id': 1, 'title': 'Post 1', 'content': 'Content here', 'user_id': 1},
-            'create_response': {'id': 3, 'title': 'New Post', 'created': True},
-            'update_response': {'id': 1, 'title': 'Updated Post', 'updated': True},
-            'delete_response': {'success': True}
-        }
+        "posts": {
+            "base_path": "/posts",
+            "list_response": [{"id": 1, "title": "Post 1", "user_id": 1}, {"id": 2, "title": "Post 2", "user_id": 2}],
+            "get_response": {"id": 1, "title": "Post 1", "content": "Content here", "user_id": 1},
+            "create_response": {"id": 3, "title": "New Post", "created": True},
+            "update_response": {"id": 1, "title": "Updated Post", "updated": True},
+            "delete_response": {"success": True},
+        },
     }
 
     # Create a default config
@@ -133,46 +128,34 @@ def rest_mock_client() -> MockClient:
 
     # Configure REST resources
     for resource_name, resource_config in resources.items():
-        base_path = resource_config.get('base_path', resource_name)
+        base_path = resource_config.get("base_path", resource_name)
 
         # List endpoint
-        if 'list_response' in resource_config:
-            client.with_response_pattern(
-                method="GET",
-                path_pattern=f"{base_path}$",
-                data=resource_config['list_response']  # type: ignore[arg-type]
-            )
+        if "list_response" in resource_config:
+            client.with_response_pattern(method="GET", path_pattern=f"{base_path}$", data=resource_config["list_response"])  # type: ignore[arg-type]
 
         # Get endpoint
-        if 'get_response' in resource_config:
+        if "get_response" in resource_config:
             client.with_response_pattern(
-                method="GET",
-                path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['get_response']  # type: ignore[arg-type]
+                method="GET", path_pattern=f"{base_path}/\\d+$", data=resource_config["get_response"]  # type: ignore[arg-type]
             )
 
         # Create endpoint
-        if 'create_response' in resource_config:
+        if "create_response" in resource_config:
             client.with_response_pattern(
-                method="POST",
-                path_pattern=f"{base_path}$",
-                data=resource_config['create_response']  # type: ignore[arg-type]
+                method="POST", path_pattern=f"{base_path}$", data=resource_config["create_response"]  # type: ignore[arg-type]
             )
 
         # Update endpoint
-        if 'update_response' in resource_config:
+        if "update_response" in resource_config:
             client.with_response_pattern(
-                method="PUT",
-                path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['update_response']  # type: ignore[arg-type]
+                method="PUT", path_pattern=f"{base_path}/\\d+$", data=resource_config["update_response"]  # type: ignore[arg-type]
             )
 
         # Delete endpoint
-        if 'delete_response' in resource_config:
+        if "delete_response" in resource_config:
             client.with_response_pattern(
-                method="DELETE",
-                path_pattern=f"{base_path}/\\d+$",
-                data=resource_config['delete_response']  # type: ignore[arg-type]
+                method="DELETE", path_pattern=f"{base_path}/\\d+$", data=resource_config["delete_response"]  # type: ignore[arg-type]
             )
 
     # Add error responses
@@ -181,12 +164,12 @@ def rest_mock_client() -> MockClient:
         method="POST",
         path_pattern=r".*",
         data=ResponseBuilder.create_validation_error(  # Extract body from MockResponse
-            fields={'name': 'Name is required', 'email': 'Invalid email format'},
+            fields={"name": "Name is required", "email": "Invalid email format"},
             status_code=422,
             error_code="VALIDATION_ERROR",
-            message="Validation failed"
+            message="Validation failed",
         ).json(),  # Assuming .json() gets the body dict
-        status_code=422
+        status_code=422,
     )
 
     # Auth error
@@ -194,10 +177,9 @@ def rest_mock_client() -> MockClient:
         method="GET",
         path_pattern=r".*",
         data=ResponseBuilder.create_auth_error(  # Extract body from MockResponse
-            error_type="invalid_token",
-            status_code=401
+            error_type="invalid_token", status_code=401
         ).json(),  # Assuming .json() gets the body dict
-        status_code=401
+        status_code=401,
     )
 
     # Rate limit error
@@ -205,11 +187,9 @@ def rest_mock_client() -> MockClient:
         method="GET",
         path_pattern=r".*",
         data=ResponseBuilder.create_rate_limit_error(  # Extract body from MockResponse
-            limit=100,
-            remaining=0,
-            reset_seconds=60
+            limit=100, remaining=0, reset_seconds=60
         ).json(),  # Assuming .json() gets the body dict
-        status_code=429
+        status_code=429,
     )
 
     return client
@@ -235,13 +215,8 @@ def graphql_mock_client() -> MockClient:
         method="POST",
         path_pattern=r"/graphql$",
         data=BasicResponseBuilder.create_graphql_response(  # Extract body from MockResponse
-            data={
-                'users': [
-                    {'id': '1', 'name': 'User 1', 'email': 'user1@example.com'},
-                    {'id': '2', 'name': 'User 2', 'email': 'user2@example.com'}
-                ]
-            }
-        ).json()  # Assuming .json() gets the body dict
+            data={"users": [{"id": "1", "name": "User 1", "email": "user1@example.com"}, {"id": "2", "name": "User 2", "email": "user2@example.com"}]}
+        ).json(),  # Assuming .json() gets the body dict
     )
 
     client.with_response_pattern(
@@ -249,31 +224,22 @@ def graphql_mock_client() -> MockClient:
         path_pattern=r"/graphql$",
         data=BasicResponseBuilder.create_graphql_response(  # Extract body from MockResponse
             data={
-                'user': {
-                    'id': '1',
-                    'name': 'User 1',
-                    'email': 'user1@example.com',
-                    'posts': [
-                        {'id': '1', 'title': 'Post 1'},
-                        {'id': '2', 'title': 'Post 2'}
-                    ]
+                "user": {
+                    "id": "1",
+                    "name": "User 1",
+                    "email": "user1@example.com",
+                    "posts": [{"id": "1", "title": "Post 1"}, {"id": "2", "title": "Post 2"}],
                 }
             }
-        ).json()  # Assuming .json() gets the body dict
+        ).json(),  # Assuming .json() gets the body dict
     )
 
     client.with_response_pattern(
         method="POST",
         path_pattern=r"/graphql$",
         data=BasicResponseBuilder.create_graphql_response(  # Extract body from MockResponse
-            data={
-                'createUser': {
-                    'id': '3',
-                    'name': 'New User',
-                    'email': 'newuser@example.com'
-                }
-            }
-        ).json()  # Assuming .json() gets the body dict
+            data={"createUser": {"id": "3", "name": "New User", "email": "newuser@example.com"}}
+        ).json(),  # Assuming .json() gets the body dict
     )
 
     # Default response for unmatched GraphQL queries
@@ -281,13 +247,9 @@ def graphql_mock_client() -> MockClient:
         method="POST",
         path_pattern=r"/graphql$",
         data=BasicResponseBuilder.create_graphql_response(  # Extract body from MockResponse
-            errors=[{
-                'message': 'Unknown query',
-                'locations': [{'line': 1, 'column': 1}],
-                'path': ['query']
-            }]
+            errors=[{"message": "Unknown query", "locations": [{"line": 1, "column": 1}], "path": ["query"]}]
         ).json(),  # Assuming .json() gets the body dict
-        status_code=400
+        status_code=400,
     )
 
     return client

@@ -56,9 +56,7 @@ class ErrorHandler:
         """
         ...
 
-    def register_status_code_handler(
-        self, status_code: int, exception_class: Type[CrudClientError]
-    ) -> None:
+    def register_status_code_handler(self, status_code: int, exception_class: Type[CrudClientError]) -> None:
         """
         Register a custom exception class for a specific status code.
 

@@ -25,6 +25,7 @@ class TripletexAPI(API):
     """
     API client for Tripletex.
     """
+
     client_class = TripletexClient
 
     def _register_endpoints(self):

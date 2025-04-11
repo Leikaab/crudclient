@@ -21,7 +21,7 @@ class TestMockClientRequestTracking:
             headers={"Authorization": "Bearer token"},
             params={"param1": "value1"},
             data={"key": "value"},
-            extra_arg="extra_value"
+            extra_arg="extra_value",
         )
 
         # Assert

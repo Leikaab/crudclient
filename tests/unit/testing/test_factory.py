@@ -36,11 +36,7 @@ class TestMockClientFactory:
         extra_param = "extra_value"
 
         # Act
-        mock_client = MockClientFactory.create(
-            base_url=base_url,
-            enable_spy=enable_spy,
-            extra_param=extra_param
-        )
+        mock_client = MockClientFactory.create(base_url=base_url, enable_spy=enable_spy, extra_param=extra_param)
 
         # Assert
         assert isinstance(mock_client, MockClient)
@@ -91,11 +87,7 @@ class TestMockClientFactory:
         extra_param = "extra_value"
 
         # Act
-        mock_client = MockClientFactory.from_client_config(
-            config=config,
-            enable_spy=enable_spy,
-            extra_param=extra_param
-        )
+        mock_client = MockClientFactory.from_client_config(config=config, enable_spy=enable_spy, extra_param=extra_param)
 
         # Assert
         assert isinstance(mock_client, MockClient)
@@ -136,11 +128,7 @@ class TestMockClientFactory:
         extra_param = "extra_value"
 
         # Act
-        mock_client = MockClientFactory.from_real_client(
-            client=client,
-            enable_spy=enable_spy,
-            extra_param=extra_param
-        )
+        mock_client = MockClientFactory.from_real_client(client=client, enable_spy=enable_spy, extra_param=extra_param)
 
         # Assert
         assert isinstance(mock_client, MockClient)
@@ -155,21 +143,12 @@ class TestMockClientFactory:
 
         # Act
         MockClientFactory.configure_success_response(
-            mock_client=mock_client,
-            method="GET",
-            path="/test",
-            data={"key": "value"},
-            status_code=200,
-            headers={"Content-Type": "application/json"}
+            mock_client=mock_client, method="GET", path="/test", data={"key": "value"}, status_code=200, headers={"Content-Type": "application/json"}
         )
 
         # Assert
         mock_client.configure_response.assert_called_once_with(
-            method="GET",
-            path="/test",
-            status_code=200,
-            data={"key": "value"},
-            headers={"Content-Type": "application/json"}
+            method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"}
         )
 
     def test_configure_error_response_with_error(self):
@@ -179,19 +158,10 @@ class TestMockClientFactory:
         error = ValueError("Test error")
 
         # Act
-        MockClientFactory.configure_error_response(
-            mock_client=mock_client,
-            method="GET",
-            path="/test",
-            error=error
-        )
+        MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
         # Assert
-        mock_client.configure_response.assert_called_once_with(
-            method="GET",
-            path="/test",
-            error=error
-        )
+        mock_client.configure_response.assert_called_once_with(method="GET", path="/test", error=error)
 
     def test_configure_error_response_without_error(self):
         """Test configure_error_response method without an error."""
@@ -205,5 +175,5 @@ class TestMockClientFactory:
             path="/test",
             status_code=404,
             data={"error": "Not found"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )

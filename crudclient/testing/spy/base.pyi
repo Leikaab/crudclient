@@ -22,7 +22,7 @@ class SpyBase:
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
         return_value: Optional[Any] = None,
-        exception: Optional[Exception] = None
+        exception: Optional[Exception] = None,
     ) -> None:
         """
         Record a method call.
@@ -60,12 +60,7 @@ class SpyBase:
         """
         ...
 
-    def assert_called_with(
-        self,
-        method_name: str,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:
+    def assert_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> None:
         """
         Assert that a method was called with specific arguments.
 

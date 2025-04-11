@@ -11,7 +11,7 @@ class AuthTokenVerification:
         required_scopes: Optional[List[str]] = None,
         check_expiration: bool = True,
         expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        expected_user: Optional[str] = None,
     ) -> bool:
         try:
             # Try to decode as JWT
@@ -93,10 +93,7 @@ class AuthTokenVerification:
 
     @staticmethod
     def assert_token_usage(
-        token: str,
-        required_scopes: Optional[List[str]] = None,
-        expected_client_id: Optional[str] = None,
-        expected_user: Optional[str] = None
+        token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         if not token:
             raise AssertionError("Token is empty")
@@ -133,11 +130,7 @@ class AuthTokenVerification:
             pass
 
     @staticmethod
-    def assert_refresh_behavior(
-        old_token: str,
-        new_token: str,
-        expected_client_id: Optional[str] = None
-    ) -> None:
+    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         # Check that the tokens are different
         if old_token == new_token:
             raise AssertionError("New token is the same as the old token")

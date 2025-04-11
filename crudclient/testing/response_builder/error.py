@@ -1,4 +1,3 @@
-
 import random
 import uuid
 from datetime import datetime, timedelta
@@ -48,11 +47,7 @@ class ErrorResponseBuilder:
         if headers:
             response_headers.update(headers)
 
-        return BasicResponseBuilder.create_response(
-            status_code=status_code,
-            errors=errors,
-            headers=response_headers
-        )
+        return BasicResponseBuilder.create_response(status_code=status_code, errors=errors, headers=response_headers)
 
     @staticmethod
     def create_validation_error(
@@ -63,18 +58,9 @@ class ErrorResponseBuilder:
     ) -> MockResponse:
         details = []
         for field, error_msg in fields.items():
-            details.append({
-                "field": field,
-                "message": error_msg,
-                "code": "INVALID_FIELD"
-            })
+            details.append({"field": field, "message": error_msg, "code": "INVALID_FIELD"})
 
-        return ErrorResponseBuilder.create_error_response(
-            status_code=status_code,
-            message=message,
-            error_code=error_code,
-            details=details
-        )
+        return ErrorResponseBuilder.create_error_response(status_code=status_code, message=message, error_code=error_code, details=details)
 
     @staticmethod
     def create_rate_limit_error(
@@ -89,20 +75,16 @@ class ErrorResponseBuilder:
             "Retry-After": str(reset_seconds),
             "X-RateLimit-Limit": str(limit),
             "X-RateLimit-Remaining": str(remaining),
-            "X-RateLimit-Reset": str(reset_time)
+            "X-RateLimit-Reset": str(reset_time),
         }
 
         return ErrorResponseBuilder.create_error_response(
             status_code=429,
             message="Rate limit exceeded",
             error_code="RATE_LIMIT_EXCEEDED",
-            details=[{
-                "limit": limit,
-                "remaining": remaining,
-                "reset": reset_time
-            }],
+            details=[{"limit": limit, "remaining": remaining, "reset": reset_time}],
             request_id=str(uuid.uuid4()),
-            headers=headers
+            headers=headers,
         )
 
     @staticmethod
@@ -116,19 +98,11 @@ class ErrorResponseBuilder:
             "insufficient_scope": "The access token does not have the required scope",
             "invalid_client": "Client authentication failed",
             "invalid_grant": "The provided authorization grant is invalid",
-            "unauthorized_client": "The client is not authorized to use this grant type"
+            "unauthorized_client": "The client is not authorized to use this grant type",
         }
 
         message = error_messages.get(error_type, "Authentication failed")
 
-        headers = {
-            "Content-Type": "application/json",
-            "WWW-Authenticate": f'Bearer realm="api", error="{error_type}", error_description="{message}"'
-        }
+        headers = {"Content-Type": "application/json", "WWW-Authenticate": f'Bearer realm="api", error="{error_type}", error_description="{message}"'}
 
-        return ErrorResponseBuilder.create_error_response(
-            status_code=status_code,
-            message=message,
-            error_code=error_type.upper(),
-            headers=headers
-        )
+        return ErrorResponseBuilder.create_error_response(status_code=status_code, message=message, error_code=error_type.upper(), headers=headers)

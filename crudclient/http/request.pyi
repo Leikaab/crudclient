@@ -46,10 +46,7 @@ class RequestFormatter:
     """
 
     def prepare_data(
-        self,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Any] = None,
-        files: Optional[Dict[str, Any]] = None
+        self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, Any], Dict[str, str]]:
         """
         Prepare request data based on the provided parameters.
@@ -103,11 +100,7 @@ class RequestFormatter:
         """
         ...
 
-    def prepare_multipart(
-        self,
-        files: Dict[str, Any],
-        data: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    def prepare_multipart(self, files: Dict[str, Any], data: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], Dict[str, str]]:
         """
         Prepare multipart form data request.
 

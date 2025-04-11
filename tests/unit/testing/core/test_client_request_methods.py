@@ -15,20 +15,12 @@ class TestMockClientRequestMethods:
         http_client.get.return_value = expected_response
 
         # Act
-        response = client.get(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            extra_arg="extra_value"
-        )
+        response = client.get(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value")
 
         # Assert
         assert response == expected_response
         http_client.get.assert_called_once_with(
-            "/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            extra_arg="extra_value"
+            "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value"
         )
         assert len(client.request_history) == 1
         assert client.request_history[0]["method"] == "GET"
@@ -44,21 +36,13 @@ class TestMockClientRequestMethods:
 
         # Act
         response = client.post(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
 
         # Assert
         assert response == expected_response
         http_client.post.assert_called_once_with(
-            "/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
         assert len(client.request_history) == 1
         assert client.request_history[0]["method"] == "POST"
@@ -74,21 +58,13 @@ class TestMockClientRequestMethods:
 
         # Act
         response = client.put(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
 
         # Assert
         assert response == expected_response
         http_client.put.assert_called_once_with(
-            "/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
         assert len(client.request_history) == 1
         assert client.request_history[0]["method"] == "PUT"
@@ -103,20 +79,12 @@ class TestMockClientRequestMethods:
         http_client.delete.return_value = expected_response
 
         # Act
-        response = client.delete(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            extra_arg="extra_value"
-        )
+        response = client.delete(path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value")
 
         # Assert
         assert response == expected_response
         http_client.delete.assert_called_once_with(
-            "/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            extra_arg="extra_value"
+            "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value"
         )
         assert len(client.request_history) == 1
         assert client.request_history[0]["method"] == "DELETE"
@@ -132,21 +100,13 @@ class TestMockClientRequestMethods:
 
         # Act
         response = client.patch(
-            path="/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            path="/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
 
         # Assert
         assert response == expected_response
         http_client.patch.assert_called_once_with(
-            "/test",
-            headers={"Authorization": "Bearer token"},
-            params={"param1": "value1"},
-            data={"key": "value"},
-            extra_arg="extra_value"
+            "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
         )
         assert len(client.request_history) == 1
         assert client.request_history[0]["method"] == "PATCH"

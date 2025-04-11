@@ -20,47 +20,42 @@ class BackwardCompatibleMockClient(MockClient):
             return response
 
         # If the response is a Response-like object (real or mock)
-        if hasattr(response, 'status_code'):
+        if hasattr(response, "status_code"):
             # If it's an auth error, raise an AuthenticationError
             if response.status_code in [401, 403]:
                 error_data: Any = {}
                 try:
                     # Use .json() method if available, else use text
-                    if hasattr(response, 'json') and callable(response.json):
+                    if hasattr(response, "json") and callable(response.json):
                         error_data = response.json() or {}
-                    elif hasattr(response, 'text'):
+                    elif hasattr(response, "text"):
                         error_data = {"error": response.text or "Authentication failed"}
                     else:
                         error_data = {"error": "Authentication failed"}
                 except Exception:  # Catch potential JSON parsing errors
-                    error_data = {"error": getattr(response, 'text', "Authentication failed")}
+                    error_data = {"error": getattr(response, "text", "Authentication failed")}
 
                 # Ensure we're raising the correct exception
                 from crudclient.exceptions import AuthenticationError
+
                 raise AuthenticationError(f"{response.status_code} Unauthorized: Authentication failed: {error_data}", response)
 
             # For other successful responses, extract the data
             try:
                 # Use .json() method if available
-                if hasattr(response, 'json') and callable(response.json):
+                if hasattr(response, "json") and callable(response.json):
                     return response.json()
-                elif hasattr(response, 'text'):
+                elif hasattr(response, "text"):
                     return response.text
                 else:
                     return response  # Return as-is if no json/text method
             except Exception:  # Catch potential JSON parsing errors
-                return getattr(response, 'text', response)  # Fallback to text or original response
+                return getattr(response, "text", response)  # Fallback to text or original response
 
         # If it's not a dict or Response-like, return as-is
         return response
 
-    def get(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
-    ) -> Any:
+    def get(self, path: str, headers: Optional[Headers] = None, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
         """
         Make a mock GET request with backward compatible response handling.
         """
@@ -73,7 +68,7 @@ class BackwardCompatibleMockClient(MockClient):
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         """
         Make a mock POST request.
@@ -97,7 +92,7 @@ class BackwardCompatibleMockClient(MockClient):
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         """
         Make a mock PUT request.
@@ -115,13 +110,7 @@ class BackwardCompatibleMockClient(MockClient):
         response = super().put(path, headers=headers, params=params, data=data, **kwargs)
         return self._handle_response_compat(response)
 
-    def delete(
-        self,
-        path: str,
-        headers: Optional[Headers] = None,
-        params: Optional[Dict[str, Any]] = None,
-        **kwargs: Any
-    ) -> Any:
+    def delete(self, path: str, headers: Optional[Headers] = None, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
         """
         Make a mock DELETE request.
 
@@ -143,7 +132,7 @@ class BackwardCompatibleMockClient(MockClient):
         headers: Optional[Headers] = None,
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Union[Dict[str, Any], List[Any], str, bytes, None]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         """
         Make a mock PATCH request.
@@ -167,8 +156,8 @@ class BackwardCompatibleMockClient(MockClient):
         url_pattern: str,
         response: Union[Dict[str, Any], List[Dict[str, Any]], str, Dict[str, Any]],
         status_code: int = 200,
-        headers: Optional[Dict[str, str]] = None
-    ) -> 'BackwardCompatibleMockClient':
+        headers: Optional[Dict[str, str]] = None,
+    ) -> "BackwardCompatibleMockClient":
         """
         Configure a response pattern for the mock client.
 
@@ -189,15 +178,11 @@ class BackwardCompatibleMockClient(MockClient):
             status_code=status_code,
             data=response,  # Pass the raw response data
             headers=headers,
-            error=None  # Assuming no error is configured here
+            error=None,  # Assuming no error is configured here
         )
         return self
 
-    def with_network_condition(  # type: ignore[override]
-        self,
-        condition: str,
-        **kwargs: Any
-    ) -> 'BackwardCompatibleMockClient':
+    def with_network_condition(self, condition: str, **kwargs: Any) -> "BackwardCompatibleMockClient":  # type: ignore[override]
         """
         Configure a network condition for the mock client.
 
@@ -228,37 +213,17 @@ class BackwardCompatibleMockClient(MockClient):
         # matching based on expected headers for the MFA retry case.
         # Use with_response_pattern instead of add_response
         if isinstance(response_body, (dict, list)):
-            self.with_response_pattern(
-                method=method,
-                url_pattern=path,
-                response=response_body,
-                status_code=status_code,
-                headers=headers
-            )
+            self.with_response_pattern(method=method, url_pattern=path, response=response_body, status_code=status_code, headers=headers)
         elif isinstance(response_body, str):
             # Handle string response bodies
-            self.with_response_pattern(
-                method=method,
-                url_pattern=path,
-                response=response_body,
-                status_code=status_code,
-                headers=headers
-            )
+            self.with_response_pattern(method=method, url_pattern=path, response=response_body, status_code=status_code, headers=headers)
         else:
             # Handle None or other types
             self.with_response_pattern(
-                method=method,
-                url_pattern=path,
-                response={},  # Empty dict as default
-                status_code=status_code,
-                headers=headers
+                method=method, url_pattern=path, response={}, status_code=status_code, headers=headers  # Empty dict as default
             )
 
-    def with_rate_limiter(  # type: ignore[override]
-        self,
-        limit: int,
-        window_seconds: int
-    ) -> 'BackwardCompatibleMockClient':
+    def with_rate_limiter(self, limit: int, window_seconds: int) -> "BackwardCompatibleMockClient":  # type: ignore[override]
         """
         Configure a rate limiter for the mock client.
 
@@ -273,10 +238,7 @@ class BackwardCompatibleMockClient(MockClient):
         # we would configure the rate limiter based on the parameters
         return self
 
-    def create_paginated_response(  # type: ignore[override]
-        self,
-        **kwargs: Any
-    ) -> Any:
+    def create_paginated_response(self, **kwargs: Any) -> Any:  # type: ignore[override]
         """
         Create a paginated response.
 

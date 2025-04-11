@@ -4,6 +4,7 @@ Tests for client error handling in the crudclient library.
 This module contains tests for how the Client class handles various HTTP error responses,
 including different status codes, malformed responses, and network errors.
 """
+
 import json
 
 import pytest
@@ -198,9 +199,9 @@ class TestClientErrorHandling:
         url = f"{client.base_url}/{endpoint.lstrip('/')}"
 
         # Configure client for retry
-        mocker.patch.object(client.config, 'should_retry_on_403', return_value=True)
-        mock_handle_403 = mocker.patch.object(client.config, 'handle_403_retry')
-        mock_setup_auth = mocker.patch.object(client.http_client.session_manager, 'refresh_auth')
+        mocker.patch.object(client.config, "should_retry_on_403", return_value=True)
+        mock_handle_403 = mocker.patch.object(client.config, "handle_403_retry")
+        mock_setup_auth = mocker.patch.object(client.http_client.session_manager, "refresh_auth")
 
         # Mock HTTP responses: first 403, then 200
         mock_request.get(

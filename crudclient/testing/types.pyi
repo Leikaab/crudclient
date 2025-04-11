@@ -25,14 +25,14 @@ CallRecord: TypeAlias = Dict[str, Any]
 
 # Re-export MockResponse for convenience
 __all__ = [
-    'Headers',
-    'QueryParams',
-    'HttpMethod',
-    'StatusCode',
-    'RequestBody',
-    'ResponseBody',
-    'ResponseData',
-    'SpyTarget',
-    'CallRecord',
-    'MockResponse',
+    "Headers",
+    "QueryParams",
+    "HttpMethod",
+    "StatusCode",
+    "RequestBody",
+    "ResponseBody",
+    "ResponseData",
+    "SpyTarget",
+    "CallRecord",
+    "MockResponse",
 ]

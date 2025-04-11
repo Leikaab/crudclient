@@ -58,7 +58,7 @@ def _validate_response(self, data: RawResponse) -> Union[JSONDict, JSONList, str
     if isinstance(data, bytes):
         # Try to decode bytes to string
         try:
-            return data.decode('utf-8')
+            return data.decode("utf-8")
         except UnicodeDecodeError:
             # If it can't be decoded, raise an error
             raise ValueError(f"Unable to decode binary data: {data[:100]}...")
@@ -89,11 +89,7 @@ def _convert_to_model(self, data: RawResponse) -> Union[T, JSONDict]:
         logger.error(f"Failed to convert response to model: {e}")
         if isinstance(e, ModelConversionError):
             raise
-        raise ModelConversionError(
-            f"Failed to convert response to model: {e}",
-            response=None,
-            data=data
-        ) from e
+        raise ModelConversionError(f"Failed to convert response to model: {e}", response=None, data=data) from e
 
 
 def _convert_to_list_model(self, data: JSONList) -> Union[List[T], JSONList]:
@@ -104,11 +100,7 @@ def _convert_to_list_model(self, data: JSONList) -> Union[List[T], JSONList]:
         return [self._datamodel(**item) for item in data]
     except Exception as e:
         logger.error(f"Failed to convert list response to model: {e}")
-        raise ModelConversionError(
-            f"Failed to convert list response to model: {e}",
-            response=None,
-            data=data
-        ) from e
+        raise ModelConversionError(f"Failed to convert list response to model: {e}", response=None, data=data) from e
 
 
 def _validate_list_return(self, data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
@@ -126,10 +118,7 @@ def _validate_list_return(self, data: RawResponse) -> Union[JSONList, List[T], A
     except PydanticValidationError as e:  # Catch Pydantic validation errors during list conversion
         logger.error(f"Failed to convert list response items to model: {e}")
         # Wrap Pydantic error in ModelConversionError as expected by tests
-        raise ModelConversionError(
-            f"Failed to convert list response items to model: {e}",
-            data=data  # Pass the original raw data
-        ) from e
+        raise ModelConversionError(f"Failed to convert list response items to model: {e}", data=data) from e  # Pass the original raw data
     except Exception as e:
         logger.error(f"Failed to validate list return: {e}")
         # Re-raise other specific errors or wrap unexpected ones
@@ -139,9 +128,7 @@ def _validate_list_return(self, data: RawResponse) -> Union[JSONList, List[T], A
         raise ValueError(f"Unexpected error during list validation: {e}") from e
 
 
-def _fallback_list_conversion(
-    self, data: RawResponse
-) -> Union[JSONList, List[T], ApiResponse]:
+def _fallback_list_conversion(self, data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
     # If the data is already a list, convert it directly
     if isinstance(data, list):
         return self._convert_to_list_model(data)
@@ -217,9 +204,7 @@ def _dump_data(self, data: Optional[Union[JSONDict, T]], partial: bool = False) 
                         # Check if the *only* errors are related to missing fields.
                         # We want to ignore 'missing' errors for partial updates,
                         # but raise errors for invalid types on provided fields.
-                        non_missing_errors = [
-                            err for err in e.errors() if err.get('type') != 'missing'
-                        ]
+                        non_missing_errors = [err for err in e.errors() if err.get("type") != "missing"]
                         if non_missing_errors:
                             # If there are errors other than 'missing' (e.g., type errors),
                             # then the partial data is truly invalid. Raise the error.

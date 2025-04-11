@@ -12,12 +12,7 @@ class OAuthTokenManager:
         self.current_refresh_token = "refresh_token"
 
         # User management for password grant
-        self.users: Dict[str, Dict] = {
-            "user": {
-                "password": "pass",
-                "scopes": ["read", "write"]
-            }
-        }
+        self.users: Dict[str, Dict] = {"user": {"password": "pass", "scopes": ["read", "write"]}}
 
     def initialize_default_token(self, client_id: str, scope: Optional[str]) -> None:
         now = datetime.now()
@@ -26,7 +21,7 @@ class OAuthTokenManager:
             "scope": scope,
             "expires_at": now + timedelta(hours=1),
             "token_type": "Bearer",
-            "grant_type": "client_credentials"
+            "grant_type": "client_credentials",
         }
 
         self.refresh_tokens[self.current_refresh_token] = self.current_access_token
@@ -38,7 +33,7 @@ class OAuthTokenManager:
         expires_in: int = 3600,
         token_type: str = "Bearer",
         grant_type: str = "client_credentials",
-        user: Optional[str] = None
+        user: Optional[str] = None,
     ) -> Dict[str, Any]:
         now = datetime.now()
         access_token = f"access_token_{now.timestamp()}"
@@ -50,7 +45,7 @@ class OAuthTokenManager:
             "expires_at": now + timedelta(seconds=expires_in),
             "token_type": token_type,
             "grant_type": grant_type,
-            "user": user
+            "user": user,
         }
 
         self.refresh_tokens[refresh_token] = access_token
@@ -62,16 +57,10 @@ class OAuthTokenManager:
             "refresh_token": refresh_token,
             "expires_in": expires_in,
             "token_type": token_type,
-            "scope": scope or ""
+            "scope": scope or "",
         }
 
-    def create_authorization_code(
-        self,
-        client_id: str,
-        redirect_uri: str,
-        scope: Optional[str] = None,
-        state: Optional[str] = None
-    ) -> str:
+    def create_authorization_code(self, client_id: str, redirect_uri: str, scope: Optional[str] = None, state: Optional[str] = None) -> str:
         now = datetime.now()
         code = f"auth_code_{now.timestamp()}"
 
@@ -80,7 +69,7 @@ class OAuthTokenManager:
             "redirect_uri": redirect_uri,
             "scope": scope,
             "state": state,
-            "expires_at": now + timedelta(minutes=10)
+            "expires_at": now + timedelta(minutes=10),
         }
 
         return code
@@ -111,7 +100,7 @@ class OAuthTokenManager:
             scope=old_token_data["scope"],
             token_type=old_token_data["token_type"],
             grant_type="refresh_token",
-            user=old_token_data.get("user")
+            user=old_token_data.get("user"),
         )
 
     def revoke_token(self, token: str) -> bool:
@@ -141,10 +130,7 @@ class OAuthTokenManager:
         return True
 
     def add_user(self, username: str, password: str, scopes: List[str]) -> None:
-        self.users[username] = {
-            "password": password,
-            "scopes": scopes
-        }
+        self.users[username] = {"password": password, "scopes": scopes}
 
     def validate_user(self, username: str, password: str) -> bool:
         if username not in self.users:

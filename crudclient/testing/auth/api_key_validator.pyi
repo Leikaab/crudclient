@@ -42,7 +42,7 @@ class ApiKeyValidator:
         owner: Optional[str] = None,
         permissions: Optional[List[str]] = None,
         tier: Optional[str] = None,
-        expires_at: Optional[datetime] = None
+        expires_at: Optional[datetime] = None,
     ) -> None:
         """
         Set metadata for a specific API key.

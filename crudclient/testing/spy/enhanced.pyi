@@ -5,6 +5,7 @@ This module provides advanced spy classes and utilities that build upon the basi
 spy functionality, offering features like timestamping, duration tracking, stack
 trace capture, and more sophisticated assertion capabilities through mixins.
 """
+
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
@@ -18,6 +19,7 @@ class CallRecord(MethodCall):
     Inherits basic call information (method name, args, kwargs, result, exception)
     from MethodCall and adds timestamp, duration, stack trace, and caller info.
     """
+
     timestamp: float
     duration: Optional[float]
     result: Any  # Overrides return_value from MethodCall
@@ -32,7 +34,7 @@ class CallRecord(MethodCall):
         timestamp: float,
         duration: Optional[float] = None,
         result: Any = None,
-        exception: Optional[Exception] = None
+        exception: Optional[Exception] = None,
     ) -> None:
         """
         Initializes an enhanced record of a method call.
@@ -50,7 +52,6 @@ class CallRecord(MethodCall):
 
     def __repr__(self) -> str: ...
 
-
 class EnhancedSpyBase(SpyAssertionsMixin):
     """
     Base class for enhanced spies, providing call recording and retrieval logic.
@@ -58,13 +59,13 @@ class EnhancedSpyBase(SpyAssertionsMixin):
     Includes methods for recording calls, retrieving call records, checking call counts,
     and basic call verification. Assertion methods are provided via SpyAssertionsMixin.
     """
+
     _calls: List[CallRecord]  # Keep for type checking mixin, though technically private
     _method_calls: Dict[str, List[CallRecord]]  # Keep for type checking mixin
 
     def __init__(self) -> None:
         """Initializes the spy with empty call lists."""
         ...
-
     # _record_call is intentionally omitted as it's protected
 
     def get_calls(self, method_name: Optional[str] = None) -> List[CallRecord]:
@@ -105,12 +106,7 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         """
         ...
 
-    def was_called_with(
-        self,
-        method_name: str,
-        *args: Any,
-        **kwargs: Any
-    ) -> bool:
+    def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
         """
         Checks if the specified method was called at least once with the exact
         arguments provided.
@@ -124,7 +120,6 @@ class EnhancedSpyBase(SpyAssertionsMixin):
             True if a matching call was found, False otherwise.
         """
         ...
-
     # Assertion methods like assert_called, assert_called_with, etc.,
     # are inherited from SpyAssertionsMixin and defined in its stub.
 
@@ -132,23 +127,17 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         """Clears all recorded calls."""
         ...
 
-
 class MethodSpy:
     """
     Wraps a single method to spy on its calls, delegating to an EnhancedSpyBase.
     """
+
     original_method: Callable
     spy: EnhancedSpyBase
     method_name: str
     record_only: bool
 
-    def __init__(
-        self,
-        original_method: Callable,
-        spy: EnhancedSpyBase,
-        method_name: str,
-        record_only: bool = False
-    ) -> None:
+    def __init__(self, original_method: Callable, spy: EnhancedSpyBase, method_name: str, record_only: bool = False) -> None:
         """
         Initializes a spy for a specific method.
 
@@ -168,7 +157,6 @@ class MethodSpy:
         """
         ...
 
-
 class ClassSpy(EnhancedSpyBase):
     """
     Spies on methods of a target object instance.
@@ -177,15 +165,11 @@ class ClassSpy(EnhancedSpyBase):
     target object. Delegates attribute access for non-spied attributes to the
     target object.
     """
+
     target_object: Any
     record_only: bool
 
-    def __init__(
-        self,
-        target_object: Any,
-        methods: Optional[List[str]] = None,
-        record_only: bool = False
-    ) -> None:
+    def __init__(self, target_object: Any, methods: Optional[List[str]] = None, record_only: bool = False) -> None:
         """
         Initializes a spy for an object instance.
 
@@ -205,20 +189,16 @@ class ClassSpy(EnhancedSpyBase):
         """
         ...
 
-
 class FunctionSpy(EnhancedSpyBase):
     """
     Spies on calls to a standalone function.
     """
+
     target_function: Callable
     record_only: bool
     method_name: str  # Stores the function name
 
-    def __init__(
-        self,
-        target_function: Callable,
-        record_only: bool = False
-    ) -> None:
+    def __init__(self, target_function: Callable, record_only: bool = False) -> None:
         """
         Initializes a spy for a standalone function.
 
@@ -236,17 +216,13 @@ class FunctionSpy(EnhancedSpyBase):
         """
         ...
 
-
 class EnhancedSpyFactory:
     """
     Provides static methods to conveniently create different types of enhanced spies.
     """
+
     @staticmethod
-    def create_class_spy(
-        target_object: Any,
-        methods: Optional[List[str]] = None,
-        record_only: bool = False
-    ) -> ClassSpy:
+    def create_class_spy(target_object: Any, methods: Optional[List[str]] = None, record_only: bool = False) -> ClassSpy:
         """
         Factory method to create a ClassSpy.
 
@@ -261,10 +237,7 @@ class EnhancedSpyFactory:
         ...
 
     @staticmethod
-    def create_function_spy(
-        target_function: Callable,
-        record_only: bool = False
-    ) -> FunctionSpy:
+    def create_function_spy(target_function: Callable, record_only: bool = False) -> FunctionSpy:
         """
         Factory method to create a FunctionSpy.
 
@@ -278,11 +251,7 @@ class EnhancedSpyFactory:
         ...
 
     @staticmethod
-    def patch_method(
-        target_object: Any,
-        method_name: str,
-        record_only: bool = False
-    ) -> FunctionSpy:
+    def patch_method(target_object: Any, method_name: str, record_only: bool = False) -> FunctionSpy:
         """
         Patches a method on an object with a FunctionSpy.
 

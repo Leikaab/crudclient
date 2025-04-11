@@ -14,6 +14,7 @@ from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_
 
 class MockBasicAuthConfig(ClientConfig):
     """Mock config with Basic Authentication."""
+
     hostname = "https://api.example.com"
     version = "v1"
     headers = {}
@@ -26,6 +27,7 @@ class MockBasicAuthConfig(ClientConfig):
 
 class MockBearerAuthConfig(ClientConfig):
     """Mock config with Bearer Authentication."""
+
     hostname = "https://api.example.com"
     version = "v1"
     headers = {}
@@ -38,6 +40,7 @@ class MockBearerAuthConfig(ClientConfig):
 
 class MockRefreshableTokenConfig(ClientConfig):
     """Mock config with a refreshable token."""
+
     hostname = "https://api.example.com"
     version = "v1"
     headers = {}
@@ -60,6 +63,7 @@ class MockRefreshableTokenConfig(ClientConfig):
 
 class MockApiKeyHeaderConfig(ClientConfig):
     """Mock config with API Key Header Authentication."""
+
     hostname = "https://api.example.com"
     version = "v1"
     headers = {}
@@ -72,6 +76,7 @@ class MockApiKeyHeaderConfig(ClientConfig):
 
 class MockApiKeyParamConfig(ClientConfig):
     """Mock config with API Key Param Authentication."""
+
     hostname = "https://api.example.com"
     version = "v1"
     headers = {}
@@ -123,4 +128,5 @@ def mock_request():
 def mock_auth_verification():
     """Create auth verification helpers for testing."""
     from crudclient.testing.auth import AuthVerificationHelpers
+
     yield AuthVerificationHelpers

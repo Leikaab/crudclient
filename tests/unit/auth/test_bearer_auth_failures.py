@@ -15,11 +15,7 @@ def test_bearer_auth_failure(bearer_auth_client, mock_request):
     """Test handling of Bearer Authentication failures."""
     # Arrange
     url = f"{bearer_auth_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid token"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -43,29 +39,14 @@ def test_token_refresh_on_401(refreshable_token_client, mock_request):
 
     # Set up the mock response for the expired token
     url = f"{refreshable_token_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Token expired"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Token expired"})
 
     # Set up the mock response for the token refresh endpoint
     refresh_url = f"{refreshable_token_client.base_url}/oauth/token"
-    mock_request.post(
-        refresh_url,
-        json={
-            "access_token": "new_token",
-            "refresh_token": "new_refresh_token",
-            "expires_in": 3600
-        }
-    )
+    mock_request.post(refresh_url, json={"access_token": "new_token", "refresh_token": "new_refresh_token", "expires_in": 3600})
 
     # Set up the mock response for the retry with the new token
-    mock_request.get(
-        url,
-        status_code=401,  # Still fail even with new token for this test
-        json={"error": "Unauthorized", "message": "Token expired"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Token expired"})  # Still fail even with new token for this test
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -83,11 +64,7 @@ def test_token_refresh_on_403(refreshable_token_client, mock_request):
     # Instead of testing the actual refresh mechanism, which is complex,
     # we'll just verify that a 403 response raises an AuthenticationError
     url = f"{refreshable_token_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=403,
-        json={"error": "Forbidden", "message": "Insufficient permissions"}
-    )
+    mock_request.get(url, status_code=403, json={"error": "Forbidden", "message": "Insufficient permissions"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -106,22 +83,11 @@ def test_token_refresh_failure(refreshable_token_client, mock_request):
 
     # Set up the mock response for the expired token
     url = f"{refreshable_token_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Token expired"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Token expired"})
 
     # Set up the mock response for the token refresh endpoint to fail
     refresh_url = f"{refreshable_token_client.base_url}/oauth/token"
-    mock_request.post(
-        refresh_url,
-        status_code=400,
-        json={
-            "error": "invalid_grant",
-            "error_description": "Refresh token is invalid or expired"
-        }
-    )
+    mock_request.post(refresh_url, status_code=400, json={"error": "invalid_grant", "error_description": "Refresh token is invalid or expired"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -139,11 +105,7 @@ def test_retry_after_auth_failure(bearer_auth_client, mock_request):
     # Instead of testing the retry mechanism, which is complex,
     # we'll just verify that a 401 response raises an AuthenticationError
     url = f"{bearer_auth_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid token"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -161,11 +123,7 @@ def test_auth_failure_with_retry_disabled(bearer_auth_client, mock_request):
     # This test is similar to test_retry_after_auth_failure, but we're just verifying
     # that a 401 response raises an AuthenticationError
     url = f"{bearer_auth_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid token"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
@@ -230,11 +188,7 @@ def test_multiple_auth_failures(bearer_auth_client, mock_request):
     # This test is similar to the other auth failure tests, but we're just verifying
     # that a 401 response raises an AuthenticationError
     url = f"{bearer_auth_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid token"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:

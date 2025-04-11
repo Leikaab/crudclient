@@ -28,7 +28,7 @@ class TripletexAuthStrategy(AuthStrategy):
         employee_token: str,
         base_url: str,
         session_token: Optional[str] = None,
-        session_expires_at: Optional[datetime] = None
+        session_expires_at: Optional[datetime] = None,
     ):
         self.company_id = company_id
         self.consumer_token = consumer_token
@@ -120,11 +120,7 @@ class TripletexAuthStrategy(AuthStrategy):
             raise ValueError("Missing required tokens for authentication")
 
         url = f"{self.base_url}/token/session/:create"
-        params = {
-            "consumerToken": self.consumer_token,
-            "employeeToken": self.employee_token,
-            "expirationDate": self.create_date()
-        }
+        params = {"consumerToken": self.consumer_token, "employeeToken": self.employee_token, "expirationDate": self.create_date()}
 
         logger.debug("Requesting new session token from %s", url)
         try:

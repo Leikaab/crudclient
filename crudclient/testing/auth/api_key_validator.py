@@ -18,7 +18,7 @@ class ApiKeyValidator:
         owner: Optional[str] = None,
         permissions: Optional[List[str]] = None,
         tier: Optional[str] = None,
-        expires_at: Optional[datetime] = None
+        expires_at: Optional[datetime] = None,
     ) -> None:
         if api_key not in self.key_metadata:
             self.key_metadata[api_key] = {
@@ -26,7 +26,7 @@ class ApiKeyValidator:
                 "expires_at": None,
                 "owner": "default_user",
                 "permissions": ["read", "write"],
-                "tier": "standard"
+                "tier": "standard",
             }
 
         metadata = self.key_metadata[api_key]

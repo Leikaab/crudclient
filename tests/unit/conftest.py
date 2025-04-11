@@ -41,6 +41,7 @@ def basic_auth_strategy() -> BasicAuth:
 @pytest.fixture
 def custom_auth_strategy() -> CustomAuth:
     """Provides a CustomAuth strategy instance with a header callback."""
+
     def _get_custom_headers() -> Dict[str, str]:
         return {"X-Custom-Auth": "custom-value", "X-Another-Header": "another-value"}
 
@@ -49,12 +50,14 @@ def custom_auth_strategy() -> CustomAuth:
 
 # --- Client Configuration Factory ---
 
+
 @pytest.fixture
 def create_mock_client_config(bearer_auth_strategy: BearerAuth) -> Callable[..., ClientConfig]:
     """
     Factory fixture to create a mock ClientConfig instance.
     Allows customization for different test scenarios.
     """
+
     def _factory(
         hostname: str = "https://api.example.com",
         version: str = "v1",
@@ -63,7 +66,7 @@ def create_mock_client_config(bearer_auth_strategy: BearerAuth) -> Callable[...,
         headers: Optional[Dict[str, str]] = None,
         retries: int = 3,
         timeout: int = 10,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> ClientConfig:
         config = ClientConfig()
         config.hostname = hostname
@@ -84,6 +87,7 @@ def create_mock_client_config(bearer_auth_strategy: BearerAuth) -> Callable[...,
                 pass  # Ignoring unknown kwargs for flexibility
 
         return config
+
     return _factory
 
 
@@ -118,13 +122,8 @@ def create_user_data():
         user_email = email if email is not None else f"test{user_id}@example.com"
         if id is None:
             _id_counter += 1
-        return {
-            "id": user_id,
-            "name": f"{name} {user_id}",
-            "email": user_email,
-            "uuid": str(uuid.uuid4()),  # Add a unique identifier
-            **kwargs
-        }
+        return {"id": user_id, "name": f"{name} {user_id}", "email": user_email, "uuid": str(uuid.uuid4()), **kwargs}  # Add a unique identifier
+
     return _create
 
 
@@ -136,6 +135,7 @@ def create_api_response():
 
     Allows specifying status code, data payload, metadata, links, and error details.
     """
+
     def _create(
         status_code: int = 200,
         data: Optional[Any] = None,
@@ -145,13 +145,10 @@ def create_api_response():
         data_key: str = "data",  # Key under which main data is nested
         headers: Optional[Dict[str, str]] = None,
         raw_content: Optional[bytes] = None,  # For non-JSON responses
-        content_type: str = "application/json"  # Default content type
+        content_type: str = "application/json",  # Default content type
     ) -> Dict[str, Any]:
 
-        response_config: Dict[str, Any] = {
-            "status_code": status_code,
-            "headers": headers if headers is not None else {"Content-Type": content_type}
-        }
+        response_config: Dict[str, Any] = {"status_code": status_code, "headers": headers if headers is not None else {"Content-Type": content_type}}
 
         if raw_content is not None:
             response_config["content"] = raw_content
@@ -188,12 +185,14 @@ def create_api_response():
             pass
 
         return response_config
+
     return _create
 
 
 @pytest.fixture
 def create_paginated_api_response(create_api_response: Callable[..., Dict[str, Any]]) -> Callable[..., Dict[str, Any]]:
     """Factory fixture specifically for creating paginated API responses."""
+
     def _create(
         items: list,
         page: int = 1,
@@ -201,7 +200,7 @@ def create_paginated_api_response(create_api_response: Callable[..., Dict[str, A
         total_items: Optional[int] = None,
         total_pages: Optional[int] = None,
         base_url: str = "https://api.example.com/v1/items",
-        **kwargs: Any  # Pass other args to create_api_response
+        **kwargs: Any,  # Pass other args to create_api_response
     ) -> Dict[str, Any]:
         _total_items = total_items if total_items is not None else len(items) * (total_pages if total_pages else page + 1)  # Estimate if needed
         _total_pages = total_pages if total_pages is not None else (_total_items + per_page - 1) // per_page
@@ -225,22 +224,24 @@ def create_paginated_api_response(create_api_response: Callable[..., Dict[str, A
             links["next"] = f"{base_url}?page={page + 1}&per_page={per_page}"
 
         # Ensure status_code defaults to 200 if not provided in kwargs
-        if 'status_code' not in kwargs:
-            kwargs['status_code'] = 200
+        if "status_code" not in kwargs:
+            kwargs["status_code"] = 200
 
         return create_api_response(data=items, metadata=metadata, links=links, **kwargs)
+
     return _create
 
 
 @pytest.fixture
 def create_error_api_response(create_api_response: Callable[..., Dict[str, Any]]) -> Callable[..., Dict[str, Any]]:
     """Factory fixture for creating structured error API responses."""
+
     def _create(
         status_code: int = 400,
         message: str = "Bad Request",
         error_code: Optional[str] = None,
         details: Optional[Any] = None,
-        **kwargs: Any  # Pass other args to create_api_response
+        **kwargs: Any,  # Pass other args to create_api_response
     ) -> Dict[str, Any]:
         error_payload = {
             "message": message,
@@ -250,10 +251,11 @@ def create_error_api_response(create_api_response: Callable[..., Dict[str, Any]]
             error_payload["details"] = details
 
         # Ensure data_key is not 'error' to avoid conflicts if user passes it
-        if 'data_key' in kwargs and kwargs['data_key'] == 'error':
-            del kwargs['data_key']
+        if "data_key" in kwargs and kwargs["data_key"] == "error":
+            del kwargs["data_key"]
 
         return create_api_response(status_code=status_code, error=error_payload, **kwargs)
+
     return _create
 
 
@@ -304,6 +306,7 @@ def create_mock_response() -> Callable[..., MockResponse]:
     This fixture provides a factory function that creates MockResponse instances
     with configurable properties for testing.
     """
+
     def _factory(
         status_code: int = 200,
         json_data: Optional[Dict[str, Any]] = None,

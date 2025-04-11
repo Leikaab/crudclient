@@ -13,10 +13,7 @@ class ResponseBuilder:
 
     @staticmethod
     def create_validation_error(
-        fields: Optional[Dict[str, str]] = None,
-        status_code: int = 422,
-        error_code: str = "VALIDATION_ERROR",
-        message: str = "Validation failed"
+        fields: Optional[Dict[str, str]] = None, status_code: int = 422, error_code: str = "VALIDATION_ERROR", message: str = "Validation failed"
     ) -> MockResponse:
         """
         Create a mock response for a validation error.
@@ -53,12 +50,7 @@ class ResponseBuilder:
         ...
 
     @staticmethod
-    def create_rate_limit_error(
-        limit: int = 100,
-        remaining: int = 0,
-        reset_seconds: int = 60,
-        status_code: int = 429
-    ) -> MockResponse:
+    def create_rate_limit_error(limit: int = 100, remaining: int = 0, reset_seconds: int = 60, status_code: int = 429) -> MockResponse:
         """
         Create a mock response for a rate limit exceeded error.
 
@@ -90,10 +82,7 @@ class ResponseBuilder:
         ...
 
     @staticmethod
-    def create_auth_error(
-        error_type: str = "invalid_token",
-        status_code: int = 401
-    ) -> MockResponse:
+    def create_auth_error(error_type: str = "invalid_token", status_code: int = 401) -> MockResponse:
         """
         Create a mock response for an authentication error.
 
@@ -127,7 +116,6 @@ class ResponseBuilder:
             ```
         """
         ...
-
 
 __all__ = [
     "MockResponse",

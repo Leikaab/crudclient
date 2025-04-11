@@ -30,9 +30,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         self,
         datamodel: Optional[Type[T]] = None,
         api_response_model: Optional[ApiResponseType] = None,
-        list_return_keys: List[str] = ["data", "results", "items"]
+        list_return_keys: List[str] = ["data", "results", "items"],
     ) -> None: ...
-
     def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
-
     def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...

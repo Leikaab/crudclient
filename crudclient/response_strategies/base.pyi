@@ -21,9 +21,7 @@ from ..types import JSONDict, JSONList, RawResponse
 class ModelDumpable(Protocol):
     def model_dump(self) -> dict: ...
 
-
 T = TypeVar("T", bound=ModelDumpable)
-
 
 class ResponseModelStrategy(ABC, Generic[T]):
     """
@@ -36,6 +34,5 @@ class ResponseModelStrategy(ABC, Generic[T]):
 
     @abstractmethod
     def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
-
     @abstractmethod
     def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...

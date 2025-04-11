@@ -14,14 +14,17 @@ from crudclient.testing.simple_mock import SimpleMockClient
 
 class TestModel(BaseModel):
     """Test model for CRUD operations."""
+
     id: int
     name: str
 
 
 class TestCrud(Crud[TestModel]):
     """Test CRUD class."""
+
     _resource_path = "test-resources"
     _datamodel = TestModel
+
 
 # Define a dummy Parent Crud class for nesting tests
 

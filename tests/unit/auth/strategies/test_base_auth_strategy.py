@@ -2,7 +2,6 @@
 Tests for the base AuthStrategy class in the crudclient library.
 """
 
-
 from crudclient.auth.base import AuthStrategy
 
 

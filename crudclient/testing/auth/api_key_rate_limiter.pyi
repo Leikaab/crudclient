@@ -27,11 +27,7 @@ class ApiKeyRateLimiter:
         """
         ...
 
-    def enable_rate_limiting(
-        self,
-        requests_per_period: int = 100,
-        period_seconds: int = 3600
-    ) -> None:
+    def enable_rate_limiting(self, requests_per_period: int = 100, period_seconds: int = 3600) -> None:
         """
         Enable rate limiting for API keys.
 

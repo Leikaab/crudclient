@@ -38,11 +38,7 @@ class SimpleMockClientAssertions(SimpleMockClientRequestHandling):
         """
         ...
 
-    def assert_request_sequence(
-        self,
-        sequence: List[Dict[str, Any]],
-        strict: bool = False
-    ) -> None:
+    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         """
         Assert that requests were made in a specific sequence.
 
@@ -61,11 +57,7 @@ class SimpleMockClientAssertions(SimpleMockClientRequestHandling):
         ...
 
     def assert_request_params(
-        self,
-        params: Dict[str, Any],
-        method: Optional[str] = None,
-        url_pattern: Optional[str] = None,
-        match_all: bool = False
+        self, params: Dict[str, Any], method: Optional[str] = None, url_pattern: Optional[str] = None, match_all: bool = False
     ) -> None:
         """
         Assert that requests were made with specific parameters.
@@ -86,11 +78,7 @@ class SimpleMockClientAssertions(SimpleMockClientRequestHandling):
         """
         ...
 
-    def _filter_requests(
-        self,
-        method: Optional[str] = None,
-        url_pattern: Optional[str] = None
-    ) -> List[RequestRecord]:
+    def _filter_requests(self, method: Optional[str] = None, url_pattern: Optional[str] = None) -> List[RequestRecord]:
         """
         Filter request history by method and URL pattern.
 

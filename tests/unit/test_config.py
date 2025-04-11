@@ -81,10 +81,7 @@ class TestClientConfig:
         merged = base_config.merge(custom_config)
 
         # Verify headers are merged correctly
-        assert merged.headers == {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
+        assert merged.headers == {"Accept": "application/json", "Content-Type": "application/json"}
 
         # Test header override
         base_config = ClientConfig(headers={"Accept": "application/xml"})

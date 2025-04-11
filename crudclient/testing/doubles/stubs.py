@@ -42,8 +42,8 @@ class StubResponse(Response):
         status_code: int = 200,
         content: Optional[Union[str, bytes, Dict[str, Any], List[Any]]] = None,
         headers: Optional[Dict[str, str]] = None,
-        encoding: str = 'utf-8',
-        elapsed: Optional[timedelta] = None
+        encoding: str = "utf-8",
+        elapsed: Optional[timedelta] = None,
     ):
         super().__init__()
         self._status_code = status_code
@@ -53,8 +53,8 @@ class StubResponse(Response):
 
         # Handle different content types
         if content is None:
-            self._content = b''
-            self._text = ''
+            self._content = b""
+            self._text = ""
             self._json_data = None
         elif isinstance(content, (dict, list)):
             self._json_data = content
@@ -69,7 +69,7 @@ class StubResponse(Response):
                 self._json_data = None
         elif isinstance(content, bytes):
             self._content = content
-            self._text = content.decode(encoding, errors='replace')
+            self._text = content.decode(encoding, errors="replace")
             try:
                 self._json_data = json.loads(self._text)
             except json.JSONDecodeError:
@@ -112,12 +112,14 @@ class StubResponse(Response):
 
     def raise_for_status(self) -> None:
         import requests
+
         if 400 <= self._status_code < 600:
             # Create a simple error message
             error_msg = f"HTTP error {self._status_code}"
 
             # Raise HTTPError directly without trying to set response attributes
             raise requests.HTTPError(error_msg)
+
 
 # StubClient moved to stubs_client.py
 # StubCrud moved to stubs_crud.py

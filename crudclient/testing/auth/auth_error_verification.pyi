@@ -17,10 +17,7 @@ class AuthErrorVerification:
 
     @staticmethod
     def assert_auth_error_response(
-        response: Dict[str, Any],
-        expected_status: int = 401,
-        expected_error: Optional[str] = None,
-        expected_error_description: Optional[str] = None
+        response: Dict[str, Any], expected_status: int = 401, expected_error: Optional[str] = None, expected_error_description: Optional[str] = None
     ) -> None:
         """
         Assert that an authentication error response is correct.
@@ -38,10 +35,7 @@ class AuthErrorVerification:
 
     @staticmethod
     def assert_rate_limit_headers(
-        headers: Dict[str, str],
-        expected_limit: Optional[int] = None,
-        expected_remaining: Optional[int] = None,
-        expected_reset: Optional[int] = None
+        headers: Dict[str, str], expected_limit: Optional[int] = None, expected_remaining: Optional[int] = None, expected_reset: Optional[int] = None
     ) -> None:
         """
         Assert that rate limit headers are correct.

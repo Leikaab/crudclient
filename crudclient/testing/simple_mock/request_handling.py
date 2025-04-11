@@ -1,4 +1,3 @@
-
 import json
 import re
 from typing import Any, Optional
@@ -18,7 +17,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         for pattern in self.response_patterns:
             if self._is_basic_match(pattern, method, url):
                 # Skip if max calls reached
-                if pattern['call_count'] >= pattern['max_calls']:
+                if pattern["call_count"] >= pattern["max_calls"]:
                     continue
 
                 # Check detailed matchers
@@ -31,26 +30,20 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
 
     def _create_request_record(self, method: str, url: str, kwargs: dict) -> RequestRecord:
         record = RequestRecord(
-            method=method,
-            url=url,
-            params=kwargs.get('params'),
-            data=kwargs.get('data'),
-            json=kwargs.get('json'),
-            headers=kwargs.get('headers')
+            method=method, url=url, params=kwargs.get("params"), data=kwargs.get("data"), json=kwargs.get("json"), headers=kwargs.get("headers")
         )
         self.request_history.append(record)
         return record
 
     def _is_basic_match(self, pattern: dict, method: str, url: str) -> bool:
-        return (pattern['method'] == method.upper()
-                and re.search(pattern['url_pattern'], url) is not None)
+        return pattern["method"] == method.upper() and re.search(pattern["url_pattern"], url) is not None
 
     def _matches_request_details(self, pattern: dict, kwargs: dict) -> bool:
         matchers = [
-            self._check_params_match(pattern['params'], kwargs.get('params', {})),
-            self._check_data_match(pattern['data'], kwargs.get('data', {})),
-            self._check_json_match(pattern['json'], kwargs.get('json', {})),
-            self._check_headers_match(pattern['headers'], kwargs.get('headers', {}))
+            self._check_params_match(pattern["params"], kwargs.get("params", {})),
+            self._check_data_match(pattern["data"], kwargs.get("data", {})),
+            self._check_json_match(pattern["json"], kwargs.get("json", {})),
+            self._check_headers_match(pattern["headers"], kwargs.get("headers", {})),
         ]
         return all(matchers)
 
@@ -92,10 +85,10 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
 
     def _handle_matching_pattern(self, pattern: dict, record: RequestRecord, kwargs: dict) -> Optional[str]:
         # Increment call count
-        pattern['call_count'] += 1
+        pattern["call_count"] += 1
 
         # Get response object (handle callable responses)
-        response_obj = pattern['response']
+        response_obj = pattern["response"]
         if callable(response_obj):
             response_obj = response_obj(**kwargs)
 
@@ -131,16 +124,16 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         return response.text
 
     def get(self, url: str, **kwargs: Any) -> Optional[str]:
-        return self._request('GET', url, **kwargs)
+        return self._request("GET", url, **kwargs)
 
     def post(self, url: str, **kwargs: Any) -> Optional[str]:
-        return self._request('POST', url, **kwargs)
+        return self._request("POST", url, **kwargs)
 
     def put(self, url: str, **kwargs: Any) -> Optional[str]:
-        return self._request('PUT', url, **kwargs)
+        return self._request("PUT", url, **kwargs)
 
     def delete(self, url: str, **kwargs: Any) -> Optional[str]:
-        return self._request('DELETE', url, **kwargs)
+        return self._request("DELETE", url, **kwargs)
 
     def patch(self, url: str, **kwargs: Any) -> Optional[str]:
-        return self._request('PATCH', url, **kwargs)
+        return self._request("PATCH", url, **kwargs)

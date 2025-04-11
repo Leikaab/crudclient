@@ -21,6 +21,7 @@ def test_api_configuration(api):
         assert api.client.config.auth_strategy is not None
         # Check that the auth strategy is a BearerAuth
         from crudclient.auth.bearer import BearerAuth
+
         assert isinstance(api.client.config.auth_strategy, BearerAuth)
         # Check that the token is set correctly
         assert api.client.config.auth_strategy.token == token

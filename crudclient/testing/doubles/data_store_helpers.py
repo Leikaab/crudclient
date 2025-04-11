@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple  # Removed Callable, Union, 
 # if TYPE_CHECKING: # Relationship import no longer needed
 #     from .data_store_definitions import Relationship # RelationshipType moved
 
+
 def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
     filtered_data = []
 
@@ -17,8 +18,8 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
         for key, value in filters.items():
             item_value: Optional[Any] = None  # Declare once before if/else
             # Handle nested keys with dot notation
-            if '.' in key:
-                parts = key.split('.')
+            if "." in key:
+                parts = key.split(".")
                 current_val: Any = item
                 for part in parts:
                     if isinstance(current_val, dict) and part in current_val:
@@ -41,7 +42,7 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
                 if not apply_operator_filter(item_value, value):
                     match = False
                     break
-            elif isinstance(value, str) and value.startswith('regex:'):
+            elif isinstance(value, str) and value.startswith("regex:"):
                 # Regex filter
                 pattern = value[6:]
                 # Nested check to ensure item_value is str before regex search
@@ -107,16 +108,16 @@ def _op_regex(value: Any, op_value: str) -> bool:
 
 # Map of operators to their handler functions
 _OPERATOR_HANDLERS = {
-    '$eq': lambda v, op_v: _op_ne(v, op_v) is False,  # Inverted to match original logic
-    '$ne': lambda v, op_v: _op_eq(v, op_v) is False,  # Inverted to match original logic
-    '$gt': _op_gt,
-    '$gte': _op_gte,
-    '$lt': _op_lt,
-    '$lte': _op_lte,
-    '$in': _op_in,
-    '$nin': lambda v, op_v: _op_in(v, op_v) is False,  # Inverted to match original logic
-    '$exists': _op_exists,
-    '$regex': _op_regex,
+    "$eq": lambda v, op_v: _op_ne(v, op_v) is False,  # Inverted to match original logic
+    "$ne": lambda v, op_v: _op_eq(v, op_v) is False,  # Inverted to match original logic
+    "$gt": _op_gt,
+    "$gte": _op_gte,
+    "$lt": _op_lt,
+    "$lte": _op_lte,
+    "$in": _op_in,
+    "$nin": lambda v, op_v: _op_in(v, op_v) is False,  # Inverted to match original logic
+    "$exists": _op_exists,
+    "$regex": _op_regex,
 }
 
 
@@ -134,11 +135,7 @@ def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
 # Function apply_sorting moved to data_store_sorting.py
 
 
-def apply_pagination(
-    data: List[Dict[str, Any]],
-    page: int,
-    page_size: int
-) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+def apply_pagination(data: List[Dict[str, Any]], page: int, page_size: int) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     total_count = len(data)
     total_pages = (total_count + page_size - 1) // page_size if page_size > 0 else 1
 
@@ -150,30 +147,16 @@ def apply_pagination(
     end = min(start + page_size, total_count)
 
     # Create pagination metadata
-    pagination = {
-        "page": page,
-        "page_size": page_size,
-        "total_count": total_count,
-        "total_pages": total_pages
-    }
+    pagination = {"page": page, "page_size": page_size, "total_count": total_count, "total_pages": total_pages}
 
     return data[start:end], pagination
 
 
-def apply_field_selection(
-    data: List[Dict[str, Any]],
-    fields: List[str]
-) -> List[Dict[str, Any]]:
+def apply_field_selection(data: List[Dict[str, Any]], fields: List[str]) -> List[Dict[str, Any]]:
     return [{k: v for k, v in item.items() if k in fields} for item in data]
 
 
-def validate_item(
-    collection: str,
-    item: Dict[str, Any],
-    validation_rules: List,
-    unique_constraints: List,
-    add_to_constraints: bool = True
-) -> None:
+def validate_item(collection: str, item: Dict[str, Any], validation_rules: List, unique_constraints: List, add_to_constraints: bool = True) -> None:
     errors: Dict[str, List[str]] = {}  # Added type annotation
 
     # Apply validation rules
@@ -205,6 +188,7 @@ def validate_item(
     if errors:
         # Import ValidationException at the top level if needed by other functions
         from .data_store_definitions import ValidationException
+
         raise ValidationException("Validation failed", errors)
 
 

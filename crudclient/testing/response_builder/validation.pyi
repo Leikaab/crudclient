@@ -79,7 +79,6 @@ class ValidationErrorBuilder:
         """
         ...
 
-
 class BusinessLogicConstraintBuilder:
     """
     Provides static methods to create MockResponse objects representing

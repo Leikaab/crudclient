@@ -26,13 +26,7 @@ class ApiSpy(API, SpyBase):
     client_class: Type[Client]
     delegate: API
 
-    def __init__(
-        self,
-        client: Optional[Client] = None,
-        client_config: Optional[ClientConfig] = None,
-        delegate: Optional[API] = None,
-        **kwargs: Any
-    ):
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, delegate: Optional[API] = None, **kwargs: Any):
         """
         Initialize an ApiSpy instance.
 
@@ -56,13 +50,7 @@ class ApiSpy(API, SpyBase):
         """
         ...
 
-    def register_endpoint(
-        self,
-        name: str,
-        endpoint: str,
-        model: Optional[Type[Any]] = None,
-        **kwargs: Any
-    ) -> Crud:
+    def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> Crud:
         """
         Record and forward a call to register_endpoint.
 
@@ -95,7 +83,6 @@ class ApiSpy(API, SpyBase):
             Any exception raised by the delegate API
         """
         ...
-
     # Helper methods for verification
 
     def assert_endpoint_registered(self, name: str) -> None:

@@ -22,11 +22,7 @@ class TestHttpClientServerErrors:
         """
         # Mock a 500 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=500,
-            json={"error": "Internal Server Error", "message": "Something went wrong"}
-        )
+        mock_request.get(url, status_code=500, json={"error": "Internal Server Error", "message": "Something went wrong"})
 
         # Make a request that will receive a 500 response
         with pytest.raises(CrudClientError) as excinfo:
@@ -45,11 +41,7 @@ class TestHttpClientServerErrors:
         """
         # Mock a 502 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=502,
-            json={"error": "Bad Gateway", "message": "Invalid response from upstream server"}
-        )
+        mock_request.get(url, status_code=502, json={"error": "Bad Gateway", "message": "Invalid response from upstream server"})
 
         # Make a request that will receive a 502 response
         with pytest.raises(CrudClientError) as excinfo:
@@ -68,11 +60,7 @@ class TestHttpClientServerErrors:
         """
         # Mock a 503 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=503,
-            json={"error": "Service Unavailable", "message": "Server is overloaded"}
-        )
+        mock_request.get(url, status_code=503, json={"error": "Service Unavailable", "message": "Server is overloaded"})
 
         # Make a request that will receive a 503 response
         with pytest.raises(CrudClientError) as excinfo:
@@ -91,11 +79,7 @@ class TestHttpClientServerErrors:
         """
         # Mock a 504 response
         url = f"{http_client.config.base_url}/users"
-        mock_request.get(
-            url,
-            status_code=504,
-            json={"error": "Gateway Timeout", "message": "Upstream server timed out"}
-        )
+        mock_request.get(url, status_code=504, json={"error": "Gateway Timeout", "message": "Upstream server timed out"})
 
         # Make a request that will receive a 504 response
         with pytest.raises(CrudClientError) as excinfo:

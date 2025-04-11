@@ -13,6 +13,7 @@ class TripletexConfig(ClientConfig):
     """
     Configuration for Tripletex API client.
     """
+
     hostname = "https://tripletex.no/"
     version = "v2"
     company_id = "0"
@@ -23,10 +24,7 @@ class TripletexConfig(ClientConfig):
         employee_token = os.getenv("TRIPLETEX_EMPLOYEE_TOKEN", "")
 
         self.auth_strategy = TripletexAuthStrategy(
-            company_id=self.company_id,
-            consumer_token=consumer_token,
-            employee_token=employee_token,
-            base_url=self.base_url
+            company_id=self.company_id, consumer_token=consumer_token, employee_token=employee_token, base_url=self.base_url
         )
 
     def should_retry_on_403(self) -> bool:
@@ -49,6 +47,7 @@ class TripletexTestConfig(TripletexConfig):
     """
     Configuration for Tripletex test API client.
     """
+
     hostname = "https://api-test.tripletex.tech/"
 
     def __init__(self):
@@ -60,8 +59,5 @@ class TripletexTestConfig(TripletexConfig):
         employee_token = os.getenv("TRIPLETEX_TEST_EMPLOYEE_TOKEN", "")
 
         self.auth_strategy = TripletexAuthStrategy(
-            company_id=self.company_id,
-            consumer_token=consumer_token,
-            employee_token=employee_token,
-            base_url=self.base_url
+            company_id=self.company_id, consumer_token=consumer_token, employee_token=employee_token, base_url=self.base_url
         )

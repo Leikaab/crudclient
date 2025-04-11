@@ -13,6 +13,7 @@ Modules:
     - retry: Retry policies and backoff strategies
     - errors: Error handling
 """
+
 from .client import HttpClient
 from .errors import ErrorHandler
 from .request import RequestFormatter
@@ -31,5 +32,5 @@ __all__ = [
     "FixedRetryStrategy",
     "ExponentialBackoffStrategy",
     "RetryCondition",
-    "RetryEvent"
+    "RetryEvent",
 ]

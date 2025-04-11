@@ -11,19 +11,10 @@ class TestBearerAuthExamples:
     def test_bearer_auth_success_scenario(self):
         """Example of testing a successful Bearer Auth scenario."""
         # Create a mock client with Bearer Auth
-        client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "valid_token"
-            }
-        )
+        client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token"})
 
         # Configure a successful response
-        client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={"data": [{"id": 1, "name": "Resource 1"}]}
-        )
+        client.with_response_pattern(method="GET", url_pattern=r"/api/resources", response={"data": [{"id": 1, "name": "Resource 1"}]})
 
         # Make a request
         response = client.get("/api/resources")
@@ -43,23 +34,11 @@ class TestBearerAuthExamples:
     def test_bearer_auth_token_expiration_scenario(self):
         """Example of testing a Bearer Auth token expiration scenario."""
         # Create a mock client with Bearer Auth configured with an expired token
-        client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "expired_token",
-                "token_expired": True
-            }
-        )
+        client = create_mock_client(auth_type="bearer", auth_config={"token": "expired_token", "token_expired": True})
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={
-                "error": "Unauthorized",
-                "message": "Token expired"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Make a request and expect it to fail
@@ -75,34 +54,19 @@ class TestBearerAuthExamples:
         """Example of testing a Bearer Auth token refresh scenario."""
         # Create a mock client with Bearer Auth configured with an expired token that can be refreshed
         client = create_mock_client(
-            auth_type="bearer",
-            auth_config={
-                "token": "expired_token",
-                "token_expired": True,
-                "refresh_token": "valid_refresh_token"
-            }
+            auth_type="bearer", auth_config={"token": "expired_token", "token_expired": True, "refresh_token": "valid_refresh_token"}
         )
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET",
-            url_pattern=r"/api/resources",
-            response={
-                "error": "Unauthorized",
-                "message": "Token expired"
-            },
-            status_code=401
+            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Configure a token refresh response
         client.with_response_pattern(
             method="POST",
             url_pattern=r"/oauth/token",
-            response={
-                "access_token": "new_token",
-                "refresh_token": "new_refresh_token",
-                "expires_in": 3600
-            }
+            response={"access_token": "new_token", "refresh_token": "new_refresh_token", "expires_in": 3600},
         )
 
         # Configure a successful response for the retry with new token
@@ -110,7 +74,7 @@ class TestBearerAuthExamples:
             method="GET",
             url_pattern=r"/api/resources",
             response={"data": [{"id": 1, "name": "Resource 1"}]},
-            headers={"Authorization": "Bearer new_token"}
+            headers={"Authorization": "Bearer new_token"},
         )
 
         # In a real implementation, the client would handle token refresh automatically
@@ -126,10 +90,7 @@ class TestBearerAuthExamples:
 
         # Now simulate token refresh
         # In a real implementation, this would be handled by the client
-        refresh_response = client.post("/oauth/token", json={
-            "grant_type": "refresh_token",
-            "refresh_token": "valid_refresh_token"
-        })
+        refresh_response = client.post("/oauth/token", json={"grant_type": "refresh_token", "refresh_token": "valid_refresh_token"})
 
         # Update the client's auth header with the new token
         client.http_client.session_manager.session.headers["Authorization"] = f"Bearer {refresh_response['access_token']}"

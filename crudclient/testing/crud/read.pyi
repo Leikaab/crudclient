@@ -18,7 +18,6 @@ from .base import BaseCrudMock
 if TYPE_CHECKING:
     from .request_record import RequestRecord
 
-
 class ReadMock(BaseCrudMock):
     """
     Mock for Read operations in CRUD APIs.
@@ -30,7 +29,7 @@ class ReadMock(BaseCrudMock):
     """
 
     _parent_id_handling: bool
-    request_history: List['RequestRecord']
+    request_history: List["RequestRecord"]
 
     def __init__(self) -> None:
         """
@@ -55,12 +54,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_single_resource(
-        self,
-        url_pattern: str,
-        resource_data: Dict[str, Any],
-        **kwargs: Any
-    ) -> 'ReadMock':
+    def with_single_resource(self, url_pattern: str, resource_data: Dict[str, Any], **kwargs: Any) -> "ReadMock":
         """
         Configure a response for a single resource.
 
@@ -74,12 +68,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_resource_list(
-        self,
-        url_pattern: str,
-        resources: List[Dict[str, Any]],
-        **kwargs: Any
-    ) -> 'ReadMock':
+    def with_resource_list(self, url_pattern: str, resources: List[Dict[str, Any]], **kwargs: Any) -> "ReadMock":
         """
         Configure a response for a list of resources.
 
@@ -93,7 +82,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_stored_resources(self, resources: List[Dict[str, Any]]) -> 'ReadMock':
+    def with_stored_resources(self, resources: List[Dict[str, Any]]) -> "ReadMock":
         """
         Configure the mock with a list of resources for dynamic querying.
 
@@ -109,7 +98,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_field_selection(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
+    def with_field_selection(self, url_pattern: str, **kwargs: Any) -> "ReadMock":
         """
         Configure the mock to support field selection.
 
@@ -125,7 +114,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_filtering(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
+    def with_filtering(self, url_pattern: str, **kwargs: Any) -> "ReadMock":
         """
         Configure the mock to support filtering.
 
@@ -141,7 +130,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_sorting(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
+    def with_sorting(self, url_pattern: str, **kwargs: Any) -> "ReadMock":
         """
         Configure the mock to support sorting.
 
@@ -157,7 +146,7 @@ class ReadMock(BaseCrudMock):
         """
         ...
 
-    def with_pagination(self, url_pattern: str, **kwargs: Any) -> 'ReadMock':
+    def with_pagination(self, url_pattern: str, **kwargs: Any) -> "ReadMock":
         """
         Configure the mock to support pagination.
 

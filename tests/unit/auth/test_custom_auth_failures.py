@@ -15,6 +15,7 @@ from .conftest import MockBasicAuthConfig
 
 def test_custom_auth_failure(mock_request):
     """Test handling of custom authentication failures during setup."""
+
     # Arrange
     # Create a custom auth strategy that fails during header generation
     def header_callback():
@@ -45,6 +46,7 @@ def test_custom_auth_param_callback_failure(mock_request):
 
 def test_custom_auth_api_failure(mock_request):
     """Test handling of API returning 401/403 with CustomAuth."""
+
     # Arrange
     def get_headers():
         return {"X-Custom": "valid"}
@@ -55,11 +57,7 @@ def test_custom_auth_api_failure(mock_request):
 
     # Mock a 401 response
     url = f"{client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Custom auth failed"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Custom auth failed"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:

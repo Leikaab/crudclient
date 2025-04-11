@@ -41,7 +41,7 @@ class CombinedCrudMock:
         self.request_history.extend(self.delete_mock.request_history)  # type: ignore
         return result
 
-    def with_parent_id_handling(self, enabled: bool = True) -> 'CombinedCrudMock':
+    def with_parent_id_handling(self, enabled: bool = True) -> "CombinedCrudMock":
         self._parent_id_handling = enabled
         self.create_mock.with_parent_id_handling(enabled)
         self.read_mock.with_parent_id_handling(enabled)
@@ -56,23 +56,14 @@ class CombinedCrudMock:
             matching_requests = [r for r in matching_requests if pattern.search(r.url)]
 
         actual_count = len(matching_requests)
-        assert actual_count == count, (
-            f"Expected {count} matching requests, but found {actual_count}. "
-            f"Filter: url_pattern={url_pattern}"
-        )
+        assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
-    def assert_request_sequence(
-        self,
-        sequence: List[Dict[str, Any]],
-        strict: bool = False
-    ) -> None:
+    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         if not sequence:
             return
 
         if strict and len(sequence) != len(self.request_history):
-            raise AssertionError(
-                f"Expected {len(sequence)} requests, but found {len(self.request_history)}"
-            )
+            raise AssertionError(f"Expected {len(sequence)} requests, but found {len(self.request_history)}")
 
         # Find subsequence match
         history_idx = 0
@@ -83,12 +74,12 @@ class CombinedCrudMock:
             matcher = sequence[sequence_idx]
 
             method_match = True
-            if 'method' in matcher:
-                method_match = request.method == matcher['method'].upper()
+            if "method" in matcher:
+                method_match = request.method == matcher["method"].upper()
 
             url_match = True
-            if 'url_pattern' in matcher:
-                url_match = bool(re.search(matcher['url_pattern'], request.url))
+            if "url_pattern" in matcher:
+                url_match = bool(re.search(matcher["url_pattern"], request.url))
 
             if method_match and url_match:
                 sequence_idx += 1
@@ -96,37 +87,24 @@ class CombinedCrudMock:
             history_idx += 1
 
         if sequence_idx < len(sequence):
-            raise AssertionError(
-                f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests."
-            )
+            raise AssertionError(f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests.")
 
-    def assert_crud_operation_sequence(
-        self,
-        operations: List[str],
-        resource_id: Optional[str] = None,
-        url_pattern: Optional[str] = None
-    ) -> None:
+    def assert_crud_operation_sequence(self, operations: List[str], resource_id: Optional[str] = None, url_pattern: Optional[str] = None) -> None:
         # Map operation names to HTTP methods
-        method_map = {
-            "create": "POST",
-            "read": "GET",
-            "update": "PUT",
-            "partial_update": "PATCH",
-            "delete": "DELETE"
-        }
+        method_map = {"create": "POST", "read": "GET", "update": "PUT", "partial_update": "PATCH", "delete": "DELETE"}
 
         # Build sequence matchers
         sequence = []
         for op in operations:
-            matcher = {'method': method_map.get(op, op.upper())}
+            matcher = {"method": method_map.get(op, op.upper())}
             if url_pattern:
-                matcher['url_pattern'] = url_pattern
+                matcher["url_pattern"] = url_pattern
             if resource_id and op != "create":
                 # For non-create operations, include resource_id in the URL pattern
-                if 'url_pattern' in matcher:
-                    matcher['url_pattern'] = f"{matcher['url_pattern']}.*{resource_id}"
+                if "url_pattern" in matcher:
+                    matcher["url_pattern"] = f"{matcher['url_pattern']}.*{resource_id}"
                 else:
-                    matcher['url_pattern'] = f".*{resource_id}"
+                    matcher["url_pattern"] = f".*{resource_id}"
             sequence.append(matcher)
 
         self.assert_request_sequence(sequence)

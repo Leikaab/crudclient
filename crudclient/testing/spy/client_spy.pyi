@@ -24,12 +24,7 @@ class ClientSpy(Client, SpyBase):
 
     delegate: Client
 
-    def __init__(
-        self,
-        config: Union[ClientConfig, Dict[str, Any]],
-        delegate: Optional[Client] = None,
-        **kwargs: Any
-    ):
+    def __init__(self, config: Union[ClientConfig, Dict[str, Any]], delegate: Optional[Client] = None, **kwargs: Any):
         """
         Initialize a ClientSpy instance.
 
@@ -40,11 +35,7 @@ class ClientSpy(Client, SpyBase):
         """
         ...
 
-    def get(
-        self,
-        endpoint: str,
-        params: Optional[Dict[str, Any]] = None
-    ) -> RawResponseSimple:
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """
         Record and forward a GET request.
 
@@ -147,7 +138,6 @@ class ClientSpy(Client, SpyBase):
             Any exception raised by the delegate client
         """
         ...
-
     # Helper methods for verification
 
     def assert_endpoint_called(self, endpoint: str) -> None:
@@ -175,12 +165,7 @@ class ClientSpy(Client, SpyBase):
         """
         ...
 
-    def assert_json_payload_sent(
-        self,
-        method: str,
-        endpoint: str,
-        expected_json: Any
-    ) -> None:
+    def assert_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
         """
         Assert that a JSON payload was sent to an endpoint.
 

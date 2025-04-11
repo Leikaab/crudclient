@@ -75,11 +75,7 @@ def test_update_post(api):
     is properly converted to a Post model instance.
     """
     # Create a Post model instance with updated data
-    updated_data = Post(
-        title="Updated Title",
-        body="Updated Body",
-        userId=1
-    )
+    updated_data = Post(title="Updated Title", body="Updated Body", userId=1)
     updated_post = api.posts.update("1", updated_data)
 
     # Verify the response is a Post model instance

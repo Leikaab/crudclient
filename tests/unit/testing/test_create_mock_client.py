@@ -15,8 +15,8 @@ from crudclient.testing.core.client import MockClient
 class TestCreateMockClient:
     """Tests specifically for the MockClientFactory.create_mock_client method."""
 
-    @patch('crudclient.testing.client_factory.create_basic_auth_mock')  # Auth mock creation is still in client_factory
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')  # Helper is in factory.helpers
+    @patch("crudclient.testing.client_factory.create_basic_auth_mock")  # Auth mock creation is still in client_factory
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")  # Helper is in factory.helpers
     def test_create_mock_client_with_basic_auth(self, mock_configure_auth, mock_create_basic):
         """Test create_mock_client with basic auth type."""
         # Arrange
@@ -25,22 +25,19 @@ class TestCreateMockClient:
         mock_basic_auth_instance.get_auth_strategy.return_value = mock_auth_strategy
         mock_create_basic.return_value = mock_basic_auth_instance
 
-        auth_config = {'username': 'test_user', 'password': 'test_password'}
+        auth_config = {"username": "test_user", "password": "test_password"}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='basic',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="basic", auth_config=auth_config)
 
         # Assert
-        mock_create_basic.assert_called_once_with(username='test_user', password='test_password')
+        mock_create_basic.assert_called_once_with(username="test_user", password="test_password")
         mock_configure_auth.assert_called_once_with(mock_basic_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
         assert isinstance(mock_client, MockClient)
 
-    @patch('crudclient.testing.client_factory.create_bearer_auth_mock')
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')
+    @patch("crudclient.testing.client_factory.create_bearer_auth_mock")
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
     def test_create_mock_client_with_bearer_auth(self, mock_configure_auth, mock_create_bearer):
         """Test create_mock_client with bearer auth type."""
         # Arrange
@@ -49,21 +46,18 @@ class TestCreateMockClient:
         mock_bearer_auth_instance.get_auth_strategy.return_value = mock_auth_strategy
         mock_create_bearer.return_value = mock_bearer_auth_instance
 
-        auth_config = {'token': 'test_token'}
+        auth_config = {"token": "test_token"}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='bearer',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="bearer", auth_config=auth_config)
 
         # Assert
-        mock_create_bearer.assert_called_once_with(token='test_token')
+        mock_create_bearer.assert_called_once_with(token="test_token")
         mock_configure_auth.assert_called_once_with(mock_bearer_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch('crudclient.testing.client_factory.create_api_key_auth_mock')
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')
+    @patch("crudclient.testing.client_factory.create_api_key_auth_mock")
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
     def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth, mock_create_apikey):
         """Test create_mock_client with apikey auth type (header)."""
         # Arrange
@@ -72,21 +66,18 @@ class TestCreateMockClient:
         mock_apikey_auth_instance.get_auth_strategy.return_value = mock_auth_strategy
         mock_create_apikey.return_value = mock_apikey_auth_instance
 
-        auth_config = {'api_key': 'test_key', 'header_name': 'X-API-Key'}
+        auth_config = {"api_key": "test_key", "header_name": "X-API-Key"}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='apikey',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="apikey", auth_config=auth_config)
 
         # Assert
-        mock_create_apikey.assert_called_once_with(api_key='test_key', header_name='X-API-Key')
+        mock_create_apikey.assert_called_once_with(api_key="test_key", header_name="X-API-Key")
         mock_configure_auth.assert_called_once_with(mock_apikey_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch('crudclient.testing.client_factory.create_api_key_auth_mock')
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')
+    @patch("crudclient.testing.client_factory.create_api_key_auth_mock")
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
     def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth, mock_create_apikey):
         """Test create_mock_client with apikey auth type (param)."""
         # Arrange
@@ -95,21 +86,18 @@ class TestCreateMockClient:
         mock_apikey_auth_instance.get_auth_strategy.return_value = mock_auth_strategy
         mock_create_apikey.return_value = mock_apikey_auth_instance
 
-        auth_config = {'api_key': 'test_key', 'param_name': 'api_key'}
+        auth_config = {"api_key": "test_key", "param_name": "api_key"}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='apikey',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="apikey", auth_config=auth_config)
 
         # Assert
-        mock_create_apikey.assert_called_once_with(api_key='test_key', header_name=None, param_name='api_key')
+        mock_create_apikey.assert_called_once_with(api_key="test_key", header_name=None, param_name="api_key")
         mock_configure_auth.assert_called_once_with(mock_apikey_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch('crudclient.testing.client_factory.create_custom_auth_mock')
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')
+    @patch("crudclient.testing.client_factory.create_custom_auth_mock")
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
     def test_create_mock_client_with_custom_auth(self, mock_configure_auth, mock_create_custom):
         """Test create_mock_client with custom auth type."""
         # Arrange
@@ -123,21 +111,19 @@ class TestCreateMockClient:
 
         def param_cb():
             return {"custom_param": "value"}
-        auth_config = {'header_callback': header_cb, 'param_callback': param_cb}
+
+        auth_config = {"header_callback": header_cb, "param_callback": param_cb}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='custom',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="custom", auth_config=auth_config)
 
         # Assert
         mock_create_custom.assert_called_once_with(header_callback=header_cb, param_callback=param_cb)
         mock_configure_auth.assert_called_once_with(mock_custom_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch('crudclient.testing.client_factory.create_oauth_mock')
-    @patch('crudclient.testing.factory.helpers._configure_auth_mock')
+    @patch("crudclient.testing.client_factory.create_oauth_mock")
+    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
     def test_create_mock_client_with_oauth_auth(self, mock_configure_auth, mock_create_oauth):
         """Test create_mock_client with oauth auth type."""
         # Arrange
@@ -146,19 +132,21 @@ class TestCreateMockClient:
         mock_oauth_auth_instance.get_auth_strategy.return_value = mock_auth_strategy
         mock_create_oauth.return_value = mock_oauth_auth_instance
 
-        auth_config = {'client_id': 'id', 'client_secret': 'secret', 'token_url': 'url'}
+        auth_config = {"client_id": "id", "client_secret": "secret", "token_url": "url"}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_type='oauth',
-            auth_config=auth_config
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_type="oauth", auth_config=auth_config)
 
         # Assert
         mock_create_oauth.assert_called_once_with(
-            client_id='id', client_secret='secret', token_url='url',
-            authorize_url=None, grant_type='authorization_code', scope='read write',
-            access_token=None, refresh_token=None
+            client_id="id",
+            client_secret="secret",
+            token_url="url",
+            authorize_url=None,
+            grant_type="authorization_code",
+            scope="read write",
+            access_token=None,
+            refresh_token=None,
         )
         mock_configure_auth.assert_called_once_with(mock_oauth_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
@@ -169,29 +157,24 @@ class TestCreateMockClient:
         auth_strategy = BearerAuth(token="direct_token")
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            auth_strategy=auth_strategy
-        )
+        mock_client = MockClientFactory.create_mock_client(auth_strategy=auth_strategy)
 
         # Assert
         assert mock_client.get_auth_strategy() is auth_strategy
 
-    @patch('crudclient.testing.factory.helpers._create_api_patterns')
+    @patch("crudclient.testing.factory.helpers._create_api_patterns")
     def test_create_mock_client_with_api_type(self, mock_create_patterns):
         """Test create_mock_client with api_type."""
         # Arrange
-        mock_patterns = [{'method': 'GET', 'path': '/test', 'status_code': 200}]
+        mock_patterns = [{"method": "GET", "path": "/test", "status_code": 200}]
         mock_create_patterns.return_value = mock_patterns
-        api_resources_config = {'users': {'base_path': '/users'}}
+        api_resources_config = {"users": {"base_path": "/users"}}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            api_type='rest',
-            api_resources=api_resources_config
-        )
+        mock_client = MockClientFactory.create_mock_client(api_type="rest", api_resources=api_resources_config)
 
         # Assert
-        mock_create_patterns.assert_called_once_with('rest', api_resources=api_resources_config)
+        mock_create_patterns.assert_called_once_with("rest", api_resources=api_resources_config)
         # Assert calls on the actual http_client's configure_response method
         if isinstance(mock_client.http_client.configure_response, MagicMock):
             mock_client.http_client.configure_response.assert_called_once_with(**mock_patterns[0])
@@ -200,16 +183,14 @@ class TestCreateMockClient:
             # This depends on the test setup and whether MockHTTPClient is fully mocked.
             pass  # Placeholder
 
-    @patch('crudclient.testing.factory.helpers._add_error_responses')
+    @patch("crudclient.testing.factory.helpers._add_error_responses")
     def test_create_mock_client_with_error_responses(self, mock_add_errors):
         """Test create_mock_client with error_responses."""
         # Arrange
-        error_config = {'validation': {'status_code': 422}}
+        error_config = {"validation": {"status_code": 422}}
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            error_responses=error_config
-        )
+        mock_client = MockClientFactory.create_mock_client(error_responses=error_config)
 
         # Assert
         mock_add_errors.assert_called_once_with(mock_client, error_config)
@@ -217,15 +198,10 @@ class TestCreateMockClient:
     def test_create_mock_client_with_response_patterns(self):
         """Test create_mock_client with response_patterns."""
         # Arrange
-        patterns = [
-            {'method': 'GET', 'path': '/ping', 'status_code': 200, 'data': 'pong'},
-            {'method': 'POST', 'path': '/echo', 'status_code': 201}
-        ]
+        patterns = [{"method": "GET", "path": "/ping", "status_code": 200, "data": "pong"}, {"method": "POST", "path": "/echo", "status_code": 201}]
 
         # Act
-        mock_client = MockClientFactory.create_mock_client(
-            response_patterns=patterns
-        )
+        mock_client = MockClientFactory.create_mock_client(response_patterns=patterns)
 
         # Assert calls on the actual http_client's configure_response method
         # Ensure configure_response is a mock if http_client itself isn't fully mocked

@@ -23,12 +23,12 @@ def check_stub_files(files: List[str]) -> List[str]:
     """
     # Get all .py files in the commit that are in the crudclient/ directory
     # Note: Files in hooks/ directory are already excluded since we only check crudclient/
-    py_files = [f for f in files if f.endswith('.py') and f.startswith('crudclient/') and not f.startswith('hooks/')]
+    py_files = [f for f in files if f.endswith(".py") and f.startswith("crudclient/") and not f.startswith("hooks/")]
 
     # For each .py file, check if a corresponding .pyi file exists
     missing_stubs = []
     for py_file in py_files:
-        pyi_file = py_file + 'i'  # Convert .py to .pyi
+        pyi_file = py_file + "i"  # Convert .py to .pyi
         if pyi_file not in files and not os.path.exists(pyi_file):
             missing_stubs.append(py_file)
 
@@ -61,16 +61,16 @@ def main(files: List[str]) -> int:
     return 0
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Check stub file rules')
-    parser.add_argument('files', nargs='*', help='Files to check')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Check stub file rules")
+    parser.add_argument("files", nargs="*", help="Files to check")
     args = parser.parse_args()
 
     # If no files are provided, check all files in the crudclient/ directory
     if not args.files:
-        for root, _, files in os.walk('crudclient'):
+        for root, _, files in os.walk("crudclient"):
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith(".py"):
                     args.files.append(os.path.join(root, file))
 
     sys.exit(main(args.files))

@@ -14,6 +14,7 @@ class TripletexSuppliers(TripletexCrud[Supplier]):
     because the Tripletex API has specific requirements for the request format.
     The Supplier model is still used for type hints and documentation.
     """
+
     _resource_path = "supplier"
     _datamodel = None  # Use None to return dictionaries instead of model objects
     _api_response_model = SupplierResponse
@@ -105,6 +106,7 @@ class TripletexCountries(TripletexCrud[Country]):
     """
     CRUD operations for Tripletex countries.
     """
+
     _resource_path = "country"
     _datamodel = Country
     _api_response_model = CountryResponse
@@ -120,8 +122,8 @@ class TripletexCountries(TripletexCrud[Country]):
         response = self.client.get(endpoint)
 
         # The response has a 'value' field that contains the actual country data
-        if isinstance(response, dict) and 'value' in response:
-            return response['value']
+        if isinstance(response, dict) and "value" in response:
+            return response["value"]
 
         # If response is not a dict or doesn't have 'value', return it as is
         if isinstance(response, dict):

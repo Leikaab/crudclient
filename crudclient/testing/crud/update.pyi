@@ -61,12 +61,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_update_response(
-        self,
-        url_pattern: str,
-        updated_data: Dict[str, Any],
-        **kwargs: Any
-    ) -> 'UpdateMock':
+    def with_update_response(self, url_pattern: str, updated_data: Dict[str, Any], **kwargs: Any) -> "UpdateMock":
         """
         Configures a successful response (200 OK) for a PUT request matching the URL pattern.
 
@@ -81,12 +76,8 @@ class UpdateMock(BaseCrudMock):
         ...
 
     def with_partial_update_response(
-        self,
-        url_pattern: str,
-        partial_data: Dict[str, Any],
-        full_response_data: Dict[str, Any],
-        **kwargs: Any
-    ) -> 'UpdateMock':
+        self, url_pattern: str, partial_data: Dict[str, Any], full_response_data: Dict[str, Any], **kwargs: Any
+    ) -> "UpdateMock":
         """
         Configures a successful response (200 OK) for a PATCH request matching the URL pattern
         and specific partial data.
@@ -104,14 +95,8 @@ class UpdateMock(BaseCrudMock):
         ...
 
     def with_conditional_update(
-        self,
-        url_pattern: str,
-        condition_field: str,
-        condition_value: Any,
-        success_data: Dict[str, Any],
-        error_data: Dict[str, Any],
-        **kwargs: Any
-    ) -> 'UpdateMock':
+        self, url_pattern: str, condition_field: str, condition_value: Any, success_data: Dict[str, Any], error_data: Dict[str, Any], **kwargs: Any
+    ) -> "UpdateMock":
         """
         Configures a conditional response for PUT/PATCH requests based on a field in the request body.
 
@@ -132,11 +117,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_not_found(
-        self,
-        url_pattern: str,
-        **kwargs: Any
-    ) -> 'UpdateMock':
+    def with_not_found(self, url_pattern: str, **kwargs: Any) -> "UpdateMock":
         """
         Configures the mock to raise a NotFoundError (simulating a 404 response)
         for PUT/PATCH requests matching the URL pattern.
@@ -150,7 +131,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> 'UpdateMock':
+    def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> "UpdateMock":
         """
         Stores an initial version of a resource for concurrency control testing.
 
@@ -166,12 +147,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_concurrency_control(
-        self,
-        url_pattern: str,
-        control_type: str = 'etag',
-        version_field: str = 'version'
-    ) -> 'UpdateMock':
+    def with_concurrency_control(self, url_pattern: str, control_type: str = "etag", version_field: str = "version") -> "UpdateMock":
         """
         Enables concurrency control simulation for PUT/PATCH requests matching the URL pattern.
 
@@ -201,11 +177,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_optimistic_locking(
-        self,
-        url_pattern: str,
-        version_field: str = 'version'
-    ) -> 'UpdateMock':
+    def with_optimistic_locking(self, url_pattern: str, version_field: str = "version") -> "UpdateMock":
         """
         Alias for `with_concurrency_control` specifically configured for version-based optimistic locking.
 
@@ -218,7 +190,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_etag_concurrency(self, url_pattern: str) -> 'UpdateMock':
+    def with_etag_concurrency(self, url_pattern: str) -> "UpdateMock":
         """
         Alias for `with_concurrency_control` specifically configured for ETag-based concurrency control.
 
@@ -230,12 +202,7 @@ class UpdateMock(BaseCrudMock):
         """
         ...
 
-    def with_concurrency_conflict(
-        self,
-        url_pattern: str,
-        resource_id: Union[str, int],
-        **kwargs: Any
-    ) -> 'UpdateMock':
+    def with_concurrency_conflict(self, url_pattern: str, resource_id: Union[str, int], **kwargs: Any) -> "UpdateMock":
         """
         Configures the mock to return a 409 Conflict response for a specific resource ID
         matching the URL pattern.

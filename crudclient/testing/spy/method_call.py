@@ -1,16 +1,10 @@
-
 from typing import Any, Dict, Optional, Tuple
 
 
 class MethodCall:
 
     def __init__(
-        self,
-        method_name: str,
-        args: Tuple[Any, ...],
-        kwargs: Dict[str, Any],
-        return_value: Any = None,
-        exception: Optional[Exception] = None
+        self, method_name: str, args: Tuple[Any, ...], kwargs: Dict[str, Any], return_value: Any = None, exception: Optional[Exception] = None
     ):
         self.method_name = method_name
         self.args = args

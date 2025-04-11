@@ -26,12 +26,7 @@ class TestSpyBase:
         spy = SpyBase()
 
         # Act
-        spy._record_call(
-            method_name="test_method",
-            args=(1, 2),
-            kwargs={"a": "b"},
-            return_value="result"
-        )
+        spy._record_call(method_name="test_method", args=(1, 2), kwargs={"a": "b"}, return_value="result")
 
         # Assert
         assert len(spy.calls) == 1
@@ -49,12 +44,7 @@ class TestSpyBase:
         exception = ValueError("Test error")
 
         # Act
-        spy._record_call(
-            method_name="test_method",
-            args=(1, 2),
-            kwargs={"a": "b"},
-            exception=exception
-        )
+        spy._record_call(method_name="test_method", args=(1, 2), kwargs={"a": "b"}, exception=exception)
 
         # Assert
         assert len(spy.calls) == 1

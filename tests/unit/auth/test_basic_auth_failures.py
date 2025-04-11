@@ -14,11 +14,7 @@ def test_basic_auth_failure(basic_auth_client, mock_request):
     """Test handling of Basic Authentication failures."""
     # Arrange
     url = f"{basic_auth_client.base_url}/users"
-    mock_request.get(
-        url,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid credentials"}
-    )
+    mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid credentials"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:

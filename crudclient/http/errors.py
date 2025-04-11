@@ -1,4 +1,3 @@
-
 import logging
 from typing import Dict, Type
 
@@ -24,7 +23,11 @@ class ErrorHandler:
 
     def handle_error_response(self, response: requests.Response) -> None:
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         try:
             error_data = response.json()
@@ -57,9 +60,7 @@ class ErrorHandler:
         # This should not be reached, but just in case
         raise CrudClientError(f"Request failed with status code {status_code}, {error_data}", response)
 
-    def register_status_code_handler(
-        self, status_code: int, exception_class: Type[CrudClientError]
-    ) -> None:
+    def register_status_code_handler(self, status_code: int, exception_class: Type[CrudClientError]) -> None:
         # Runtime type checks
         if not isinstance(status_code, int):
             raise TypeError(f"status_code must be an integer, got {type(status_code).__name__}")

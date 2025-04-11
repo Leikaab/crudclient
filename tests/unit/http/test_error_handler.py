@@ -4,6 +4,7 @@ Tests for the ErrorHandler class in the crudclient library.
 This module contains tests for how the ErrorHandler class handles various HTTP error responses,
 including different status codes and malformed responses.
 """
+
 import json
 
 import pytest
@@ -15,6 +16,7 @@ from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidR
 @pytest.fixture
 def create_response_mock(mocker):
     """Create a mock response."""
+
     def _create_mock(status_code, json_data=None, headers=None, text=None):
         response = mocker.Mock(spec=requests.Response)
         response.status_code = status_code
@@ -49,10 +51,7 @@ class TestErrorHandler:
     def test_handle_error_response_400(self, error_handler, create_response_mock):
         """Test handling of 400 Bad Request responses."""
         # Arrange
-        response = create_response_mock(
-            400,
-            json_data={"error": "Bad Request", "message": "Invalid parameters"}
-        )
+        response = create_response_mock(400, json_data={"error": "Bad Request", "message": "Invalid parameters"})
 
         # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
@@ -66,10 +65,7 @@ class TestErrorHandler:
     def test_handle_error_response_401(self, error_handler, create_response_mock):
         """Test handling of 401 Unauthorized responses."""
         # Arrange
-        response = create_response_mock(
-            401,
-            json_data={"error": "Unauthorized", "message": "Invalid credentials"}
-        )
+        response = create_response_mock(401, json_data={"error": "Unauthorized", "message": "Invalid credentials"})
 
         # Act & Assert
         with pytest.raises(AuthenticationError) as excinfo:
@@ -83,10 +79,7 @@ class TestErrorHandler:
     def test_handle_error_response_403(self, error_handler, create_response_mock):
         """Test handling of 403 Forbidden responses."""
         # Arrange
-        response = create_response_mock(
-            403,
-            json_data={"error": "Forbidden", "message": "Insufficient permissions"}
-        )
+        response = create_response_mock(403, json_data={"error": "Forbidden", "message": "Insufficient permissions"})
 
         # Act & Assert
         with pytest.raises(AuthenticationError) as excinfo:
@@ -100,10 +93,7 @@ class TestErrorHandler:
     def test_handle_error_response_404(self, error_handler, create_response_mock):
         """Test handling of 404 Not Found responses."""
         # Arrange
-        response = create_response_mock(
-            404,
-            json_data={"error": "Not Found", "message": "Resource does not exist"}
-        )
+        response = create_response_mock(404, json_data={"error": "Not Found", "message": "Resource does not exist"})
 
         # Act & Assert
         with pytest.raises(NotFoundError) as excinfo:
@@ -117,10 +107,7 @@ class TestErrorHandler:
     def test_handle_error_response_422(self, error_handler, create_response_mock):
         """Test handling of 422 Unprocessable Entity responses."""
         # Arrange
-        response = create_response_mock(
-            422,
-            json_data={"error": "Validation Error", "fields": {"name": "Required"}}
-        )
+        response = create_response_mock(422, json_data={"error": "Validation Error", "fields": {"name": "Required"}})
 
         # Act & Assert
         with pytest.raises(InvalidResponseError) as excinfo:
@@ -134,10 +121,7 @@ class TestErrorHandler:
     def test_handle_error_response_500(self, error_handler, create_response_mock):
         """Test handling of 500 Internal Server Error responses."""
         # Arrange
-        response = create_response_mock(
-            500,
-            json_data={"error": "Internal Server Error"}
-        )
+        response = create_response_mock(500, json_data={"error": "Internal Server Error"})
 
         # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
@@ -150,10 +134,7 @@ class TestErrorHandler:
     def test_handle_error_response_502(self, error_handler, create_response_mock):
         """Test handling of 502 Bad Gateway responses."""
         # Arrange
-        response = create_response_mock(
-            502,
-            json_data={"error": "Bad Gateway"}
-        )
+        response = create_response_mock(502, json_data={"error": "Bad Gateway"})
 
         # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
@@ -166,10 +147,7 @@ class TestErrorHandler:
     def test_handle_error_response_503(self, error_handler, create_response_mock):
         """Test handling of 503 Service Unavailable responses."""
         # Arrange
-        response = create_response_mock(
-            503,
-            json_data={"error": "Service Unavailable"}
-        )
+        response = create_response_mock(503, json_data={"error": "Service Unavailable"})
 
         # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
@@ -196,6 +174,7 @@ class TestErrorHandler:
 
     def test_register_status_code_handler(self, error_handler, create_response_mock):
         """Test registering a custom status code handler."""
+
         # Arrange
         # Create a custom exception class
         class CustomError(CrudClientError):
@@ -205,10 +184,7 @@ class TestErrorHandler:
         error_handler.register_status_code_handler(418, CustomError)
 
         # Create a mock response with a 418 status code
-        response = create_response_mock(
-            418,
-            json_data={"error": "I'm a teapot"}
-        )
+        response = create_response_mock(418, json_data={"error": "I'm a teapot"})
 
         # Act & Assert
         with pytest.raises(CustomError) as excinfo:

@@ -96,27 +96,13 @@ class HttpClient:
 
     @overload
     def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: Literal[True] = True,
-        **kwargs: Any
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
-
     @overload
     def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: Literal[False] = False,
-        **kwargs: Any
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
-
-    def get(
-        self, endpoint: str, params: Optional[Dict[str, Any]] = None
-    ) -> RawResponseSimple:
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """
         Make a GET request to the specified endpoint.
 
@@ -255,13 +241,7 @@ class HttpClient:
         """
         ...
 
-    def request_raw(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        **kwargs: Any
-    ) -> requests.Response:
+    def request_raw(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, **kwargs: Any) -> requests.Response:
         """
         Make a raw HTTP request and return the Response object without processing.
 

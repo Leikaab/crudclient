@@ -1,4 +1,3 @@
-
 from typing import Any, Callable, Dict, List, Optional
 
 
@@ -36,12 +35,7 @@ class PaginationHelper:
         self.custom_metadata_generator = custom_metadata_generator
         self.custom_links_generator = custom_links_generator
 
-    def get_page(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
-        cursor: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def get_page(self, page: Optional[int] = None, page_size: Optional[int] = None, cursor: Optional[str] = None) -> Dict[str, Any]:
         size = page_size or self.page_size
 
         if self.pagination_style == "cursor" and cursor is not None:
@@ -50,8 +44,9 @@ class PaginationHelper:
             try:
                 # Simple cursor implementation - in real code this would be more secure
                 import base64
+
                 decoded = base64.b64decode(cursor.encode()).decode()
-                parts = decoded.split(':')
+                parts = decoded.split(":")
                 if len(parts) >= 2:
                     page = int(parts[0])
                     size = int(parts[1])
@@ -69,7 +64,7 @@ class PaginationHelper:
         if start_idx >= len(self.items):
             page_items = []
         else:
-            page_items = self.items[start_idx:min(end_idx, len(self.items))]
+            page_items = self.items[start_idx : min(end_idx, len(self.items))]
 
         # Generate metadata based on pagination style
         if self.custom_metadata_generator:
@@ -114,11 +109,7 @@ class PaginationHelper:
             else:  # link-based or other styles
                 links = self._generate_link_based_links(page, size)
 
-        return {
-            "data": page_items,
-            "metadata": metadata,
-            "links": links
-        }
+        return {"data": page_items, "metadata": metadata, "links": links}
 
     def _generate_offset_links(self, page: int, size: int) -> Dict[str, str]:
         links = {
@@ -149,7 +140,7 @@ class PaginationHelper:
         return links
 
     def _generate_link_based_links(self, page: int, size: int) -> Dict[str, str]:
-        base = self.base_url.rstrip('/')
+        base = self.base_url.rstrip("/")
         links = {
             "self": f"{base}?{self.page_param}={page}&{self.size_param}={size}",
         }
@@ -168,10 +159,12 @@ class PaginationHelper:
 
     def _default_next_cursor_generator(self, page: int, size: int) -> str:
         import base64
+
         cursor_data = f"{page + 1}:{size}:next"
         return base64.b64encode(cursor_data.encode()).decode()
 
     def _default_prev_cursor_generator(self, page: int, size: int) -> str:
         import base64
+
         cursor_data = f"{page - 1}:{size}:prev"
         return base64.b64encode(cursor_data.encode()).decode()

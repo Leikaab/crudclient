@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from .data_store import DataStore
 
-
 def bulk_create_items(
     data_store: "DataStore",
     collection: str,
@@ -17,7 +16,6 @@ def bulk_create_items(
     Handles validation atomically before creating items.
     """
     ...
-
 
 def bulk_update_items(
     data_store: "DataStore",
@@ -32,7 +30,6 @@ def bulk_update_items(
     Handles validation atomically before updating items.
     """
     ...
-
 
 def bulk_delete_items(
     data_store: "DataStore",

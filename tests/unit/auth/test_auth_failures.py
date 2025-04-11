@@ -37,6 +37,7 @@ class TestAuthFailures:
 
     def test_auth_param_setup_failure(self, mock_request, mocker):
         """Test handling of authentication parameter setup failures."""
+
         # Arrange
         # Create a custom auth mock with a failing param callback
         def header_callback():

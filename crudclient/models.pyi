@@ -51,9 +51,7 @@ class RoleBasedModel(BaseModel):
         """
         ...
 
-
 T = TypeVar("T")
-
 
 class Link(BaseModel):
     """
@@ -65,12 +63,11 @@ class Link(BaseModel):
 
     href: Optional[HttpUrl]
 
-    @field_validator('href')
+    @field_validator("href")
     @classmethod
     def validate_href(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]:
         """Validate the href URL if present."""
         ...
-
 
 class PaginationLinks(BaseModel):
     """
@@ -86,12 +83,11 @@ class PaginationLinks(BaseModel):
     previous: Optional[Link]
     self: Link = Field(..., description="Link to the current page")
 
-    @field_validator('self')
+    @field_validator("self")
     @classmethod
     def validate_self_link(cls, v: Link) -> Link:
         """Validate that the self link is present and properly formatted."""
         ...
-
 
 class ApiResponse(BaseModel, Generic[T]):
     """
@@ -110,7 +106,7 @@ class ApiResponse(BaseModel, Generic[T]):
     count: int = Field(..., ge=0, description="Total number of items")
     data: List[T] = Field(..., description="The actual data items")
 
-    @field_validator('count')
+    @field_validator("count")
     @classmethod
     def validate_count(cls, v: int) -> int:
         """Validate that count is non-negative."""
