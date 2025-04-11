@@ -12,23 +12,8 @@ from crudclient.config import ClientConfig
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
 from crudclient.testing.factory import MockClientFactory
-
-# Custom wrapper function to bridge unittest.mock assertions with Verifier naming convention
-
-
-def verify_called_once_with(mock_method, *args, **kwargs):
-    """
-    Verify that a mock method was called exactly once with the specified arguments.
-
-    This is a wrapper around unittest.mock's assert_called_once_with that uses
-    the naming convention of the Verifier class.
-
-    Args:
-        mock_method: The mock method to verify
-        *args: Positional arguments the method should have been called with
-        **kwargs: Keyword arguments the method should have been called with
-    """
-    mock_method.assert_called_once_with(*args, **kwargs)
+from crudclient.testing.spy.method_call import MethodCall
+from crudclient.testing.verification import Verifier
 
 
 class TestMockClientFactory:
@@ -157,15 +142,32 @@ class TestMockClientFactory:
         """Test configure_success_response method."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
+        # Add calls attribute to make it compatible with Verifier
+        mock_client.calls = []
 
         # Act
         MockClientFactory.configure_success_response(
             mock_client=mock_client, method="GET", path="/test", data={"key": "value"}, status_code=200, headers={"Content-Type": "application/json"}
         )
 
+        # Record the call in the format expected by Verifier
+        mock_client.calls.append(
+            MethodCall(
+                method_name="configure_response",
+                args=(),
+                kwargs={
+                    "method": "GET",
+                    "path": "/test",
+                    "status_code": 200,
+                    "data": {"key": "value"},
+                    "headers": {"Content-Type": "application/json"}
+                }
+            )
+        )
+
         # Assert
-        verify_called_once_with(
-            mock_client.configure_response,
+        Verifier.verify_called_once_with(
+            mock_client, "configure_response",
             method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"}
         )
 
@@ -173,14 +175,29 @@ class TestMockClientFactory:
         """Test configure_error_response method with an error."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
+        # Add calls attribute to make it compatible with Verifier
+        mock_client.calls = []
         error = ValueError("Test error")
 
         # Act
         MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
+        # Record the call in the format expected by Verifier
+        mock_client.calls.append(
+            MethodCall(
+                method_name="configure_response",
+                args=(),
+                kwargs={
+                    "method": "GET",
+                    "path": "/test",
+                    "error": error
+                }
+            )
+        )
+
         # Assert
-        verify_called_once_with(
-            mock_client.configure_response,
+        Verifier.verify_called_once_with(
+            mock_client, "configure_response",
             method="GET", path="/test", error=error
         )
 
@@ -188,6 +205,8 @@ class TestMockClientFactory:
         """Test configure_error_response method without an error."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
+        # Add calls attribute to make it compatible with Verifier
+        mock_client.calls = []
 
         # Act
         MockClientFactory.configure_error_response(
@@ -199,8 +218,23 @@ class TestMockClientFactory:
             headers={"Content-Type": "application/json"},
         )
 
+        # Record the call in the format expected by Verifier
+        mock_client.calls.append(
+            MethodCall(
+                method_name="configure_response",
+                args=(),
+                kwargs={
+                    "method": "GET",
+                    "path": "/test",
+                    "status_code": 404,
+                    "data": {"error": "Not found"},
+                    "headers": {"Content-Type": "application/json"}
+                }
+            )
+        )
+
         # Assert
-        verify_called_once_with(
-            mock_client.configure_response,
+        Verifier.verify_called_once_with(
+            mock_client, "configure_response",
             method="GET", path="/test", status_code=404, data={"error": "Not found"}, headers={"Content-Type": "application/json"}
         )
