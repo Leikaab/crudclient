@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse
@@ -9,7 +9,7 @@ from crudclient.testing.simple_mock.core import SimpleMockClientCore
 
 class SimpleMockClientRequestHandling(SimpleMockClientCore):
 
-    def _request(self, method: str, url: str, **kwargs: Any) -> Optional[str]:
+    def _request(self, method: str, url: str, **kwargs: Any) -> str:
         # Record the request
         record = self._create_request_record(method, url, kwargs)
 
@@ -28,17 +28,17 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         # No pattern matched, use default response
         return self._handle_default_response(record)
 
-    def _create_request_record(self, method: str, url: str, kwargs: dict) -> RequestRecord:
+    def _create_request_record(self, method: str, url: str, kwargs: Dict[str, Any]) -> RequestRecord:
         record = RequestRecord(
             method=method, url=url, params=kwargs.get("params"), data=kwargs.get("data"), json=kwargs.get("json"), headers=kwargs.get("headers")
         )
         self.request_history.append(record)
         return record
 
-    def _is_basic_match(self, pattern: dict, method: str, url: str) -> bool:
+    def _is_basic_match(self, pattern: Dict[str, Any], method: str, url: str) -> bool:
         return pattern["method"] == method.upper() and re.search(pattern["url_pattern"], url) is not None
 
-    def _matches_request_details(self, pattern: dict, kwargs: dict) -> bool:
+    def _matches_request_details(self, pattern: Dict[str, Any], kwargs: Dict[str, Any]) -> bool:
         matchers = [
             self._check_params_match(pattern["params"], kwargs.get("params", {})),
             self._check_data_match(pattern["data"], kwargs.get("data", {})),
@@ -47,7 +47,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         ]
         return all(matchers)
 
-    def _check_params_match(self, pattern_params: Optional[dict], request_params: dict) -> bool:
+    def _check_params_match(self, pattern_params: Optional[Dict[str, Any]], request_params: Dict[str, Any]) -> bool:
         if pattern_params is None:
             return True
 
@@ -56,7 +56,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                 return False
         return True
 
-    def _check_data_match(self, pattern_data: Optional[dict], request_data: dict) -> bool:
+    def _check_data_match(self, pattern_data: Optional[Dict[str, Any]], request_data: Dict[str, Any]) -> bool:
         if pattern_data is None:
             return True
 
@@ -65,7 +65,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                 return False
         return True
 
-    def _check_json_match(self, pattern_json: Optional[dict], request_json: dict) -> bool:
+    def _check_json_match(self, pattern_json: Optional[Dict[str, Any]], request_json: Dict[str, Any]) -> bool:
         if pattern_json is None:
             return True
 
@@ -74,7 +74,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                 return False
         return True
 
-    def _check_headers_match(self, pattern_headers: Optional[dict], request_headers: dict) -> bool:
+    def _check_headers_match(self, pattern_headers: Optional[Dict[str, Any]], request_headers: Dict[str, Any]) -> bool:
         if pattern_headers is None:
             return True
 
@@ -83,7 +83,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
                 return False
         return True
 
-    def _handle_matching_pattern(self, pattern: dict, record: RequestRecord, kwargs: dict) -> Optional[str]:
+    def _handle_matching_pattern(self, pattern: Dict[str, Any], record: RequestRecord, kwargs: Dict[str, Any]) -> str:
         # Increment call count
         pattern["call_count"] += 1
 
@@ -101,7 +101,7 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         # Return response as string
         return self._response_to_string(response_obj)
 
-    def _ensure_mock_response(self, response_obj: Any) -> MockResponse:
+    def _ensure_mock_response(self, response_obj: Union[MockResponse, Dict[str, Any], List[Any], str, Any]) -> MockResponse:
         if isinstance(response_obj, MockResponse):
             return response_obj
 
@@ -114,26 +114,26 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         else:
             return MockResponse(status_code=200, text=str(response_obj))
 
-    def _handle_default_response(self, record: RequestRecord) -> Optional[str]:
+    def _handle_default_response(self, record: RequestRecord) -> str:
         record.response = self.default_response
         return self._response_to_string(self.default_response)
 
-    def _response_to_string(self, response: MockResponse) -> Optional[str]:
+    def _response_to_string(self, response: MockResponse) -> str:
         if response.json_data is not None:
             return json.dumps(response.json_data)
-        return response.text
+        return response.text or ""
 
-    def get(self, url: str, **kwargs: Any) -> Optional[str]:
+    def get(self, url: str, **kwargs: Any) -> str:
         return self._request("GET", url, **kwargs)
 
-    def post(self, url: str, **kwargs: Any) -> Optional[str]:
+    def post(self, url: str, **kwargs: Any) -> str:
         return self._request("POST", url, **kwargs)
 
-    def put(self, url: str, **kwargs: Any) -> Optional[str]:
+    def put(self, url: str, **kwargs: Any) -> str:
         return self._request("PUT", url, **kwargs)
 
-    def delete(self, url: str, **kwargs: Any) -> Optional[str]:
+    def delete(self, url: str, **kwargs: Any) -> str:
         return self._request("DELETE", url, **kwargs)
 
-    def patch(self, url: str, **kwargs: Any) -> Optional[str]:
+    def patch(self, url: str, **kwargs: Any) -> str:
         return self._request("PATCH", url, **kwargs)
