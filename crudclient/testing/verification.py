@@ -1,12 +1,12 @@
 from typing import Any
 
 from .exceptions import VerificationError
-from .types import SpyTarget
+from .types import SpyTarget  # Keep the import for documentation purposes # noqa: F401
 
 
 class Verifier:
     @staticmethod
-    def verify_called_with(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_called_with(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -29,7 +29,7 @@ class Verifier:
         raise VerificationError(f"Method {method_name} was not called with arguments ({all_args})")
 
     @staticmethod
-    def verify_called_once_with(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_called_once_with(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -62,7 +62,7 @@ class Verifier:
             )
 
     @staticmethod
-    def verify_not_called(target: SpyTarget, method_name: str) -> bool:
+    def verify_not_called(target: Any, method_name: str) -> bool:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -73,7 +73,7 @@ class Verifier:
         return True
 
     @staticmethod
-    def verify_call_count(target: SpyTarget, method_name: str, count: int) -> bool:
+    def verify_call_count(target: Any, method_name: str, count: int) -> bool:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 
@@ -85,7 +85,7 @@ class Verifier:
         return True
 
     @staticmethod
-    def verify_any_call(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_any_call(target: Any, method_name: str, *args: Any, **kwargs: Any) -> bool:
         if not hasattr(target, "calls"):
             raise VerificationError(f"Target object {target} does not have 'calls' attribute")
 

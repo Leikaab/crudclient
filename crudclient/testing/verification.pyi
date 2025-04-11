@@ -5,12 +5,13 @@ This module provides high-level verification functions and classes that might
 coordinate verification across different spies (client, auth, crud).
 """
 
-from typing import Any
+from typing import Any, Union
 
 from typing_extensions import TypeAlias
 
 from .exceptions import VerificationError
 from .types import SpyTarget
+
 
 class Verifier:
     """
@@ -21,7 +22,7 @@ class Verifier:
     """
 
     @staticmethod
-    def verify_called_with(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_called_with(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
         """
         Verify that the given method was called with the given arguments.
 
@@ -40,7 +41,7 @@ class Verifier:
         ...
 
     @staticmethod
-    def verify_called_once_with(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_called_once_with(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
         """
         Verify that the given method was called exactly once with the given arguments.
 
@@ -59,7 +60,7 @@ class Verifier:
         ...
 
     @staticmethod
-    def verify_not_called(target: SpyTarget, method_name: str) -> bool:
+    def verify_not_called(target: Union[SpyTarget, object], method_name: str) -> bool:
         """
         Verify that the given method was not called.
 
@@ -76,7 +77,7 @@ class Verifier:
         ...
 
     @staticmethod
-    def verify_call_count(target: SpyTarget, method_name: str, count: int) -> bool:
+    def verify_call_count(target: Union[SpyTarget, object], method_name: str, count: int) -> bool:
         """
         Verify that the given method was called exactly count times.
 
@@ -94,7 +95,7 @@ class Verifier:
         ...
 
     @staticmethod
-    def verify_any_call(target: SpyTarget, method_name: str, *args: Any, **kwargs: Any) -> bool:
+    def verify_any_call(target: Union[SpyTarget, object], method_name: str, *args: Any, **kwargs: Any) -> bool:
         """
         Verify that the given method was called at least once with the given arguments.
 
