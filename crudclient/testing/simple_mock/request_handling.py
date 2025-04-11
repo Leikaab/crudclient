@@ -12,6 +12,24 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
 
     def _request(self, method: str, url: str, **kwargs: Any) -> Optional[str]:
         # Record the request
+        record = self._create_request_record(method, url, kwargs)
+
+        # Try to find a matching pattern
+        for pattern in self.response_patterns:
+            if self._is_basic_match(pattern, method, url):
+                # Skip if max calls reached
+                if pattern['call_count'] >= pattern['max_calls']:
+                    continue
+
+                # Check detailed matchers
+                if self._matches_request_details(pattern, kwargs):
+                    # Pattern matched - prepare and return response
+                    return self._handle_matching_pattern(pattern, record, kwargs)
+
+        # No pattern matched, use default response
+        return self._handle_default_response(record)
+
+    def _create_request_record(self, method: str, url: str, kwargs: dict) -> RequestRecord:
         record = RequestRecord(
             method=method,
             url=url,
@@ -21,87 +39,96 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
             headers=kwargs.get('headers')
         )
         self.request_history.append(record)
+        return record
 
-        # Find a matching response pattern
-        for pattern in self.response_patterns:
-            if (pattern['method'] == method.upper()
-                    and re.search(pattern['url_pattern'], url)):
+    def _is_basic_match(self, pattern: dict, method: str, url: str) -> bool:
+        return (pattern['method'] == method.upper()
+                and re.search(pattern['url_pattern'], url) is not None)
 
-                # Check if we've reached the max calls for this pattern
-                if pattern['call_count'] >= pattern['max_calls']:
-                    continue
+    def _matches_request_details(self, pattern: dict, kwargs: dict) -> bool:
+        matchers = [
+            self._check_params_match(pattern['params'], kwargs.get('params', {})),
+            self._check_data_match(pattern['data'], kwargs.get('data', {})),
+            self._check_json_match(pattern['json'], kwargs.get('json', {})),
+            self._check_headers_match(pattern['headers'], kwargs.get('headers', {}))
+        ]
+        return all(matchers)
 
-                # Check params matcher
-                params_match = True
-                if pattern['params'] is not None:
-                    request_params = kwargs.get('params', {})
-                    for key, value in pattern['params'].items():
-                        if key not in request_params or request_params[key] != value:
-                            params_match = False
-                            break
+    def _check_params_match(self, pattern_params: Optional[dict], request_params: dict) -> bool:
+        if pattern_params is None:
+            return True
 
-                # Check data matcher
-                data_match = True
-                if pattern['data'] is not None:
-                    request_data = kwargs.get('data', {})
-                    for key, value in pattern['data'].items():
-                        if key not in request_data or request_data[key] != value:
-                            data_match = False
-                            break
+        for key, value in pattern_params.items():
+            if key not in request_params or request_params[key] != value:
+                return False
+        return True
 
-                # Check json matcher
-                json_match = True
-                if pattern['json'] is not None:
-                    request_json = kwargs.get('json', {})
-                    for key, value in pattern['json'].items():
-                        if key not in request_json or request_json[key] != value:
-                            json_match = False
-                            break
+    def _check_data_match(self, pattern_data: Optional[dict], request_data: dict) -> bool:
+        if pattern_data is None:
+            return True
 
-                # Check headers matcher
-                headers_match = True
-                if pattern['headers'] is not None:
-                    request_headers = kwargs.get('headers', {})
-                    for key, value in pattern['headers'].items():
-                        if key not in request_headers or request_headers[key] != value:
-                            headers_match = False
-                            break
+        for key, value in pattern_data.items():
+            if key not in request_data or request_data[key] != value:
+                return False
+        return True
 
-                # If all matchers pass, return the response
-                if params_match and data_match and json_match and headers_match:
-                    pattern['call_count'] += 1
-                    response_obj = pattern['response']
+    def _check_json_match(self, pattern_json: Optional[dict], request_json: dict) -> bool:
+        if pattern_json is None:
+            return True
 
-                    # Handle callable responses
-                    if callable(response_obj):
-                        response_obj = response_obj(**kwargs)
+        for key, value in pattern_json.items():
+            if key not in request_json or request_json[key] != value:
+                return False
+        return True
 
-                    # Ensure it's a MockResponse
-                    if not isinstance(response_obj, MockResponse):
-                        if isinstance(response_obj, dict):
-                            response_obj = MockResponse(status_code=200, json_data=response_obj)
-                        elif isinstance(response_obj, list):
-                            # Convert list to JSON string
-                            response_obj = MockResponse(status_code=200, text=json.dumps(response_obj))
-                        elif isinstance(response_obj, str):
-                            response_obj = MockResponse(status_code=200, text=response_obj)
-                        else:
-                            response_obj = MockResponse(status_code=200, text=str(response_obj))
+    def _check_headers_match(self, pattern_headers: Optional[dict], request_headers: dict) -> bool:
+        if pattern_headers is None:
+            return True
 
-                    record.response = response_obj
+        for key, value in pattern_headers.items():
+            if key not in request_headers or request_headers[key] != value:
+                return False
+        return True
 
-                    # Convert to string
-                    if response_obj.json_data is not None:
-                        return json.dumps(response_obj.json_data)
-                    return response_obj.text
+    def _handle_matching_pattern(self, pattern: dict, record: RequestRecord, kwargs: dict) -> Optional[str]:
+        # Increment call count
+        pattern['call_count'] += 1
 
-        # No pattern matched, use default response
+        # Get response object (handle callable responses)
+        response_obj = pattern['response']
+        if callable(response_obj):
+            response_obj = response_obj(**kwargs)
+
+        # Convert to MockResponse if needed
+        response_obj = self._ensure_mock_response(response_obj)
+
+        # Store response in record
+        record.response = response_obj
+
+        # Return response as string
+        return self._response_to_string(response_obj)
+
+    def _ensure_mock_response(self, response_obj: Any) -> MockResponse:
+        if isinstance(response_obj, MockResponse):
+            return response_obj
+
+        if isinstance(response_obj, dict):
+            return MockResponse(status_code=200, json_data=response_obj)
+        elif isinstance(response_obj, list):
+            return MockResponse(status_code=200, text=json.dumps(response_obj))
+        elif isinstance(response_obj, str):
+            return MockResponse(status_code=200, text=response_obj)
+        else:
+            return MockResponse(status_code=200, text=str(response_obj))
+
+    def _handle_default_response(self, record: RequestRecord) -> Optional[str]:
         record.response = self.default_response
+        return self._response_to_string(self.default_response)
 
-        # Convert to string
-        if self.default_response.json_data is not None:
-            return json.dumps(self.default_response.json_data)
-        return self.default_response.text
+    def _response_to_string(self, response: MockResponse) -> Optional[str]:
+        if response.json_data is not None:
+            return json.dumps(response.json_data)
+        return response.text
 
     def get(self, url: str, **kwargs: Any) -> Optional[str]:
         return self._request('GET', url, **kwargs)

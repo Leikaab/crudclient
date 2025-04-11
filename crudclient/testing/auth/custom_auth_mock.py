@@ -18,7 +18,8 @@ class CustomAuthMock(AuthMockBase):
         super().__init__()
 
         # Default callbacks if none provided
-        def default_header_callback(): return {"X-Custom-Auth": "custom_value"}
+        def default_header_callback():
+            return {"X-Custom-Auth": "custom_value"}
         if header_callback is None and param_callback is None:
             header_callback = default_header_callback
 

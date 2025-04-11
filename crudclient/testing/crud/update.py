@@ -165,7 +165,7 @@ class UpdateMock(BaseCrudMock):
                 json_data={"error": "Resource not found"}
             ),
             'error': NotFoundError(
-                f"HTTP error occurred: 404, Resource not found"
+                "HTTP error occurred: 404, Resource not found"
             ),
             'params': kwargs.get('params'),
             'data': kwargs.get('data'),

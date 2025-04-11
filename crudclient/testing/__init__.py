@@ -27,7 +27,7 @@ from .exceptions import (
     TestingError,
     VerificationError,
 )
-from .factory import MockClientFactory  # Import from factory.py file
+from .client_factory import MockClientFactory  # Import from renamed file
 from .response_builder import ResponseBuilder  # Import ResponseBuilder
 from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatternBuilder
 from .response_builder.response import MockResponse  # Import MockResponse from response_builder

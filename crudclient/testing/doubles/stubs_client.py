@@ -57,21 +57,12 @@ class StubClient(Client):
         # Request history
         self._request_history: List[Dict[str, Any]] = []
 
-    def _request(
-        self,
-        method: str,
-        endpoint: Optional[str] = None,
-        url: Optional[str] = None,
-        handle_response: bool = True,
-        **kwargs: Any
-    ) -> str:
-        # Determine the full URL
+    def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         if url is None and endpoint is not None:
-            url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        elif url is None:
-            url = self.base_url
+            return f"{self.base_url}/{endpoint.lstrip('/')}"
+        return url or self.base_url
 
-        # Record the request
+    def _record_request(self, method: str, url: str, endpoint: Optional[str], kwargs: Dict[str, Any]) -> None:
         request_record = {
             'method': method,
             'url': url,
@@ -81,78 +72,114 @@ class StubClient(Client):
         }
         self._request_history.append(request_record)
 
-        # Simulate latency
+    def _simulate_network_conditions(self) -> None:
         if self._latency_ms > 0:
             time.sleep(self._latency_ms / 1000.0)
 
-        # Simulate errors
+    def _handle_simulated_error(self, handle_response: bool) -> Optional[str]:
         if self._error_rate > 0 and random.random() < self._error_rate:
             error = requests.ConnectionError("Simulated network error")
             if handle_response:
                 raise error
             return json.dumps({"error": "Simulated network error"})
+        return None
 
-        # Find a matching response in the map
+    def _find_matching_response(self, method: str, url: str) -> Any:
         response = None
         method_prefix = f"{method}:"
 
         # First try to find a method-specific pattern
         for pattern, resp in self._response_map.items():
             if pattern.startswith("^") and pattern[1:].startswith(method_prefix):
-                response = resp
-                break
+                return resp
 
         # If no method-specific pattern found, try generic patterns
-        if response is None:
-            for pattern, resp in self._response_map.items():
-                if not pattern.startswith("^") and re.search(pattern, url):
-                    response = resp
-                    break
+        for pattern, resp in self._response_map.items():
+            if not pattern.startswith("^") and re.search(pattern, url):
+                return resp
 
         # Use default response if no match found
-        if response is None:
-            response = self._default_response
+        return self._default_response
 
-        # Handle callable responses
-        if callable(response):
-            # Extract the endpoint from the URL
-            endpoint = endpoint or url.split('/')[-1]
+    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str],
+                                   url: str, kwargs: Dict[str, Any]) -> Any:
+        if not callable(response):
+            return response
 
-            # For GET requests
-            if method == "GET":
-                params = kwargs.get("params", {})
-                response = response(endpoint, params)
-            # For POST requests
-            elif method == "POST":
-                data = kwargs.get("data", {})
-                json_data = kwargs.get("json", {})
-                params = kwargs.get("params", {})
-                response = response(endpoint, data=data, json=json_data, params=params)
+        # Extract the endpoint from the URL if not provided
+        endpoint_value = endpoint or url.split('/')[-1]
+
+        # Handle different HTTP methods
+        if method == "GET":
+            params = kwargs.get("params", {})
+            return response(endpoint_value, params)
+        elif method == "POST":
+            data = kwargs.get("data", {})
+            json_data = kwargs.get("json", {})
+            params = kwargs.get("params", {})
+            return response(endpoint_value, data=data, json=json_data, params=params)
+        else:
             # For other methods, pass all kwargs
-            else:
-                response = response(endpoint, **kwargs)
+            return response(endpoint_value, **kwargs)
 
-        # Convert response to string
-        if isinstance(response, dict) or isinstance(response, list):
-            response_str = json.dumps(response)
+    def _convert_response_to_string(self, response: Any, handle_response: bool) -> str:
+        # Handle dict or list responses
+        if isinstance(response, (dict, list)):
+            return json.dumps(response)
+
+        # Handle StubResponse objects
         elif isinstance(response, StubResponse):
             if response.status_code >= 400 and handle_response:
                 response.raise_for_status()
 
             if hasattr(response, '_json_data') and response._json_data:
-                response_str = json.dumps(response._json_data)
-            else:
-                response_str = response.text
-                # Try to parse as JSON if it looks like JSON
-                if response_str.strip().startswith('{') or response_str.strip().startswith('['):
-                    try:
-                        json.loads(response_str)  # Just to validate it's valid JSON
-                    except json.JSONDecodeError:
-                        pass  # Not valid JSON, leave as text
-        else:
-            response_str = str(response)
+                return json.dumps(response._json_data)
 
-        return response_str
+            # Handle text response
+            response_str = response.text
+            # Try to parse as JSON if it looks like JSON
+            if response_str.strip().startswith('{') or response_str.strip().startswith('['):
+                try:
+                    json.loads(response_str)  # Just to validate it's valid JSON
+                except json.JSONDecodeError:
+                    pass  # Not valid JSON, leave as text
+            return response_str
+
+        # Handle other response types
+        else:
+            return str(response)
+
+    def _request(
+        self,
+        method: str,
+        endpoint: Optional[str] = None,
+        url: Optional[str] = None,
+        handle_response: bool = True,
+        **kwargs: Any
+    ) -> str:
+        # Build the full URL
+        url = self._build_full_url(endpoint, url)
+
+        # Record the request
+        self._record_request(method, url, endpoint, kwargs)
+
+        # Simulate network conditions (latency)
+        self._simulate_network_conditions()
+
+        # Handle simulated errors
+        error_response = self._handle_simulated_error(handle_response)
+        if error_response:
+            return error_response
+
+        # Find a matching response
+        response = self._find_matching_response(method, url)
+
+        # Process callable responses
+        if callable(response):
+            response = self._process_callable_response(response, method, endpoint, url, kwargs)
+
+        # Convert response to string
+        return self._convert_response_to_string(response, handle_response)
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         import json as json_module

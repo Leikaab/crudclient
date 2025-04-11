@@ -74,7 +74,6 @@ class BaseCrudMock:
                 )
             except Exception as e:
                 # Create a proper ValidationError instance
-                validation_error = CrudValidationError(str(e), None)
                 return MockResponse(
                     status_code=422,
                     json_data={"error": "Validation Error", "detail": str(e)},

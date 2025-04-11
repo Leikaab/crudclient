@@ -94,7 +94,6 @@ class TestMockHTTPClient:
         )
 
         # Assert
-        key = ("GET", "test")  # Uppercase and no leading slash
         # The implementation normalizes the path differently than expected
         # It keeps the trailing slash
         assert ('GET', 'test/') in client._configured_responses

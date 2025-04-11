@@ -11,7 +11,7 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
-from crudclient.testing.factory_module import MockClientFactory
+from crudclient.testing.client_factory import MockClientFactory  # Import from renamed file
 
 
 class TestMockClientFactory:

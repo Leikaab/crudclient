@@ -3,6 +3,8 @@ from typing import Any, Dict, List
 from .enhanced import EnhancedSpyBase
 
 # Helper functions for common verification patterns
+# Helper functions for common verification patterns
+
 
 def verify_call_sequence(spy: EnhancedSpyBase, *method_names: str) -> None:
     spy.assert_call_order(*method_names)

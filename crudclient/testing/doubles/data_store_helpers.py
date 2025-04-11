@@ -63,40 +63,70 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
     return filtered_data
 
 
+def _op_eq(value: Any, op_value: Any) -> bool:
+    return value == op_value
+
+
+def _op_ne(value: Any, op_value: Any) -> bool:
+    return value != op_value
+
+
+def _op_gt(value: Any, op_value: Any) -> bool:
+    return value > op_value
+
+
+def _op_gte(value: Any, op_value: Any) -> bool:
+    return value >= op_value
+
+
+def _op_lt(value: Any, op_value: Any) -> bool:
+    return value < op_value
+
+
+def _op_lte(value: Any, op_value: Any) -> bool:
+    return value <= op_value
+
+
+def _op_in(value: Any, op_value: Any) -> bool:
+    return value in op_value
+
+
+def _op_nin(value: Any, op_value: Any) -> bool:
+    return value not in op_value
+
+
+def _op_exists(value: Any, op_value: bool) -> bool:
+    if op_value:
+        return value is not None
+    return value is None
+
+
+def _op_regex(value: Any, op_value: str) -> bool:
+    return isinstance(value, str) and bool(re.search(op_value, value))
+
+
+# Map of operators to their handler functions
+_OPERATOR_HANDLERS = {
+    '$eq': lambda v, op_v: _op_ne(v, op_v) is False,  # Inverted to match original logic
+    '$ne': lambda v, op_v: _op_eq(v, op_v) is False,  # Inverted to match original logic
+    '$gt': _op_gt,
+    '$gte': _op_gte,
+    '$lt': _op_lt,
+    '$lte': _op_lte,
+    '$in': _op_in,
+    '$nin': lambda v, op_v: _op_in(v, op_v) is False,  # Inverted to match original logic
+    '$exists': _op_exists,
+    '$regex': _op_regex,
+}
+
+
 def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
     for op, op_value in operators.items():
-        if op == '$eq':
-            if value != op_value:
+        handler = _OPERATOR_HANDLERS.get(op)
+        if handler:
+            if not handler(value, op_value):
                 return False
-        elif op == '$ne':
-            if value == op_value:
-                return False
-        elif op == '$gt':
-            if not value > op_value:
-                return False
-        elif op == '$gte':
-            if not value >= op_value:
-                return False
-        elif op == '$lt':
-            if not value < op_value:
-                return False
-        elif op == '$lte':
-            if not value <= op_value:
-                return False
-        elif op == '$in':
-            if value not in op_value:
-                return False
-        elif op == '$nin':
-            if value in op_value:
-                return False
-        elif op == '$exists':
-            if op_value and value is None:
-                return False
-            if not op_value and value is not None:
-                return False
-        elif op == '$regex':
-            if not isinstance(value, str) or not re.search(op_value, value):
-                return False
+        # Silently ignore unknown operators to maintain backward compatibility
 
     return True
 

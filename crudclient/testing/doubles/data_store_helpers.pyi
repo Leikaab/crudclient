@@ -15,9 +15,169 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
     ...
 
 
+def _op_eq(value: Any, op_value: Any) -> bool:
+    """
+    Check if value equals op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value equals op_value, False otherwise
+    """
+    ...
+
+
+def _op_ne(value: Any, op_value: Any) -> bool:
+    """
+    Check if value does not equal op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value does not equal op_value, False otherwise
+    """
+    ...
+
+
+def _op_gt(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is greater than op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value is greater than op_value, False otherwise
+    """
+    ...
+
+
+def _op_gte(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is greater than or equal to op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value is greater than or equal to op_value, False otherwise
+    """
+    ...
+
+
+def _op_lt(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is less than op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value is less than op_value, False otherwise
+    """
+    ...
+
+
+def _op_lte(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is less than or equal to op_value.
+
+    Args:
+        value: The value to compare
+        op_value: The value to compare against
+
+    Returns:
+        bool: True if value is less than or equal to op_value, False otherwise
+    """
+    ...
+
+
+def _op_in(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is in op_value.
+
+    Args:
+        value: The value to check
+        op_value: The collection to check against (must support 'in' operator)
+
+    Returns:
+        bool: True if value is in op_value, False otherwise
+    """
+    ...
+
+
+def _op_nin(value: Any, op_value: Any) -> bool:
+    """
+    Check if value is not in op_value.
+
+    Args:
+        value: The value to check
+        op_value: The collection to check against (must support 'in' operator)
+
+    Returns:
+        bool: True if value is not in op_value, False otherwise
+    """
+    ...
+
+
+def _op_exists(value: Any, op_value: bool) -> bool:
+    """
+    Check if value exists (is not None) when op_value is True,
+    or does not exist (is None) when op_value is False.
+
+    Args:
+        value: The value to check for existence
+        op_value: Boolean indicating expected existence state
+
+    Returns:
+        bool: True if existence state matches expectation, False otherwise
+    """
+    ...
+
+
+def _op_regex(value: Any, op_value: str) -> bool:
+    """
+    Check if value matches the regex pattern in op_value.
+
+    Args:
+        value: The string value to check
+        op_value: The regex pattern to match against
+
+    Returns:
+        bool: True if value is a string and matches the pattern, False otherwise
+    """
+    ...
+
+
 def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
     """
-    Applies operator-based filters ($eq, $ne, $gt, etc.) to a single value.
+    Applies MongoDB-style operators to filter a value.
+
+    Supports the following operators:
+    - $eq: Equal to
+    - $ne: Not equal to
+    - $gt: Greater than
+    - $gte: Greater than or equal to
+    - $lt: Less than
+    - $lte: Less than or equal to
+    - $in: In collection
+    - $nin: Not in collection
+    - $exists: Checks if value exists (is not None)
+    - $regex: Matches regex pattern
+
+    Args:
+        value: The value to filter
+        operators: Dictionary of operators and their values
+
+    Returns:
+        bool: True if the value passes all operator filters, False otherwise
     """
     ...
 

@@ -68,7 +68,6 @@ class SpyAssertionsMixin:
 
         # Check the order using the public get_calls()
         all_calls = self.get_calls()
-        last_index = -1
         indices_found: Dict[str, int] = {}  # Track first occurrence index
 
         for i, call in enumerate(all_calls):

@@ -88,6 +88,109 @@ class StubClient(Client):
         **kwargs: Any
     ) -> str: ...  # Stub always returns str, even if base might return Response obj
 
+    def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
+        """
+        Build the full URL from endpoint or use provided URL.
+
+        Args:
+            endpoint: The API endpoint path.
+            url: The full URL (overrides endpoint if provided).
+
+        Returns:
+            The complete URL to use for the request.
+        """
+        ...
+
+    def _record_request(self, method: str, url: str, endpoint: Optional[str], kwargs: Dict[str, Any]) -> None:
+        """
+        Record the request in the history.
+
+        Args:
+            method: The HTTP method (e.g., 'GET', 'POST').
+            url: The full URL for the request.
+            endpoint: The API endpoint path.
+            kwargs: Additional request parameters.
+        """
+        ...
+
+    def _simulate_network_conditions(self) -> None:
+        """
+        Simulate network latency.
+
+        Introduces a delay based on the configured latency_ms value.
+        """
+        ...
+
+    def _handle_simulated_error(self, handle_response: bool) -> Optional[str]:
+        """
+        Handle simulated network errors based on error rate.
+
+        Args:
+            handle_response: If True, raise exceptions for simulated errors.
+                             If False, return error as JSON string.
+
+        Returns:
+            A JSON error string if an error is simulated and handle_response is False,
+            otherwise None.
+
+        Raises:
+            requests.ConnectionError: If error simulation is triggered and handle_response is True.
+        """
+        ...
+
+    def _find_matching_response(self, method: str, url: str) -> Any:
+        """
+        Find a matching response from the response map.
+
+        First tries to find a method-specific pattern, then falls back to generic URL patterns.
+
+        Args:
+            method: The HTTP method (e.g., 'GET', 'POST').
+            url: The full URL for the request.
+
+        Returns:
+            The matching response or the default response if no match is found.
+        """
+        ...
+
+    def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str],
+                                   url: str, kwargs: Dict[str, Any]) -> Any:
+        """
+        Process response if it's a callable.
+
+        Handles different HTTP methods by passing appropriate arguments to the callable.
+
+        Args:
+            response: The response object or callable.
+            method: The HTTP method (e.g., 'GET', 'POST').
+            endpoint: The API endpoint path.
+            url: The full URL for the request.
+            kwargs: Additional request parameters.
+
+        Returns:
+            The result of calling the response function with appropriate arguments.
+        """
+        ...
+
+    def _convert_response_to_string(self, response: Any, handle_response: bool) -> str:
+        """
+        Convert the response object to a string.
+
+        Handles different response types (dict, list, StubResponse, etc.).
+
+        Args:
+            response: The response object to convert.
+            handle_response: If True, raise exceptions for error status codes.
+
+        Returns:
+            The response as a string.
+
+        Raises:
+            requests.HTTPError: If a StubResponse with a >= 400 status code is returned
+                                and handle_response is True.
+        """
+        ...
+
     def _request(
         self,
         method: str,

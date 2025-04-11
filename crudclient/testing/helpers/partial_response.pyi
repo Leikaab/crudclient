@@ -75,6 +75,77 @@ class PartialResponseHelper:
         """
         ...
 
+    def _handle_exclusions_only(self, exclude_fields: List[str]) -> Dict[str, Any]:
+        """
+        Handle the case where only exclusions are provided.
+
+        Creates a copy of the full response and removes the excluded fields.
+
+        Args:
+            exclude_fields: List of field paths to exclude
+
+        Returns:
+            A copy of the full response with excluded fields removed
+        """
+        ...
+
+    def _apply_exclusions(self, data: Dict[str, Any], exclude_fields: List[str]) -> None:
+        """
+        Apply exclusions to the data.
+
+        Removes all fields specified in exclude_fields from the data.
+
+        Args:
+            data: The data to modify
+            exclude_fields: List of field paths to exclude
+        """
+        ...
+
+    def _process_included_fields(self, fields_to_use: List[str]) -> Dict[str, Any]:
+        """
+        Process the included fields and build the result.
+
+        Builds a new dictionary containing only the specified fields.
+
+        Args:
+            fields_to_use: List of field paths to include
+
+        Returns:
+            A dictionary containing only the specified fields
+        """
+        ...
+
+    def _process_single_field(self, result: Dict[str, Any], field_path: str) -> None:
+        """
+        Process a single field path and add it to the result if it exists.
+
+        Navigates to the field in the full response and adds it to the result
+        with the same nested structure.
+
+        Args:
+            result: The result dictionary to update
+            field_path: The field path to process
+        """
+        ...
+
+    def _build_nested_structure(
+        self,
+        result: Dict[str, Any],
+        parts: List[str],
+        final_value: Any
+    ) -> None:
+        """
+        Build a nested structure in the result dictionary.
+
+        Creates the necessary nested dictionaries in the result and sets the final value.
+
+        Args:
+            result: The result dictionary to update
+            parts: The parts of the field path
+            final_value: The value to set at the end of the path
+        """
+        ...
+
     def _process_wildcard_field(self, result: Dict[str, Any], field_path: str) -> None:
         """
         Process a field path containing wildcards and add matching fields to the result.
@@ -85,7 +156,7 @@ class PartialResponseHelper:
         """
         ...
 
-    def _find_matching_paths(self, data: Dict[str, Any], pattern_parts: List[str], current_path: str = "") -> Set[str]:
+    def _find_matching_paths(self, data: Any, pattern_parts: List[str], current_path: str = "") -> Set[str]:
         """
         Find all paths in the data that match the given pattern parts.
 
@@ -144,7 +215,7 @@ class PartialResponseHelper:
         """
         ...
 
-    def _count_fields(self, data: Dict[str, Any], prefix: str = "") -> int:
+    def _count_fields(self, data: Any, prefix: str = "") -> int:
         """
         Count the total number of fields in the data.
 

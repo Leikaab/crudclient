@@ -52,119 +52,197 @@ class RateLimitHelper:
         if tier and self.tiered_limits:
             self._current_tier = tier
 
-        # Remove requests outside the current window
+        # Clean up expired requests
+        self._clean_expired_requests(now)
+
+        # Check all limits
+        standard_limited = self._check_standard_limit()
+        burst_limited = self._check_burst_limit(now)
+        tier_limited, tier_info = self._check_tier_limit(now)
+
+        # Determine if request is allowed
+        is_allowed = not (standard_limited or burst_limited or tier_limited)
+
+        # Record this request if allowed
+        if is_allowed:
+            self._record_request(now, tier_info.get('name'))
+
+        # Calculate reset times
+        reset_times = self._calculate_reset_times(now, burst_limited, tier_limited, tier_info)
+
+        # Generate response headers
+        headers = self._generate_headers(now, is_allowed, reset_times, tier_info)
+
+        return is_allowed, headers
+
+    def _clean_expired_requests(self, now: float) -> None:
+        # Standard window
         self.requests = [t for t in self.requests if now - t < self.window_seconds]
 
-        # Check burst limit if configured
-        burst_limited = False
+        # Burst window
         if self.burst_limit is not None:
-            self.burst_requests = [t for t in self.burst_requests if now - t < self.burst_window_seconds]
-            if len(self.burst_requests) >= self.burst_limit:
-                burst_limited = True
+            self.burst_requests = [t for t in self.burst_requests
+                                   if now - t < self.burst_window_seconds]
 
-        # Check tiered limits if configured
-        tier_limited = False
-        tier_limit = self.limit
-        tier_window = self.window_seconds
-        tier_name: Optional[str] = None
+    def _check_standard_limit(self) -> bool:
+        return len(self.requests) >= self.limit
 
-        if self.tiered_limits and self._current_tier:
-            for tier_config in self.tiered_limits:
-                if str(tier_config['name']) == self._current_tier:
-                    tier_name = str(tier_config['name'])
-                    tier_limit = int(tier_config['limit'])
-                    tier_window = int(tier_config.get('window', self.window_seconds))
+    def _check_burst_limit(self, now: float) -> bool:
+        if self.burst_limit is None:
+            return False
+        return len(self.burst_requests) >= self.burst_limit
 
-                    # Initialize tier requests list if not exists
-                    if tier_name not in self.tiered_requests:
-                        self.tiered_requests[tier_name] = []
+    def _check_tier_limit(self, now: float) -> Tuple[bool, Dict[str, Any]]:
+        tier_info: Dict[str, Any] = {
+            'name': None,
+            'limit': self.limit,
+            'window': self.window_seconds,
+            'requests': []
+        }
 
-                    # Remove old requests
-                    self.tiered_requests[tier_name] = [
-                        t for t in self.tiered_requests[tier_name]
-                        if now - t < tier_window
-                    ]
+        # If no tier configuration or current tier, use standard limits
+        if not (self.tiered_limits and self._current_tier):
+            return False, tier_info
 
-                    # Check if tier limit exceeded
-                    if len(self.tiered_requests[tier_name]) >= tier_limit:
-                        tier_limited = True
-                    break
+        # Find matching tier configuration
+        for tier_config in self.tiered_limits:
+            if str(tier_config['name']) == self._current_tier:
+                tier_name = str(tier_config['name'])
+                tier_info['name'] = tier_name
+                tier_info['limit'] = int(tier_config['limit'])
+                tier_info['window'] = int(tier_config.get('window', self.window_seconds))
 
-        # Check if we've hit any limit
-        is_allowed = (
-            len(self.requests) < self.limit
-            and not burst_limited
-            and not tier_limited
-        )
+                # Initialize tier requests list if not exists
+                if tier_name not in self.tiered_requests:
+                    self.tiered_requests[tier_name] = []
 
-        # If allowed, record this request
-        if is_allowed:
-            self.requests.append(now)
-            if self.burst_limit is not None:
-                self.burst_requests.append(now)
-            if tier_name and tier_name in self.tiered_requests:
-                self.tiered_requests[tier_name].append(now)
+                # Remove old requests
+                self.tiered_requests[tier_name] = [
+                    t for t in self.tiered_requests[tier_name]
+                    if now - t < tier_info['window']
+                ]
 
-        # Calculate reset time
+                tier_info['requests'] = self.tiered_requests[tier_name]
+
+                # Check if tier limit exceeded
+                return len(self.tiered_requests[tier_name]) >= tier_info['limit'], tier_info
+
+        # No matching tier found
+        return False, tier_info
+
+    def _record_request(self, now: float, tier_name: Optional[str]) -> None:
+        # Standard tracking
+        self.requests.append(now)
+
+        # Burst tracking
+        if self.burst_limit is not None:
+            self.burst_requests.append(now)
+
+        # Tier tracking
+        if tier_name and tier_name in self.tiered_requests:
+            self.tiered_requests[tier_name].append(now)
+
+    def _calculate_reset_times(
+        self,
+        now: float,
+        burst_limited: bool,
+        tier_limited: bool,
+        tier_info: Dict[str, Any]
+    ) -> Dict[str, Optional[int]]:
+        result: Dict[str, Optional[int]] = {
+            'standard': None,
+            'burst': None,
+            'tier': None,
+            'effective': None
+        }
+
+        # Standard reset time
         if self.requests:
             oldest_request = min(self.requests)
-            reset_time = int(oldest_request + self.window_seconds)
+            result['standard'] = int(oldest_request + self.window_seconds)
         else:
-            reset_time = int(now + self.window_seconds)
+            result['standard'] = int(now + self.window_seconds)
 
-        # Calculate burst reset time if applicable
-        burst_reset_time = None
+        # Burst reset time
         if burst_limited and self.burst_requests:
             oldest_burst = min(self.burst_requests)
-            burst_reset_time = int(oldest_burst + self.burst_window_seconds)
+            result['burst'] = int(oldest_burst + self.burst_window_seconds)
 
-        # Calculate tier reset time if applicable
-        tier_reset_time = None
-        if tier_limited and tier_name and tier_name in self.tiered_requests and self.tiered_requests[tier_name]:
+        # Tier reset time
+        tier_name = tier_info.get('name')
+        tier_window = tier_info.get('window', self.window_seconds)  # Default to standard window
+        if (tier_limited and tier_name
+                and tier_name in self.tiered_requests and self.tiered_requests[tier_name]):
             oldest_tier = min(self.tiered_requests[tier_name])
-            tier_reset_time = int(oldest_tier + tier_window)
+            result['tier'] = int(oldest_tier + tier_window)
 
-        # Use the earliest reset time
-        effective_reset_time = reset_time
-        if burst_reset_time and burst_reset_time < effective_reset_time:
-            effective_reset_time = burst_reset_time
-        if tier_reset_time and tier_reset_time < effective_reset_time:
-            effective_reset_time = tier_reset_time
+        # Calculate effective (earliest) reset time
+        effective_time = result['standard']
 
-        # Generate headers
+        # Safe comparison with burst reset time
+        if (result['burst'] is not None and effective_time is not None
+                and result['burst'] < effective_time):
+            effective_time = result['burst']
+        elif result['burst'] is not None and effective_time is None:
+            effective_time = result['burst']
+
+        # Safe comparison with tier reset time
+        if (result['tier'] is not None and effective_time is not None
+                and result['tier'] < effective_time):
+            effective_time = result['tier']
+        elif result['tier'] is not None and effective_time is None:
+            effective_time = result['tier']
+
+        result['effective'] = effective_time
+        return result
+
+    def _generate_headers(
+        self,
+        now: float,
+        is_allowed: bool,
+        reset_times: Dict[str, Optional[int]],
+        tier_info: Dict[str, Any]
+    ) -> Dict[str, str]:
+        # Ensure we have a valid reset time (should never be None in practice)
+        effective_reset = reset_times['effective'] or int(now + self.window_seconds)
+
         headers = {
             self.remaining_header: str(max(0, self.limit - len(self.requests))),
             self.limit_header: str(self.limit),
-            self.reset_header: str(effective_reset_time)
+            self.reset_header: str(effective_reset)
         }
 
         # Add retry-after header if rate limited
         if not is_allowed:
-            retry_after = effective_reset_time - int(now)
+            retry_after = effective_reset - int(now)
             headers[self.retry_after_header] = str(max(1, retry_after))
 
-        # Add tier information if applicable
+        # Add tier information
+        tier_name = tier_info.get('name')
         if self.tier_header and tier_name:
             headers[self.tier_header] = tier_name
 
-        # Add burst limit information if configured
+        # Add burst limit information
         if self.burst_limit is not None:
             headers["X-Burst-Limit"] = str(self.burst_limit)
             headers["X-Burst-Remaining"] = str(max(0, self.burst_limit - len(self.burst_requests)))
-            if burst_reset_time:
-                headers["X-Burst-Reset"] = str(burst_reset_time)
+            if reset_times['burst'] is not None:
+                headers["X-Burst-Reset"] = str(reset_times['burst'])
 
-        # Add tier limit information if applicable
+        # Add tier limit information
         if tier_name:
+            tier_limit = tier_info.get('limit', self.limit)  # Default to standard limit
             headers["X-Tier-Limit"] = str(tier_limit)
+
             remaining = 0
             if tier_name in self.tiered_requests:
                 remaining = max(0, tier_limit - len(self.tiered_requests[tier_name]))
             headers["X-Tier-Remaining"] = str(remaining)
-            if tier_reset_time:
-                headers["X-Tier-Reset"] = str(tier_reset_time)
 
-        return is_allowed, headers
+            if reset_times['tier'] is not None:
+                headers["X-Tier-Reset"] = str(reset_times['tier'])
+
+        return headers
 
     def set_tier(self, tier: str) -> None:
         if self.tiered_limits:

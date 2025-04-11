@@ -2,7 +2,7 @@ import os
 import sys
 
 from crudclient.testing.factory.simple_mock import create_simple_mock_client
-from crudclient.testing.factory_module import MockClientFactory
+# Removed problematic import of MockClientFactory causing circular dependency
 
 # Add the parent directory to sys.path
 parent_dir = os.path.dirname(os.path.dirname(__file__))

@@ -107,7 +107,7 @@ class DeleteMock(BaseCrudMock):
 
         # Create the error instance
         error_instance = CrudClientError(
-            f"HTTP error occurred: 409, Resource is in use and cannot be deleted"
+            "HTTP error occurred: 409, Resource is in use and cannot be deleted"
         )
 
         # Add to response patterns
