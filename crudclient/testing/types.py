@@ -1,17 +1,18 @@
-from typing import Any, Dict, List, Sequence, Union
+from typing import Any, Dict, List, Union
 
-from typing_extensions import Protocol
+from typing_extensions import Protocol, TypeAlias
 
+from crudclient.testing.response_builder.response import MockResponse
 from crudclient.testing.spy.method_call import MethodCall
 
 # Type aliases for HTTP components
-Headers = Dict[str, str]
-QueryParams = Dict[str, str]
-HttpMethod = str
-StatusCode = int
-RequestBody = Union[Dict[str, Any], List[Any], str, bytes, None]
-ResponseBody = Union[Dict[str, Any], List[Any], str, bytes, None]
-ResponseData = Dict[str, Any]
+Headers: TypeAlias = Dict[str, str]
+QueryParams: TypeAlias = Dict[str, str]
+HttpMethod: TypeAlias = str
+StatusCode: TypeAlias = int
+RequestBody: TypeAlias = Union[Dict[str, Any], List[Any], str, bytes, None]
+ResponseBody: TypeAlias = Union[Dict[str, Any], List[Any], str, bytes, None]
+ResponseData: TypeAlias = Dict[str, Any]
 
 
 # We're using MethodCall directly instead of a separate CallRecord Protocol
@@ -19,7 +20,16 @@ ResponseData = Dict[str, Any]
 class SpyTarget(Protocol):
     calls: List[MethodCall]  # Using the concrete MethodCall type to match test implementation
 
-    calls: Sequence[Any]  # Using Any to be compatible with existing code
 
-
-# MockResponse is imported from response_builder/response.py to avoid code duplication
+# Re-export MockResponse for convenience
+__all__ = [
+    "Headers",
+    "QueryParams",
+    "HttpMethod",
+    "StatusCode",
+    "RequestBody",
+    "ResponseBody",
+    "ResponseData",
+    "SpyTarget",
+    "MockResponse",
+]
