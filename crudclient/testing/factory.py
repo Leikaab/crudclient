@@ -195,6 +195,7 @@ def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyA
 
 # --- Helper Function (from factory/simple_mock.py) ---
 
+
 def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs: Dict[str, Any]) -> None:
     # Add validation error response
     if "validation" in error_configs:
@@ -255,6 +256,7 @@ def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs:
 
 # --- MockClientFactory (from client_factory.py) ---
 
+
 class MockClientFactory:
     @classmethod
     def create(
@@ -265,9 +267,7 @@ class MockClientFactory:
         **kwargs: Any,
     ) -> MockClient:
         http_client = MockHTTPClient(base_url=base_url)
-        mock_client = MockClient(
-            http_client=http_client, config=config, enable_spy=enable_spy, **kwargs
-        )
+        mock_client = MockClient(http_client=http_client, config=config, enable_spy=enable_spy, **kwargs)
         return mock_client
 
     @classmethod
@@ -342,8 +342,9 @@ class MockClientFactory:
                 else:
                     auth_mock = create_api_key_auth_mock(api_key=auth_config.get("api_key", "valid_api_key"))  # Default to header
             elif auth_type == "custom":
-                auth_mock = create_custom_auth_mock(header_callback=auth_config.get("header_callback"),
-                                                    param_callback=auth_config.get("param_callback"))
+                auth_mock = create_custom_auth_mock(
+                    header_callback=auth_config.get("header_callback"), param_callback=auth_config.get("param_callback")
+                )
             elif auth_type == "oauth":
                 auth_mock = create_oauth_mock(
                     client_id=auth_config.get("client_id", "client_id"),
@@ -365,8 +366,16 @@ class MockClientFactory:
 
         # Create the mock client, passing the finalized config object
         # Filter out factory-specific kwargs before passing to MockClient constructor
-        factory_kwargs = {"auth_type", "auth_config", "api_type", "api_resources",
-                          "graphql_config", "oauth_config", "error_responses", "response_patterns"}
+        factory_kwargs = {
+            "auth_type",
+            "auth_config",
+            "api_type",
+            "api_resources",
+            "graphql_config",
+            "oauth_config",
+            "error_responses",
+            "response_patterns",
+        }
         client_kwargs = {k: v for k, v in kwargs.items() if k not in factory_kwargs}
 
         mock_client = cls.create(
@@ -400,6 +409,7 @@ class MockClientFactory:
 
 
 # --- SimpleMockClient Creation (from factory/simple_mock.py) ---
+
 
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
     client = SimpleMockClient()

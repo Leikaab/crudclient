@@ -77,12 +77,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
 
     def assert_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
         for call in self.get_calls(method):
-            if (
-                call.args
-                and call.args[0] == endpoint
-                and "json" in call.kwargs
-                and call.kwargs["json"] == expected_json
-            ):
+            if call.args and call.args[0] == endpoint and "json" in call.kwargs and call.kwargs["json"] == expected_json:
                 return
 
         raise AssertionError(f"JSON payload {expected_json} was not sent to {endpoint} with method {method}")
@@ -98,5 +93,6 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
 
     # We keep the custom assertions, adapting them as needed.
     # Basic assertions (assert_called, assert_called_with, etc.) come from SpyAssertionsMixin via EnhancedSpyBase.
+
 
 # (Removed commented out and leftover code from previous version)

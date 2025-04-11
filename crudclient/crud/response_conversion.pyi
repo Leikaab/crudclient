@@ -17,7 +17,11 @@ from pydantic import ValidationError as PydanticValidationError
 
 from ..exceptions import ModelConversionError, ValidationError
 from ..models import ApiResponse
-from ..response_strategies import DefaultResponseModelStrategy, PathBasedResponseModelStrategy, ResponseModelStrategy
+from ..response_strategies import (
+    DefaultResponseModelStrategy,
+    PathBasedResponseModelStrategy,
+    ResponseModelStrategy,
+)
 from ..types import JSONDict, JSONList, RawResponse
 
 # Define T type variable

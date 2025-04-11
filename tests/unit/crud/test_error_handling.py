@@ -27,6 +27,7 @@ SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
 
 # === Error Handling Tests (Generic Client Errors) ===
 
+
 def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client raising network errors
@@ -42,21 +43,30 @@ def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock
     with pytest.raises(TimeoutError):
         test_crud.create(data=SAMPLE_PAYLOAD)
 
+
 # === API Error Handling Tests (4xx/5xx) ===
 
 
-@pytest.mark.parametrize("operation_name, operation_args, status_code, expected_exception, error_payload", [
-    ("list", {}, 404, NotFoundError, {"error": "List Not Found"}),
-    ("create", {"data": SAMPLE_PAYLOAD}, 401, AuthenticationError, {"error": "Unauthorized"}),
-    ("read", {"resource_id": "1"}, 404, NotFoundError, {"error": "Resource Not Found"}),
-    ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}, 403, AuthenticationError, {"error": "Forbidden"}),
-    ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}, 422, InvalidResponseError, {"detail": "Validation Failed"}),
-    ("destroy", {"resource_id": "1"}, 400, CrudClientError, {"error": "Bad Request"}),
-    ("custom_action", {"action": "test-action", "method": "post"}, 404, NotFoundError, {"error": "Action Not Found"}),
-])
+@pytest.mark.parametrize(
+    "operation_name, operation_args, status_code, expected_exception, error_payload",
+    [
+        ("list", {}, 404, NotFoundError, {"error": "List Not Found"}),
+        ("create", {"data": SAMPLE_PAYLOAD}, 401, AuthenticationError, {"error": "Unauthorized"}),
+        ("read", {"resource_id": "1"}, 404, NotFoundError, {"error": "Resource Not Found"}),
+        ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}, 403, AuthenticationError, {"error": "Forbidden"}),
+        ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}, 422, InvalidResponseError, {"detail": "Validation Failed"}),
+        ("destroy", {"resource_id": "1"}, 400, CrudClientError, {"error": "Bad Request"}),
+        ("custom_action", {"action": "test-action", "method": "post"}, 404, NotFoundError, {"error": "Action Not Found"}),
+    ],
+)
 def test_crud_operation_client_error_4xx(
-    test_crud: TestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict,
-    status_code: int, expected_exception: Type[CrudClientError], error_payload: dict
+    test_crud: TestCrud,
+    mock_client: MagicMock,
+    operation_name: str,
+    operation_args: dict,
+    status_code: int,
+    expected_exception: Type[CrudClientError],
+    error_payload: dict,
 ):
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters
@@ -95,15 +105,18 @@ def test_crud_operation_client_error_4xx(
     assert exc_info.value is error  # Check if the original exception is raised
 
 
-@pytest.mark.parametrize("operation_name, operation_args", [
-    ("list", {}),
-    ("create", {"data": SAMPLE_PAYLOAD}),
-    ("read", {"resource_id": "1"}),
-    ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}),
-    ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}),
-    # Destroy might not raise ServerError directly, depends on client impl.
-    ("custom_action", {"action": "test-action", "method": "post"}),
-])
+@pytest.mark.parametrize(
+    "operation_name, operation_args",
+    [
+        ("list", {}),
+        ("create", {"data": SAMPLE_PAYLOAD}),
+        ("read", {"resource_id": "1"}),
+        ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}),
+        ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}),
+        # Destroy might not raise ServerError directly, depends on client impl.
+        ("custom_action", {"action": "test-action", "method": "post"}),
+    ],
+)
 def test_crud_operation_server_error_5xx(test_crud: TestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict):
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters

@@ -106,8 +106,7 @@ class ReadMock(BaseCrudMock):
 
     def _apply_filtering(self, resources: List[Dict[str, Any]], params: Dict[str, Any]) -> List[Dict[str, Any]]:
         # Apply filtering (simple equality based on params, excluding reserved keys)
-        filter_params = {k: v for k, v in params.items() if k not in (
-            "sort", "fields", "page", "limit", "_page", "_limit")}
+        filter_params = {k: v for k, v in params.items() if k not in ("sort", "fields", "page", "limit", "_page", "_limit")}
 
         filtered_resources = resources
         for key, value in filter_params.items():

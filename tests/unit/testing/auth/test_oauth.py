@@ -31,6 +31,7 @@ def test_oauth_mock_init_defaults():
 
 # --- Test Configuration Methods ---
 
+
 def test_with_client_credentials():
     mock = OAuthMock().with_client_credentials("new_id", "new_secret")
     assert mock.client_id == "new_id"
@@ -132,6 +133,7 @@ def test_with_available_scopes():
 
 # --- Test Verification Methods ---
 
+
 @freeze_time("2023-01-01 12:00:00")
 def test_verify_auth_header_valid():
     mock = OAuthMock().with_access_token("valid_bearer_token")
@@ -163,6 +165,7 @@ def test_verify_token_usage():
 
 
 # --- Test Base Class Method Implementations ---
+
 
 def test_get_auth_headers():
     """Test get_auth_headers returns current bearer token."""

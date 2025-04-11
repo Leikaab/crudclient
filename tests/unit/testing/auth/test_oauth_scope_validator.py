@@ -45,6 +45,7 @@ def test_add_required_scope():
 
 # --- Test validate_scopes ---
 
+
 @pytest.mark.parametrize(
     "available, required, provided, expected",
     [
@@ -55,14 +56,12 @@ def test_add_required_scope():
         (None, None, "read unknown", False),  # Contains unknown scope
         (None, None, "", True),  # Empty scopes are valid if none required
         (None, None, None, True),  # None scopes are valid if none required
-
         # With required scopes
         (None, ["admin"], "read write admin", True),
         (None, ["admin"], "read write", False),  # Missing required
         (None, ["admin", "profile"], "profile admin", True),
         (None, ["admin"], "", False),  # Empty scopes invalid if scopes required
         (None, ["admin"], None, False),  # None scopes invalid if scopes required
-
         # With limited available scopes
         (["read", "profile"], None, "read profile", True),
         (["read", "profile"], None, "read", True),
@@ -71,14 +70,13 @@ def test_add_required_scope():
         (["read", "profile"], ["read"], "read", True),
         (["read", "profile"], ["profile"], "read", False),  # Missing required
         (["read", "profile"], ["admin"], "read profile", False),  # Required scope not available
-
         # Edge cases
         (None, None, " read  write ", True),  # Extra whitespace
         (["scope1"], ["scope1"], "scope1", True),
         ([], [], "", True),  # No scopes available or required, empty is valid
         ([], [], "read", False),  # No scopes available, providing one is invalid
         ([], ["read"], "", False),  # Required scope not available
-    ]
+    ],
 )
 def test_validate_scopes(available, required, provided, expected):
     validator = OAuthScopeValidator()

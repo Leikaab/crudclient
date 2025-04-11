@@ -8,16 +8,14 @@ for different grant types, scopes, and advanced authentication scenarios.
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from ..response_builder.response import MockResponse
-
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
 
+from ..response_builder.response import MockResponse
 from .base import AuthMockBase
 from .oauth_grant_handler import OAuthGrantHandler
 from .oauth_scope_validator import OAuthScopeValidator
 from .oauth_token_manager import OAuthTokenManager
-
 
 class OAuthMock(AuthMockBase):
     """

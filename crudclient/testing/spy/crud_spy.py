@@ -100,4 +100,5 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
                 return
         raise AssertionError(f"Resource with ID {id} was not deleted")
 
+
 # (Removed commented out original methods)

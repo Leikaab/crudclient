@@ -108,9 +108,7 @@ class FakeCrud:
             data_dict = data
 
         try:
-            updated_data = self.database.update(
-                self.collection, id, data_dict, skip_validation=skip_validation, check_version=check_version
-            )
+            updated_data = self.database.update(self.collection, id, data_dict, skip_validation=skip_validation, check_version=check_version)
         except ValidationException as e:
             # Raise 422 for validation errors
             raise FakeAPIError(status_code=422, detail=e.errors) from e
@@ -179,9 +177,7 @@ class FakeCrud:
 
         # Similar note for bulk update regarding partial failures and error reporting.
         try:
-            updated_data = self.database.bulk_update(
-                self.collection, data_dicts, skip_validation=skip_validation, check_version=check_version
-            )
+            updated_data = self.database.bulk_update(self.collection, data_dicts, skip_validation=skip_validation, check_version=check_version)
         except ValidationException as e:
             # Raise 422 for validation errors during bulk update
             raise FakeAPIError(status_code=422, detail=e.errors) from e

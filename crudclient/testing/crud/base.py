@@ -82,51 +82,37 @@ class BaseCrudMock:
 
         return self.with_response(url_pattern=url_pattern, response=response, **kwargs)
 
-    def with_bad_request(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_bad_request(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Bad Request"}
         return self.with_error_response(url_pattern, 400, error_data, **kwargs)
 
-    def with_unauthorized(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_unauthorized(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Unauthorized"}
         return self.with_error_response(url_pattern, 401, error_data, **kwargs)
 
-    def with_forbidden(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_forbidden(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Forbidden"}
         return self.with_error_response(url_pattern, 403, error_data, **kwargs)
 
-    def with_not_found(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_not_found(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Not Found"}
         return self.with_error_response(url_pattern, 404, error_data, **kwargs)
 
-    def with_method_not_allowed(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_method_not_allowed(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Method Not Allowed"}
         return self.with_error_response(url_pattern, 405, error_data, **kwargs)
 
-    def with_unprocessable_entity(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_unprocessable_entity(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Unprocessable Entity"}
         return self.with_error_response(url_pattern, 422, error_data, **kwargs)
 
-    def with_server_error(
-        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
-    ) -> "BaseCrudMock":
+    def with_server_error(self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any) -> "BaseCrudMock":
         if error_data is None:
             error_data = {"error": "Internal Server Error"}
         return self.with_error_response(url_pattern, 500, error_data, **kwargs)

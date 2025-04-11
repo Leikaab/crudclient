@@ -8,7 +8,6 @@ validation, and refreshing of tokens.
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Mapping, Optional, Set, Union
 
-
 class OAuthTokenManager:
     """
     OAuth token manager for handling token lifecycle.

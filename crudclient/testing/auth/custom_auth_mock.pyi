@@ -12,9 +12,7 @@ from crudclient.auth.custom import CustomAuth
 
 from ..response_builder.response import MockResponse
 from ..spy.enhanced import EnhancedSpyBase, FunctionSpy
-
 from .base import AuthMockBase
-
 
 class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
     """

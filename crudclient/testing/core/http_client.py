@@ -187,14 +187,9 @@ class MockHTTPClient(EnhancedSpyBase):
             call_args = (method, path)
             call_kwargs = {"headers": headers, "params": params, "data": data, **kwargs}
             # 'response' might not be assigned if an exception occurred early
-            call_result = response if 'response' in locals() and recorded_exception is None else None
+            call_result = response if "response" in locals() and recorded_exception is None else None
             self._record_call(
-                method_name="request",
-                args=call_args,
-                kwargs=call_kwargs,
-                result=call_result,
-                exception=recorded_exception,
-                duration=duration
+                method_name="request", args=call_args, kwargs=call_kwargs, result=call_result, exception=recorded_exception, duration=duration
             )
 
     # Convenience methods for common HTTP methods

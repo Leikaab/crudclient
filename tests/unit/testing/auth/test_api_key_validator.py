@@ -84,6 +84,7 @@ def test_revoke_non_existent_key():
 
 # --- Test validate_key ---
 
+
 def test_validate_key_valid():
     """Test validate_key for a simple valid key."""
     validator = ApiKeyValidator()

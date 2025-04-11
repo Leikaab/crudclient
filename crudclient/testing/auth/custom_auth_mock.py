@@ -32,28 +32,17 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
             self._original_header_callback = default_header_callback
 
         # Wrap callbacks with FunctionSpy
-        self.header_callback_spy = (
-            FunctionSpy(self._original_header_callback, record_only=False)
-            if self._original_header_callback
-            else None
-        )
+        self.header_callback_spy = FunctionSpy(self._original_header_callback, record_only=False) if self._original_header_callback else None
         # FunctionSpy records calls internally, no need to set .spy
 
-        self.param_callback_spy = (
-            FunctionSpy(self._original_param_callback, record_only=False)
-            if self._original_param_callback
-            else None
-        )
+        self.param_callback_spy = FunctionSpy(self._original_param_callback, record_only=False) if self._original_param_callback else None
         # FunctionSpy records calls internally, no need to set .spy
 
         # Use the spied callbacks (or lambdas if None) for the actual auth strategy
         safe_spied_header_callback = self.header_callback_spy if self.header_callback_spy else lambda: {}
         spied_param_callback = self.param_callback_spy if self.param_callback_spy else None
 
-        self.auth_strategy = CustomAuth(
-            header_callback=safe_spied_header_callback,
-            param_callback=spied_param_callback
-        )
+        self.auth_strategy = CustomAuth(header_callback=safe_spied_header_callback, param_callback=spied_param_callback)
 
         # Additional properties for enhanced functionality
         self.expected_headers: Dict[str, str] = {}

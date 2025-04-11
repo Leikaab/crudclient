@@ -1,4 +1,3 @@
-
 # Assuming AuthTypes exists in crudclient.auth, might need adjustment if not
 # from crudclient.auth import AuthTypes
 from crudclient.testing.auth.api_key import ApiKeyAuthMock
@@ -51,6 +50,7 @@ def test_create_oauth_mock():
     assert auth_mock.client_id == "client_id"  # Check default value
     assert auth_mock.client_secret == "client_secret"  # Check default value
     assert auth_mock.token_url == "https://example.com/oauth/token"  # Check default value
+
 
 # Note: The test for invalid type is removed as each factory function creates a specific type.
 # We might add tests later to check the behavior of each factory function with various arguments.

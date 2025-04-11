@@ -12,7 +12,14 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
 
-from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
+from ..types import (
+    Headers,
+    HttpMethod,
+    QueryParams,
+    RequestBody,
+    ResponseBody,
+    StatusCode,
+)
 
 class MockClient:
     """

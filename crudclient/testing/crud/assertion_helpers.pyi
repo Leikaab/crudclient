@@ -12,7 +12,6 @@ from crudclient.testing.response_builder.response import MockResponse
 # Define a Request class that represents the structure of request objects
 # stored in request_history
 
-
 class Request:
     """
     Represents a request made to a mock API.
@@ -39,7 +38,6 @@ class Request:
     response: MockResponse
     """The response returned for this request"""
 
-
 def check_request_payload(
     requests: List[Request],
     payload: Dict[str, Any],
@@ -60,7 +58,6 @@ def check_request_payload(
     """
     ...
 
-
 def check_operation_parameters(
     requests: List[Request],
     expected_params: Dict[str, Any],
@@ -80,7 +77,6 @@ def check_operation_parameters(
         AssertionError: If no matching requests or parameters don't match
     """
     ...
-
 
 def check_response_handling(
     requests: List[Request],
@@ -103,7 +99,6 @@ def check_response_handling(
         AssertionError: If no matching requests or responses don't match
     """
     ...
-
 
 def check_error_handling(
     requests: List[Request],
@@ -130,7 +125,6 @@ def check_error_handling(
     """
     ...
 
-
 def check_query_parameters(
     requests: List[Request],
     expected_params: Dict[str, Any],
@@ -150,7 +144,6 @@ def check_query_parameters(
         AssertionError: If no matching requests or parameters don't match
     """
     ...
-
 
 def check_body_parameters(
     requests: List[Request],

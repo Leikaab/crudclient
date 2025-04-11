@@ -52,7 +52,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
         if hasattr(self._spy_wrapper, name) and callable(getattr(self._spy_wrapper, name)):
             method_spy = getattr(self._spy_wrapper, name)
             # Ensure the MethodSpy instance within ClassSpy records calls to *this* ApiSpy instance
-            if hasattr(method_spy, 'spy'):
+            if hasattr(method_spy, "spy"):
                 method_spy.spy = self
             return method_spy
 
@@ -92,14 +92,10 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
     # Adjust other custom assertions similarly...
     def assert_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
         for call in self.get_calls("register_endpoint"):
-            if (
-                call.args
-                and call.args[0] == name
-                and "model" in call.kwargs
-                and call.kwargs["model"] == model
-            ):
+            if call.args and call.args[0] == name and "model" in call.kwargs and call.kwargs["model"] == model:
                 return
 
         raise AssertionError(f"Endpoint {name} was not registered via register_endpoint with model {model.__name__}")
+
 
 # (Removed commented out original methods)

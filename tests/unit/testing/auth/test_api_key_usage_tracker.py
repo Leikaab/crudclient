@@ -1,4 +1,3 @@
-
 from crudclient.testing.auth.api_key_usage_tracker import ApiKeyUsageTracker
 
 
@@ -94,9 +93,5 @@ def test_get_usage_stats_with_data():
     tracker.track_request("key1")  # No endpoint
 
     stats = tracker.get_usage_stats()
-    expected_stats = {
-        "by_key": {"key1": 3, "key2": 1},
-        "by_endpoint": {"/users": 2, "/posts": 1},
-        "total_requests": 4
-    }
+    expected_stats = {"by_key": {"key1": 3, "key2": 1}, "by_endpoint": {"/users": 2, "/posts": 1}, "total_requests": 4}
     assert stats == expected_stats

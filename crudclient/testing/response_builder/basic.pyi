@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from .response import MockResponse
 
-
 class BasicResponseBuilder:
     """
     Builder for creating basic API responses.
@@ -116,9 +115,7 @@ class BasicResponseBuilder:
         ...
 
     @staticmethod
-    def no_content(
-        headers: Optional[Dict[str, str]] = None
-    ) -> MockResponse:
+    def no_content(headers: Optional[Dict[str, str]] = None) -> MockResponse:
         """
         Creates a 204 No Content response.
 

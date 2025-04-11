@@ -104,10 +104,7 @@ def check_query_parameters(
             mismatch_details.append(f"Request {i}: {'; '.join(current_request_mismatches)}")
 
     if not found_matching_request:
-        error_message = (
-            f"No request matched all expected query parameters: {expected_params}. "
-            f"URL pattern: {url_pattern}, method: {method}."
-        )
+        error_message = f"No request matched all expected query parameters: {expected_params}. " f"URL pattern: {url_pattern}, method: {method}."
         if mismatch_details:
             error_message += "\nMismatches found:\n" + "\n".join(mismatch_details)
         raise AssertionError(error_message)
@@ -153,10 +150,7 @@ def check_body_parameters(
             mismatch_details.append(f"Request {i}: {'; '.join(current_request_mismatches)}")
 
     if not found_matching_request:
-        error_message = (
-            f"No request matched all expected body parameters: {expected_params}. "
-            f"URL pattern: {url_pattern}, method: {method}."
-        )
+        error_message = f"No request matched all expected body parameters: {expected_params}. " f"URL pattern: {url_pattern}, method: {method}."
         if mismatch_details:
             error_message += "\nMismatches found:\n" + "\n".join(mismatch_details)
         raise AssertionError(error_message)
@@ -195,13 +189,11 @@ def check_response_handling(
                 # Allow callable for value checking
                 if callable(expected_value):
                     assert expected_value(actual_value), (
-                        f"Request {i} response key '{key}' failed validation. "
-                        f"Value: '{actual_value}'. URL: {request.url}"
+                        f"Request {i} response key '{key}' failed validation. " f"Value: '{actual_value}'. URL: {request.url}"
                     )
                 elif actual_value != expected_value:
                     raise AssertionError(
-                        f"Request {i} response key '{key}' has value '{actual_value}', "
-                        f"expected '{expected_value}'. URL: {request.url}"
+                        f"Request {i} response key '{key}' has value '{actual_value}', " f"expected '{expected_value}'. URL: {request.url}"
                     )
 
 

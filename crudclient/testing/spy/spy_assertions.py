@@ -107,6 +107,4 @@ class SpyAssertionsMixin:
                 slow_calls.append(f"{call.method_name} took {call.duration:.6f}s")
 
         if slow_calls:
-            raise AssertionError(
-                f"Method {method_name} exceeded max duration ({max_duration:.6f}s) in the following calls: {'; '.join(slow_calls)}"
-            )
+            raise AssertionError(f"Method {method_name} exceeded max duration ({max_duration:.6f}s) in the following calls: {'; '.join(slow_calls)}")

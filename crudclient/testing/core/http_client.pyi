@@ -7,14 +7,29 @@ actual network calls.
 """
 
 import re  # Added
-from typing import Any, Dict, List, Optional, Pattern, Tuple, Union  # Added List, Pattern, Union
+from typing import (  # Added List, Pattern, Union
+    Any,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Union,
+)
 from urllib.parse import urljoin
 
 import requests
 from requests import Response
 
 from ..exceptions import RequestNotConfiguredError
-from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
+from ..types import (
+    Headers,
+    HttpMethod,
+    QueryParams,
+    RequestBody,
+    ResponseBody,
+    StatusCode,
+)
 
 class MockHTTPClient:
     """

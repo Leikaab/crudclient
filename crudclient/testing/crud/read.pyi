@@ -18,7 +18,6 @@ from .base import BaseCrudMock
 if TYPE_CHECKING:
     from .request_record import RequestRecord
 
-
 class ReadMock(BaseCrudMock):
     """
     Mock for Read operations in CRUD APIs.

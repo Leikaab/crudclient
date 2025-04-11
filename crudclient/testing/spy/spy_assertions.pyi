@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 if TYPE_CHECKING:
     from .enhanced import CallRecord  # Avoid circular import
 
-
 class SpyProtocol(Protocol):
     """
     Defines the protocol required by SpyAssertionsMixin.
@@ -16,7 +15,6 @@ class SpyProtocol(Protocol):
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool: ...
     def get_call_count(self, method_name: Optional[str] = None) -> int: ...
     def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]: ...
-
 
 class SpyAssertionsMixin:
     """

@@ -1,4 +1,3 @@
-
 from crudclient.auth.custom import CustomAuth
 from crudclient.testing.auth.custom_auth_mock import CustomAuthMock
 
@@ -27,6 +26,7 @@ def test_custom_auth_mock_init_defaults():
 
 def test_custom_auth_mock_init_with_header_callback():
     """Test initialization with a custom header callback."""
+
     def my_header_cb():
         return {"Authorization": "Bearer test_token"}
 
@@ -42,6 +42,7 @@ def test_custom_auth_mock_init_with_header_callback():
 
 def test_custom_auth_mock_init_with_param_callback():
     """Test initialization with a custom param callback."""
+
     def my_param_cb():
         return {"api_key": "test_key"}
 
@@ -60,6 +61,7 @@ def test_custom_auth_mock_init_with_param_callback():
 
 def test_custom_auth_mock_init_with_both_callbacks():
     """Test initialization with both header and param callbacks."""
+
     def my_header_cb():
         return {"X-H": "hval"}
 
@@ -80,6 +82,7 @@ def test_custom_auth_mock_init_with_both_callbacks():
 
 
 # --- Test Configuration Methods ---
+
 
 def test_with_header_callback():
     """Test updating the header callback."""
@@ -145,6 +148,7 @@ def test_with_required_param():
 def test_with_header_validator():
     def is_valid_token(val):
         return val.startswith("Bearer ")
+
     mock = CustomAuthMock().with_header_validator("Authorization", is_valid_token)
     assert "Authorization" in mock.header_validators
     assert mock.header_validators["Authorization"] == is_valid_token
@@ -153,12 +157,14 @@ def test_with_header_validator():
 def test_with_param_validator():
     def is_numeric(val):
         return val.isdigit()
+
     mock = CustomAuthMock().with_param_validator("user_id", is_numeric)
     assert "user_id" in mock.param_validators
     assert mock.param_validators["user_id"] == is_numeric
 
 
 # --- Test Verification Methods ---
+
 
 def test_verify_headers_success_no_rules():
     mock = CustomAuthMock()
@@ -195,12 +201,7 @@ def test_verify_headers_success_all_rules():
     mock.with_expected_header("X-Expected", "val1")
     mock.with_header_validator("X-Validated", lambda v: len(v) > 3)
 
-    headers = {
-        "X-Mandatory": "present",
-        "X-Expected": "val1",
-        "X-Validated": "long_enough",
-        "Other": "ignored"
-    }
+    headers = {"X-Mandatory": "present", "X-Expected": "val1", "X-Validated": "long_enough", "Other": "ignored"}
     assert mock.verify_headers(headers) is True
     assert mock.get_call_count() == 1
     assert mock.get_calls()[0].result is True
@@ -239,18 +240,14 @@ def test_verify_params_success_all_rules():
     mock.with_expected_param("p_expected", "v1")
     mock.with_param_validator("p_validated", lambda v: v == "ok")
 
-    params = {
-        "p_mandatory": "present",
-        "p_expected": "v1",
-        "p_validated": "ok",
-        "other": "ignored"
-    }
+    params = {"p_mandatory": "present", "p_expected": "v1", "p_validated": "ok", "other": "ignored"}
     assert mock.verify_params(params) is True
     assert mock.get_call_count() == 1
     assert mock.get_calls()[0].result is True
 
 
 # --- Test Base Class Method Implementations ---
+
 
 def test_get_auth_headers():
     """CustomAuthMock get_auth_headers should return None."""
@@ -270,4 +267,4 @@ def test_get_auth_strategy():
     strategy = mock.get_auth_strategy()
     assert isinstance(strategy, CustomAuth)
     # Further check if the strategy uses the spied callbacks if needed
-    assert hasattr(strategy.header_callback, 'get_call_count')  # Check if it's a spy
+    assert hasattr(strategy.header_callback, "get_call_count")  # Check if it's a spy
