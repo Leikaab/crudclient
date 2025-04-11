@@ -145,28 +145,37 @@ class MockClientFactory:
         Create a pre-configured MockClient instance with advanced configuration options.
 
         This method provides a comprehensive way to create and configure a mock client
-        with various behaviors including authentication, network conditions, rate limiting,
-        and pre-configured response patterns.
+        with various behaviors including authentication, pre-configured response patterns,
+        and common error responses.
 
         Args:
-            config: Optional client configuration
+            config: Optional client configuration (ClientConfig object or dict).
             **kwargs: Additional configuration options including:
-                - latency_ms: Simulated network latency in milliseconds
-                - packet_loss_percentage: Percentage of requests that will be dropped
-                - error_rate_percentage: Percentage of requests that will raise errors
-                - rate_limit: Maximum number of requests allowed in the rate window
-                - rate_window_seconds: Time window for rate limiting in seconds
-                - response_patterns: List of response patterns to configure
-                - default_response: Default response for unmatched requests
-                - api_type: Type of API to mock (rest, graphql, etc.)
-                - api_resources: Resources to mock for REST APIs
-                - error_responses: Pre-configured error responses to include
-                - auth_strategy: Authentication strategy to use
-                - auth_type: Type of authentication to mock (basic, bearer, apikey, custom)
-                - auth_config: Configuration for the authentication strategy
-                - enable_spy: Whether to enable spying on the mock client
+                - enable_spy: Whether to enable spying on the mock client (default: False).
+                - auth_strategy: An already configured authentication strategy instance.
+                - auth_type: Type of authentication to mock ('basic', 'bearer', 'apikey', 'custom', 'oauth').
+                - auth_config: Dictionary with configuration for the chosen 'auth_type'.
+                    See `crudclient.testing.auth` mocks for specific options.
+                - api_type: Type of API patterns to pre-configure ('rest', 'graphql', 'oauth').
+                - api_resources: (For 'rest' api_type) Dict defining REST resources and their responses.
+                    See `crudclient.testing.response_builder.api_patterns.APIPatternBuilder.rest_resource`.
+                - graphql_config: (For 'graphql' api_type) Dict defining GraphQL endpoint behavior.
+                    See `crudclient.testing.response_builder.api_patterns.APIPatternBuilder.graphql_endpoint`.
+                - oauth_config: (For 'oauth' api_type) Dict defining OAuth flow behavior.
+                    See `crudclient.testing.response_builder.api_patterns.APIPatternBuilder.oauth_flow`.
+                - error_responses: Dict defining common error responses to add ('validation', 'rate_limit', 'auth').
+                    See `crudclient.testing.factory.helpers._add_error_responses`.
+                - response_patterns: List of raw response pattern dictionaries to configure directly
+                    on the underlying `MockHTTPClient`.
 
         Returns:
-            Configured MockClient instance
+            Configured MockClient instance.
+
+        Note:
+            Network condition simulation (latency, packet loss, error rate), rate limiting,
+            and default responses for unmatched requests are not currently implemented in MockClient.
+            Parameters related to these features (`latency_ms`, `packet_loss_percentage`,
+            `error_rate_percentage`, `rate_limit`, `rate_window_seconds`, `default_response`)
+            are accepted but ignored.
         """
         ...

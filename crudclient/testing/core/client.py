@@ -15,17 +15,22 @@ class MockClient:
 
     def __init__(
         self,
-        http_client: Any,
-        base_url: str = "https://api.example.com",
+        http_client: Any,  # Expect MockHTTPClient or similar with base_url attribute
+        config: Optional[ClientConfig] = None,  # Accept optional config object
         enable_spy: bool = False,
-        **kwargs: Any
+        **kwargs: Any  # Keep kwargs for potential future use or flexibility
     ) -> None:
         self.http_client = http_client
-        self.base_url = base_url
+        # Derive base_url from the http_client
+        self.base_url = getattr(http_client, 'base_url', "https://api.example.com")  # Fallback if http_client lacks base_url
         self.enable_spy = enable_spy
 
-        # Create a config object
-        self.config = ClientConfig(hostname=base_url)
+        # Use provided config or create a default one based on derived base_url
+        if config is not None:
+            self.config = config
+        else:
+            # Ensure hostname matches derived base_url if creating default config
+            self.config = ClientConfig(hostname=self.base_url)
 
         # Authentication strategy
         self._auth_strategy: Optional[AuthStrategy] = None

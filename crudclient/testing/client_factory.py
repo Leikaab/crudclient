@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional, Union
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.testing.factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns  # Use absolute import
 
+# Removed top-level import of helpers to break circular dependency
 from .auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock, create_oauth_mock
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
@@ -12,22 +12,26 @@ from .types import Headers, ResponseData, StatusCode
 
 
 class MockClientFactory:
+    # Docstring moved to .pyi file
 
     @classmethod
     def create(
         cls,
         base_url: str = "https://api.example.com",
         enable_spy: bool = False,
+        config: Optional[ClientConfig] = None,  # Add optional config parameter
         **kwargs: Any
     ) -> MockClient:
+        # Docstring moved to .pyi file
         # Create a mock HTTP client
         http_client = MockHTTPClient(base_url=base_url)
 
         # Create a mock client with the mock HTTP client
         mock_client = MockClient(
             http_client=http_client,
+            config=config,  # Pass config to MockClient constructor
             enable_spy=enable_spy,
-            **kwargs
+            **kwargs  # Pass other kwargs
         )
 
         return mock_client
@@ -39,6 +43,7 @@ class MockClientFactory:
         enable_spy: bool = False,
         **kwargs: Any
     ) -> MockClient:
+        # Docstring moved to .pyi file
         # Extract the base URL from the config
         base_url = config.hostname or "https://api.example.com"
 
@@ -62,6 +67,7 @@ class MockClientFactory:
         enable_spy: bool = False,
         **kwargs: Any
     ) -> MockClient:
+        # Docstring moved to .pyi file
         # Extract the config from the real client
         config = client.config
 
@@ -84,6 +90,7 @@ class MockClientFactory:
         status_code: StatusCode = 200,
         headers: Optional[Headers] = None
     ) -> None:
+        # Docstring moved to .pyi file
         mock_client.configure_response(
             method=method,
             path=path,
@@ -103,6 +110,7 @@ class MockClientFactory:
         headers: Optional[Headers] = None,
         error: Optional[Exception] = None
     ) -> None:
+        # Docstring moved to .pyi file
         if error is not None:
             mock_client.configure_response(
                 method=method,
@@ -124,6 +132,10 @@ class MockClientFactory:
         config: Optional[Union[ClientConfig, Dict[str, Any]]] = None,
         **kwargs: Any
     ) -> MockClient:
+        # Docstring moved to .pyi file
+        # Import helpers locally at the start of the method to avoid circular import at module level
+        from crudclient.testing.factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns
+
         # Ensure we have a valid config
         if config is None:
             config = ClientConfig(hostname="https://api.example.com", version="v1")
@@ -215,11 +227,12 @@ class MockClientFactory:
         # Extract enable_spy from kwargs
         enable_spy = kwargs.pop('enable_spy', False)
 
-        # Create the mock client
+        # Create the mock client, passing the finalized config object
         mock_client = cls.create(
             base_url=config.hostname or "https://api.example.com",
             enable_spy=enable_spy,
-            **kwargs
+            config=config,  # Pass the config object
+            **kwargs  # Pass remaining kwargs
         )
 
         # Configure the mock client with the auth strategy from the config
@@ -241,7 +254,9 @@ class MockClientFactory:
         # Add API-specific patterns based on api_type
         api_type = kwargs.get('api_type')
         if api_type:
-            patterns = _create_api_patterns(api_type, **kwargs)
+            # Exclude api_type itself from kwargs passed to the helper
+            helper_kwargs = {k: v for k, v in kwargs.items() if k != 'api_type'}
+            patterns = _create_api_patterns(api_type, **helper_kwargs)
             for pattern in patterns:
                 mock_client.configure_response(**pattern)
 

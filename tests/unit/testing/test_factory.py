@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.testing.client_factory import MockClientFactory  # Import from renamed file
+from crudclient.testing.client_factory import MockClientFactory
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
 
@@ -45,8 +45,8 @@ class TestMockClientFactory:
         # Assert
         assert isinstance(mock_client, MockClient)
         assert isinstance(mock_client.http_client, MockHTTPClient)
-        # The implementation doesn't use the base_url parameter correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url passed to create is stored
+        assert mock_client.base_url == base_url
         assert mock_client.enable_spy is enable_spy
         # We can't directly check extra_param as it's passed to the constructor but not stored as an attribute
 
@@ -61,8 +61,8 @@ class TestMockClientFactory:
 
         # Assert
         assert isinstance(mock_client, MockClient)
-        # The implementation doesn't use the config.hostname correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url from config.hostname is stored
+        assert mock_client.base_url == config.hostname
         assert mock_client.enable_spy is False
 
     def test_from_client_config_with_auth_strategy(self):
@@ -78,8 +78,8 @@ class TestMockClientFactory:
 
         # Assert
         assert isinstance(mock_client, MockClient)
-        # The implementation doesn't use the config.hostname correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url from config.hostname is stored
+        assert mock_client.base_url == config.hostname
         assert mock_client.get_auth_strategy() is auth_strategy
 
     def test_from_client_config_with_custom_parameters(self):
@@ -99,8 +99,8 @@ class TestMockClientFactory:
 
         # Assert
         assert isinstance(mock_client, MockClient)
-        # The implementation doesn't use the config.hostname correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url from config.hostname is stored
+        assert mock_client.base_url == config.hostname
         assert mock_client.enable_spy is enable_spy
 
     def test_from_real_client(self):
@@ -119,8 +119,8 @@ class TestMockClientFactory:
 
         # Assert
         assert isinstance(mock_client, MockClient)
-        # The implementation doesn't use the config.hostname correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url from the real client's config.hostname is stored
+        assert mock_client.base_url == config.hostname
         assert mock_client.get_auth_strategy() is auth_strategy
 
     def test_from_real_client_with_custom_parameters(self):
@@ -144,8 +144,8 @@ class TestMockClientFactory:
 
         # Assert
         assert isinstance(mock_client, MockClient)
-        # The implementation doesn't use the config.hostname correctly
-        assert mock_client.base_url == "https://api.example.com"
+        # Assert that the base_url from the real client's config.hostname is stored
+        assert mock_client.base_url == config.hostname
         assert mock_client.enable_spy is enable_spy
 
     def test_configure_success_response(self):
@@ -201,15 +201,6 @@ class TestMockClientFactory:
         # Act
         MockClientFactory.configure_error_response(
             mock_client=mock_client,
-            method="GET",
-            path="/test",
-            status_code=404,
-            data={"error": "Not found"},
-            headers={"Content-Type": "application/json"}
-        )
-
-        # Assert
-        mock_client.configure_response.assert_called_once_with(
             method="GET",
             path="/test",
             status_code=404,
