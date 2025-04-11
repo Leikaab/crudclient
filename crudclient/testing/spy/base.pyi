@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .method_call import MethodCall
 
+
 class SpyBase:
     """
     Base class for spy implementations.
@@ -36,33 +37,46 @@ class SpyBase:
         """
         ...
 
-    def assert_called(self, method_name: str) -> None:
+    def _format_args_string(self, *args: Any, **kwargs: Any) -> str:
         """
-        Assert that a method was called.
+        Format arguments as a string.
+
+        Args:
+            *args: Positional arguments
+            **kwargs: Keyword arguments
+
+        Returns:
+            Formatted string representation of the arguments
+        """
+        ...
+
+    def verify_called(self, method_name: str) -> None:
+        """
+        Verify that a method was called.
 
         Args:
             method_name: Name of the method
 
         Raises:
-            AssertionError: If the method was not called
+            SpyError: If the method was not called
         """
         ...
 
-    def assert_not_called(self, method_name: str) -> None:
+    def verify_not_called(self, method_name: str) -> None:
         """
-        Assert that a method was not called.
+        Verify that a method was not called.
 
         Args:
             method_name: Name of the method
 
         Raises:
-            AssertionError: If the method was called
+            SpyError: If the method was called
         """
         ...
 
-    def assert_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> None:
+    def verify_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> None:
         """
-        Assert that a method was called with specific arguments.
+        Verify that a method was called with specific arguments.
 
         Args:
             method_name: Name of the method
@@ -70,20 +84,20 @@ class SpyBase:
             **kwargs: Expected keyword arguments
 
         Raises:
-            AssertionError: If the method was not called with the expected arguments
+            SpyError: If the method was not called with the expected arguments
         """
         ...
 
-    def assert_call_count(self, method_name: str, count: int) -> None:
+    def verify_call_count(self, method_name: str, count: int) -> None:
         """
-        Assert that a method was called a specific number of times.
+        Verify that a method was called a specific number of times.
 
         Args:
             method_name: Name of the method
             count: Expected number of calls
 
         Raises:
-            AssertionError: If the method was not called the expected number of times
+            SpyError: If the method was not called the expected number of times
         """
         ...
 
@@ -101,4 +115,56 @@ class SpyBase:
 
     def clear_calls(self) -> None:
         """Clear all recorded calls."""
+        ...
+
+    # Deprecated methods for backward compatibility
+    def assert_called(self, method_name: str) -> None:
+        """
+        Assert that a method was called (deprecated, use verify_called instead).
+
+        Args:
+            method_name: Name of the method
+
+        Raises:
+            AssertionError: If the method was not called
+        """
+        ...
+
+    def assert_not_called(self, method_name: str) -> None:
+        """
+        Assert that a method was not called (deprecated, use verify_not_called instead).
+
+        Args:
+            method_name: Name of the method
+
+        Raises:
+            AssertionError: If the method was called
+        """
+        ...
+
+    def assert_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> None:
+        """
+        Assert that a method was called with specific arguments (deprecated, use verify_called_with instead).
+
+        Args:
+            method_name: Name of the method
+            *args: Expected positional arguments
+            **kwargs: Expected keyword arguments
+
+        Raises:
+            AssertionError: If the method was not called with the expected arguments
+        """
+        ...
+
+    def assert_call_count(self, method_name: str, count: int) -> None:
+        """
+        Assert that a method was called a specific number of times (deprecated, use verify_call_count instead).
+
+        Args:
+            method_name: Name of the method
+            count: Expected number of calls
+
+        Raises:
+            AssertionError: If the method was not called the expected number of times
+        """
         ...
