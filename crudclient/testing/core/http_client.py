@@ -1,19 +1,41 @@
 import json
 import re
 import time  # Added
-from typing import Any, Dict, List, Optional, Pattern, Tuple, Union  # Added List, Pattern, Union
+from typing import (  # Added List, Pattern, Union
+    Any,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Union,
+)
 from urllib.parse import urljoin
 
 import requests
 from requests import Response
 
 from ..exceptions import RequestNotConfiguredError
-from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
+
+# Import EnhancedSpyBase
+from ..spy.enhanced import EnhancedSpyBase
+from ..types import (
+    Headers,
+    HttpMethod,
+    QueryParams,
+    RequestBody,
+    ResponseBody,
+    StatusCode,
+)
 
 
-class MockHTTPClient:
+# Inherit from EnhancedSpyBase to add spying capabilities
+class MockHTTPClient(EnhancedSpyBase):
 
     def __init__(self, base_url: str = "https://api.example.com") -> None:
+        # Initialize SpyBase first
+        EnhancedSpyBase.__init__(self)
+
         self.base_url = base_url
         # Store exact path matches
         self._configured_responses: Dict[Tuple[HttpMethod, str], Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]] = {}
@@ -23,6 +45,8 @@ class MockHTTPClient:
         self._latency_ms: float = 0.0
 
     def reset(self) -> None:
+        # Reset spy calls along with mock configuration
+        EnhancedSpyBase.reset(self)
         self._configured_responses = {}
         self._configured_patterns = []
         self._latency_ms = 0.0
@@ -109,46 +133,69 @@ class MockHTTPClient:
         data: Optional[RequestBody] = None,
         **kwargs: Any,
     ) -> Response:
-        # Simulate latency if configured
-        if self._latency_ms > 0:
-            time.sleep(self._latency_ms / 1000.0)
+        start_request_time = time.time()
+        response: Optional[Response] = None
+        recorded_exception: Optional[Exception] = None
+        try:
+            # Simulate latency if configured
+            if self._latency_ms > 0:
+                time.sleep(self._latency_ms / 1000.0)
 
-        # Find the configured response (checks exact then patterns)
-        status_code, response_body, response_headers, error = self._get_configured_response(method=method, path=path)
+            # Find the configured response (checks exact then patterns)
+            status_code, response_body, response_headers, error = self._get_configured_response(method=method, path=path)
 
-        # If an error is configured, raise it
-        if error is not None:
-            raise error
+            # If an error is configured, capture and raise it
+            if error is not None:
+                recorded_exception = error
+                raise error
 
-        # Create a Response object with the configured response
-        url = urljoin(self.base_url, path)  # Use original path for URL
-        response = requests.Response()
-        response.status_code = status_code
-        response.headers.update(response_headers or {})
+            # Create a Response object
+            url = urljoin(self.base_url, path)
+            response = requests.Response()
+            response.status_code = status_code
+            response.headers.update(response_headers or {})
 
-        # Handle different response body types
-        # Handle different response body types
-        if response_body is None:
-            response._content = None
-        elif isinstance(response_body, bytes):
-            response._content = response_body
-        elif isinstance(response_body, str):
-            response._content = response_body.encode("utf-8")
-        else:
-            # Assume JSON serializable if dict/list, convert to string then bytes
-            # Note: 'import json' moved to top of file
-            try:
-                response._content = json.dumps(response_body).encode("utf-8")
-                if "content-type" not in (h.lower() for h in response.headers):
-                    response.headers["Content-Type"] = "application/json"
-            except TypeError:  # Handle non-serializable types if necessary
-                response._content = str(response_body).encode("utf-8")
+            # Handle response body
+            if response_body is None:
+                response._content = None
+            elif isinstance(response_body, bytes):
+                response._content = response_body
+            elif isinstance(response_body, str):
+                response._content = response_body.encode("utf-8")
+            else:
+                try:
+                    response._content = json.dumps(response_body).encode("utf-8")
+                    if "content-type" not in (h.lower() for h in response.headers):
+                        response.headers["Content-Type"] = "application/json"
+                except TypeError:
+                    response._content = str(response_body).encode("utf-8")
 
-        response.url = url
-        # Set request on response for potential inspection
-        response.request = requests.Request(method=method.upper(), url=url, headers=headers, data=data, params=params).prepare()
+            response.url = url
+            response.request = requests.Request(method=method.upper(), url=url, headers=headers, data=data, params=params).prepare()
 
-        return response
+            return response  # Return the successfully created response
+
+        except Exception as e:
+            # Capture any exception raised during the process
+            if recorded_exception is None:  # Avoid overwriting configured error
+                recorded_exception = e
+            raise  # Re-raise the exception
+
+        finally:
+            # Record the call regardless of outcome
+            duration = time.time() - start_request_time
+            call_args = (method, path)
+            call_kwargs = {"headers": headers, "params": params, "data": data, **kwargs}
+            # 'response' might not be assigned if an exception occurred early
+            call_result = response if 'response' in locals() and recorded_exception is None else None
+            self._record_call(
+                method_name="request",
+                args=call_args,
+                kwargs=call_kwargs,
+                result=call_result,
+                exception=recorded_exception,
+                duration=duration
+            )
 
     # Convenience methods for common HTTP methods
 

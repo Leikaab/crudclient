@@ -9,7 +9,13 @@ from .auth import TripletexAuthStrategy
 from .client import TripletexAPI, TripletexClient
 from .config import TripletexConfig, TripletexTestConfig
 from .crud import TripletexCrud
-from .models import Country, CountryResponse, Supplier, SupplierResponse, TokenSessionResponse
+from .models import (
+    Country,
+    CountryResponse,
+    Supplier,
+    SupplierResponse,
+    TokenSessionResponse,
+)
 from .resources import TripletexCountries, TripletexSuppliers
 
 T = TypeVar("T", bound=ModelDumpable)

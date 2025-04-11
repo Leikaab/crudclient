@@ -2,7 +2,9 @@ import re
 from typing import Any, Dict, List, Optional
 
 from crudclient.testing.crud.request_record import RequestRecord
-from crudclient.testing.simple_mock.request_handling import SimpleMockClientRequestHandling
+from crudclient.testing.simple_mock.request_handling import (
+    SimpleMockClientRequestHandling,
+)
 
 
 class SimpleMockClientAssertions(SimpleMockClientRequestHandling):

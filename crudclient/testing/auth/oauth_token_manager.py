@@ -10,9 +10,10 @@ class OAuthTokenManager:
         self.authorization_codes: Dict[str, Dict] = {}
         self.current_access_token = "access_token"
         self.current_refresh_token = "refresh_token"
+        self._token_counter = 0  # Counter to ensure unique tokens even with same timestamp
 
         # User management for password grant
-        self.users: Dict[str, Dict] = {"user": {"password": "pass", "scopes": ["read", "write"]}}
+        self.user_credentials: Dict[str, Dict] = {"user": {"password": "pass", "scopes": ["read", "write"]}}  # Renamed from self.users
 
     def initialize_default_token(self, client_id: str, scope: Optional[str]) -> None:
         now = datetime.now()
@@ -36,8 +37,9 @@ class OAuthTokenManager:
         user: Optional[str] = None,
     ) -> Dict[str, Any]:
         now = datetime.now()
-        access_token = f"access_token_{now.timestamp()}"
-        refresh_token = f"refresh_token_{now.timestamp()}"
+        self._token_counter += 1
+        access_token = f"access_token_{now.timestamp()}_{self._token_counter}"
+        refresh_token = f"refresh_token_{now.timestamp()}_{self._token_counter}"
 
         self.access_tokens[access_token] = {
             "client_id": client_id,
@@ -103,37 +105,66 @@ class OAuthTokenManager:
             user=old_token_data.get("user"),
         )
 
-    def revoke_token(self, token: str) -> bool:
-        if token not in self.access_tokens:
+    def revoke_token(self, access_token: str) -> bool:
+        if access_token not in self.access_tokens:
             return False
 
-        # Find and remove the refresh token
-        refresh_token = None
+        # Find and remove the refresh token associated with this access token
+        refresh_token_to_remove = None
         for rt, at in self.refresh_tokens.items():
-            if at == token:
-                refresh_token = rt
+            if at == access_token:
+                refresh_token_to_remove = rt
                 break
+        if refresh_token_to_remove:
+            del self.refresh_tokens[refresh_token_to_remove]
 
-        if refresh_token:
-            del self.refresh_tokens[refresh_token]
+        # Remove the access token itself
+        del self.access_tokens[access_token]
 
-        # Remove the access token
-        del self.access_tokens[token]
-
-        # Update current token if it was revoked
-        if self.current_access_token == token:
+        # If the revoked token was the current one, find a new current token
+        if self.current_access_token == access_token:
+            # Check if there are any tokens left after deletion
             if self.access_tokens:
-                self.current_access_token = next(iter(self.access_tokens))
+                # Find the oldest token based on the timestamp in the token string
+                # Format is "access_token_<timestamp>"
+                tokens = list(self.access_tokens.keys())
+                # Sort tokens by timestamp (if they have a timestamp)
+                tokens_with_timestamp = []
+                for token in tokens:
+                    if "_" in token and token.split("_")[-1].replace(".", "").isdigit():
+                        timestamp = float(token.split("_")[-1])
+                        tokens_with_timestamp.append((token, timestamp))
+
+                if tokens_with_timestamp:
+                    # Sort by timestamp (ascending)
+                    tokens_with_timestamp.sort(key=lambda x: x[1])
+                    oldest_token = tokens_with_timestamp[0][0]
+                    self.current_access_token = oldest_token
+                else:
+                    # If no tokens with timestamp, just pick the first one
+                    self.current_access_token = tokens[0]
+
+                # Find the corresponding refresh token for the new current access token
+                new_refresh_token = ""
+                for rt, at in self.refresh_tokens.items():
+                    if at == self.current_access_token:
+                        new_refresh_token = rt
+                        break
+                self.current_refresh_token = new_refresh_token
             else:
+                # No more tokens left at all
                 self.current_access_token = ""
+                self.current_refresh_token = ""
 
         return True
 
-    def add_user(self, username: str, password: str, scopes: List[str]) -> None:
-        self.users[username] = {"password": password, "scopes": scopes}
+    def add_user(self, username: str, password: str, scopes: Optional[List[str]] = None) -> None:
+        if scopes is None:  # Ensure scopes is a list
+            scopes = []
+        self.user_credentials[username] = {"password": password, "scopes": scopes}  # Store in user_credentials dict
 
     def validate_user(self, username: str, password: str) -> bool:
-        if username not in self.users:
+        user_data = self.user_credentials.get(username)  # Get from user_credentials dict
+        if not user_data or user_data["password"] != password:
             return False
-
-        return self.users[username]["password"] == password
+        return True

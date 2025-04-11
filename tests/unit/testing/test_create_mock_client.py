@@ -7,16 +7,22 @@ from unittest.mock import MagicMock, patch
 from crudclient.auth.basic import BasicAuth
 from crudclient.auth.bearer import BearerAuth
 from crudclient.config import ClientConfig
-from crudclient.testing.auth import ApiKeyAuthMock, BasicAuthMock, BearerAuthMock, CustomAuthMock, OAuthMock
-from crudclient.testing.client_factory import MockClientFactory
+from crudclient.testing.auth import (
+    ApiKeyAuthMock,
+    BasicAuthMock,
+    BearerAuthMock,
+    CustomAuthMock,
+    OAuthMock,
+)
 from crudclient.testing.core.client import MockClient
+from crudclient.testing.factory import MockClientFactory
 
 
 class TestCreateMockClient:
     """Tests specifically for the MockClientFactory.create_mock_client method."""
 
-    @patch("crudclient.testing.client_factory.create_basic_auth_mock")  # Auth mock creation is still in client_factory
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")  # Helper is in factory.helpers
+    @patch("crudclient.testing.factory.create_basic_auth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_basic_auth(self, mock_configure_auth, mock_create_basic):
         """Test create_mock_client with basic auth type."""
         # Arrange
@@ -36,8 +42,8 @@ class TestCreateMockClient:
         assert mock_client.get_auth_strategy() is mock_auth_strategy
         assert isinstance(mock_client, MockClient)
 
-    @patch("crudclient.testing.client_factory.create_bearer_auth_mock")
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
+    @patch("crudclient.testing.factory.create_bearer_auth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_bearer_auth(self, mock_configure_auth, mock_create_bearer):
         """Test create_mock_client with bearer auth type."""
         # Arrange
@@ -56,8 +62,8 @@ class TestCreateMockClient:
         mock_configure_auth.assert_called_once_with(mock_bearer_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch("crudclient.testing.client_factory.create_api_key_auth_mock")
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
+    @patch("crudclient.testing.factory.create_api_key_auth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth, mock_create_apikey):
         """Test create_mock_client with apikey auth type (header)."""
         # Arrange
@@ -76,8 +82,8 @@ class TestCreateMockClient:
         mock_configure_auth.assert_called_once_with(mock_apikey_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch("crudclient.testing.client_factory.create_api_key_auth_mock")
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
+    @patch("crudclient.testing.factory.create_api_key_auth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth, mock_create_apikey):
         """Test create_mock_client with apikey auth type (param)."""
         # Arrange
@@ -96,8 +102,8 @@ class TestCreateMockClient:
         mock_configure_auth.assert_called_once_with(mock_apikey_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch("crudclient.testing.client_factory.create_custom_auth_mock")
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
+    @patch("crudclient.testing.factory.create_custom_auth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_custom_auth(self, mock_configure_auth, mock_create_custom):
         """Test create_mock_client with custom auth type."""
         # Arrange
@@ -122,8 +128,8 @@ class TestCreateMockClient:
         mock_configure_auth.assert_called_once_with(mock_custom_auth_instance, auth_config)
         assert mock_client.get_auth_strategy() is mock_auth_strategy
 
-    @patch("crudclient.testing.client_factory.create_oauth_mock")
-    @patch("crudclient.testing.factory.helpers._configure_auth_mock")
+    @patch("crudclient.testing.factory.create_oauth_mock")
+    @patch("crudclient.testing.factory._configure_auth_mock")
     def test_create_mock_client_with_oauth_auth(self, mock_configure_auth, mock_create_oauth):
         """Test create_mock_client with oauth auth type."""
         # Arrange
@@ -162,7 +168,7 @@ class TestCreateMockClient:
         # Assert
         assert mock_client.get_auth_strategy() is auth_strategy
 
-    @patch("crudclient.testing.factory.helpers._create_api_patterns")
+    @patch("crudclient.testing.factory._create_api_patterns")
     def test_create_mock_client_with_api_type(self, mock_create_patterns):
         """Test create_mock_client with api_type."""
         # Arrange
@@ -174,7 +180,7 @@ class TestCreateMockClient:
         mock_client = MockClientFactory.create_mock_client(api_type="rest", api_resources=api_resources_config)
 
         # Assert
-        mock_create_patterns.assert_called_once_with("rest", api_resources=api_resources_config)
+        mock_create_patterns.assert_called_once_with("rest", api_type="rest", api_resources=api_resources_config)
         # Assert calls on the actual http_client's configure_response method
         if isinstance(mock_client.http_client.configure_response, MagicMock):
             mock_client.http_client.configure_response.assert_called_once_with(**mock_patterns[0])
@@ -183,7 +189,7 @@ class TestCreateMockClient:
             # This depends on the test setup and whether MockHTTPClient is fully mocked.
             pass  # Placeholder
 
-    @patch("crudclient.testing.factory.helpers._add_error_responses")
+    @patch("crudclient.testing.factory._add_error_responses")
     def test_create_mock_client_with_error_responses(self, mock_add_errors):
         """Test create_mock_client with error_responses."""
         # Arrange

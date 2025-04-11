@@ -90,7 +90,8 @@ class OAuthMock(AuthMockBase):
         # Link the refresh token to the current access token
         self.token_manager.refresh_tokens[refresh_token] = self.token_manager.current_access_token
         self.token_manager.current_refresh_token = refresh_token
-
+        # Also update the base class state for consistency
+        super().with_refresh_token(refresh_token)
         return self
 
     def with_token_expiration(self, expires_in_seconds: int) -> "OAuthMock":
@@ -133,21 +134,39 @@ class OAuthMock(AuthMockBase):
     def get_auth_strategy(self) -> AuthStrategy:
         return self.auth_strategy
 
-    # --- Added Abstract Method Implementations ---
+    # --- Method Overrides & Implementations ---
+
+    def is_token_expired(self) -> bool:
+        token = self.token_manager.current_access_token
+        if not token or token not in self.token_manager.access_tokens:
+            return True  # No valid current token or token unknown
+        token_data = self.token_manager.access_tokens[token]
+        # Check if 'expires_at' exists and is in the past
+        expires_at = token_data.get("expires_at")
+        return expires_at is not None and expires_at < datetime.now()
 
     def get_auth_headers(self) -> Optional[Tuple[str, str]]:
         token = self.token_manager.current_access_token
-        if not token:
+        # Use the overridden is_token_expired to check status
+        if not token or self.is_token_expired():
             return None
         return ("Authorization", f"Bearer {token}")
 
     def handle_auth_error(self, response: "MockResponse") -> bool:
-        # Check if the error is likely due to token expiration and if we can refresh
+        # Use the overridden is_token_expired and base can_refresh_token
         if self.is_token_expired() and self.can_refresh_token():
-            # Attempt to refresh using the base class simulation
-            refreshed = super().refresh()
-            # If base refresh simulation succeeded, return True (retry might work)
-            return refreshed
+            # Attempt to refresh via the token manager
+            new_token_info = self.token_manager.refresh_token(self.token_manager.current_refresh_token)
+
+            if new_token_info and "access_token" in new_token_info:
+                # Update base class state for consistency
+                self.refresh_attempts += 1  # Track attempt via base
+                # Update the auth_strategy with the new token from token_manager
+                self.auth_strategy = CustomAuth(header_callback=lambda: {"Authorization": f"Bearer {self.token_manager.current_access_token}"})
+                return True  # Refresh succeeded
+            else:
+                # Refresh failed via token manager
+                return False
 
         # If not an expiration error or refresh is not possible/failed
         return False

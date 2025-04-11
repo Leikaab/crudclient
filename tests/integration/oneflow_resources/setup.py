@@ -10,7 +10,14 @@ from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 from crudclient.types import JSONDict
 
-from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesResponse, User, UsersResponse
+from .models import (
+    DataField,
+    DataFieldsResponse,
+    TemplateType,
+    TemplateTypesResponse,
+    User,
+    UsersResponse,
+)
 
 # Load environment variables from .env file
 load_dotenv()

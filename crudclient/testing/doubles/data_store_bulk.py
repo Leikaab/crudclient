@@ -29,13 +29,17 @@ def bulk_create_items(
                     item_copy["id"] = str(uuid.uuid4())
 
                 # Validate using temporary constraints to check for conflicts within the batch
+                # Pass the data_store instance, but override constraints for batch check
+                temp_data_store_view = copy.copy(data_store)  # Shallow copy is enough
+                temp_data_store_view.unique_constraints = temp_unique_constraints
                 validate_item(
+                    temp_data_store_view,  # Pass modified view with temp constraints
                     collection,
                     item_copy,
-                    data_store.validation_rules,
-                    temp_unique_constraints,
                     add_to_constraints=True,  # Add to temp constraints for batch check
                 )
+                # Restore original constraints on the actual data_store instance
+                # (validate_item might have added to the temp list if successful)
                 items_to_create.append(item_copy)  # Store validated copy with potential new ID
             # If validation passes for all, proceed with creation using original items
             # (or copies if IDs were generated)
@@ -96,13 +100,17 @@ def bulk_update_items(
                         constraint.remove_value(existing_item)
 
                 # Validate the prospective update using temporary constraints
+                # Pass the data_store instance, but override constraints for batch check
+                temp_data_store_view = copy.copy(data_store)  # Shallow copy is enough
+                temp_data_store_view.unique_constraints = temp_unique_constraints
                 validate_item(
+                    temp_data_store_view,  # Pass modified view with temp constraints
                     collection,
                     prospective_update,
-                    data_store.validation_rules,
-                    temp_unique_constraints,
                     add_to_constraints=True,  # Add updated value to temp constraints
                 )
+                # Restore original constraints on the actual data_store instance
+                # (validate_item might have added to the temp list if successful)
                 updates_to_perform.append((item_id, item_update_data))
 
         except Exception as e:
@@ -142,7 +150,23 @@ def bulk_delete_items(
 ) -> int:
     # Docstring moved to .pyi
     deleted_count = 0
-    for item_id in ids:
+    items_to_delete = []
+    collection_data = data_store.get_collection(collection)
+    ids_set = set(ids)  # Faster lookup
+
+    # Pre-check: Find existing, non-deleted items matching the IDs
+    for item in collection_data:
+        item_id = item.get("id")
+        if item_id in ids_set and not item.get(data_store.deleted_field, False):
+            items_to_delete.append(item)  # Store the actual item
+
+    # Perform delete on found items
+    # Note: Still not fully atomic if cascade fails midway
+    for item_to_delete in items_to_delete:
+        item_id = item_to_delete.get("id")  # Get ID from the found item
+        # The delete function internally handles checking if it's already deleted again,
+        # but our pre-check avoids unnecessary calls.
         if data_store.delete(collection, item_id, soft_delete, cascade):
             deleted_count += 1
+
     return deleted_count

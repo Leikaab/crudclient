@@ -6,7 +6,13 @@ from requests import PreparedRequest  # Added
 
 from crudclient.testing.response_builder.response import MockResponse
 
-from .assertion_helpers import check_error_handling, check_operation_parameters, check_request_payload, check_response_handling
+from .assertion_helpers import (
+    check_body_parameters,
+    check_error_handling,
+    check_query_parameters,
+    check_request_payload,
+    check_response_handling,
+)
 
 
 class BaseCrudMock:
@@ -52,6 +58,81 @@ class BaseCrudMock:
         self._parent_id_handling = enabled
         return self
 
+    # --- Error Simulation Helpers ---
+
+    def with_error_response(
+        self,
+        url_pattern: str,
+        status_code: int,
+        error_data: Optional[Union[Dict[str, Any], str]] = None,
+        **kwargs: Any,
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": f"Simulated HTTP {status_code} error"}
+
+        if isinstance(error_data, dict):
+            response = MockResponse(status_code=status_code, json_data=error_data)
+        else:  # Assume string
+            response = MockResponse(status_code=status_code, text=str(error_data))
+
+        # Pass status_code also to the pattern dict for potential future use/assertion?
+        # Keep it simple for now, rely on MockResponse's status.
+        kwargs.pop("status_code", None)  # Remove status_code from kwargs if present
+        kwargs.pop("error", None)  # Remove error from kwargs if present (use MockResponse instead)
+
+        return self.with_response(url_pattern=url_pattern, response=response, **kwargs)
+
+    def with_bad_request(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Bad Request"}
+        return self.with_error_response(url_pattern, 400, error_data, **kwargs)
+
+    def with_unauthorized(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Unauthorized"}
+        return self.with_error_response(url_pattern, 401, error_data, **kwargs)
+
+    def with_forbidden(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Forbidden"}
+        return self.with_error_response(url_pattern, 403, error_data, **kwargs)
+
+    def with_not_found(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Not Found"}
+        return self.with_error_response(url_pattern, 404, error_data, **kwargs)
+
+    def with_method_not_allowed(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Method Not Allowed"}
+        return self.with_error_response(url_pattern, 405, error_data, **kwargs)
+
+    def with_unprocessable_entity(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Unprocessable Entity"}
+        return self.with_error_response(url_pattern, 422, error_data, **kwargs)
+
+    def with_server_error(
+        self, url_pattern: str, error_data: Optional[Union[Dict[str, Any], str]] = None, **kwargs: Any
+    ) -> "BaseCrudMock":
+        if error_data is None:
+            error_data = {"error": "Internal Server Error"}
+        return self.with_error_response(url_pattern, 500, error_data, **kwargs)
+
+    # --- End Error Simulation Helpers ---
+
     def with_validation_error(self, url_pattern: str, model_class: Type, invalid_data: Dict[str, Any], **kwargs: Any) -> "BaseCrudMock":
         def validation_error_response(**request_kwargs):
             try:
@@ -59,26 +140,18 @@ class BaseCrudMock:
                 # If validation doesn't fail, return a generic error
                 return MockResponse(status_code=422, json_data={"error": "Validation should have failed but didn't"})
             except Exception as e:
-                # Create a proper ValidationError instance
+                # Create a proper ValidationError instance or similar structure
+                # This might need adjustment based on the specific validation library used (e.g., Pydantic)
+                error_detail = {"detail": str(e)}  # Simple default
+                # Example for Pydantic-like errors:
+                # if hasattr(e, 'errors'): error_detail = e.errors()
                 return MockResponse(
                     status_code=422,
-                    json_data={"error": "Validation Error", "detail": str(e)},
-                    # Removed invalid 'error' parameter
+                    json_data={"error": "Validation Error", **error_detail},
                 )
 
-        self.response_patterns.append(
-            {
-                "url_pattern": url_pattern,
-                "response": validation_error_response,
-                "params": kwargs.get("params"),
-                "data": kwargs.get("data"),
-                "json": kwargs.get("json"),
-                "headers": kwargs.get("headers"),
-                "max_calls": kwargs.get("max_calls", float("inf")),
-                "call_count": 0,
-            }
-        )
-        return self
+        # Use the generic with_response, passing the callable
+        return self.with_response(url_pattern=url_pattern, response=validation_error_response, **kwargs)
 
     def _find_matching_pattern(self, method: str, url: str, **kwargs: Any) -> Optional[Dict[str, Any]]:
         for pattern in self.response_patterns:
@@ -167,6 +240,24 @@ class BaseCrudMock:
         actual_count = len(matching_requests)
         assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
+    def assert_query_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
+        check_query_parameters(
+            requests=matching_requests,  # type: ignore[arg-type]
+            expected_params=expected_params,
+            url_pattern=url_pattern,
+            method=method,
+        )
+
+    def assert_body_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
+        check_body_parameters(
+            requests=matching_requests,  # type: ignore[arg-type]
+            expected_params=expected_params,
+            url_pattern=url_pattern,
+            method=method,
+        )
+
     def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         if not sequence:
             return
@@ -202,16 +293,6 @@ class BaseCrudMock:
             payload=payload,
             url_pattern=url_pattern,
             match_all=match_all,
-        )
-
-    def assert_operation_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
-        matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
-
-        check_operation_parameters(
-            requests=matching_requests,  # type: ignore[arg-type] # Re-add ignore temporarily if needed
-            expected_params=expected_params,
-            url_pattern=url_pattern,
-            method=method,
         )
 
     def assert_response_handling(

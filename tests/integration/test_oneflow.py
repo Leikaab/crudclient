@@ -3,7 +3,15 @@ import random
 
 import pytest
 
-from .oneflow_resources.setup import DataField, OneflowAPI, OneflowConfig, TemplateType, TemplateTypesResponse, User, UsersResponse
+from .oneflow_resources.setup import (
+    DataField,
+    OneflowAPI,
+    OneflowConfig,
+    TemplateType,
+    TemplateTypesResponse,
+    User,
+    UsersResponse,
+)
 
 
 @pytest.fixture

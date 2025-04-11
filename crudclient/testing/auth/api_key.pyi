@@ -6,7 +6,7 @@ for key validation, rate limiting, and usage tracking.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Pattern, Set, TypeVar
+from typing import Dict, List, Optional, Pattern, Set, Tuple, TypeVar
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import ApiKeyAuth
@@ -16,7 +16,10 @@ from .api_key_usage_tracker import ApiKeyUsageTracker
 from .api_key_validator import ApiKeyValidator
 from .base import AuthMockBase
 
+from ..response_builder.response import MockResponse
+
 T = TypeVar("T", bound="ApiKeyAuthMock")
+
 
 class ApiKeyAuthMock(AuthMockBase):
     """
@@ -238,5 +241,26 @@ class ApiKeyAuthMock(AuthMockBase):
 
         Returns:
             The configured ApiKeyAuth strategy
+        """
+        ...
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        """
+        Get the authentication headers for the current API key.
+
+        Returns:
+            A tuple of (header_name, api_key) or None if using param auth
+        """
+        ...
+
+    def handle_auth_error(self, response: MockResponse) -> bool:
+        """
+        Handle authentication errors (API keys don't have a refresh mechanism).
+
+        Args:
+            response: The error response that triggered the auth error
+
+        Returns:
+            Always False for API keys as they don't have a refresh mechanism
         """
         ...

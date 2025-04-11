@@ -10,7 +10,12 @@ import json
 import pytest
 import requests
 
-from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
+from crudclient.exceptions import (
+    AuthenticationError,
+    CrudClientError,
+    InvalidResponseError,
+    NotFoundError,
+)
 
 # Import fixtures from conftest.py
 

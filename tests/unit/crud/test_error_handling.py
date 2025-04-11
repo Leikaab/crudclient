@@ -9,7 +9,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
+from crudclient.exceptions import (
+    AuthenticationError,
+    CrudClientError,
+    InvalidResponseError,
+    NotFoundError,
+)
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 

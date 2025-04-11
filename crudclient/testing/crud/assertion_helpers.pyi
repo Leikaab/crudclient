@@ -12,6 +12,7 @@ from crudclient.testing.response_builder.response import MockResponse
 # Define a Request class that represents the structure of request objects
 # stored in request_history
 
+
 class Request:
     """
     Represents a request made to a mock API.
@@ -38,6 +39,7 @@ class Request:
     response: MockResponse
     """The response returned for this request"""
 
+
 def check_request_payload(
     requests: List[Request],
     payload: Dict[str, Any],
@@ -58,6 +60,7 @@ def check_request_payload(
     """
     ...
 
+
 def check_operation_parameters(
     requests: List[Request],
     expected_params: Dict[str, Any],
@@ -77,6 +80,7 @@ def check_operation_parameters(
         AssertionError: If no matching requests or parameters don't match
     """
     ...
+
 
 def check_response_handling(
     requests: List[Request],
@@ -100,6 +104,7 @@ def check_response_handling(
     """
     ...
 
+
 def check_error_handling(
     requests: List[Request],
     expected_error_type: Type[Exception],
@@ -122,5 +127,47 @@ def check_error_handling(
 
     Raises:
         AssertionError: If no matching requests or errors don't match
+    """
+    ...
+
+
+def check_query_parameters(
+    requests: List[Request],
+    expected_params: Dict[str, Any],
+    url_pattern: str,
+    method: Optional[str],
+) -> None:
+    """
+    Checks if at least one matching request contains the expected query parameters.
+
+    Args:
+        requests: List of requests to check
+        expected_params: Expected query parameters
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        method: HTTP method used to filter the requests (for error messages)
+
+    Raises:
+        AssertionError: If no matching requests or parameters don't match
+    """
+    ...
+
+
+def check_body_parameters(
+    requests: List[Request],
+    expected_params: Dict[str, Any],
+    url_pattern: str,
+    method: Optional[str],
+) -> None:
+    """
+    Checks if at least one matching request contains the expected body (data or json) parameters.
+
+    Args:
+        requests: List of requests to check
+        expected_params: Expected body parameters
+        url_pattern: URL pattern used to filter the requests (for error messages)
+        method: HTTP method used to filter the requests (for error messages)
+
+    Raises:
+        AssertionError: If no matching requests or parameters don't match
     """
     ...

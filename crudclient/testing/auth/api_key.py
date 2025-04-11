@@ -1,6 +1,12 @@
 import re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple  # Added Tuple, TYPE_CHECKING
+from typing import (  # Added Tuple, TYPE_CHECKING
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+)
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import ApiKeyAuth

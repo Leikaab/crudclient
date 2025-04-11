@@ -3,6 +3,10 @@ from typing import Any, Dict, List, Optional, Type, Union
 from crudclient.api import API
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.testing.doubles.data_store_definitions import (
+    ValidationException,  # Import ValidationException
+)
+from crudclient.testing.exceptions import FakeAPIError  # Corrected import path
 
 from .data_store import DataStore
 
@@ -63,7 +67,8 @@ class FakeCrud:
         )
 
         if data is None:
-            return None
+            # Raise 404 instead of returning None
+            raise FakeAPIError(status_code=404, detail=f"{self.collection} with id {id} not found")
 
         # Convert to model instance if model is provided
         if self.model:
@@ -80,7 +85,11 @@ class FakeCrud:
         else:
             data_dict = data
 
-        created_data = self.database.create(self.collection, data_dict, skip_validation=skip_validation)
+        try:
+            created_data = self.database.create(self.collection, data_dict, skip_validation=skip_validation)
+        except ValidationException as e:
+            # Raise 422 for validation errors
+            raise FakeAPIError(status_code=422, detail=e.errors) from e
 
         # Convert to model instance if model is provided
         if self.model:
@@ -98,10 +107,21 @@ class FakeCrud:
         else:
             data_dict = data
 
-        updated_data = self.database.update(self.collection, id, data_dict, skip_validation=skip_validation, check_version=check_version)
+        try:
+            updated_data = self.database.update(
+                self.collection, id, data_dict, skip_validation=skip_validation, check_version=check_version
+            )
+        except ValidationException as e:
+            # Raise 422 for validation errors
+            raise FakeAPIError(status_code=422, detail=e.errors) from e
+        except ValueError as e:
+            # Assume ValueError is primarily for version conflicts here
+            # Raise 409 Conflict
+            raise FakeAPIError(status_code=409, detail=str(e)) from e
 
         if updated_data is None:
-            return None
+            # Raise 404 if update didn't find the item (and didn't raise other errors)
+            raise FakeAPIError(status_code=404, detail=f"{self.collection} with id {id} not found")
 
         # Convert to model instance if model is provided
         if self.model:
@@ -128,7 +148,14 @@ class FakeCrud:
 
             data_dicts.append(data_dict)
 
-        created_data = self.database.bulk_create(self.collection, data_dicts, skip_validation=skip_validation)
+        # Note: Bulk operations might require more nuanced error handling for partial failures.
+        # For now, catch ValidationException during the whole bulk operation.
+        # A real API might return a 207 Multi-Status or similar.
+        try:
+            created_data = self.database.bulk_create(self.collection, data_dicts, skip_validation=skip_validation)
+        except ValidationException as e:
+            # Raise 422 for validation errors during bulk create
+            raise FakeAPIError(status_code=422, detail=e.errors) from e
 
         # Convert to model instances if model is provided
         if self.model:
@@ -150,7 +177,17 @@ class FakeCrud:
 
             data_dicts.append(data_dict)
 
-        updated_data = self.database.bulk_update(self.collection, data_dicts, skip_validation=skip_validation, check_version=check_version)
+        # Similar note for bulk update regarding partial failures and error reporting.
+        try:
+            updated_data = self.database.bulk_update(
+                self.collection, data_dicts, skip_validation=skip_validation, check_version=check_version
+            )
+        except ValidationException as e:
+            # Raise 422 for validation errors during bulk update
+            raise FakeAPIError(status_code=422, detail=e.errors) from e
+        except ValueError as e:
+            # Raise 409 for version conflicts during bulk update
+            raise FakeAPIError(status_code=409, detail=str(e)) from e
 
         # Convert to model instances if model is provided
         if self.model:

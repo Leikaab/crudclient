@@ -8,6 +8,7 @@ validation, and refreshing of tokens.
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Mapping, Optional, Set, Union
 
+
 class OAuthTokenManager:
     """
     OAuth token manager for handling token lifecycle.
@@ -21,7 +22,7 @@ class OAuthTokenManager:
     authorization_codes: Dict[str, Dict]
     current_access_token: str
     current_refresh_token: str
-    users: Dict[str, Dict]
+    user_credentials: Dict[str, Dict]
 
     def __init__(self) -> None:
         """

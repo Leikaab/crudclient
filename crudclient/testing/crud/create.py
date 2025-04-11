@@ -189,18 +189,16 @@ class CreateMock(BaseCrudMock):
         def exact_response(**request_kwargs):
             return MockResponse(status_code=status_code, json_data=response_data)
 
-        # Add the response pattern with the exact response function
-        self.response_patterns.append(
-            {
-                "url_pattern": url_pattern,
-                "response": exact_response,
-                "params": kwargs.get("params"),
-                "data": kwargs.get("data"),
-                "json": kwargs.get("json"),
-                "headers": kwargs.get("headers"),
-                "max_calls": kwargs.get("max_calls", 1),  # Default to 1 call
-                "call_count": 0,
-            }
+        # Use the inherited with_response method
+        self.with_response(
+            url_pattern=url_pattern,
+            response=exact_response,  # Pass the callable directly
+            status_code=status_code,  # Pass status_code
+            params=kwargs.get("params"),
+            data=kwargs.get("data"),
+            json=kwargs.get("json"),
+            headers=kwargs.get("headers"),
+            max_calls=kwargs.get("max_calls", 1),  # Keep the default of 1 call for this specific method
         )
 
         return self

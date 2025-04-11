@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 if TYPE_CHECKING:
     from .enhanced import CallRecord  # Avoid circular import
 
+
 class SpyProtocol(Protocol):
     """
     Defines the protocol required by SpyAssertionsMixin.
@@ -15,6 +16,7 @@ class SpyProtocol(Protocol):
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool: ...
     def get_call_count(self, method_name: Optional[str] = None) -> int: ...
     def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]: ...
+
 
 class SpyAssertionsMixin:
     """
@@ -128,5 +130,30 @@ class SpyAssertionsMixin:
 
         Raises:
             AssertionError: If any call recorded an exception.
+        """
+        ...
+
+    def assert_no_unexpected_calls(self: SpyProtocol, expected_methods: List[str]) -> None:
+        """
+        Asserts that only methods from the expected list were called.
+
+        Args:
+            expected_methods: A list of method names that are expected to be called.
+
+        Raises:
+            AssertionError: If any method not in the expected list was called.
+        """
+        ...
+
+    def assert_call_max_duration(self: SpyProtocol, method_name: str, max_duration: float) -> None:
+        """
+        Asserts that all calls to a specific method completed within the max duration.
+
+        Args:
+            method_name: The name of the method to check.
+            max_duration: The maximum allowed duration in seconds.
+
+        Raises:
+            AssertionError: If any call to the method exceeded the maximum duration.
         """
         ...

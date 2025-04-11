@@ -1,6 +1,8 @@
 from typing import Any, Dict, List, Optional, Type
 
-from crudclient.testing.response_builder.response import MockResponse  # Assuming Request object structure
+from crudclient.testing.response_builder.response import (
+    MockResponse,  # Assuming Request object structure
+)
 
 # Placeholder for the actual Request object type used in request_history
 # Replace with the actual import if available
@@ -63,7 +65,7 @@ def check_request_payload(
             raise AssertionError(f"No request matched all payload {payload}. " f"Filter: url_pattern={url_pattern}")
 
 
-def check_operation_parameters(
+def check_query_parameters(
     requests: List[Request],
     expected_params: Dict[str, Any],
     url_pattern: str,
@@ -71,52 +73,93 @@ def check_operation_parameters(
 ) -> None:
     assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
 
-    # Find a request that matches all expected parameters
     found_matching_request = False
-    for request in requests:
+    mismatch_details = []
+
+    for i, request in enumerate(requests):
         all_params_match = True
-        for key, value in expected_params.items():
-            param_found = False
-            param_matches = False
+        current_request_mismatches = []
+        request_params = request.params or {}
 
-            # Check in params, data, or json
-            if request.params and key in request.params:
-                param_found = True
-                param_matches = request.params[key] == value
-            elif request.data and key in request.data:
-                param_found = True
-                param_matches = request.data[key] == value
-            elif request.json and key in request.json:
-                param_found = True
-                param_matches = request.json[key] == value
-
-            if not param_found or not param_matches:
+        for key, expected_value in expected_params.items():
+            if key not in request_params:
                 all_params_match = False
-                break
+                current_request_mismatches.append(f"missing key '{key}'")
+                break  # Move to next request if a key is missing
+
+            actual_value = request_params[key]
+            # Allow callable for value checking
+            if callable(expected_value):
+                if not expected_value(actual_value):
+                    all_params_match = False
+                    current_request_mismatches.append(f"key '{key}' failed validation (value: '{actual_value}')")
+            elif actual_value != expected_value:
+                all_params_match = False
+                current_request_mismatches.append(f"key '{key}' has value '{actual_value}', expected '{expected_value}'")
 
         if all_params_match:
             found_matching_request = True
             break
+        elif current_request_mismatches:
+            mismatch_details.append(f"Request {i}: {'; '.join(current_request_mismatches)}")
 
-    if found_matching_request:
-        return
+    if not found_matching_request:
+        error_message = (
+            f"No request matched all expected query parameters: {expected_params}. "
+            f"URL pattern: {url_pattern}, method: {method}."
+        )
+        if mismatch_details:
+            error_message += "\nMismatches found:\n" + "\n".join(mismatch_details)
+        raise AssertionError(error_message)
 
-    # If we get here, no request matched all parameters
-    # Find the closest match to provide a helpful error message
+
+def check_body_parameters(
+    requests: List[Request],
+    expected_params: Dict[str, Any],
+    url_pattern: str,
+    method: Optional[str],
+) -> None:
+    assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
+
+    found_matching_request = False
+    mismatch_details = []
+
     for i, request in enumerate(requests):
-        for key, value in expected_params.items():
-            if request.params and key in request.params:
-                if request.params[key] != value:
-                    raise AssertionError(f"Request {i} param '{key}' has value '{request.params[key]}', " f"expected '{value}'. URL: {request.url}")
-            elif request.data and key in request.data:
-                if request.data[key] != value:
-                    raise AssertionError(f"Request {i} data '{key}' has value '{request.data[key]}', " f"expected '{value}'. URL: {request.url}")
-            elif request.json and key in request.json:
-                if request.json[key] != value:
-                    raise AssertionError(f"Request {i} json '{key}' has value '{request.json[key]}', " f"expected '{value}'. URL: {request.url}")
+        all_params_match = True
+        current_request_mismatches = []
+        # Combine data and json, preferring json if both exist (common case)
+        request_body = request.json if request.json is not None else request.data or {}
 
-    # If we get here, parameters were missing in all requests
-    raise AssertionError(f"No request matched all expected parameters: {expected_params}. " f"URL pattern: {url_pattern}, method: {method}")
+        for key, expected_value in expected_params.items():
+            if key not in request_body:
+                all_params_match = False
+                current_request_mismatches.append(f"missing key '{key}'")
+                break  # Move to next request if a key is missing
+
+            actual_value = request_body[key]
+            # Allow callable for value checking
+            if callable(expected_value):
+                if not expected_value(actual_value):
+                    all_params_match = False
+                    current_request_mismatches.append(f"key '{key}' failed validation (value: '{actual_value}')")
+            elif actual_value != expected_value:
+                all_params_match = False
+                current_request_mismatches.append(f"key '{key}' has value '{actual_value}', expected '{expected_value}'")
+
+        if all_params_match:
+            found_matching_request = True
+            break
+        elif current_request_mismatches:
+            mismatch_details.append(f"Request {i}: {'; '.join(current_request_mismatches)}")
+
+    if not found_matching_request:
+        error_message = (
+            f"No request matched all expected body parameters: {expected_params}. "
+            f"URL pattern: {url_pattern}, method: {method}."
+        )
+        if mismatch_details:
+            error_message += "\nMismatches found:\n" + "\n".join(mismatch_details)
+        raise AssertionError(error_message)
 
 
 def check_response_handling(
@@ -137,13 +180,29 @@ def check_response_handling(
         # Check response data if provided
         if expected_data:
             response_json = request.response.json()  # Use the public json() method
-            if not response_json:
-                continue
-            for key, value in expected_data.items():
-                assert key in response_json, f"Request {i} response missing key '{key}'. URL: {request.url}"
-                assert response_json[key] == value, (
-                    f"Request {i} response key '{key}' has value '{response_json[key]}', " f"expected '{value}'. URL: {request.url}"
+            # Ensure response_json is a dict if expected_data is provided
+            if not isinstance(response_json, dict):
+                raise AssertionError(
+                    f"Request {i} response body is not a JSON object (or is empty), "
+                    f"but expected data was provided. URL: {request.url}. Body: {(request.response.text or '')[:100]}"  # Show snippet
                 )
+            # Add assertion to help type checker confirm response_json is not None here
+            assert response_json is not None
+
+            for key, expected_value in expected_data.items():
+                assert key in response_json, f"Request {i} response missing key '{key}'. URL: {request.url}"
+                actual_value = response_json[key]
+                # Allow callable for value checking
+                if callable(expected_value):
+                    assert expected_value(actual_value), (
+                        f"Request {i} response key '{key}' failed validation. "
+                        f"Value: '{actual_value}'. URL: {request.url}"
+                    )
+                elif actual_value != expected_value:
+                    raise AssertionError(
+                        f"Request {i} response key '{key}' has value '{actual_value}', "
+                        f"expected '{expected_value}'. URL: {request.url}"
+                    )
 
 
 def check_error_handling(

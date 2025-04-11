@@ -2,9 +2,17 @@ from .api_spy import ApiSpy
 from .base import SpyBase
 from .client_spy import ClientSpy
 from .crud_spy import CrudSpy
-from .enhanced import CallRecord, ClassSpy, EnhancedSpyBase, EnhancedSpyFactory, FunctionSpy, MethodSpy
+from .enhanced import (
+    CallRecord,
+    ClassSpy,
+    EnhancedSpyBase,
+    EnhancedSpyFactory,
+    FunctionSpy,
+    MethodSpy,
+)
 from .method_call import MethodCall
-from .verification_helpers import verify_call_arguments, verify_call_sequence, verify_call_timing, verify_no_unexpected_calls
+
+# Verification helpers are now part of SpyAssertionsMixin, mixed into EnhancedSpyBase
 
 __all__ = [
     # Basic spy components
@@ -20,9 +28,4 @@ __all__ = [
     "ClassSpy",
     "FunctionSpy",
     "EnhancedSpyFactory",
-    # Verification helpers
-    "verify_call_sequence",
-    "verify_no_unexpected_calls",
-    "verify_call_timing",
-    "verify_call_arguments",
 ]

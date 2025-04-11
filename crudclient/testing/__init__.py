@@ -12,12 +12,13 @@ from .auth import (
     create_custom_auth_mock,
     create_oauth_mock,
 )
-from .client_factory import MockClientFactory  # Import from renamed file
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
 from .doubles import DataStore, FakeAPI
+
 # Import directly from the module file
-from .exceptions import (
+from .exceptions import FakeAPIError  # Import separately
+from .exceptions import (  # FakeAPIError, # Removed from group
     AuthStrategyError,
     CRUDOperationError,
     DataStoreError,
@@ -28,9 +29,12 @@ from .exceptions import (
     TestingError,
     VerificationError,
 )
+from .factory import MockClientFactory  # Corrected import path
 from .response_builder import ResponseBuilder  # Import ResponseBuilder
 from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatternBuilder
-from .response_builder.response import MockResponse  # Import MockResponse from response_builder
+from .response_builder.response import (
+    MockResponse,  # Import MockResponse from response_builder
+)
 from .simple_mock import SimpleMockClient  # Import SimpleMockClient
 from .spy import MethodCall, SpyBase
 from .verification import Verifier
@@ -86,4 +90,5 @@ __all__ = [
     "DataStoreError",
     "ResourceNotFoundError",
     "SpyError",
+    "FakeAPIError",  # Ensure FakeAPIError is in __all__
 ]

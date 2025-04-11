@@ -4,7 +4,10 @@ from pydantic import BaseModel
 
 from crudclient.crud import Crud
 from crudclient.models import ApiResponse
-from crudclient.response_strategies import PathBasedResponseModelStrategy, ResponseModelStrategy
+from crudclient.response_strategies import (
+    PathBasedResponseModelStrategy,
+    ResponseModelStrategy,
+)
 from crudclient.types import JSONDict, JSONList
 
 

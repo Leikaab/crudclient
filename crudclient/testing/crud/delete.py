@@ -85,19 +85,17 @@ class DeleteMock(BaseCrudMock):
         # Create the error instance
         error_instance = CrudClientError("HTTP error occurred: 409, Resource is in use and cannot be deleted")
 
-        # Add to response patterns
-        self.response_patterns.append(
-            {
-                "url_pattern": url_pattern,
-                "response": mock_response,
-                "error": error_instance,
-                "params": kwargs.get("params"),
-                "data": kwargs.get("data"),
-                "json": kwargs.get("json"),
-                "headers": kwargs.get("headers"),
-                "max_calls": kwargs.get("max_calls", float("inf")),
-                "call_count": 0,
-            }
+        # Use the inherited with_response method
+        self.with_response(
+            url_pattern=url_pattern,
+            response=mock_response,
+            error=error_instance,
+            status_code=409,  # Explicitly set status code
+            params=kwargs.get("params"),
+            data=kwargs.get("data"),
+            json=kwargs.get("json"),
+            headers=kwargs.get("headers"),
+            max_calls=kwargs.get("max_calls", float("inf")),
         )
         return self
 
@@ -191,17 +189,15 @@ class DeleteMock(BaseCrudMock):
         # Create a CrudClientError with a specific message
         error = CrudClientError("Referential integrity violation: Cannot delete resource with dependencies")
 
-        # Add the error response for this URL pattern with the error
-        self.response_patterns.append(
-            {
-                "url_pattern": url_pattern,
-                "response": MockResponse(
-                    status_code=409, json_data={"error": "Referential integrity violation", "message": "Cannot delete resource with dependencies"}
-                ),
-                "error": error,
-                "max_calls": float("inf"),
-                "call_count": 0,
-            }
+        # Use the inherited with_response method
+        self.with_response(
+            url_pattern=url_pattern,
+            response=MockResponse(
+                status_code=409, json_data={"error": "Referential integrity violation", "message": "Cannot delete resource with dependencies"}
+            ),
+            error=error,
+            status_code=409,  # Explicitly set status code
+            max_calls=float("inf"),
         )
 
         # Override the delete method to raise the error

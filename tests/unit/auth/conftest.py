@@ -9,7 +9,11 @@ import requests_mock
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock
+from crudclient.testing.auth import (
+    create_api_key_auth_mock,
+    create_basic_auth_mock,
+    create_bearer_auth_mock,
+)
 
 
 class MockBasicAuthConfig(ClientConfig):

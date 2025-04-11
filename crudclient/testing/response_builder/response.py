@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 
 class MockResponse:
@@ -6,7 +6,7 @@ class MockResponse:
         self,
         status_code: int,
         json_data: Optional[Dict] = None,
-        text: Optional[str] = None,
+        text: Optional[Union[str, bytes]] = None,
         headers: Optional[Dict[str, str]] = None,
     ):
         self.status_code = status_code

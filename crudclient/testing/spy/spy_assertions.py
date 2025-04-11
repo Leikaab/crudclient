@@ -1,4 +1,8 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
+
+# Type hint for EnhancedSpyBase to avoid circular import
+# In a real scenario, consider using typing.TYPE_CHECKING or protocols
+EnhancedSpyBase = Any
 
 
 class SpyAssertionsMixin:
@@ -80,3 +84,29 @@ class SpyAssertionsMixin:
         for call in self.get_calls():
             if call.exception is not None:
                 raise AssertionError(f"Method {call.method_name} raised an exception: {call.exception}")
+
+    # --- Assertions moved from verification_helpers ---
+
+    def assert_no_unexpected_calls(self: EnhancedSpyBase, expected_methods: List[str]) -> None:
+        unexpected_calls = []
+        for call in self.get_calls():
+            if call.method_name not in expected_methods:
+                unexpected_calls.append(call.method_name)
+
+        if unexpected_calls:
+            unique_unexpected = sorted(list(set(unexpected_calls)))
+            raise AssertionError(f"Unexpected method calls detected: {', '.join(unique_unexpected)}")
+
+    def assert_call_max_duration(self: EnhancedSpyBase, method_name: str, max_duration: float) -> None:
+        self.assert_called(method_name)  # Ensure the method was called at least once
+
+        slow_calls = []
+        for call in self.get_calls(method_name):
+            # Ensure duration is recorded and check against max_duration
+            if call.duration is not None and call.duration > max_duration:
+                slow_calls.append(f"{call.method_name} took {call.duration:.6f}s")
+
+        if slow_calls:
+            raise AssertionError(
+                f"Method {method_name} exceeded max duration ({max_duration:.6f}s) in the following calls: {'; '.join(slow_calls)}"
+            )

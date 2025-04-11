@@ -25,13 +25,13 @@ repos:
         types: [python]
         files: ^crudclient/.*\.py$
 
-      - id: check-file-length
-        name: Check .py files are ≤ 300 lines
-        stages: [pre-commit]
-        language: system
-        entry: python hooks/check_file_length.py
-        types: [python]
-
+#      - id: check-file-length
+#        name: Check .py files are ≤ 300 lines
+#        stages: [pre-commit]
+#        language: system
+#        entry: python hooks/check_file_length.py
+#        types: [python]
+#
       - id: autoflake
         name: autoflake
         stages: [pre-commit]

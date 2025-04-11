@@ -1,12 +1,20 @@
 # import copy # No longer used directly here
 import re
-from typing import Any, Dict, List, Optional, Tuple  # Removed Callable, Union, TYPE_CHECKING, datetime
+from typing import (  # Removed Callable, Union, datetime
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+)
 
 # RelationshipType class moved to data_store_relationships.py
 
 
-# if TYPE_CHECKING: # Relationship import no longer needed
-#     from .data_store_definitions import Relationship # RelationshipType moved
+if TYPE_CHECKING:  # Relationship import no longer needed
+    # from .data_store_definitions import Relationship # RelationshipType moved
+    from .data_store import DataStore  # Import DataStore for type hinting
 
 
 def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -156,33 +164,72 @@ def apply_field_selection(data: List[Dict[str, Any]], fields: List[str]) -> List
     return [{k: v for k, v in item.items() if k in fields} for item in data]
 
 
-def validate_item(collection: str, item: Dict[str, Any], validation_rules: List, unique_constraints: List, add_to_constraints: bool = True) -> None:
+def validate_item(data_store: "DataStore", collection: str, item: Dict[str, Any], add_to_constraints: bool = True) -> None:
     errors: Dict[str, List[str]] = {}  # Added type annotation
 
-    # Apply validation rules
-    for rule in validation_rules:
+    # Apply validation rules defined in DataStore
+    for rule in data_store.validation_rules:
         if rule.collection is None or rule.collection == collection:
             if rule.field in item:
-                is_valid, error_message = rule.validate(item[rule.field])
-                if not is_valid:
+                value_to_validate = item.get(rule.field)
+                # Allow validation of None if the rule is designed for it
+                is_valid, error_message = rule.validate(value_to_validate)
+                if not is_valid and error_message:  # Ensure error_message is not None
                     if rule.field not in errors:
                         errors[rule.field] = []
                     errors[rule.field].append(error_message)
 
-    # Apply unique constraints
-    for constraint in unique_constraints:
+    # Apply unique constraints defined in DataStore
+    for constraint in data_store.unique_constraints:
         if constraint.collection is None or constraint.collection == collection:
+            # Temporarily add the value to check for uniqueness
             is_valid, error_message = constraint.validate(item)
-            if not is_valid:
-                # If validation failed, remove the value from the constraint
-                # since we're not going to add this item
+            if not is_valid and error_message:  # Ensure error_message is not None
+                # If validation failed, immediately remove the value we tried to add
                 constraint.remove_value(item)
 
                 # Add the error
-                field_name = constraint.fields[0] if len(constraint.fields) == 1 else "combined_fields"
+                field_name = ", ".join(constraint.fields)
                 if field_name not in errors:
                     errors[field_name] = []
-                errors[field_name].append(error_message)
+                # Avoid duplicate messages if multiple fields involved
+                if error_message not in errors[field_name]:
+                    errors[field_name].append(error_message)
+            elif not add_to_constraints:
+                # If we are just validating (e.g., during update before committing),
+                # remove the value again so the constraint state isn't permanently changed yet.
+                constraint.remove_value(item)
+
+    # Apply referential integrity checks (Foreign Key constraints)
+    for relationship in data_store.relationships:
+        # Check if the current collection is the 'target' side holding the FK
+        if relationship.target_collection == collection:
+            fk_field = relationship.target_key
+            fk_value = item.get(fk_field)
+
+            # Only check if the FK field exists and has a non-null value
+            if fk_field in item and fk_value is not None:
+                source_collection_name = relationship.source_collection
+                source_key_field = relationship.source_key
+
+                # Check if the referenced item exists in the source collection
+                source_collection_data = data_store.collections.get(source_collection_name, [])
+                exists = any(
+                    source_item.get(source_key_field) == fk_value and not source_item.get(data_store.deleted_field, False)
+                    for source_item in source_collection_data
+                )
+
+                if not exists:
+                    error_message = f"Referenced item with {source_key_field}={fk_value} not found in {source_collection_name}."
+                    if fk_field not in errors:
+                        errors[fk_field] = []
+                    errors[fk_field].append(error_message)
+
+        # Add check for ONE_TO_ONE where FK might be on the source side if defined that way
+        # (Less common, but possible)
+        # elif relationship.source_collection == collection and relationship.relationship_type == RelationshipType.ONE_TO_ONE:
+        #    # Similar logic if FK is defined on the source side
+        #    pass # Add if needed based on specific relationship definitions
 
     # If there are errors, raise an exception
     if errors:

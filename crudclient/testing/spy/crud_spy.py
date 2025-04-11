@@ -1,126 +1,103 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
+# Assuming Client or a suitable mock/spy is available for injection
+from crudclient.client import Client
 from crudclient.crud.base import Crud as CrudBase
 
-from .base import SpyBase
+from .enhanced import ClassSpy, EnhancedSpyBase, MethodSpy
 
 
-class CrudSpy(CrudBase, SpyBase):
+# Note: This class now primarily acts as a wrapper and provider of specific assertions.
+# The core spying mechanism (call recording, basic assertions) is handled by ClassSpy/EnhancedSpyBase.
+class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions and call storage
 
-    # Set a default resource path as a class attribute
-    _resource_path = "/test"
+    # _resource_path is part of the target CrudBase instance, not the spy itself.
 
-    def __init__(self, delegate: Optional[CrudBase] = None, **kwargs: Any):
-        # Create a mock client if not provided in kwargs
-        if "client" not in kwargs:
-            from unittest.mock import MagicMock
-
-            if delegate is not None and hasattr(delegate, "client") and delegate.client is not None:
-                kwargs["client"] = delegate.client
-            else:
-                kwargs["client"] = MagicMock()
-
-        # Initialize with the client
-        client = kwargs.get("client")
+    def __init__(self, client: Client, resource_path: str = "/test", datamodel: Optional[type] = None, **kwargs: Any):
+        # 1. Create the actual CrudBase instance that will be spied upon
+        # CrudBase requires a client.
         if client is None:
-            raise ValueError("Client must be provided")
-        CrudBase.__init__(self, client)
-        SpyBase.__init__(self)
+            raise ValueError("A client instance (real, spy, or mock) must be provided to CrudSpy")
+        target_crud = CrudBase(client)
+        # Set resource path and datamodel on the target instance
+        target_crud._resource_path = resource_path
+        target_crud._datamodel = datamodel
+        # Apply any other kwargs relevant to CrudBase if needed
 
-        # Create a delegate CRUD if not provided
-        self.delegate = delegate or super()
+        # 2. Initialize the EnhancedSpyBase part (for storing calls, assertions)
+        super().__init__()
 
-    def list(self, **kwargs: Any) -> Any:
+        # 3. Create the ClassSpy wrapper around the target CrudBase instance
+        crud_methods_to_spy = [
+            "list",
+            "get",
+            "create",
+            "update",
+            "delete",
+            "bulk_create",
+            "bulk_update",
+            "bulk_delete",
+            # Add other relevant public methods of CrudBase if needed
+        ]
+        self._spy_wrapper = ClassSpy(target_object=target_crud, methods=crud_methods_to_spy)
+
+        # Store the target CrudBase instance
+        self._target_crud = target_crud
+
+        # Ensure the MethodSpy instances within ClassSpy record calls to *this* CrudSpy
+        for method_name in crud_methods_to_spy:
+            if hasattr(self._spy_wrapper, method_name):
+                spy_method = getattr(self._spy_wrapper, method_name)
+                if isinstance(spy_method, MethodSpy):
+                    spy_method.spy = self
+
+    # Delegate method calls and attribute access
+    def __getattr__(self, name: str) -> Any:
+        # Priority 1: Is it a method being spied on by the wrapper?
+        if hasattr(self._spy_wrapper, name) and callable(getattr(self._spy_wrapper, name)):
+            spy_method = getattr(self._spy_wrapper, name)
+            if isinstance(spy_method, MethodSpy):
+                spy_method.spy = self
+            return spy_method
+
+        # Priority 2: Is it an attribute of the EnhancedSpyBase itself?
         try:
-            result = self.delegate.list(**kwargs)
-            self._record_call("list", (), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("list", (), kwargs, exception=e)
-            raise
+            return super().__getattribute__(name)
+        except AttributeError:
+            pass
 
-    def get(self, id: Any, **kwargs: Any) -> Any:
+        # Priority 3: Is it an attribute of the *target* CrudBase object?
         try:
-            result = self.delegate.get(id, **kwargs)  # type: ignore
-            self._record_call("get", (id,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("get", (id,), kwargs, exception=e)
-            raise
+            return getattr(self._target_crud, name)
+        except AttributeError:
+            raise AttributeError(f"'{type(self).__name__}' object (or its target) has no attribute '{name}'")
 
-    def create(self, data: Any, **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.create(data, **kwargs)
-            self._record_call("create", (data,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("create", (data,), kwargs, exception=e)
-            raise
+    # --- Custom Assertions specific to Crud interactions ---
+    # These methods now operate on the self.get_calls() list inherited from EnhancedSpyBase,
+    # which contains CallRecord objects.
 
-    def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.update(id, data, **kwargs)
-            self._record_call("update", (id, data), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("update", (id, data), kwargs, exception=e)
-            raise
-
-    def delete(self, id: Any, **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.delete(id, **kwargs)  # type: ignore
-            self._record_call("delete", (id,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("delete", (id,), kwargs, exception=e)
-            raise
-
-    def bulk_create(self, data: List[Any], **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.bulk_create(data, **kwargs)  # type: ignore
-            self._record_call("bulk_create", (data,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("bulk_create", (data,), kwargs, exception=e)
-            raise
-
-    def bulk_update(self, data: List[Dict[str, Any]], **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.bulk_update(data, **kwargs)  # type: ignore
-            self._record_call("bulk_update", (data,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("bulk_update", (data,), kwargs, exception=e)
-            raise
-
-    def bulk_delete(self, ids: List[Any], **kwargs: Any) -> Any:
-        try:
-            result = self.delegate.bulk_delete(ids, **kwargs)  # type: ignore
-            self._record_call("bulk_delete", (ids,), kwargs, result)
-            return result
-        except Exception as e:
-            self._record_call("bulk_delete", (ids,), kwargs, exception=e)
-            raise
-
-    # Helper methods for verification
+    # Note: The original implementations of list, get, create, etc. are removed.
+    # The ClassSpy mechanism handles intercepting these calls on the target_crud.
 
     def assert_resource_created(self, data: Any) -> None:
-        for call in self.calls:
-            if call.method_name == "create" and call.args and call.args[0] == data:
+        for call in self.get_calls("create"):  # Filter by method name
+            # Data is typically the first positional argument for create
+            if call.args and call.args[0] == data:
                 return
-
         raise AssertionError(f"Resource with data {data} was not created")
 
     def assert_resource_updated(self, id: Any, data: Any) -> None:
-        for call in self.calls:
-            if call.method_name == "update" and call.args and len(call.args) >= 2 and call.args[0] == id and call.args[1] == data:
+        for call in self.get_calls("update"):
+            # ID and data are typically the first two positional arguments for update
+            if call.args and len(call.args) >= 2 and call.args[0] == id and call.args[1] == data:
                 return
-
         raise AssertionError(f"Resource with ID {id} was not updated with data {data}")
 
     def assert_resource_deleted(self, id: Any) -> None:
-        for call in self.calls:
-            if call.method_name == "delete" and call.args and call.args[0] == id:
+        for call in self.get_calls("delete"):
+            # ID is typically the first positional argument for delete
+            if call.args and call.args[0] == id:
                 return
-
         raise AssertionError(f"Resource with ID {id} was not deleted")
+
+# (Removed commented out original methods)

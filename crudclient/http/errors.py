@@ -3,7 +3,12 @@ from typing import Dict, Type
 
 import requests
 
-from ..exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
+from ..exceptions import (
+    AuthenticationError,
+    CrudClientError,
+    InvalidResponseError,
+    NotFoundError,
+)
 
 # Set up logging
 logger = logging.getLogger(__name__)

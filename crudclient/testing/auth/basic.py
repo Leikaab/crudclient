@@ -106,6 +106,7 @@ class BasicAuthMock(AuthMockBase):
                 username_match = username.lower() == valid_username.lower()
 
             if username_match and password == valid_password:
+                self.current_attempts = 0  # Reset on success
                 return True
 
         return False

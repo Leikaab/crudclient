@@ -7,7 +7,12 @@ including 4xx status codes.
 
 import pytest
 
-from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, NotFoundError
+from crudclient.exceptions import (
+    AuthenticationError,
+    CrudClientError,
+    InvalidResponseError,
+    NotFoundError,
+)
 
 
 class TestHttpClientClientErrors:

@@ -4,7 +4,13 @@ import pytest
 import requests
 
 from crudclient.exceptions import CrudClientError
-from crudclient.http.retry import ExponentialBackoffStrategy, FixedRetryStrategy, RetryCondition, RetryEvent, RetryHandler
+from crudclient.http.retry import (
+    ExponentialBackoffStrategy,
+    FixedRetryStrategy,
+    RetryCondition,
+    RetryEvent,
+    RetryHandler,
+)
 
 
 class TestRetryStrategies:

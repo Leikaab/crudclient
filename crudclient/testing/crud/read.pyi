@@ -18,6 +18,7 @@ from .base import BaseCrudMock
 if TYPE_CHECKING:
     from .request_record import RequestRecord
 
+
 class ReadMock(BaseCrudMock):
     """
     Mock for Read operations in CRUD APIs.
@@ -76,6 +77,19 @@ class ReadMock(BaseCrudMock):
             url_pattern: Regular expression pattern to match request URLs
             resources: List of resource data to return
             **kwargs: Additional criteria for matching requests
+
+        Returns:
+            Self for method chaining
+        """
+        ...
+
+    def set_stored_resources(self, resources: List[Dict[str, Any]]) -> "ReadMock":
+        """
+        Set a list of resources that the mock will use for dynamic filtering,
+        sorting, and pagination based on request parameters.
+
+        Args:
+            resources: A list of dictionaries representing the resources.
 
         Returns:
             Self for method chaining

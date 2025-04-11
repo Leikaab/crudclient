@@ -5,7 +5,9 @@ Examples of using the enhanced mock client for testing.
 import pytest
 
 from crudclient.testing import MockClient
-from crudclient.testing.response_builder.pagination import PaginationResponseBuilder  # Added import
+from crudclient.testing.response_builder.pagination import (
+    PaginationResponseBuilder,  # Added import
+)
 
 
 class TestMockClientExamples:

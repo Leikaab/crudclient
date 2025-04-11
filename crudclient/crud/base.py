@@ -1,5 +1,15 @@
 import logging
-from typing import Any, Generic, List, Literal, Optional, Type, TypeAlias, TypeVar, Union
+from typing import (
+    Any,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Type,
+    TypeAlias,
+    TypeVar,
+    Union,
+)
 
 from ..client import Client
 from ..models import ApiResponse
@@ -45,7 +55,15 @@ class Crud(Generic[T]):
         _join_path_segments,
         _validate_path_segments,
     )
-    from .operations import create, custom_action, destroy, list, partial_update, read, update
+    from .operations import (
+        create,
+        custom_action,
+        destroy,
+        list,
+        partial_update,
+        read,
+        update,
+    )
     from .response_conversion import (
         _convert_to_list_model,
         _convert_to_model,

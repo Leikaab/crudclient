@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from .response import MockResponse
 
+
 class BasicResponseBuilder:
     """
     Builder for creating basic API responses.
@@ -51,6 +52,7 @@ class BasicResponseBuilder:
     def create_nested_response(
         structure: Dict[str, Any],
         status_code: int = 200,
+        headers: Optional[Dict[str, str]] = None,
     ) -> MockResponse:
         """
         Create a response with a nested structure.
@@ -61,6 +63,7 @@ class BasicResponseBuilder:
         Args:
             structure: Nested structure for the response body
             status_code: HTTP status code for the response
+            headers: HTTP headers to include in the response
 
         Returns:
             A MockResponse instance with the specified nested structure
@@ -86,5 +89,43 @@ class BasicResponseBuilder:
 
         Returns:
             A MockResponse instance formatted according to GraphQL specification
+        """
+        ...
+
+    @staticmethod
+    def created(
+        data: Any,
+        location: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        links: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> MockResponse:
+        """
+        Creates a 201 Created response.
+
+        Args:
+            data: Primary response data
+            location: Location header value for the created resource
+            metadata: Response metadata
+            links: HATEOAS links for resource navigation
+            headers: Additional HTTP headers
+
+        Returns:
+            A MockResponse with 201 status code and the specified data
+        """
+        ...
+
+    @staticmethod
+    def no_content(
+        headers: Optional[Dict[str, str]] = None
+    ) -> MockResponse:
+        """
+        Creates a 204 No Content response.
+
+        Args:
+            headers: HTTP headers to include in the response
+
+        Returns:
+            A MockResponse with 204 status code and no content
         """
         ...

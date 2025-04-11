@@ -51,6 +51,7 @@ types-requests = "*"
 # autopep8 = "*"
 # yapf = "*"
 pytest-benchmark = "^5.1.0"
+freezegun = "^1.5.1"
 
 
 [build-system]

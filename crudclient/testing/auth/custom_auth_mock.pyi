@@ -5,14 +5,18 @@ This module provides a mock for Custom Authentication strategy with enhanced
 validation capabilities for headers and parameters.
 """
 
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
 
+from ..response_builder.response import MockResponse
+from ..spy.enhanced import EnhancedSpyBase, FunctionSpy
+
 from .base import AuthMockBase
 
-class CustomAuthMock(AuthMockBase):
+
+class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
     """
     Mock for Custom Authentication strategy with enhanced capabilities.
 
@@ -20,8 +24,10 @@ class CustomAuthMock(AuthMockBase):
     strategy, with support for header and parameter callbacks, validation, and error simulation.
     """
 
-    header_callback: Optional[Callable[[], Dict[str, str]]]
-    param_callback: Optional[Callable[[], Dict[str, str]]]
+    _original_header_callback: Optional[Callable[[], Dict[str, str]]]
+    _original_param_callback: Optional[Callable[[], Dict[str, str]]]
+    header_callback_spy: Optional[FunctionSpy]
+    param_callback_spy: Optional[FunctionSpy]
     auth_strategy: CustomAuth
     expected_headers: Dict[str, str]
     expected_params: Dict[str, str]
@@ -172,5 +178,50 @@ class CustomAuthMock(AuthMockBase):
 
         Returns:
             The configured CustomAuth strategy
+        """
+        ...
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        """
+        Get the authentication headers for the current token.
+
+        Returns:
+            None for CustomAuthMock as headers are applied via callbacks
+        """
+        ...
+
+    def handle_auth_error(self, response: MockResponse) -> bool:
+        """
+        Handle authentication errors.
+
+        Args:
+            response: The error response that triggered the auth error
+
+        Returns:
+            False as no standard refresh mechanism is defined for custom auth
+        """
+        ...
+
+    def get_calls(self, method_name: Optional[str] = None) -> List[Any]:
+        """
+        Get all recorded calls or calls for a specific method.
+
+        Args:
+            method_name: Optional name of method to filter calls by
+
+        Returns:
+            List of call records
+        """
+        ...
+
+    def get_call_count(self, method_name: Optional[str] = None) -> int:
+        """
+        Get the number of calls made to all methods or a specific method.
+
+        Args:
+            method_name: Optional name of method to count calls for
+
+        Returns:
+            Number of calls
         """
         ...

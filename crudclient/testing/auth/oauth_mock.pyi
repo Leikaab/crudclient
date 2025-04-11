@@ -6,7 +6,9 @@ for different grant types, scopes, and advanced authentication scenarios.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+
+from ..response_builder.response import MockResponse
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
@@ -15,6 +17,7 @@ from .base import AuthMockBase
 from .oauth_grant_handler import OAuthGrantHandler
 from .oauth_scope_validator import OAuthScopeValidator
 from .oauth_token_manager import OAuthTokenManager
+
 
 class OAuthMock(AuthMockBase):
     """
@@ -243,5 +246,35 @@ class OAuthMock(AuthMockBase):
 
         Returns:
             The configured CustomAuth strategy
+        """
+        ...
+
+    def is_token_expired(self) -> bool:
+        """
+        Check if the current access token is expired using the token manager.
+
+        Returns:
+            True if the token is expired, False otherwise
+        """
+        ...
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        """
+        Get the authentication headers for the current token.
+
+        Returns:
+            A tuple of (header_name, header_value) or None if no valid token
+        """
+        ...
+
+    def handle_auth_error(self, response: "MockResponse") -> bool:
+        """
+        Attempt to refresh the token if it's expired and refreshable.
+
+        Args:
+            response: The error response that triggered the auth error
+
+        Returns:
+            True if the error was handled and the request should be retried, False otherwise
         """
         ...

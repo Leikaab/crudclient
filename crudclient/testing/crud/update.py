@@ -108,19 +108,17 @@ class UpdateMock(BaseCrudMock):
         return self
 
     def with_not_found(self, url_pattern: str, **kwargs: Any) -> "UpdateMock":
-        # Add response pattern for not found error
-        self.response_patterns.append(
-            {
-                "url_pattern": url_pattern,
-                "response": MockResponse(status_code=404, json_data={"error": "Resource not found"}),
-                "error": NotFoundError("HTTP error occurred: 404, Resource not found"),
-                "params": kwargs.get("params"),
-                "data": kwargs.get("data"),
-                "json": kwargs.get("json"),
-                "headers": kwargs.get("headers"),
-                "max_calls": kwargs.get("max_calls", float("inf")),
-                "call_count": 0,
-            }
+        # Use the inherited with_response method to configure the not found error
+        self.with_response(
+            url_pattern=url_pattern,
+            response=MockResponse(status_code=404, json_data={"error": "Resource not found"}),
+            error=NotFoundError("HTTP error occurred: 404, Resource not found"),
+            status_code=404,  # Explicitly set status code for clarity
+            params=kwargs.get("params"),
+            data=kwargs.get("data"),
+            json=kwargs.get("json"),
+            headers=kwargs.get("headers"),
+            max_calls=kwargs.get("max_calls", float("inf")),
         )
         return self
 

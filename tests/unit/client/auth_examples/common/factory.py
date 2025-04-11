@@ -1,4 +1,9 @@
-from crudclient.testing.auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock
+from crudclient.testing.auth import (
+    create_api_key_auth_mock,
+    create_basic_auth_mock,
+    create_bearer_auth_mock,
+    create_custom_auth_mock,
+)
 from crudclient.testing.core.http_client import MockHTTPClient
 
 # Import the backward compatible client from the new location

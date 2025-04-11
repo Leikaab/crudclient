@@ -7,9 +7,12 @@ crudclient testing framework.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
+
+from ..response_builder.response import MockResponse
 
 from ..response_builder import ResponseBuilder
+
 
 class AuthMockBase:
     """
@@ -239,5 +242,26 @@ class AuthMockBase:
 
         Returns:
             True if the refresh behavior is correct, False otherwise
+        """
+        ...
+
+    def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        """
+        Get the authentication headers for the current token.
+
+        Returns:
+            A tuple of (header_name, header_value) or None if no valid token
+        """
+        ...
+
+    def handle_auth_error(self, response: "MockResponse") -> bool:
+        """
+        Handle authentication errors by attempting to refresh tokens or other recovery.
+
+        Args:
+            response: The error response that triggered the auth error
+
+        Returns:
+            True if the error was handled and the request should be retried, False otherwise
         """
         ...

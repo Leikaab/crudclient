@@ -123,7 +123,8 @@ def create_item(data_store: "DataStore", collection: str, data: Dict[str, Any], 
 
     # Validate the item
     if not skip_validation:
-        validate_item(collection, new_item, data_store.validation_rules, data_store.unique_constraints)
+        # Pass the whole data_store instance now
+        validate_item(data_store, collection, new_item)
 
     # Add the item to the collection
     collection_data.append(new_item)
@@ -176,8 +177,9 @@ def update_item(
                     if constraint.collection is None or constraint.collection == collection:
                         constraint.remove_value(item)
 
-                # Then validate the new item
-                validate_item(collection, updated_item, data_store.validation_rules, data_store.unique_constraints)
+                # Then validate the new item (pass the whole data_store instance)
+                # The validate_item function now handles adding the value to constraints if valid
+                validate_item(data_store, collection, updated_item)
 
             # Replace the item in the collection
             collection_data[i] = updated_item
