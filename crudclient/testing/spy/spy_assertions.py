@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Callable, Dict
+from typing import Any, Callable, Dict
 
 
 class SpyAssertionsMixin:
