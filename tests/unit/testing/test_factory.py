@@ -13,6 +13,23 @@ from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
 from crudclient.testing.factory import MockClientFactory
 
+# Custom wrapper function to bridge unittest.mock assertions with Verifier naming convention
+
+
+def verify_called_once_with(mock_method, *args, **kwargs):
+    """
+    Verify that a mock method was called exactly once with the specified arguments.
+
+    This is a wrapper around unittest.mock's assert_called_once_with that uses
+    the naming convention of the Verifier class.
+
+    Args:
+        mock_method: The mock method to verify
+        *args: Positional arguments the method should have been called with
+        **kwargs: Keyword arguments the method should have been called with
+    """
+    mock_method.assert_called_once_with(*args, **kwargs)
+
 
 class TestMockClientFactory:
     """Tests for the MockClientFactory class."""
@@ -147,7 +164,8 @@ class TestMockClientFactory:
         )
 
         # Assert
-        mock_client.configure_response.assert_called_once_with(
+        verify_called_once_with(
+            mock_client.configure_response,
             method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"}
         )
 
@@ -161,7 +179,10 @@ class TestMockClientFactory:
         MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
         # Assert
-        mock_client.configure_response.assert_called_once_with(method="GET", path="/test", error=error)
+        verify_called_once_with(
+            mock_client.configure_response,
+            method="GET", path="/test", error=error
+        )
 
     def test_configure_error_response_without_error(self):
         """Test configure_error_response method without an error."""
@@ -176,4 +197,10 @@ class TestMockClientFactory:
             status_code=404,
             data={"error": "Not found"},
             headers={"Content-Type": "application/json"},
+        )
+
+        # Assert
+        verify_called_once_with(
+            mock_client.configure_response,
+            method="GET", path="/test", status_code=404, data={"error": "Not found"}, headers={"Content-Type": "application/json"}
         )
