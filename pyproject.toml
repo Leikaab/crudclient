@@ -66,21 +66,11 @@ typeCheckingMode = "basic"
 
 
 [tool.isort]
+profile = "black"
 skip = ["tests/debug.py", "crudclient/config.pyi", "crudclient/client.pyi"]
 extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*"]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 150
 
 
-[tool.flake8]
-ignore = ["E203", "E266", "E501", "W503"]
-max-line-length = 150
-max-complexity = 18
-select = ["B", "C", "E", "F", "W", "T4"]
-exclude = [".coveragerc"]
 
 [tool.black]
 line-length = 150

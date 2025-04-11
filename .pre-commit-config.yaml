@@ -43,7 +43,7 @@ repos:
         name: isort
         stages: [pre-commit]
         language: system
-        entry: poetry run isort
+        entry: poetry run isort --profile black
         types: [python]
 
       - id: black
@@ -52,8 +52,6 @@ repos:
         language: system
         entry: poetry run black
         types: [python, pyi]
-        args:
-          - "--line-length=150"
 
       - id: flake8
         name: flake8
@@ -62,8 +60,6 @@ repos:
         entry: poetry run flake8
         types: [python]
         exclude: setup.py
-        args:
-          - "--max-line-length=150"
 
       - id: mypy
         name: mypy

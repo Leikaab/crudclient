@@ -30,10 +30,11 @@ jobs:
           pip install poetry
           poetry install --no-interaction --no-ansi --with dev
 
-      - name: Run forced std
+      - name: Run code quality checks
         run: |
-          poetry run isort --diff .
-          poetry run black --check --line-length=150 .
+          poetry run autoflake --remove-all-unused-imports --check --recursive .
+          poetry run isort --check --profile black .
+          poetry run black --check .
           poetry run flake8
           poetry run mypy
 
