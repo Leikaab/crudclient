@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:
-    from .data_store_definitions import ValidationRule, UniqueConstraint
+    from .data_store_definitions import UniqueConstraint, ValidationRule
 
 
 def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[Dict[str, Any]]:

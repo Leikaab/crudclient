@@ -10,7 +10,6 @@ from typing import Any, Dict, Optional
 
 from crudclient.testing.response_builder.response import MockResponse
 
-
 class RequestRecord:
     """
     Record of an HTTP request made during testing.

@@ -9,7 +9,6 @@ import base64
 import json
 from typing import Any, Dict, Tuple
 
-
 class AuthExtractionUtils:
     """
     Helper methods for extracting authentication information.

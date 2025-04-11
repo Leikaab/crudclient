@@ -40,7 +40,6 @@ from .response import ResponseHandler
 from .retry import RetryHandler
 from .session import SessionManager
 
-
 class HttpClient:
     """
     Makes HTTP requests and delegates specialized concerns to other components.

@@ -7,7 +7,7 @@ for testing API clients with username/password authentication.
 
 import base64
 import re
-from typing import List, Optional, Tuple, TYPE_CHECKING, Pattern
+from typing import TYPE_CHECKING, List, Optional, Pattern, Tuple
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.basic import BasicAuth

@@ -6,7 +6,6 @@ This module provides a class for tracking API key usage across endpoints.
 
 from typing import Dict, Optional
 
-
 class ApiKeyUsageTracker:
     """
     API Key usage tracker for monitoring API key usage across endpoints.

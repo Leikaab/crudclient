@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .method_call import MethodCall
 
-
 class SpyBase:
     """
     Base class for spy implementations.

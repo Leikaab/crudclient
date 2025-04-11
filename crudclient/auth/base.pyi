@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
-
 class AuthStrategy(ABC):
     """
     Abstract base class for authentication strategies.

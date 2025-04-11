@@ -29,7 +29,6 @@ Classes:
 
 from typing import Any, Dict, Optional, Tuple
 
-
 class RequestFormatter:
     """
     Handles request preparation and content-type setting.

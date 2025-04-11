@@ -2,7 +2,6 @@ from typing import Any, Callable, Dict, List, Optional
 
 from .response import MockResponse
 
-
 class ValidationErrorBuilder:
     """
     Provides static methods to create MockResponse objects representing

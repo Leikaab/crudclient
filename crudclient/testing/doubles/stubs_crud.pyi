@@ -2,7 +2,6 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from crudclient.client import Client
 
-
 class CrudBase:
     """
     Abstract base class defining the standard interface for CRUD operations

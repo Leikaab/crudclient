@@ -1,12 +1,7 @@
 # crudclient/testing/doubles/data_store.pyi
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .data_store_definitions import (
-    Relationship,
-    UniqueConstraint,
-    ValidationRule,
-)
-
+from .data_store_definitions import Relationship, UniqueConstraint, ValidationRule
 
 class DataStore:
     """

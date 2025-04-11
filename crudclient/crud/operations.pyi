@@ -7,9 +7,10 @@ It provides implementations for list, create, read, update, partial_update, dest
 and custom_action operations.
 """
 
-from .base import T
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+from .base import T
 
 if TYPE_CHECKING:
     from .base import Crud
@@ -17,7 +18,6 @@ if TYPE_CHECKING:
 from ..exceptions import ModelConversionError, ValidationError
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
-
 
 def list_operation(  # Note: self type added below
     self: 'Crud', parent_id: Optional[str] = None, params: Optional[JSONDict] = None

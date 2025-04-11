@@ -18,7 +18,6 @@ from typing import Any, Generic, List, Protocol, TypeVar, Union
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
-
 class ModelDumpable(Protocol):
     def model_dump(self) -> dict: ...
 

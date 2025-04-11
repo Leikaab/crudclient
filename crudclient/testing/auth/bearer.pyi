@@ -6,7 +6,7 @@ for testing API clients with token-based authentication.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Tuple, Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Type
 
 if TYPE_CHECKING:
     from ..response_builder import MockResponse
@@ -15,7 +15,6 @@ from crudclient.auth.base import AuthStrategy
 from crudclient.auth.bearer import BearerAuth
 
 from .base import AuthMockBase
-
 
 class BearerAuthMock(AuthMockBase):
     """

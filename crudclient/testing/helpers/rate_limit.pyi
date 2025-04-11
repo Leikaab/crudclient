@@ -11,7 +11,6 @@ rate-limited conditions.
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-
 def get_current_time() -> float:
     """
     Get current time in seconds.

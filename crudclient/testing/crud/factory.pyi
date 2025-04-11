@@ -11,7 +11,6 @@ from .delete import DeleteMock
 from .read import ReadMock
 from .update import UpdateMock
 
-
 class CrudMockFactory:
     """
     Factory for creating CRUD mock objects.

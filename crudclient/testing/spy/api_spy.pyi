@@ -14,7 +14,6 @@ from crudclient.crud.base import Crud
 
 from .base import SpyBase
 
-
 class ApiSpy(API, SpyBase):
     """
     Spy implementation of the API class.

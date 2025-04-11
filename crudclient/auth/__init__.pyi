@@ -27,8 +27,8 @@ Example:
 """
 
 from .base import AuthStrategy, create_auth_strategy
-from .bearer import BearerAuth
 from .basic import BasicAuth
+from .bearer import BearerAuth
 from .custom import CustomAuth
 
 __all__ = ["AuthStrategy", "BearerAuth", "BasicAuth", "CustomAuth", "create_auth_strategy"]

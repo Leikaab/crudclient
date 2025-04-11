@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from .response import MockResponse
 
-
 class BasicResponseBuilder:
     """
     Builder for creating basic API responses.

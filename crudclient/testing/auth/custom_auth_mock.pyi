@@ -12,7 +12,6 @@ from crudclient.auth.custom import CustomAuth
 
 from .base import AuthMockBase
 
-
 class CustomAuthMock(AuthMockBase):
     """
     Mock for Custom Authentication strategy with enhanced capabilities.

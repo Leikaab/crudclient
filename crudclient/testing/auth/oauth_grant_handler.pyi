@@ -6,11 +6,10 @@ including authorization_code, client_credentials, password, and refresh_token.
 """
 
 from datetime import datetime
-from typing import Dict, Optional, Set, Any
+from typing import Any, Dict, Optional, Set
 
-from .oauth_token_manager import OAuthTokenManager
 from .oauth_scope_validator import OAuthScopeValidator
-
+from .oauth_token_manager import OAuthTokenManager
 
 class OAuthGrantHandler:
     """

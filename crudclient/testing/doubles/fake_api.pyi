@@ -7,7 +7,6 @@ from crudclient.config import ClientConfig
 
 from .data_store import DataStore
 
-
 class FakeCrud:
     """
     A mock implementation of CRUD operations for testing purposes.

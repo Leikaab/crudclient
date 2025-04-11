@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 
 from crudclient.testing.response_builder.response import MockResponse
 
-
 class ResponsePattern:
     """
     Defines a pattern for matching HTTP requests and providing appropriate mock responses.

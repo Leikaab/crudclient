@@ -14,11 +14,11 @@ Modules:
     - errors: Error handling
 """
 from .client import HttpClient
-from .session import SessionManager
+from .errors import ErrorHandler
 from .request import RequestFormatter
 from .response import ResponseHandler
-from .errors import ErrorHandler
-from .retry import RetryHandler, RetryStrategy, FixedRetryStrategy, ExponentialBackoffStrategy, RetryCondition, RetryEvent
+from .retry import ExponentialBackoffStrategy, FixedRetryStrategy, RetryCondition, RetryEvent, RetryHandler, RetryStrategy
+from .session import SessionManager
 
 __all__ = [
     "HttpClient",

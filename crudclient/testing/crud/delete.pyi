@@ -12,9 +12,9 @@ from requests import PreparedRequest
 
 from crudclient.exceptions import CrudClientError
 from crudclient.testing.response_builder.response import MockResponse
+
 from .base import BaseCrudMock
 from .request_record import RequestRecord
-
 
 class DeleteMock(BaseCrudMock):
     """

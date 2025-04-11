@@ -12,7 +12,6 @@ import requests
 
 from ..types import RawResponseSimple
 
-
 class ResponseHandler:
     """
     Handles HTTP response processing and validation.

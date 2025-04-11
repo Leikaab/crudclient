@@ -39,14 +39,13 @@ Exceptions:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Type, TypeVar, Union
 from types import TracebackType
+from typing import Any, Dict, Optional, Type, TypeVar, Union
 
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
-
 
 T = TypeVar('T', bound=Crud)
 

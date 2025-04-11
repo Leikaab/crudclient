@@ -15,7 +15,6 @@ from ..types import JSONDict, JSONList, RawResponse
 from .base import ModelDumpable, ResponseModelStrategy, T
 from .types import ApiResponseType, ResponseTransformer
 
-
 class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
     """
     A response model strategy that extracts data using path expressions.

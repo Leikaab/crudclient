@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Any, Callable, List, Optional, Union
 
-
 def required_field(value: Any) -> Optional[str]:
     """
     Validates that a field is present and not empty.

@@ -9,7 +9,6 @@ patterns.
 
 from crudclient.testing.simple_mock.assertions import SimpleMockClientAssertions
 
-
 class SimpleMockClient(SimpleMockClientAssertions):
     """
     A simple mock client that doesn't inherit from the real Client class.

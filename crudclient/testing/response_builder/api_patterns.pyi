@@ -9,7 +9,6 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from .response import MockResponse
 
-
 class APIPatternBuilder:
     """
     Builder for creating mock responses that follow common API patterns.

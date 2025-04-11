@@ -1,7 +1,6 @@
 # crudclient/testing/response_builder/data_generation.pyi
 from typing import Any, Dict, List, Optional, Union
 
-
 class DataGenerationBuilder:
     """
     Utility class for generating random test data based on a schema definition.

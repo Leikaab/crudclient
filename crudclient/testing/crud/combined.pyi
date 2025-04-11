@@ -12,9 +12,8 @@ from typing import Any, Dict, List, Optional, Union
 from .create import CreateMock
 from .delete import DeleteMock
 from .read import ReadMock
-from .update import UpdateMock
 from .request_record import RequestRecord
-
+from .update import UpdateMock
 
 class CombinedCrudMock:
     """

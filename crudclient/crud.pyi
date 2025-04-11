@@ -33,7 +33,7 @@ Type Variables:
 """
 
 import logging
-from typing import Any, Callable, Dict, Generic, List, Literal, Optional, Protocol, Type, TypeAlias, TypeVar, cast, Tuple, Union
+from typing import Any, Callable, Dict, Generic, List, Literal, Optional, Protocol, Tuple, Type, TypeAlias, TypeVar, Union, cast
 
 from pydantic import ValidationError as PydanticValidationError
 
@@ -48,7 +48,6 @@ from .response_strategies import (
     ResponseTransformer,
 )
 from .types import JSONDict, JSONList, RawResponse
-
 
 T = TypeVar("T", bound=ModelDumpable)
 HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]

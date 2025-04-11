@@ -12,7 +12,6 @@ from .basic import BasicAuthMock
 from .bearer import BearerAuthMock
 from .custom import CustomAuthMock, OAuthMock
 
-
 def create_basic_auth_mock(
     username: str = "user",
     password: str = "pass",

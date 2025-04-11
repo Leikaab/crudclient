@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 
 from .data_store_definitions import Relationship
 
-
 def perform_soft_delete(
     item: Dict[str, Any],
     deleted_field: str = "_deleted",

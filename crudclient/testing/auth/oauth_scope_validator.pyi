@@ -7,7 +7,6 @@ and required scopes.
 
 from typing import List, Optional, Set
 
-
 class OAuthScopeValidator:
     """
     OAuth scope validator for validating requested scopes.

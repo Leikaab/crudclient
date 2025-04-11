@@ -12,7 +12,6 @@ from typing import Callable, Optional
 
 import requests
 
-
 class NetworkCondition:
     """
     Simulates various network conditions for testing.

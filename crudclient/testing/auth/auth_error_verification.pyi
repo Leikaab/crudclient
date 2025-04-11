@@ -7,7 +7,6 @@ and rate limit headers.
 
 from typing import Any, Dict, List, Optional
 
-
 class AuthErrorVerification:
     """
     Helper methods for verifying authentication error responses.

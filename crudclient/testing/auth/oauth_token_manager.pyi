@@ -6,8 +6,7 @@ validation, and refreshing of tokens.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Set, List, Union, Any, Mapping
-
+from typing import Any, Dict, List, Mapping, Optional, Set, Union
 
 class OAuthTokenManager:
     """

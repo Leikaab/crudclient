@@ -7,10 +7,9 @@ crudclient testing framework.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from ..response_builder import ResponseBuilder
-
 
 class AuthMockBase:
     """

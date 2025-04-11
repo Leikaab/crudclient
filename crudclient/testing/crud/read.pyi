@@ -9,7 +9,7 @@ pagination, and field selection capabilities.
 import copy
 import json
 import re
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from crudclient.testing.response_builder.response import MockResponse
 

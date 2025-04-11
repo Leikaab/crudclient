@@ -1,7 +1,6 @@
 # crudclient/testing/doubles/data_store_sorting.pyi
 from typing import Any, Dict, List, Union
 
-
 def apply_sorting(
     data: List[Dict[str, Any]],
     sort_by: Union[str, List[str]],

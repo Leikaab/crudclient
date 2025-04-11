@@ -7,11 +7,10 @@ including header validation, error handling, and token refresh verification.
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from .auth_error_verification import AuthErrorVerification
 from .auth_extraction_utils import AuthExtractionUtils
 from .auth_header_verification import AuthHeaderVerification
 from .auth_token_verification import AuthTokenVerification
-from .auth_error_verification import AuthErrorVerification
-
 
 class AuthVerificationHelpers:
     """

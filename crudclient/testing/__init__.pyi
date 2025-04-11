@@ -40,7 +40,6 @@ from .simple_mock import SimpleMockClient
 from .spy import MethodCall, SpyBase
 from .verification import Verifier
 
-
 class RequestVerifier:
     """Placeholder for RequestVerifier class referenced in tests."""
     ...

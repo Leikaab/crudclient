@@ -13,7 +13,6 @@ from crudclient.types import RawResponseSimple
 
 from .base import SpyBase
 
-
 class ClientSpy(Client, SpyBase):
     """
     Spy implementation of the Client class.

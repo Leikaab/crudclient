@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional
 
-
 class MockResponse:
     """
     A mock object simulating an HTTP response, typically from libraries like requests or httpx.

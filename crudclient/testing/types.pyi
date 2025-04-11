@@ -5,6 +5,7 @@ This module provides type definitions and utility classes used throughout the te
 """
 
 from typing import Any, Dict, List, Union
+
 from typing_extensions import TypeAlias
 
 from crudclient.testing.response_builder.response import MockResponse

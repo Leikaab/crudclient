@@ -22,7 +22,6 @@ import requests
 
 from ..exceptions import CrudClientError
 
-
 class RetryEvent(Enum):
     """Enum representing different retry events."""
     FORBIDDEN = 403

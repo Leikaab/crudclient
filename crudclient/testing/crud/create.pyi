@@ -15,7 +15,6 @@ from .base import BaseCrudMock
 from .exceptions import ValidationFailedError
 from .request_record import RequestRecord
 
-
 class CreateMock(BaseCrudMock):
     """
     Mock implementation for create (POST) operations.

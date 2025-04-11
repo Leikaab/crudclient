@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .response import MockResponse
 
-
 class EntityRelationshipBuilder:
     """
     Builder for creating related entities and entity graphs.

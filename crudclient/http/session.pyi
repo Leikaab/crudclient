@@ -32,9 +32,8 @@ from typing import Any, Dict, Optional
 
 import requests
 
-from ..config import ClientConfig
 from ..auth.base import AuthStrategy
-
+from ..config import ClientConfig
 
 class SessionManager:
     """

@@ -15,7 +15,6 @@ from ..types import JSONDict, JSONList, RawResponse
 from .base import ModelDumpable, ResponseModelStrategy, T
 from .types import ApiResponseType
 
-
 class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
     """
     Default implementation of the response model strategy.

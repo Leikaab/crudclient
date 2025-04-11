@@ -11,7 +11,6 @@ from crudclient.testing.auth import ApiKeyAuthMock, BasicAuthMock, BearerAuthMoc
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.response_builder.api_patterns import APIPatternBuilder
 
-
 def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     Create response patterns for a specific API type.

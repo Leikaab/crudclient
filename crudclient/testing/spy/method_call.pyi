@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional, Tuple
 
-
 class MethodCall:
     """
     Record of a method call for verification.

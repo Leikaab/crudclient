@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from .auth_extraction_utils import AuthExtractionUtils
 
-
 class AuthTokenVerification:
     """
     Helper methods for verifying authentication tokens.

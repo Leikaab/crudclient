@@ -12,10 +12,9 @@ Classes:
     - ApiResponse: A generic model for API responses with pagination.
 """
 
-from typing import Any, Dict, Generic, List, Optional, TypeVar, ClassVar
+from typing import Any, ClassVar, Dict, Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl, validator, field_validator
-
+from pydantic import BaseModel, Field, HttpUrl, field_validator, validator
 
 class RoleBasedModel(BaseModel):
     """

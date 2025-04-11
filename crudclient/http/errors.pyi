@@ -11,10 +11,10 @@ Classes:
 """
 
 from typing import Dict, Optional, Type
+
 import requests
 
 from ..exceptions import CrudClientError
-
 
 class ErrorHandler:
     """

@@ -10,6 +10,7 @@ extended for specific API endpoints.
 
 import logging
 from typing import Any, Generic, List, Literal, Optional, Tuple, Type, TypeVar, Union, cast
+
 from typing_extensions import TypeAlias
 
 from ..client import Client

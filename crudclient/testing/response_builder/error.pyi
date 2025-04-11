@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 from .basic import BasicResponseBuilder
 from .response import MockResponse
 
-
 class ErrorResponseBuilder:
     """
     Builder for creating standardized API error responses.

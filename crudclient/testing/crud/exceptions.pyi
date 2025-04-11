@@ -7,7 +7,6 @@ to simulate specific error conditions.
 
 from crudclient.exceptions import CrudClientError
 
-
 class ConcurrencyError(CrudClientError):
     """
     Exception raised when a concurrency conflict is detected.

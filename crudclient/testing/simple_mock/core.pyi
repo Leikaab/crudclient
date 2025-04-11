@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, List, Union
 from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse
 
-
 class SimpleMockClientCore:
     """
     A simple mock client that doesn't inherit from the real Client class.

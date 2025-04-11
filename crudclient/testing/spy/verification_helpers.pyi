@@ -2,7 +2,6 @@ from typing import Any, Dict, List
 
 from .enhanced import EnhancedSpyBase
 
-
 def verify_call_sequence(spy: EnhancedSpyBase, *method_names: str) -> None:
     """
     Verifies that the specified methods were called on the spy in the exact order given.

@@ -1,7 +1,6 @@
 # crudclient/testing/doubles/data_store_definitions.pyi
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-
 class ValidationException(Exception):
     """Exception raised for data validation errors."""
     errors: Dict[str, List[str]]

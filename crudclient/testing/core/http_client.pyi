@@ -16,7 +16,6 @@ from requests import Response
 from ..exceptions import RequestNotConfiguredError
 from ..types import Headers, HttpMethod, QueryParams, RequestBody, ResponseBody, StatusCode
 
-
 class MockHTTPClient:
     """
     Mock implementation of the crudclient.http.Client class.

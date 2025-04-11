@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Union
 
 import requests
 
-
 class Response:
     """
     Abstract base class defining the interface for an HTTP response object.

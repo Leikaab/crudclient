@@ -6,7 +6,6 @@ from crudclient.config import ClientConfig
 
 from .stubs_crud import StubCrud
 
-
 class StubAPI(API):
     """
     A stub implementation of the API class for testing, managing multiple stubbed endpoints.

@@ -12,7 +12,6 @@ from typing import Any, Dict
 from crudclient.testing.factory.helpers import _create_api_patterns
 from crudclient.testing.simple_mock import SimpleMockClient
 
-
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
     """
     Create a pre-configured SimpleMockClient instance for testing API interactions.

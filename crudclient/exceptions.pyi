@@ -1,8 +1,8 @@
 from typing import Any, Dict, Optional, Union
+
 import requests
 
 from .types import JSONDict
-
 
 class APIError(Exception):
     """Base class for all API-related errors."""

@@ -4,7 +4,6 @@ from typing import Any, List, Optional
 from .basic import BasicResponseBuilder
 from .response import MockResponse
 
-
 class PaginationResponseBuilder:
     """
     Builder for creating paginated API responses.

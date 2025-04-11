@@ -7,12 +7,12 @@ all method calls for later verification.
 
 from typing import Any, Dict, List, Optional, Union
 
-from crudclient.crud.base import Crud as CrudBase, T
+from crudclient.crud.base import Crud as CrudBase
+from crudclient.crud.base import T
 from crudclient.models import ApiResponse
 from crudclient.types import JSONDict, JSONList
 
 from .base import SpyBase
-
 
 class CrudSpy(CrudBase, SpyBase):
     """

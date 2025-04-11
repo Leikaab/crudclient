@@ -11,6 +11,7 @@ Type Aliases:
 """
 
 from typing import Any, Callable, Type
+
 from typing_extensions import TypeAlias
 
 from ..models import ApiResponse

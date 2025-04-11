@@ -11,10 +11,10 @@ from typing import Dict, List, Optional, Pattern, Set, TypeVar
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import ApiKeyAuth
 
-from .base import AuthMockBase
-from .api_key_validator import ApiKeyValidator
 from .api_key_rate_limiter import ApiKeyRateLimiter
 from .api_key_usage_tracker import ApiKeyUsageTracker
+from .api_key_validator import ApiKeyValidator
+from .base import AuthMockBase
 
 T = TypeVar('T', bound='ApiKeyAuthMock')
 

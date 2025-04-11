@@ -2,7 +2,6 @@
 import copy
 from typing import Any, Dict, List, Optional, Set
 
-
 class PartialResponseHelper:
     """
     Helper class for creating partial API responses by selecting specific fields.

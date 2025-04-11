@@ -1,7 +1,6 @@
 # crudclient/testing/helpers/pagination.pyi
 from typing import Any, Callable, Dict, List, Optional
 
-
 class PaginationHelper:
     """
     Helper class for simulating various pagination styles in API responses.

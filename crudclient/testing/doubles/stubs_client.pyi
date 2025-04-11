@@ -1,14 +1,14 @@
 import json
-import requests
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union, overload
+
+import requests
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.types import RawResponseSimple
 
 from .stubs import StubResponse
-
 
 class StubClient(Client):
     """
