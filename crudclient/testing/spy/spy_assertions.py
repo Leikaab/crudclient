@@ -1,8 +1,5 @@
 from typing import TYPE_CHECKING, Any, Callable, Dict
 
-if TYPE_CHECKING:
-    from .enhanced import CallRecord  # Avoid circular import
-
 
 class SpyAssertionsMixin:
 

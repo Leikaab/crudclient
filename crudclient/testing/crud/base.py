@@ -3,7 +3,6 @@ import json
 import re
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
 
 # TODO: Replace 'Any' with the actual Request type used in request_history if available

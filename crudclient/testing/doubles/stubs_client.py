@@ -85,7 +85,6 @@ class StubClient(Client):
         return None
 
     def _find_matching_response(self, method: str, url: str) -> Any:
-        response = None
         method_prefix = f"{method}:"
 
         # First try to find a method-specific pattern

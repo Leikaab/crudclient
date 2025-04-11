@@ -2,7 +2,7 @@ import random
 import string
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Union, TypeVar, Callable, Optional
+from typing import Any, Dict, List, Union, TypeVar, Optional
 
 
 T = TypeVar('T')
