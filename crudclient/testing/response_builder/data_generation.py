@@ -1,10 +1,9 @@
+# crudclient/testing/response_builder/data_generation.py
 import random
 import string
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, TypeVar, Union
-
-T = TypeVar("T")
+from typing import Any, Dict, List, Optional, Union
 
 
 class DataGenerationBuilder:
