@@ -181,7 +181,7 @@ def _fallback_list_conversion(
     return []
 
 
-def _dump_data(self, data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
+def _dump_data(self, data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:  # noqa: C901
     if data is None:
         return {}
 

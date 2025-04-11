@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock
 
-import pytest
 
 from crudclient.testing.core.client import MockClient
 
