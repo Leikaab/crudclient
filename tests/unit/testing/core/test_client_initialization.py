@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock
 
-
 from crudclient.auth.bearer import BearerAuth
 from crudclient.testing.core.client import MockClient
 

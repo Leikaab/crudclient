@@ -9,9 +9,9 @@ from unittest.mock import MagicMock
 from crudclient.auth.bearer import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.testing.client_factory import MockClientFactory  # Import from renamed file
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
-from crudclient.testing.client_factory import MockClientFactory  # Import from renamed file
 
 
 class TestMockClientFactory:

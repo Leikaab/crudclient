@@ -3,11 +3,11 @@ from typing import Any, Dict, Optional, Union
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.testing.factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns  # Use absolute import
 
 from .auth import create_api_key_auth_mock, create_basic_auth_mock, create_bearer_auth_mock, create_custom_auth_mock, create_oauth_mock
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
-from crudclient.testing.factory.helpers import _add_error_responses, _configure_auth_mock, _create_api_patterns  # Use absolute import
 from .types import Headers, ResponseData, StatusCode
 
 

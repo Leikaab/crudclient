@@ -8,8 +8,8 @@ in real-world testing scenarios.
 import pytest
 
 from crudclient.config import ClientConfig
-
 from crudclient.testing.auth.custom_auth_mock import CustomAuthMock
+
 from .common import create_mock_client
 
 

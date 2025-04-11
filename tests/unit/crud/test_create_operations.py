@@ -6,10 +6,10 @@ Unit tests for the create operation of the CRUD base class.
 from unittest.mock import MagicMock
 
 import pytest
-# Import the custom ValidationError, which wraps the Pydantic one
-from crudclient.exceptions import ValidationError
 
-from crudclient.exceptions import ModelConversionError
+# Import the custom ValidationError, which wraps the Pydantic one
+from crudclient.exceptions import ModelConversionError, ValidationError
+
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
 # Sample data (Consider moving to conftest.py later if shared across more files)

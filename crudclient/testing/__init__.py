@@ -12,6 +12,7 @@ from .auth import (
     create_custom_auth_mock,
     create_oauth_mock,
 )
+from .client_factory import MockClientFactory  # Import from renamed file
 from .core.client import MockClient
 from .core.http_client import MockHTTPClient
 from .doubles import DataStore, FakeAPI
@@ -27,7 +28,6 @@ from .exceptions import (
     TestingError,
     VerificationError,
 )
-from .client_factory import MockClientFactory  # Import from renamed file
 from .response_builder import ResponseBuilder  # Import ResponseBuilder
 from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatternBuilder
 from .response_builder.response import MockResponse  # Import MockResponse from response_builder

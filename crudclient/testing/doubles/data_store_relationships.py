@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 from .data_store_definitions import Relationship  # Import Relationship
 from .data_store_relationship_helpers import (
-    handle_many_to_many_junction, handle_many_to_many_targets,
-    handle_one_to_many_cascade, handle_one_to_one_cascade
+    handle_many_to_many_junction,
+    handle_many_to_many_targets,
+    handle_one_to_many_cascade,
+    handle_one_to_one_cascade,
 )
 
 # RelationshipType is now defined in this file

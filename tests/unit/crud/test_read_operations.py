@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from crudclient.exceptions import ModelConversionError
+
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
 # Sample data (Consider moving to conftest.py later if shared across more files)
