@@ -1,3 +1,9 @@
+"""
+Base components for the Test Spy pattern.
+
+This module defines the foundational `SpyBase` class, which provides the core
+functionality for recording method calls in test doubles.
+"""
 from typing import Any, Dict, List, Optional, Tuple
 
 from .method_call import MethodCall

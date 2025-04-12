@@ -1,7 +1,15 @@
+"""
+Assertion mixin for enhanced spy objects.
+
+This module provides the `SpyAssertionsMixin`, which adds various `assert_*` methods
+to spy classes that conform to the `SpyProtocol`. These assertions help verify
+interactions recorded by the spy during tests.
+"""
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 
 if TYPE_CHECKING:
     from .enhanced import CallRecord  # Avoid circular import
+
 
 class SpyProtocol(Protocol):
     """
@@ -11,10 +19,22 @@ class SpyProtocol(Protocol):
     _calls: List["CallRecord"]
     _method_calls: Dict[str, List["CallRecord"]]
 
-    def was_called(self, method_name: str) -> bool: ...
-    def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool: ...
-    def get_call_count(self, method_name: Optional[str] = None) -> int: ...
-    def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]: ...
+    def was_called(self, method_name: str) -> bool:
+        """Check if the specified method was called at least once."""
+        ...
+
+    def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
+        """Check if the specified method was called with the exact arguments."""
+        ...
+
+    def get_call_count(self, method_name: Optional[str] = None) -> int:
+        """Get the number of times a method (or any method) was called."""
+        ...
+
+    def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]:
+        """Retrieve recorded calls for a specific method or all methods."""
+        ...
+
 
 class SpyAssertionsMixin:
     """

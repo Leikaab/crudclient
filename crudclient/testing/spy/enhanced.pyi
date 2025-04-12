@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from .method_call import MethodCall
 from .spy_assertions import SpyAssertionsMixin
 
+
 class CallRecord(MethodCall):
     """
     Represents a single recorded method call with enhanced details.
@@ -50,7 +51,10 @@ class CallRecord(MethodCall):
         """
         ...
 
-    def __repr__(self) -> str: ...
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation of the call record."""
+        ...
+
 
 class EnhancedSpyBase(SpyAssertionsMixin):
     """
@@ -127,6 +131,7 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         """Clears all recorded calls."""
         ...
 
+
 class MethodSpy:
     """
     Wraps a single method to spy on its calls, delegating to an EnhancedSpyBase.
@@ -156,6 +161,7 @@ class MethodSpy:
         the original method.
         """
         ...
+
 
 class ClassSpy(EnhancedSpyBase):
     """
@@ -189,6 +195,7 @@ class ClassSpy(EnhancedSpyBase):
         """
         ...
 
+
 class FunctionSpy(EnhancedSpyBase):
     """
     Spies on calls to a standalone function.
@@ -215,6 +222,7 @@ class FunctionSpy(EnhancedSpyBase):
         the original function.
         """
         ...
+
 
 class EnhancedSpyFactory:
     """

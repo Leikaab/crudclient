@@ -146,9 +146,16 @@ class MockClient(EnhancedSpyBase):
         """
         Configure rate limiting for the mock client.
 
+        Delegates to the underlying HTTP client's rate limiting configuration.
+        This simulates scenarios where an API enforces usage limits.
+
         Args:
-            limit: The maximum number of requests allowed in the rate window.
-            window_seconds: The time window for rate limiting in seconds.
+            limit: The maximum number of requests allowed within the specified window.
+            window_seconds: The duration of the time window for rate limiting, in seconds.
+
+        Raises:
+            ValueError: If limit or window_seconds are non-positive (raised by underlying HTTP client).
+            NotImplementedError: If the underlying HTTP client does not support rate limiting.
         """
         ...
 
@@ -217,7 +224,27 @@ class MockClient(EnhancedSpyBase):
         data: Optional[RequestBody] = None,
         **kwargs: Any
     ) -> Any:
-        """Helper method to execute HTTP methods with timing and recording."""
+        """
+        Internal helper to execute HTTP methods, apply auth, record calls, and handle timing.
+
+        This method centralizes the logic for handling requests made via `get`, `post`, etc.
+        It prepares arguments, records the call if spying is enabled, executes the
+        request via the underlying mock HTTP client, and returns the result.
+
+        Args:
+            method_name: The name of the HTTP method (e.g., 'GET', 'POST').
+            path: The request path.
+            headers: Optional request headers.
+            params: Optional query parameters.
+            data: Optional request body data.
+            **kwargs: Additional keyword arguments passed to the underlying HTTP client.
+
+        Returns:
+            The response object returned by the underlying mock HTTP client.
+
+        Raises:
+            Any exceptions raised by the underlying mock HTTP client or the auth strategy.
+        """
         ...
 
     def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
@@ -307,5 +334,12 @@ class MockClient(EnhancedSpyBase):
     # Verification methods
 
     def reset(self) -> None:
-        """Reset the mock client to its initial state."""
+        """
+        Resets the mock client to its initial state.
+
+        This clears all configured responses (both exact and pattern-based),
+        resets any simulated network conditions or rate limiters configured on
+        the underlying HTTP client, and clears the recorded call history
+        inherited from `EnhancedSpyBase`.
+        """
         ...

@@ -148,7 +148,7 @@ class TestMockClientRequestTracking:
         # Act & Assert
         with pytest.raises(AssertionError) as excinfo:
             client.assert_called("POST")
-        assert "Method POST was not called" in str(excinfo.value)
+        assert "Expected method 'POST' to have been called, but it was not." in str(excinfo.value)
 
     def test_assert_request_not_made_success(self):
         """Test assert_not_called when no matching requests were made."""
@@ -170,7 +170,7 @@ class TestMockClientRequestTracking:
         # Act & Assert
         with pytest.raises(AssertionError) as excinfo:
             client.assert_not_called("GET")
-        assert "Method GET was called" in str(excinfo.value)
+        assert "Expected method 'GET' not to have been called, but it was." in str(excinfo.value)
 
     def test_filter_requests(self):
         """Test filtering requests by method and path pattern."""

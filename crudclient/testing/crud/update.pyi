@@ -1,9 +1,17 @@
+"""
+Mock implementation for update (PUT/PATCH) operations in CRUD testing.
+
+This module provides a mock implementation for testing update operations,
+allowing configuration of responses for specific update scenarios, including
+conditional updates, concurrency control, and error simulation.
+"""
 # crudclient/testing/crud/update.pyi
 from typing import Any, Dict, Union
 
 from crudclient.exceptions import NotFoundError
 
 from .base import BaseCrudMock
+
 
 class UpdateMock(BaseCrudMock):
     """

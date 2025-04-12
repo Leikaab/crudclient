@@ -1,4 +1,11 @@
+"""
+Data structure for representing a recorded method call.
+
+This module defines the `MethodCall` class, used by spy objects to store
+information about interactions for later verification.
+"""
 from typing import Any, Dict, Optional, Tuple
+
 
 class MethodCall:
     """

@@ -10,9 +10,9 @@ This document summarizes the key software design patterns employed within the `c
 
 ## 2. Verifier Pattern
 
-*   **What:** Encapsulates the logic for verifying interactions or state changes within a test subject or its collaborators (like mocks or spies).
-*   **Why:** Used to create reusable and focused assertion logic, especially for complex verification scenarios like checking authentication headers or sequences of API calls. This makes tests cleaner and more readable.
-*   **Where:** Implemented in classes like `crudclient.testing.verification.Verifier` and specialized verifiers such as those in `crudclient.testing.auth.verification` (e.g., `AuthHeaderVerification`, `AuthTokenVerification`).
+*   **What:** Encapsulates the logic for verifying interactions with test doubles (mocks or spies). It provides a dedicated interface for making assertions about method calls, arguments, and call counts.
+*   **Why:** Decouples assertion logic from the test double itself, leading to cleaner tests and reusable verification logic. Useful for complex checks (e.g., call sequences, auth details).
+*   **Where:** Implemented generally by the static methods in `crudclient.testing.verification.Verifier` (often raising `VerificationError`). More specialized, functional helpers exist for specific spy types (`crudclient.testing.spy.verification_helpers`) or authentication details (`crudclient.testing.auth.verification`), which often raise `AssertionError`.
 
 ## 3. Test Spy Pattern
 
@@ -26,7 +26,13 @@ This document summarizes the key software design patterns employed within the `c
 *   **Why:** Used extensively to replace real components like the HTTP client, authentication mechanisms, or CRUD endpoints during unit tests. This allows testing components in isolation without needing external services or complex setup. Mocks can be configured to return specific responses or simulate error conditions.
 *   **Where:** Found throughout the testing module, with key examples including `crudclient.testing.core.client.MockClient`, `crudclient.testing.auth.base.AuthMockBase`, and `crudclient.testing.crud.base.BaseCrudMock`.
 
-## 5. Builder Pattern
+## 5. Fake Object Pattern
+
+*   **What:** Provides a functional, but simplified, implementation of a component's interface. Fakes have working behavior but substitute complex dependencies (like databases or network calls) with simpler alternatives (like in-memory storage).
+*   **Why:** Used for higher-level integration tests where the interaction between components is important, but external dependencies are undesirable. Fakes offer more realism than mocks but are simpler than running the real component.
+*   **Where:** Key examples are `crudclient.testing.doubles.fake_api.FakeAPI` (which simulates the `API` interface) and its backing `crudclient.testing.doubles.data_store.DataStore` (which simulates a database in memory).
+
+## 6. Builder Pattern
 
 *   **What:** Separates the construction of a complex object from its representation, allowing the same construction process to create different representations. Often used for setting up objects with many optional parameters or configurations.
 *   **Why:** Used implicitly or explicitly in the configuration of mock objects (e.g., `MockClient`, `BaseCrudMock`). It allows tests to specify only the necessary configuration details for a mock, making test setup more fluent and readable, especially when dealing with complex mock behaviors or responses.

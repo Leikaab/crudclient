@@ -1,8 +1,13 @@
 """
-Authentication error verification utilities for testing.
+Specific utilities for verifying authentication error responses and headers.
 
-This module provides helper methods for verifying authentication error responses
-and rate limit headers.
+This module provides the `AuthErrorVerification` class containing static methods
+focused on checking the structure and content of common authentication-related
+error response bodies and standard rate limit headers.
+
+These methods are typically used internally by higher-level verification helpers
+(like `AuthVerificationHelpers`) or can be used directly for fine-grained checks.
+They raise `VerificationError` upon failure.
 """
 
 from typing import Any, Dict, List, Optional
@@ -12,10 +17,11 @@ from ..exceptions import VerificationError  # Import VerificationError
 
 class AuthErrorVerification:
     """
-    Helper methods for verifying authentication error responses.
+    Provides static methods focused on verifying auth error responses and rate limits.
 
-    This class provides static methods for verifying authentication error responses
-    and rate limit headers.
+    Contains specific checks for the content of error response bodies and the
+    presence/values of standard rate limit headers.
+    Methods raise `VerificationError` if checks fail.
     """
 
     @staticmethod
@@ -23,16 +29,32 @@ class AuthErrorVerification:
         response: Dict[str, Any], expected_status: int = 401, expected_error: Optional[str] = None, expected_error_description: Optional[str] = None
     ) -> None:
         """
-        Verify that an authentication error response is correct.
+        Verify the structure and content of an authentication error response body.
+
+        Checks if the `response` dictionary (representing the parsed JSON body)
+        contains expected keys (like 'status', 'error', 'error_description') and
+        if their values match the provided expected values.
 
         Args:
-            response: The response to verify
-            expected_status: The expected HTTP status code
-            expected_error: The expected error code
-            expected_error_description: The expected error description
+            response: The dictionary representing the parsed JSON error response body.
+            expected_status: The expected HTTP status code (often checked separately,
+                             but can be verified if present in the response body, e.g., response['status']).
+                             Defaults to 401.
+            expected_error: Optional expected value for the 'error' field (e.g., "invalid_token").
+            expected_error_description: Optional expected value for the 'error_description' field.
 
         Raises:
-            VerificationError: If the response does not match the expected values
+            VerificationError: If the response structure is incorrect or if provided
+                               expected values do not match the actual values in the response.
+
+        Example:
+            >>> error_resp = {"status": 401, "error": "invalid_request", "error_description": "Missing credentials"}
+            >>> AuthErrorVerification.verify_auth_error_response(error_resp, expected_status=401, expected_error="invalid_request")
+            >>> try:
+            ...     AuthErrorVerification.verify_auth_error_response(error_resp, expected_error="invalid_token")
+            ... except VerificationError:
+            ...     print("Failed as expected") # doctest: +SKIP
+            Failed as expected
         """
         ...
 
@@ -41,15 +63,35 @@ class AuthErrorVerification:
         headers: Dict[str, str], expected_limit: Optional[int] = None, expected_remaining: Optional[int] = None, expected_reset: Optional[int] = None
     ) -> None:
         """
-        Verify that rate limit headers are correct.
+        Verify the presence and optionally the values of standard rate limit headers.
+
+        Checks for headers like 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'.
+        If expected values are provided, compares them against the header values (after
+        converting header values to integers).
 
         Args:
-            headers: The headers to verify
-            expected_limit: The expected rate limit
-            expected_remaining: The expected remaining requests
-            expected_reset: The expected reset time
+            headers: Dictionary of response headers (case-insensitive keys recommended).
+            expected_limit: Optional integer value for 'X-RateLimit-Limit'.
+            expected_remaining: Optional integer value for 'X-RateLimit-Remaining'.
+            expected_reset: Optional integer value for 'X-RateLimit-Reset' (Unix timestamp).
 
         Raises:
-            VerificationError: If the headers do not match the expected values
+            VerificationError: If a header corresponding to an expected value is missing,
+                               cannot be parsed as an integer, or does not match the
+                               provided expected value.
+
+        Example:
+            >>> rate_limit_headers = {"X-RateLimit-Limit": "100", "X-RateLimit-Remaining": "99", "X-RateLimit-Reset": "1678886400"}
+            >>> AuthErrorVerification.verify_rate_limit_headers(rate_limit_headers, expected_limit=100, expected_remaining=99)
+            >>> try:
+            ...     AuthErrorVerification.verify_rate_limit_headers(rate_limit_headers, expected_limit=50)
+            ... except VerificationError:
+            ...     print("Failed as expected") # doctest: +SKIP
+            Failed as expected
+            >>> try: # Check for missing header if expectation is set
+            ...     AuthErrorVerification.verify_rate_limit_headers({"X-RateLimit-Limit": "100"}, expected_remaining=99)
+            ... except VerificationError:
+            ...     print("Failed as expected") # doctest: +SKIP
+            Failed as expected
         """
         ...
