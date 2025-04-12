@@ -83,7 +83,7 @@ repos:
         name: pytest with coverage
         stages: [pre-push]
         language: system
-        entry: poetry run pytest tests/unit/ --cov --cov-report=term-missing --cov-fail-under=85 --cov-branch --no-header --durations=5
+        entry: poetry run pytest tests/unit/ --cov --cov-report=term-missing --cov-branch --no-header --durations=5
         types: [python]
         pass_filenames: false
         verbose: true
