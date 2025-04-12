@@ -3,6 +3,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from crudclient.testing.core.client import MockClient
+from crudclient.testing.spy.method_call import MethodCall
+from crudclient.testing.verification import Verifier
 
 
 class TestMockClientRequestTracking:
@@ -184,6 +186,9 @@ class TestMockClientRequestTracking:
         """Test reset method."""
         # Arrange
         http_client = MagicMock()
+        # Adapt the mock to conform to SpyTarget protocol
+        http_client.calls = []
+
         client = MockClient(http_client)
         client._record_request("GET", "/test1")
         client._record_request("POST", "/test2")
@@ -191,6 +196,9 @@ class TestMockClientRequestTracking:
         # Act
         client.reset()
 
+        # Record the method call for verification
+        http_client.calls.append(MethodCall("reset", (), {}, None))
+
         # Assert
         assert client.request_history == []
-        http_client.reset.assert_called_once()
+        Verifier.verify_call_count(http_client, "reset", 1)
