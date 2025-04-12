@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
+from typing import Any, Dict, Optional, Tuple, Union
 
 import requests
 
@@ -194,17 +194,9 @@ class Client:
         # Process the response
         return self._handle_response(raw_response)
 
-    @overload
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
-                 handle_response: Literal[True] = True, **kwargs: Any) -> RawResponseSimple:
-        ...
-
-    @overload
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None,
-                 handle_response: Literal[False] = False, **kwargs: Any) -> requests.Response:
-        ...
-
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Union[RawResponseSimple, requests.Response]:
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any
+    ) -> Union[RawResponseSimple, requests.Response]:
         # Runtime type checks
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
@@ -228,20 +220,15 @@ class Client:
     def session(self) -> requests.Session:
         # For test compatibility, we need to make the session appear to have an is_closed attribute
         # We'll use a custom descriptor to dynamically access the session_manager's is_closed state
-        if not hasattr(self._session, 'is_closed'):
+        if not hasattr(self._session, "is_closed"):
             # Use setattr with a property-like object to dynamically access session_manager.is_closed
-            setattr(self._session.__class__, 'is_closed', property(
-                lambda s: getattr(self.http_client.session_manager, 'is_closed', False)
-            ))
+            setattr(self._session.__class__, "is_closed", property(lambda s: getattr(self.http_client.session_manager, "is_closed", False)))
         return self._session
 
     # The following methods are provided for backward compatibility with existing tests
 
     def _prepare_data(
-        self,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Any] = None,
-        files: Optional[Dict[str, Any]] = None
+        self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, str], Dict[str, Any]]:
         # Runtime type checks
         if data is not None and not isinstance(data, dict):
@@ -269,9 +256,7 @@ class Client:
 
         return headers, request_kwargs
 
-    def _maybe_retry_after_403(
-        self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response
-    ) -> requests.Response:
+    def _maybe_retry_after_403(self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response) -> requests.Response:
         # Runtime type checks
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
@@ -283,7 +268,11 @@ class Client:
             raise TypeError(f"kwargs must be a dictionary, got {type(kwargs).__name__}")
 
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         if response.status_code != 403:
             return response
@@ -300,7 +289,11 @@ class Client:
     def _handle_response(self, response: requests.Response) -> RawResponseSimple:
         # Runtime type check
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
 
         try:
@@ -315,6 +308,10 @@ class Client:
     def _handle_error_response(self, response: requests.Response) -> None:
         # Runtime type check
         # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if not isinstance(response, requests.Response) and not hasattr(response, '_mock_spec') and requests.Response not in getattr(response, '_mock_spec', []):
+        if (
+            not isinstance(response, requests.Response)
+            and not hasattr(response, "_mock_spec")
+            and requests.Response not in getattr(response, "_mock_spec", [])
+        ):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         self.http_client.error_handler.handle_error_response(response)

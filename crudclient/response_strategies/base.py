@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ModelDumpable(Protocol):
-    def model_dump(self) -> dict:
-        ...
+    def model_dump(self) -> dict: ...  # noqa: E704
 
 
 T = TypeVar("T", bound=ModelDumpable)
