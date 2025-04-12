@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from crudclient.exceptions import ModelConversionError
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
@@ -28,7 +30,8 @@ def test_read_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     # GIVEN
     mock_client.get.return_value = SAMPLE_PAYLOAD
     result = test_crud.read(resource_id="1")
-    mock_client.get.assert_called_once_with("test-resources/1")
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "get", "test-resources/1")
     assert result == SAMPLE_MODEL
     assert isinstance(result, TestModel)
 
@@ -43,7 +46,8 @@ def test_read_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMo
     mock_client.get.return_value = SAMPLE_PAYLOAD
     result = test_crud.read(resource_id="1", parent_id="parent123")
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
-    # mock_client.get.assert_called_once_with("parents/parent123/test-resources/1") # Example assertion
+    # translate_mock_calls_for_verifier(mock_client)
+    # Verifier.verify_called_once_with(mock_client, "get", "parents/parent123/test-resources/1") # Example assertion
     assert result == SAMPLE_MODEL
 
 
