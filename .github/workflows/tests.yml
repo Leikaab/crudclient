@@ -43,6 +43,10 @@ jobs:
           ONEFLOW_API_KEY: ${{ secrets.ONEFLOW_API_KEY }}
           ONEFLOW_USER_EMAIL: ${{ secrets.ONEFLOW_USER_EMAIL }}
           FIKEN_ACCESS_TOKEN: ${{ secrets.FIKEN_ACCESS_TOKEN }}
+          TRIPLETEX_TEST_CONSUMER_NAME: ${{ secrets.TRIPLETEX_TEST_CONSUMER_NAME }}
+          TRIPLETEX_TEST_CONSUMER_TOKEN: ${{ secrets.TRIPLETEX_TEST_CONSUMER_TOKEN }}
+          TRIPLETEX_TEST_EMPLOYEE_TOKEN: ${{ secrets.TRIPLETEX_TEST_EMPLOYEE_TOKEN }}
+
 
         run: |
           poetry run pytest --cov=crudclient
