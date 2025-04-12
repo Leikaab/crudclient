@@ -40,6 +40,7 @@ from .response import ResponseHandler
 from .retry import RetryHandler
 from .session import SessionManager
 
+
 class HttpClient:
     """
     Makes HTTP requests and delegates specialized concerns to other components.
@@ -94,14 +95,63 @@ class HttpClient:
         """
         ...
 
+    def _validate_request_params(
+        self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool
+    ) -> None:
+        """Validate the core parameters for the _request method."""
+        ...
+
+    def _build_request_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
+        """Build the final request URL from endpoint or provided URL."""
+        ...
+
+    def _prepare_auth_params(self, kwargs: Dict[str, Any]) -> None:
+        """Prepare and merge authentication parameters into kwargs."""
+        ...
+
+    def _execute_request_with_retry(self, method: str, url: str, **kwargs: Any) -> requests.Response:
+        """Execute the HTTP request using the session manager and retry handler."""
+        ...
+
+    def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
+        """Handle the successful response or error during response processing."""
+        ...
+
+    def _handle_request_error(self, error: requests.HTTPError, handle_response: bool) -> Any:
+        """Handle HTTP errors using the error handler."""
+        ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
-    ) -> requests.Response: ...
+    ) -> requests.Response:
+        """
+        Internal method to make an HTTP request with validation, auth, retry, and error handling.
+
+        Args:
+            method: HTTP method (e.g., 'GET', 'POST').
+            endpoint: API endpoint path (relative to base_url).
+            url: Full URL (overrides endpoint if provided).
+            handle_response: Whether to process the response using ResponseHandler.
+            **kwargs: Additional arguments passed to requests.request.
+
+        Returns:
+            Processed response data (RawResponseSimple) if handle_response is True,
+            otherwise the raw requests.Response object.
+
+        Raises:
+            TypeError: If input parameters have incorrect types.
+            ValueError: If neither endpoint nor url is provided.
+            requests.HTTPError: If the request fails and is not handled by ErrorHandler.
+            Various exceptions from AuthStrategy or ResponseHandler/ErrorHandler.
+        """
+        ...
+
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """
         Make a GET request to the specified endpoint.

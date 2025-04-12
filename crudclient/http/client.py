@@ -36,54 +36,99 @@ class HttpClient:
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler()
 
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Any:
-        # Runtime type checks for critical parameters
+    def _validate_request_params(
+        self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool
+    ) -> None:
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
-
         if endpoint is not None and not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string or None, got {type(endpoint).__name__}")
-
         if url is not None and not isinstance(url, str):
             raise TypeError(f"url must be a string or None, got {type(url).__name__}")
-
         if not isinstance(handle_response, bool):
             raise TypeError(f"handle_response must be a boolean, got {type(handle_response).__name__}")
-        if url is None:
-            if endpoint is None:
-                raise ValueError("Either 'endpoint' or 'url' must be provided.")
-            # Construct the URL from the base URL and endpoint
-            url = f"{self.config.base_url}/{endpoint.lstrip('/')}"
 
-        logger.debug(f"Making {method} request to {url} with params: {kwargs}")
+    def _build_request_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
+        if url is not None:
+            return url
+        if endpoint is None:
+            raise ValueError("Either 'endpoint' or 'url' must be provided.")
+        # Construct the URL from the base URL and endpoint
+        return f"{self.config.base_url}/{endpoint.lstrip('/')}"
 
-        # Define a function to make the request
+    def _prepare_auth_params(self, kwargs: Dict[str, Any]) -> None:
+        auth_params: Dict[str, Any] = {}
+        if hasattr(self.config, "auth_strategy") and self.config.auth_strategy is not None and hasattr(self.config.auth_strategy, "prepare_request_params"):
+            auth_params = self.config.auth_strategy.prepare_request_params()
+            if not isinstance(auth_params, dict):
+                raise TypeError(
+                    f"Auth strategy's prepare_request_params must return a dictionary, "
+                    f"got {type(auth_params).__name__}"
+                )
+
+        if not auth_params:
+            return  # No auth params to merge
+
+        # Ensure 'params' exists in kwargs and is a dictionary
+        if 'params' not in kwargs or kwargs['params'] is None:
+            kwargs['params'] = {}
+        elif not isinstance(kwargs['params'], dict):
+            logger.warning(
+                f"Request 'params' has unexpected type: {type(kwargs['params']).__name__}. "
+                f"Attempting conversion to dict for auth param merging."
+            )
+            try:
+                kwargs['params'] = dict(kwargs['params'])
+            except (TypeError, ValueError) as e:
+                logger.error(f"Could not convert 'params' to dict: {e}. Auth params might be lost.")
+                kwargs['params'] = {}  # Fallback
+
+        # Merge auth params, prioritizing auth params
+        if isinstance(kwargs['params'], dict):
+            kwargs['params'].update(auth_params)
+        else:
+            # This case should ideally not be reached
+            logger.error("Failed to merge auth params: 'params' is not a dictionary.")
+
+    def _execute_request_with_retry(self, method: str, url: str, **kwargs: Any) -> requests.Response:
         def make_request() -> requests.Response:
             return self.session_manager.session.request(method, url, timeout=self.session_manager.timeout, **kwargs)
 
-        # Execute the request with retry logic
-        try:
-            response = self.retry_handler.execute_with_retry(make_request, self.session_manager.session, self.session_manager.refresh_auth)
-        except requests.HTTPError as e:
-            # Handle error responses
-            self.error_handler.handle_error_response(e.response)
-            # If handle_error_response doesn't raise an exception, return the response
-            return e.response if not handle_response else self.response_handler.handle_response(e.response)
+        return self.retry_handler.execute_with_retry(
+            make_request, self.session_manager.session, self.session_manager.refresh_auth
+        )
 
-        # We don't handle 403 retries here - let the Client class handle them
-        # This ensures the correct object is passed to handle_403_retry
-
+    def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
         if not handle_response:
             return response
-
-        # Process the response
         try:
             return self.response_handler.handle_response(response)
-        except requests.HTTPError:
-            # Handle error responses
-            self.error_handler.handle_error_response(response)
-            # If handle_error_response doesn't raise an exception, return the response
-            return response
+        except requests.HTTPError as e:
+            # Handle error that occurred during response processing (e.g., bad JSON)
+            # or if handle_response itself raised an HTTPError
+            return self._handle_request_error(e, handle_response=True)  # Force handling as error
+
+    def _handle_request_error(self, error: requests.HTTPError, handle_response: bool) -> Any:
+        response = error.response
+        if response is None:  # Should not happen with HTTPError, but safeguard
+            raise error  # Re-raise original error if no response attached
+
+        self.error_handler.handle_error_response(response)
+        # If handle_error_response doesn't raise, return processed or raw response
+        return self.response_handler.handle_response(response) if handle_response else response
+
+    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Any:
+        self._validate_request_params(method, endpoint, url, handle_response)
+        final_url = self._build_request_url(endpoint, url)
+        self._prepare_auth_params(kwargs)  # Modifies kwargs in-place
+
+        logger.debug(f"Making {method} request to {final_url} with final params: {kwargs.get('params')}")
+
+        try:
+            response = self._execute_request_with_retry(method, final_url, **kwargs)
+            return self._handle_request_response(response, handle_response)
+        except requests.HTTPError as e:
+            return self._handle_request_error(e, handle_response)
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         # Runtime type checks

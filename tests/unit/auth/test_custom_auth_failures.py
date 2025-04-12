@@ -37,11 +37,24 @@ def test_custom_auth_failure(mock_request):
     assert "Failed to generate custom header" in str(excinfo.value)
 
 
-@pytest.mark.skip(reason="Test needs to be updated to work with the new testing module")
 def test_custom_auth_param_callback_failure(mock_request):
-    """Test handling of custom authentication failures in param callback."""
-    # This test needs to be updated to work with the new testing module
-    pass  # Keep the skipped test structure
+    """Test that exceptions from param_callback are propagated."""
+
+    # Arrange
+    def failing_param_callback() -> dict:
+        """Simulate failure during parameter generation."""
+        raise ValueError("Failed during param generation")
+
+    config = MockBasicAuthConfig()
+    # Use the failing callback for param generation
+    config.auth_strategy = CustomAuth(header_callback=lambda: {}, param_callback=failing_param_callback)
+    client = Client(config)
+
+    # Act & Assert
+    # The error should occur during request preparation when the callback is invoked.
+    # The mock_request fixture prevents actual network calls, but the error happens before that.
+    with pytest.raises(ValueError, match="Failed during param generation"):
+        client.get("/some/path")
 
 
 def test_custom_auth_api_failure(mock_request):
