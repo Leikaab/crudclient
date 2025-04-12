@@ -13,7 +13,7 @@ from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
 from crudclient.testing.factory import MockClientFactory
 from crudclient.testing.verification import Verifier
-from tests.unit.helpers import translate_mock_calls_for_verifier
+from tests.unit.helpers import VerifiableMock, translate_mock_calls_for_verifier
 
 
 class TestMockClientFactory:
@@ -141,14 +141,14 @@ class TestMockClientFactory:
     def test_configure_success_response(self):
         """Test configure_success_response method."""
         # Arrange
-        mock_client = MagicMock(spec=MockClient)
+        mock_client = VerifiableMock(spec=MockClient)
 
         # Act
         MockClientFactory.configure_success_response(
             mock_client=mock_client, method="GET", path="/test", data={"key": "value"}, status_code=200, headers={"Content-Type": "application/json"}
         )
 
-        # Translate mock calls to the format expected by Verifier
+        # Translate mock calls for verification
         translate_mock_calls_for_verifier(mock_client)
 
         # Assert
@@ -160,13 +160,13 @@ class TestMockClientFactory:
     def test_configure_error_response_with_error(self):
         """Test configure_error_response method with an error."""
         # Arrange
-        mock_client = MagicMock(spec=MockClient)
+        mock_client = VerifiableMock(spec=MockClient)
         error = ValueError("Test error")
 
         # Act
         MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
-        # Translate mock calls to the format expected by Verifier
+        # Translate mock calls for verification
         translate_mock_calls_for_verifier(mock_client)
 
         # Assert
@@ -178,7 +178,7 @@ class TestMockClientFactory:
     def test_configure_error_response_without_error(self):
         """Test configure_error_response method without an error."""
         # Arrange
-        mock_client = MagicMock(spec=MockClient)
+        mock_client = VerifiableMock(spec=MockClient)
 
         # Act
         MockClientFactory.configure_error_response(
@@ -190,7 +190,7 @@ class TestMockClientFactory:
             headers={"Content-Type": "application/json"},
         )
 
-        # Translate mock calls to the format expected by Verifier
+        # Translate mock calls for verification
         translate_mock_calls_for_verifier(mock_client)
 
         # Assert
