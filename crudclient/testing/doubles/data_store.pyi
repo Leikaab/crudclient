@@ -1,7 +1,8 @@
 # crudclient/testing/doubles/data_store.pyi
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .data_store_definitions import Relationship, UniqueConstraint, ValidationRule
+from .data_store_definitions import Relationship, UniqueConstraint, ValidationRule, ValidationException
+
 
 class DataStore:
     """
@@ -76,6 +77,11 @@ class DataStore:
     ) -> "DataStore":
         """
         Adds a unique constraint across one or more fields.
+
+        Note:
+            Adding a constraint to a collection with pre-existing data that violates
+            the constraint may raise a ValidationException during the internal
+            initialization process of this method.
 
         Args:
             fields: A single field name or a list of field names for the constraint.
@@ -166,6 +172,10 @@ class DataStore:
 
         Returns:
             A deep copy of the created item dictionary.
+
+        Raises:
+            ValidationException: If validation fails (unique constraints, rules,
+                referential integrity) and `skip_validation` is False.
         """
         ...
 
@@ -184,6 +194,10 @@ class DataStore:
 
         Returns:
             A deep copy of the updated item dictionary, or None if not found.
+
+        Raises:
+            ValidationException: If validation fails and `skip_validation` is False.
+            ValueError: If `check_version` is True and a version conflict occurs.
         """
         ...
 
@@ -219,6 +233,10 @@ class DataStore:
 
         Returns:
             A list of deep copies of the created item dictionaries.
+
+        Raises:
+            ValidationException: If validation fails for any item (unique constraints,
+                rules, referential integrity) and `skip_validation` is False.
         """
         ...
 
@@ -240,6 +258,10 @@ class DataStore:
 
         Returns:
             A list containing deep copies of updated items or None for items not found/updated.
+
+        Raises:
+            ValidationException: If validation fails for any item and `skip_validation` is False.
+            ValueError: If `check_version` is True and a version conflict occurs for any item.
         """
         ...
 
