@@ -1,8 +1,9 @@
-import re
+import time
 from typing import Any, Dict, List, Optional, Pattern, Union
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
+from crudclient.testing.spy.enhanced import EnhancedSpyBase
 
 # Import PaginationHelper
 from ..response_builder.pagination import (
@@ -21,7 +22,7 @@ from ..types import (
 )
 
 
-class MockClient:
+class MockClient(EnhancedSpyBase):
 
     def __init__(
         self,
@@ -31,6 +32,9 @@ class MockClient:
         enable_spy: bool = False,
         **kwargs: Any,  # Keep kwargs for potential future use or flexibility
     ) -> None:
+        # Initialize the EnhancedSpyBase
+        EnhancedSpyBase.__init__(self)
+
         self.http_client = http_client
         # Prioritize explicit base_url, then derive from http_client, then default
         if base_url is not None:
@@ -48,9 +52,6 @@ class MockClient:
 
         # Authentication strategy
         self._auth_strategy: Optional[AuthStrategy] = None
-
-        # Request history
-        self.request_history: List[Dict[str, Any]] = []
 
     def configure_response(
         self,
@@ -111,116 +112,75 @@ class MockClient:
 
         return {"headers": final_headers, "params": final_params}
 
-    def _record_request(
-        self,
-        method: HttpMethod,
-        path: str,
-        headers: Optional[Headers] = None,  # These are the *final* headers after merge
-        params: Optional[QueryParams] = None,  # These are the *final* params after merge
-        data: Optional[RequestBody] = None,
-        **kwargs: Any,
-    ) -> None:
-        # Record the state *after* auth strategy has been applied
-        self.request_history.append(
-            {
-                "method": method,
-                "path": path,
-                "headers": headers.copy() if headers else {},  # Explicitly copy
-                "params": params or {},
-                "data": data,
-                "kwargs": kwargs,  # kwargs passed directly to underlying client
-            }
-        )
-
     # HTTP method implementations
 
-    def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
+    def _execute_http_method(
+        self,
+        method_name: str,
+        path: str,
+        headers: Optional[Headers] = None,
+        params: Optional[QueryParams] = None,
+        data: Optional[RequestBody] = None,
+        **kwargs: Any
+    ) -> Any:
+        # Helper method to execute HTTP methods with timing and recording
         request_args = self._prepare_request_args(headers, params)
-        self._record_request("GET", path, headers=request_args["headers"], params=request_args["params"], **kwargs)
-        # Simulate rate limiting failure based on test case
-        # Removed httpx import and specific rate limit simulation for this stub
-        return self.http_client.get(path, **request_args, **kwargs)
+        start_time = time.time()
+        result = None
+        exception = None
+
+        try:
+            # Get the method from http_client
+            http_method = getattr(self.http_client, method_name.lower())
+
+            # Call the method with appropriate arguments
+            if method_name.upper() in ["POST", "PUT", "PATCH"]:
+                result = http_method(path, data=data, **request_args, **kwargs)
+            else:
+                result = http_method(path, **request_args, **kwargs)
+
+            return result
+        except Exception as e:
+            exception = e
+            raise
+        finally:
+            duration = time.time() - start_time
+
+            # Record the call
+            call_kwargs = {"headers": request_args["headers"], "params": request_args["params"]}
+            if data is not None:
+                call_kwargs["data"] = data
+            call_kwargs.update(kwargs)
+
+            self._record_call(
+                method_name=method_name.upper(),
+                args=(path,),
+                kwargs=call_kwargs,
+                result=result,
+                exception=exception,
+                duration=duration
+            )
+
+    def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
+        return self._execute_http_method("GET", path, headers, params, **kwargs)
 
     def post(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
-        request_args = self._prepare_request_args(headers, params)
-        self._record_request("POST", path, headers=request_args["headers"], params=request_args["params"], data=data, **kwargs)
-        return self.http_client.post(path, data=data, **request_args, **kwargs)
+        return self._execute_http_method("POST", path, headers, params, data, **kwargs)
 
     def put(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
-        request_args = self._prepare_request_args(headers, params)
-        self._record_request("PUT", path, headers=request_args["headers"], params=request_args["params"], data=data, **kwargs)
-        return self.http_client.put(path, data=data, **request_args, **kwargs)
+        return self._execute_http_method("PUT", path, headers, params, data, **kwargs)
 
     def delete(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
-        request_args = self._prepare_request_args(headers, params)
-        self._record_request("DELETE", path, headers=request_args["headers"], params=request_args["params"], **kwargs)
-        return self.http_client.delete(path, **request_args, **kwargs)
+        return self._execute_http_method("DELETE", path, headers, params, **kwargs)
 
     def patch(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Any:
-        request_args = self._prepare_request_args(headers, params)
-        self._record_request("PATCH", path, headers=request_args["headers"], params=request_args["params"], data=data, **kwargs)
-        return self.http_client.patch(path, data=data, **request_args, **kwargs)
-
-    # Verification methods
-
-    def get_request_count(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> int:
-        return len(self._filter_requests(method, path_pattern))
-
-    def verify_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        actual_count = self.get_request_count(method, path_pattern)
-        assert actual_count == count, (
-            f"Expected {count} matching requests, but found {actual_count}. " f"Filters: method={method}, path_pattern={path_pattern}"
-        )
-
-    def verify_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        actual_count = self.get_request_count(method, path_pattern)
-        assert actual_count > 0, f"Expected at least one matching request, but found none. " f"Filters: method={method}, path_pattern={path_pattern}"
-
-    def verify_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        actual_count = self.get_request_count(method, path_pattern)
-        assert actual_count == 0, (
-            f"Expected no matching requests, but found {actual_count}. " f"Filters: method={method}, path_pattern={path_pattern}"
-        )
-
-    def verify_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
-        actual_count = len(self.request_history)
-        expected_count = len(expected_sequence)
-        assert actual_count == expected_count, f"Expected {expected_count} requests, but found {actual_count}."
-
-        for i, expected in enumerate(expected_sequence):
-            actual = self.request_history[i]
-            # Basic check: compare methods if provided in expected sequence
-            if "method" in expected:
-                assert (
-                    actual["method"].upper() == expected["method"].upper()
-                ), f"Request {i + 1}: Expected method {expected['method']}, but got {actual['method']}."
-            # Add more checks here as needed (e.g., path, params)
-            # This is a basic stub; a full implementation might involve deep comparison
-            # or delegate to a helper in crudclient.testing.verification
-
-    def verify_request_params(
-        self,
-        expected_params: Dict[str, str],
-        method: Optional[HttpMethod] = None,
-        path_pattern: Optional[str] = None,
-    ) -> None:
-        matching_requests = self._filter_requests(method=method, path_pattern=path_pattern)
-
-        found_match = False
-        for request in matching_requests:
-            # Simple subset check: are expected_params in actual params?
-            actual_params = request.get("params", {})
-            if expected_params.items() <= actual_params.items():
-                found_match = True
-                break
-
-        assert found_match, f"Expected request with params {expected_params} not found. " f"Filters: method={method}, path_pattern={path_pattern}"
+        return self._execute_http_method("PATCH", path, headers, params, data, **kwargs)
 
     def create_paginated_response(
         self,
@@ -233,25 +193,9 @@ class MockClient:
             items=items, page=page, per_page=per_page, base_url=base_url
         )
 
-    def _filter_requests(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> List[Dict[str, Any]]:
-        result = self.request_history
-
-        if method:
-            method = method.upper()
-            result = [r for r in result if r["method"].upper() == method]
-
-        if path_pattern:
-            if isinstance(path_pattern, str):
-                pattern = re.compile(path_pattern)
-            else:
-                pattern = path_pattern
-            # Ensure path exists and is a string before matching
-            result = [r for r in result if "path" in r and isinstance(r["path"], str) and pattern.search(r["path"])]
-
-        return result
-
     def reset(self) -> None:
-        self.request_history = []
+        # Call the parent reset method to clear call history
+        EnhancedSpyBase.reset(self)
         # Reset the HTTP client if it has a reset method
         if hasattr(self.http_client, "reset"):
             self.http_client.reset()

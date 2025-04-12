@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
+from crudclient.testing.spy.enhanced import EnhancedSpyBase
 
 from ..response_builder.response import MockResponse
 from ..types import (
@@ -23,7 +24,7 @@ from ..types import (
 )
 
 
-class MockClient:
+class MockClient(EnhancedSpyBase):
     """
     Mock implementation of the crudclient.Client class.
 
@@ -42,7 +43,6 @@ class MockClient:
     enable_spy: bool
     config: ClientConfig
     _auth_strategy: Optional[AuthStrategy]
-    request_history: List[Dict[str, Any]]
 
     def __init__(
         self,
@@ -142,32 +142,6 @@ class MockClient:
         """
         ...
 
-    def verify_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
-        """
-        Assert that requests were made in the expected sequence.
-
-        Args:
-            expected_sequence: The expected sequence of requests.
-
-        Raises:
-            AssertionError: If the requests were not made in the expected sequence.
-        """
-        ...
-
-    def verify_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, path_pattern: Optional[str] = None) -> None:
-        """
-        Assert that a request was made with the expected parameters.
-
-        Args:
-            expected_params: The expected query parameters.
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Raises:
-            AssertionError: If no matching request was made with the expected parameters.
-        """
-        ...
-
     def create_paginated_response(self, items: List[Any], per_page: int, base_url: str, page: int = 1) -> MockResponse:
         """
         Create a paginated response helper.
@@ -222,28 +196,19 @@ class MockClient:
         """
         ...
 
-    def _record_request(
+    # HTTP method implementations
+
+    def _execute_http_method(
         self,
-        method: HttpMethod,
+        method_name: str,
         path: str,
         headers: Optional[Headers] = None,
         params: Optional[QueryParams] = None,
         data: Optional[RequestBody] = None,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Record a request in the request history.
-
-        Args:
-            method: The HTTP method of the request.
-            path: The path of the request.
-            headers: Optional headers for the request.
-            params: Optional query parameters for the request.
-            data: Optional body for the request.
-            **kwargs: Additional keyword arguments.
-        """
+        **kwargs: Any
+    ) -> Any:
+        """Helper method to execute HTTP methods with timing and recording."""
         ...
-    # HTTP method implementations
 
     def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
         """
@@ -328,73 +293,8 @@ class MockClient:
             The response from the mock HTTP client.
         """
         ...
+
     # Verification methods
-
-    def get_request_count(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> int:
-        """
-        Get the number of requests matching the given criteria.
-
-        Args:
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Returns:
-            The number of matching requests.
-        """
-        ...
-
-    def verify_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        """
-        Assert that a specific number of matching requests were made.
-
-        Args:
-            count: The expected number of requests.
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Raises:
-            AssertionError: If the number of matching requests does not match the expected count.
-        """
-        ...
-
-    def verify_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        """
-        Assert that at least one matching request was made.
-
-        Args:
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Raises:
-            AssertionError: If no matching requests were made.
-        """
-        ...
-
-    def verify_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
-        """
-        Assert that no matching requests were made.
-
-        Args:
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Raises:
-            AssertionError: If any matching requests were made.
-        """
-        ...
-
-    def _filter_requests(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> List[Dict[str, Any]]:
-        """
-        Filter request history by method and path pattern.
-
-        Args:
-            method: Optional HTTP method to filter by.
-            path_pattern: Optional path pattern to filter by.
-
-        Returns:
-            A list of matching requests.
-        """
-        ...
 
     def reset(self) -> None:
         """Reset the mock client to its initial state."""

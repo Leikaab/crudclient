@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 from crudclient.auth.bearer import BearerAuth
 from crudclient.testing.core.client import MockClient
-from crudclient.testing.spy.method_call import MethodCall
 from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 
 class TestMockClientInitialization:
@@ -22,15 +22,13 @@ class TestMockClientInitialization:
         assert client.http_client == http_client
         assert client.base_url == base_url
         assert client.config.hostname == base_url
-        assert client.request_history == []
+        assert client.get_call_count() == 0
         assert client._auth_strategy is None
 
     def test_configure_response(self):
         """Test configure_response method."""
         # Arrange
         http_client = MagicMock()
-        # Add calls attribute to make it compatible with Verifier
-        http_client.calls = []
         client = MockClient(http_client)
 
         # Act
@@ -42,25 +40,11 @@ class TestMockClientInitialization:
             headers={"Content-Type": "application/json"},
         )
 
-        # Record the call in the format expected by Verifier
-        http_client.calls.append(
-            MethodCall(
-                method_name="configure_response",
-                args=(),
-                kwargs={
-                    "method": "GET",
-                    "path": "/test",
-                    "status_code": 200,
-                    "data": {"key": "value"},
-                    "headers": {"Content-Type": "application/json"},
-                    "error": None,
-                }
-            )
-        )
-
         # Assert
+        translate_mock_calls_for_verifier(http_client)
         Verifier.verify_called_once_with(
-            http_client, "configure_response",
+            http_client,
+            "configure_response",
             method="GET",
             path="/test",
             status_code=200,
