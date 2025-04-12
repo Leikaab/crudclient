@@ -80,7 +80,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
 
     # Example: Adjusting assert_endpoint_registered
 
-    def assert_endpoint_registered(self, name: str) -> None:
+    def verify_endpoint_registered(self, name: str) -> None:
         # Access self.get_calls() provided by EnhancedSpyBase, filtered by method name
         for call in self.get_calls("register_endpoint"):  # call is now a CallRecord
             # Endpoint name is typically the first positional argument
@@ -90,7 +90,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
         raise AssertionError(f"Endpoint {name} was not registered via register_endpoint")
 
     # Adjust other custom assertions similarly...
-    def assert_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
+    def verify_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
         for call in self.get_calls("register_endpoint"):
             if call.args and call.args[0] == name and "model" in call.kwargs and call.kwargs["model"] == model:
                 return

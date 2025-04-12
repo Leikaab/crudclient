@@ -220,13 +220,13 @@ class BaseCrudMock:
         # Assume it's already a MockResponse if not dict/list/str
         return response  # type: ignore[return-value]
 
-    def assert_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
+    def verify_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
         matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         actual_count = len(matching_requests)
         assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
-    def assert_query_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+    def verify_query_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
         check_query_parameters(
             requests=matching_requests,  # type: ignore[arg-type]
@@ -235,7 +235,7 @@ class BaseCrudMock:
             method=method,
         )
 
-    def assert_body_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+    def verify_body_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
         check_body_parameters(
             requests=matching_requests,  # type: ignore[arg-type]
@@ -244,7 +244,7 @@ class BaseCrudMock:
             method=method,
         )
 
-    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
+    def verify_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         if not sequence:
             return
 
@@ -271,7 +271,7 @@ class BaseCrudMock:
         if sequence_idx < len(sequence):
             raise AssertionError(f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests.")
 
-    def assert_request_payload(self, payload: Dict[str, Any], url_pattern: Optional[str] = None, match_all: bool = False) -> None:
+    def verify_request_payload(self, payload: Dict[str, Any], url_pattern: Optional[str] = None, match_all: bool = False) -> None:
         matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         check_request_payload(
@@ -281,7 +281,7 @@ class BaseCrudMock:
             match_all=match_all,
         )
 
-    def assert_response_handling(
+    def verify_response_handling(
         self, url_pattern: str, expected_status: int, expected_data: Optional[Dict[str, Any]] = None, method: Optional[str] = None
     ) -> None:
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
@@ -294,7 +294,7 @@ class BaseCrudMock:
             method=method,
         )
 
-    def assert_error_handling(
+    def verify_error_handling(
         self, url_pattern: str, expected_error_type: Type[Exception], expected_status: Optional[int] = None, method: Optional[str] = None
     ) -> None:
         # Check if a pre-configured error pattern matches

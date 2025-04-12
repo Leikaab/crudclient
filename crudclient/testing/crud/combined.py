@@ -49,7 +49,7 @@ class CombinedCrudMock:
         self.delete_mock.with_parent_id_handling(enabled)
         return self
 
-    def assert_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
+    def verify_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
         matching_requests = self.request_history
         if url_pattern:
             pattern = re.compile(url_pattern)
@@ -58,7 +58,7 @@ class CombinedCrudMock:
         actual_count = len(matching_requests)
         assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
-    def assert_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
+    def verify_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
         if not sequence:
             return
 
@@ -89,7 +89,7 @@ class CombinedCrudMock:
         if sequence_idx < len(sequence):
             raise AssertionError(f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests.")
 
-    def assert_crud_operation_sequence(self, operations: List[str], resource_id: Optional[str] = None, url_pattern: Optional[str] = None) -> None:
+    def verify_crud_operation_sequence(self, operations: List[str], resource_id: Optional[str] = None, url_pattern: Optional[str] = None) -> None:
         # Map operation names to HTTP methods
         method_map = {"create": "POST", "read": "GET", "update": "PUT", "partial_update": "PATCH", "delete": "DELETE"}
 
@@ -107,4 +107,4 @@ class CombinedCrudMock:
                     matcher["url_pattern"] = f".*{resource_id}"
             sequence.append(matcher)
 
-        self.assert_request_sequence(sequence)
+        self.verify_request_sequence(sequence)

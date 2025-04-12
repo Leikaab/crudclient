@@ -58,7 +58,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
     # The ClassSpy mechanism handles intercepting these calls on the target_client.
 
     # Example: Adjusting assert_endpoint_called
-    def assert_endpoint_called(self, endpoint: str) -> None:
+    def verify_endpoint_called(self, endpoint: str) -> None:
         # Access self.get_calls() provided by EnhancedSpyBase
         for call in self.get_calls():  # call is now a CallRecord
             # Endpoint is typically the first positional argument
@@ -68,14 +68,14 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
         raise AssertionError(f"Endpoint {endpoint} was not called")
 
     # Adjust other custom assertions similarly...
-    def assert_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
+    def verify_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
         for call in self.get_calls(method):  # Filter by method name using get_calls(method)
             if call.args and call.args[0] == endpoint:
                 return
 
         raise AssertionError(f"Endpoint {endpoint} was not called with method {method}")
 
-    def assert_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
+    def verify_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
         for call in self.get_calls(method):
             if call.args and call.args[0] == endpoint and "json" in call.kwargs and call.kwargs["json"] == expected_json:
                 return

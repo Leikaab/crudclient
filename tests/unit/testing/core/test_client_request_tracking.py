@@ -97,7 +97,7 @@ class TestMockClientRequestTracking:
         assert count == 1
 
     def test_assert_request_count_success(self):
-        """Test assert_request_count when the count matches."""
+        """Test verify_request_count when the count matches."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
@@ -106,10 +106,10 @@ class TestMockClientRequestTracking:
         client._record_request("GET", "/test3")
 
         # Act & Assert
-        client.assert_request_count(3)  # Should not raise an exception
+        client.verify_request_count(3)  # Should not raise an exception
 
     def test_assert_request_count_failure(self):
-        """Test assert_request_count when the count doesn't match."""
+        """Test verify_request_count when the count doesn't match."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
@@ -118,21 +118,21 @@ class TestMockClientRequestTracking:
 
         # Act & Assert
         with pytest.raises(AssertionError) as excinfo:
-            client.assert_request_count(3)
+            client.verify_request_count(3)
         assert "Expected 3 matching requests, but found 2" in str(excinfo.value)
 
     def test_assert_request_made_success(self):
-        """Test assert_request_made when at least one matching request was made."""
+        """Test verify_request_made when at least one matching request was made."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
         client._record_request("GET", "/test1")
 
         # Act & Assert
-        client.assert_request_made(method="GET", path_pattern=r"/test1")  # Should not raise an exception
+        client.verify_request_made(method="GET", path_pattern=r"/test1")  # Should not raise an exception
 
     def test_assert_request_made_failure(self):
-        """Test assert_request_made when no matching requests were made."""
+        """Test verify_request_made when no matching requests were made."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
@@ -140,21 +140,21 @@ class TestMockClientRequestTracking:
 
         # Act & Assert
         with pytest.raises(AssertionError) as excinfo:
-            client.assert_request_made(method="POST")
+            client.verify_request_made(method="POST")
         assert "Expected at least one matching request, but found none" in str(excinfo.value)
 
     def test_assert_request_not_made_success(self):
-        """Test assert_request_not_made when no matching requests were made."""
+        """Test verify_request_not_made when no matching requests were made."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
         client._record_request("GET", "/test1")
 
         # Act & Assert
-        client.assert_request_not_made(method="POST")  # Should not raise an exception
+        client.verify_request_not_made(method="POST")  # Should not raise an exception
 
     def test_assert_request_not_made_failure(self):
-        """Test assert_request_not_made when at least one matching request was made."""
+        """Test verify_request_not_made when at least one matching request was made."""
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
@@ -162,7 +162,7 @@ class TestMockClientRequestTracking:
 
         # Act & Assert
         with pytest.raises(AssertionError) as excinfo:
-            client.assert_request_not_made(method="GET")
+            client.verify_request_not_made(method="GET")
         assert "Expected no matching requests, but found 1" in str(excinfo.value)
 
     def test_filter_requests(self):

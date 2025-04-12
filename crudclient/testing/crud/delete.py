@@ -238,7 +238,7 @@ class DeleteMock(BaseCrudMock):
 
         return self
 
-    def assert_resource_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
+    def verify_resource_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
         str_id = str(resource_id)
 
         # Check that the resource is not in stored resources
@@ -248,7 +248,7 @@ class DeleteMock(BaseCrudMock):
         if soft_delete:
             assert str_id in self._soft_deleted_resources, f"Resource {str_id} was not soft deleted"
 
-    def assert_dependencies_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
+    def verify_dependencies_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
         str_id = str(resource_id)
 
         # Check that the resource has dependencies

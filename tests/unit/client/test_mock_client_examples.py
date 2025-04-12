@@ -127,15 +127,15 @@ class TestMockClientExamples:
         mock_client.get("/users", params={"page": "2"})
 
         # Verify request count
-        mock_client.assert_request_count(3)
-        mock_client.assert_request_count(2, method="GET")
-        mock_client.assert_request_count(1, method="POST")
+        mock_client.verify_request_count(3)
+        mock_client.verify_request_count(2, method="GET")
+        mock_client.verify_request_count(1, method="POST")
 
         # Verify request sequence
-        mock_client.assert_request_sequence([{"method": "GET"}, {"method": "POST"}, {"method": "GET"}])
+        mock_client.verify_request_sequence([{"method": "GET"}, {"method": "POST"}, {"method": "GET"}])
 
         # Verify request parameters
-        mock_client.assert_request_params({"page": "1"}, method="GET", path_pattern=r"/users$")
+        mock_client.verify_request_params({"page": "1"}, method="GET", path_pattern=r"/users$")
 
     def test_pagination_helper(self, mock_client: MockClient, create_user_data):
         """Test pagination helper."""

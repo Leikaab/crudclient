@@ -79,21 +79,21 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
     # Note: The original implementations of list, get, create, etc. are removed.
     # The ClassSpy mechanism handles intercepting these calls on the target_crud.
 
-    def assert_resource_created(self, data: Any) -> None:
+    def verify_resource_created(self, data: Any) -> None:
         for call in self.get_calls("create"):  # Filter by method name
             # Data is typically the first positional argument for create
             if call.args and call.args[0] == data:
                 return
         raise AssertionError(f"Resource with data {data} was not created")
 
-    def assert_resource_updated(self, id: Any, data: Any) -> None:
+    def verify_resource_updated(self, id: Any, data: Any) -> None:
         for call in self.get_calls("update"):
             # ID and data are typically the first two positional arguments for update
             if call.args and len(call.args) >= 2 and call.args[0] == id and call.args[1] == data:
                 return
         raise AssertionError(f"Resource with ID {id} was not updated with data {data}")
 
-    def assert_resource_deleted(self, id: Any) -> None:
+    def verify_resource_deleted(self, id: Any) -> None:
         for call in self.get_calls("delete"):
             # ID is typically the first positional argument for delete
             if call.args and call.args[0] == id:

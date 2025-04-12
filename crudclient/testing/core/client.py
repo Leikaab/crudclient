@@ -172,23 +172,23 @@ class MockClient:
     def get_request_count(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> int:
         return len(self._filter_requests(method, path_pattern))
 
-    def assert_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         actual_count = self.get_request_count(method, path_pattern)
         assert actual_count == count, (
             f"Expected {count} matching requests, but found {actual_count}. " f"Filters: method={method}, path_pattern={path_pattern}"
         )
 
-    def assert_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         actual_count = self.get_request_count(method, path_pattern)
         assert actual_count > 0, f"Expected at least one matching request, but found none. " f"Filters: method={method}, path_pattern={path_pattern}"
 
-    def assert_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         actual_count = self.get_request_count(method, path_pattern)
         assert actual_count == 0, (
             f"Expected no matching requests, but found {actual_count}. " f"Filters: method={method}, path_pattern={path_pattern}"
         )
 
-    def assert_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
+    def verify_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
         actual_count = len(self.request_history)
         expected_count = len(expected_sequence)
         assert actual_count == expected_count, f"Expected {expected_count} requests, but found {actual_count}."
@@ -204,7 +204,7 @@ class MockClient:
             # This is a basic stub; a full implementation might involve deep comparison
             # or delegate to a helper in crudclient.testing.verification
 
-    def assert_request_params(
+    def verify_request_params(
         self,
         expected_params: Dict[str, str],
         method: Optional[HttpMethod] = None,
