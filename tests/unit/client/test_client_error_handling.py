@@ -16,6 +16,8 @@ from crudclient.exceptions import (
     InvalidResponseError,
     NotFoundError,
 )
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 # Import fixtures from conftest.py
 
@@ -225,10 +227,12 @@ class TestClientErrorHandling:
         assert json.loads(response)["status"] == "success after retry"
 
         # 2. Check config handler was called
-        mock_handle_403.assert_called_once_with(client)
+        translate_mock_calls_for_verifier(mock_handle_403)
+        Verifier.verify_called_once_with(mock_handle_403, "", client)
 
         # 3. Check auth was refreshed
-        mock_setup_auth.assert_called_once()
+        translate_mock_calls_for_verifier(mock_setup_auth)
+        Verifier.verify_call_count(mock_setup_auth, "", 1)
 
         # 4. Check two requests were made to the same URL
         assert len(mock_request.request_history) == 2
