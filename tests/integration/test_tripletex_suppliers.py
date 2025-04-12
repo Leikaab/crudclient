@@ -1,3 +1,4 @@
+import random  # <-- Added import
 import uuid
 
 import pytest
@@ -21,6 +22,14 @@ def generate_unique_name():
     return f"Test Supplier {uuid.uuid4()}"
 
 
+def generate_unique_supplier_number():  # <-- Added function
+    """
+    Generate a unique supplier number to avoid conflicts.
+    Using a large random number range to minimize collision probability.
+    """
+    return random.randint(100000, 9999999)
+
+
 @pytest.mark.no_parallel
 def test_create_supplier(api):
     """
@@ -28,8 +37,15 @@ def test_create_supplier(api):
     """
     # Create a new supplier with a unique name and supplier number
     supplier_name = generate_unique_name()
+    supplier_number = generate_unique_supplier_number()  # <-- Generate number
 
-    supplier_data = {"name": supplier_name, "email": "test@example.com", "isSupplier": True, "isCustomer": False}
+    supplier_data = {
+        "name": supplier_name,
+        "email": "test@example.com",
+        "isSupplier": True,
+        "isCustomer": False,
+        "supplierNumber": supplier_number,  # <-- Added field
+    }
 
     # Create the supplier
     supplier = api.suppliers.create(supplier_data)
@@ -40,6 +56,7 @@ def test_create_supplier(api):
     assert supplier["email"] == "test@example.com"
     assert supplier["isSupplier"] is True
     assert supplier["isCustomer"] is False
+    assert supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
     assert "id" in supplier
 
     # Clean up - delete the supplier
@@ -51,9 +68,14 @@ def test_read_supplier(api):
     """
     Test reading a supplier.
     """
-    # Create a new supplier with a unique name
+    # Create a new supplier with a unique name and number
     supplier_name = generate_unique_name()
-    supplier_data = {"name": supplier_name, "email": "test@example.com"}
+    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_data = {
+        "name": supplier_name,
+        "email": "test@example.com",
+        "supplierNumber": supplier_number,  # <-- Added field
+    }
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -65,6 +87,7 @@ def test_read_supplier(api):
     assert isinstance(supplier, dict)
     assert supplier["name"] == supplier_name
     assert supplier["email"] == "test@example.com"
+    assert supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
     assert supplier["id"] == created_supplier["id"]
 
     # Clean up - delete the supplier
@@ -76,9 +99,14 @@ def test_update_supplier(api):
     """
     Test updating a supplier.
     """
-    # Create a new supplier with a unique name
+    # Create a new supplier with a unique name and number
     supplier_name = generate_unique_name()
-    supplier_data = {"name": supplier_name, "email": "test@example.com"}
+    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_data = {
+        "name": supplier_name,
+        "email": "test@example.com",
+        "supplierNumber": supplier_number,  # <-- Added field
+    }
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -87,9 +115,10 @@ def test_update_supplier(api):
     updated_data = {
         "id": created_supplier["id"],
         "version": created_supplier["version"],
-        "name": supplier_name,
+        "name": supplier_name,  # Keep name same for simplicity here
         "email": "updated@example.com",
         "description": "Updated description",
+        # supplierNumber typically cannot be updated, so we don't include it here.
     }
 
     updated_supplier = api.suppliers.update(created_supplier["id"], updated_data)
@@ -99,6 +128,7 @@ def test_update_supplier(api):
     assert updated_supplier["id"] == created_supplier["id"]
     assert updated_supplier["email"] == "updated@example.com"
     assert updated_supplier["description"] == "Updated description"
+    assert updated_supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
 
     # Clean up - delete the supplier
     api.suppliers.destroy(updated_supplier["id"])
@@ -109,26 +139,43 @@ def test_list_suppliers(api):
     """
     Test listing suppliers.
     """
-    # Create a few suppliers with unique names
-    supplier_names = [generate_unique_name() for _ in range(3)]
+    # Create a few suppliers with unique names and numbers
     created_suppliers = []
+    supplier_info = []  # Store name and number for checking
 
-    for name in supplier_names:
-        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com"}
+    for _ in range(3):
+        name = generate_unique_name()
+        number = generate_unique_supplier_number()  # <-- Generate number
+        supplier_info.append({"name": name, "number": number})
+        supplier_data = {
+            "name": name,
+            "email": f"{name.replace(' ', '').lower()}@example.com",
+            "supplierNumber": number,  # <-- Added field
+        }
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
 
-    # List all suppliers
+    # List all suppliers (consider filtering if possible and necessary)
+    # For now, list all and find ours
     suppliers = api.suppliers.list()
 
     # Check that we got a list of suppliers
     assert isinstance(suppliers, list)
-    assert len(suppliers) > 0
+    assert len(suppliers) >= len(created_suppliers)  # Check we have at least as many as we created
 
     # Check that our created suppliers are in the list
-    created_ids = [s["id"] for s in created_suppliers]
-    found_suppliers = [s for s in suppliers if s["id"] in created_ids]
-    assert len(found_suppliers) == len(created_suppliers)
+    created_ids = {s["id"] for s in created_suppliers}
+    found_suppliers_map = {s["id"]: s for s in suppliers if s["id"] in created_ids}
+    assert len(found_suppliers_map) == len(created_suppliers)
+
+    # Verify details of found suppliers
+    original_supplier_map = {s["id"]: s for s in created_suppliers}
+    for supplier_id, found_supplier in found_suppliers_map.items():
+        original_supplier = original_supplier_map[supplier_id]
+        # Find the original info by matching ID indirectly or store number with ID
+        original_info = next(info for info in supplier_info if info["name"] == original_supplier["name"])
+        assert found_supplier["name"] == original_info["name"]
+        assert found_supplier["supplierNumber"] == original_info["number"]  # <-- Corrected assertion
 
     # Clean up - delete the suppliers
     for supplier in created_suppliers:
@@ -140,9 +187,14 @@ def test_destroy_supplier(api):
     """
     Test deleting a supplier.
     """
-    # Create a new supplier with a unique name
+    # Create a new supplier with a unique name and number
     supplier_name = generate_unique_name()
-    supplier_data = {"name": supplier_name, "email": "test@example.com"}
+    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_data = {
+        "name": supplier_name,
+        "email": "test@example.com",
+        "supplierNumber": supplier_number,  # <-- Added field
+    }
 
     # Create the supplier
     created_supplier = api.suppliers.create(supplier_data)
@@ -150,13 +202,15 @@ def test_destroy_supplier(api):
     # Delete the supplier
     api.suppliers.destroy(created_supplier["id"])
 
-    # Try to read the supplier - should fail or return None
+    # Try to read the supplier - should fail or return None/inactive
     try:
         deleted_supplier = api.suppliers.read(created_supplier["id"])
         # If we get here, the supplier might still exist but be marked as inactive
         assert deleted_supplier.get("isInactive") is True
     except Exception:
-        # If an exception is raised, that's also acceptable
+        # Check if the exception indicates "Not Found" or similar
+        # This depends on how crudclient/Tripletex API handles reads of deleted items
+        # For now, just passing is acceptable as per original test
         pass
 
 
@@ -166,11 +220,19 @@ def test_listcreate_suppliers(api):
     Test creating multiple suppliers in a single request.
     """
     # Create data for multiple suppliers
-    supplier_names = [generate_unique_name() for _ in range(3)]
     suppliers_data = []
+    supplier_info = []  # Store name and number for checking
 
-    for name in supplier_names:
-        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com", "isSupplier": True}
+    for _ in range(3):
+        name = generate_unique_name()
+        number = generate_unique_supplier_number()  # <-- Generate number
+        supplier_info.append({"name": name, "number": number})
+        supplier_data = {
+            "name": name,
+            "email": f"{name.replace(' ', '').lower()}@example.com",
+            "isSupplier": True,
+            "supplierNumber": number,  # <-- Added field
+        }
         suppliers_data.append(supplier_data)
 
     # Create the suppliers using listcreate
@@ -180,9 +242,13 @@ def test_listcreate_suppliers(api):
     assert isinstance(created_suppliers, list)
     assert len(created_suppliers) == len(suppliers_data)
 
-    for i, supplier in enumerate(created_suppliers):
-        assert supplier["name"] == supplier_names[i]
-        assert "id" in supplier
+    # Verify details
+    created_supplier_map = {s["name"]: s for s in created_suppliers}
+    for info in supplier_info:
+        assert info["name"] in created_supplier_map
+        created_supplier = created_supplier_map[info["name"]]
+        assert created_supplier["supplierNumber"] == info["number"]  # <-- Corrected assertion
+        assert "id" in created_supplier
 
     # Clean up - delete the suppliers
     for supplier in created_suppliers:
@@ -194,14 +260,21 @@ def test_listupdate_suppliers(api):
     """
     Test updating multiple suppliers in a single request.
     """
-    # Create a few suppliers with unique names
-    supplier_names = [generate_unique_name() for _ in range(3)]
+    # Create a few suppliers with unique names and numbers
     created_suppliers = []
+    supplier_numbers = {}  # Store ID -> number mapping
 
-    for name in supplier_names:
-        supplier_data = {"name": name, "email": f"{name.replace(' ', '').lower()}@example.com"}
+    for _ in range(3):
+        name = generate_unique_name()
+        number = generate_unique_supplier_number()  # <-- Generate number
+        supplier_data = {
+            "name": name,
+            "email": f"{name.replace(' ', '').lower()}@example.com",
+            "supplierNumber": number,  # <-- Added field
+        }
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
+        supplier_numbers[created_supplier["id"]] = number  # Store mapping
 
     # Prepare update data
     update_data = []
@@ -209,9 +282,10 @@ def test_listupdate_suppliers(api):
         supplier_update = {
             "id": supplier["id"],
             "version": supplier["version"],
-            "name": supplier["name"],
+            "name": supplier["name"],  # Keep name same
             "email": f"updated_{supplier['email']}",
             "description": f"Updated description for {supplier['name']}",
+            # supplierNumber is not updated
         }
         update_data.append(supplier_update)
 
@@ -222,11 +296,15 @@ def test_listupdate_suppliers(api):
     assert isinstance(updated_suppliers, list)
     assert len(updated_suppliers) == len(created_suppliers)
 
-    for i, supplier in enumerate(updated_suppliers):
-        assert supplier["id"] == created_suppliers[i]["id"]
-        assert supplier["email"] == f"updated_{created_suppliers[i]['email']}"
-        assert supplier["description"] == f"Updated description for {created_suppliers[i]['name']}"
+    # Verify details
+    original_supplier_map = {s["id"]: s for s in created_suppliers}
+    for updated_supplier in updated_suppliers:
+        original_supplier = original_supplier_map[updated_supplier["id"]]
+        original_number = supplier_numbers[updated_supplier["id"]]
+        assert updated_supplier["email"] == f"updated_{original_supplier['email']}"
+        assert updated_supplier["description"] == f"Updated description for {original_supplier['name']}"
+        assert updated_supplier["supplierNumber"] == original_number  # <-- Corrected assertion
 
     # Clean up - delete the suppliers
-    for supplier in created_suppliers:
+    for supplier in created_suppliers:  # Use original list for IDs
         api.suppliers.destroy(supplier["id"])
