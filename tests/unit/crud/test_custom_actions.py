@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from crudclient.exceptions import ModelConversionError
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
@@ -33,7 +35,10 @@ def test_custom_action_post_success(test_crud: TestCrud, mock_client: MagicMock)
 
     # WHEN
     result = test_crud.custom_action(action="do-something", data=action_data)
-    mock_client.post.assert_called_once_with("test-resources/do-something", json=action_data)
+
+    # THEN
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "post", "test-resources/do-something", json=action_data)
     assert result == SAMPLE_MODEL
 
 
@@ -51,7 +56,8 @@ def test_custom_action_get_success(test_crud: TestCrud, mock_client: MagicMock):
     result = test_crud.custom_action(action="get-special", method="get", params=action_params)
 
     # THEN
-    mock_client.get.assert_called_once_with("test-resources/get-special", params=action_params)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "get", "test-resources/get-special", params=action_params)
     assert result == SAMPLE_LIST_PAYLOAD  # Check if it returns raw list as per implementation
 
 
@@ -70,7 +76,8 @@ def test_custom_action_on_resource_success(test_crud: TestCrud, mock_client: Mag
 
     # THEN
     # Verify the URL call (adjust if needed based on actual implementation)
-    mock_client.post.assert_called_once_with("test-resources/1/activate", json=None)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "post", "test-resources/1/activate", json=None)
     # Verify the result is correct
     assert result == SAMPLE_MODEL
 
@@ -92,7 +99,8 @@ def test_custom_action_with_parent_id(nested_test_crud: TestCrud, mock_client: M
 
     # THEN
     # Verify the URL call (adjust if needed based on actual implementation)
-    mock_client.post.assert_called_once_with("parents/parent123/test-resources/do-something", json={})
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "post", "parents/parent123/test-resources/do-something", json={})
     # Verify the result is correct
     assert result == SAMPLE_MODEL
 
