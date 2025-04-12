@@ -5,10 +5,24 @@ from .method_call import MethodCall
 
 class SpyBase:
     """
-    Base class for spy implementations.
+    Base implementation for the **Test Spy pattern**.
 
-    This class provides common functionality for recording and verifying
-    method calls.
+    A Test Spy is a test double that records information about how it was called
+    during test execution. This base class provides the core functionality for
+    spies within the `crudclient` testing framework:
+    - Recording method calls (arguments, return values, exceptions) via `_record_call`.
+    - Storing recorded calls in the `calls` list.
+    - Providing basic verification methods (e.g., `verify_called`, `verify_called_with`)
+      to assert interactions directly on the spy instance.
+
+    Concrete spy classes (e.g., `ClientSpy`, `ApiSpy`) should inherit from this
+    base to implement specific interfaces while leveraging the call recording
+    and verification infrastructure provided here.
+
+    Note: While this base class includes verification methods, the dedicated
+    `Verifier` class (`crudclient.testing.verification.Verifier`) offers a more
+    decoupled approach for complex verification scenarios, potentially involving
+    multiple spies.
     """
 
     calls: List[MethodCall]

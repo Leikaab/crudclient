@@ -1,9 +1,11 @@
 """
-Base authentication mock class for testing.
+Base Class for Authentication Mocks using a Builder-like Configuration.
 
-This module provides the base class for authentication mocks with chainable configuration.
-It serves as the foundation for all specialized authentication mock classes in the
-crudclient testing framework.
+This module provides `AuthMockBase`, the foundation for all specialized
+authentication mock classes (e.g., `BasicAuthMock`, `OAuthMock`) in the
+`crudclient` testing framework. It utilizes a **Builder pattern** variant
+for configuration, offering a fluent, chainable interface (`with_...` methods)
+to set up complex mock behaviors.
 """
 
 from datetime import datetime, timedelta
@@ -12,16 +14,27 @@ from typing import Any, Dict, Optional, Tuple
 from ..response_builder import ResponseBuilder
 from ..response_builder.response import MockResponse
 
+
 class AuthMockBase:
     """
-    Base class for authentication mocks with chainable configuration.
+    Base class for authentication mocks using a **Builder pattern** for configuration.
 
-    This class provides common functionality for all authentication mock implementations,
-    including failure simulation, token expiration, refresh token handling, and
-    multi-factor authentication scenarios.
+    This class provides common state and behavior simulation logic for various
+    authentication scenarios (failure, token expiration, refresh, MFA). It employs
+    a fluent interface with chainable `with_...` methods, acting as a Builder
+    to construct the desired configuration and state of the authentication mock
+    before it's used in a test.
 
-    All specialized authentication mocks inherit from this base class to ensure
-    consistent behavior and interface.
+    Example Usage (Builder pattern):
+    ```python
+    mock_auth = ConcreteAuthMock() \\
+        .with_failure(status_code=403, message="Forbidden") \\
+        .fail_after(3)
+    ```
+
+    Specialized authentication mocks (e.g., `BasicAuthMock`, `OAuthMock`) inherit
+    from this base, potentially adding their own specific configuration methods
+    while leveraging the common builder infrastructure.
     """
 
     should_fail: bool

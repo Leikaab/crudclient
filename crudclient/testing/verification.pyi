@@ -1,8 +1,15 @@
 """
-Verification utilities for the crudclient testing framework.
+Verifier Pattern Implementation for Test Assertions.
 
-This module provides high-level verification functions and classes that might
-coordinate verification across different spies (client, auth, crud).
+This module implements the **Verifier pattern**, providing a dedicated interface
+(`Verifier` class) for making assertions about interactions with test doubles
+(mocks, spies) used within the `crudclient` testing framework.
+
+It centralizes the logic for checking method calls, call counts, and arguments,
+decoupling the verification step from the test doubles themselves. This promotes
+cleaner and more readable test code by offering a fluent API for common
+verification tasks across different types of spies (e.g., `ClientSpy`,
+`AuthSpy`).
 """
 
 from typing import Any, Union
@@ -15,10 +22,16 @@ from .types import SpyTarget
 
 class Verifier:
     """
-    High-level verification utilities for the testing framework.
+    Implements the **Verifier pattern** for asserting interactions with test doubles.
 
-    This class provides methods to verify interactions with mock objects
-    across different components of the testing framework.
+    This class provides static methods that act as the primary interface for
+    verifying how test doubles (specifically objects conforming to the `SpyTarget`
+    protocol or similar mock objects) were used during a test. It allows checking
+    if methods were called, how many times, and with what arguments.
+
+    Using a dedicated Verifier class separates the assertion logic from the
+    mock/spy object's primary responsibilities (simulating behavior, recording calls),
+    leading to a clearer separation of concerns in tests.
     """
 
     @staticmethod

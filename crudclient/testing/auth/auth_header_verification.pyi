@@ -7,7 +7,9 @@ including Basic Auth, Bearer Auth, and API Key headers.
 
 from typing import Any, Dict, Optional
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
+
 
 class AuthHeaderVerification:
     """
@@ -58,9 +60,9 @@ class AuthHeaderVerification:
         ...
 
     @staticmethod
-    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
+    def verify_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         """
-        Assert that an authentication header has the correct format.
+        Verify that an authentication header has the correct format.
 
         Args:
             headers: The headers dictionary
@@ -68,6 +70,6 @@ class AuthHeaderVerification:
             header_name: The name of the header (default: "Authorization")
 
         Raises:
-            AssertionError: If the header is missing or has an invalid format
+            VerificationError: If the header is missing or has an invalid format
         """
         ...

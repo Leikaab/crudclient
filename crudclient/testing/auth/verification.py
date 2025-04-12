@@ -12,15 +12,15 @@ class AuthVerificationHelpers:
     verify_basic_auth_header = AuthHeaderVerification.verify_basic_auth_header
     verify_bearer_auth_header = AuthHeaderVerification.verify_bearer_auth_header
     verify_api_key_header = AuthHeaderVerification.verify_api_key_header
-    assert_auth_header_format = AuthHeaderVerification.assert_auth_header_format
+    verify_auth_header_format = AuthHeaderVerification.verify_auth_header_format
 
     # Token verification methods
     verify_oauth_token = AuthTokenVerification.verify_oauth_token
     verify_token_refresh = AuthTokenVerification.verify_token_refresh
     verify_token_expiration = AuthTokenVerification.verify_token_expiration
-    assert_token_usage = AuthTokenVerification.assert_token_usage
-    assert_refresh_behavior = AuthTokenVerification.assert_refresh_behavior
-    assert_token_has_scopes = AuthTokenVerification.assert_token_has_scopes
+    verify_token_usage = AuthTokenVerification.verify_token_usage
+    verify_refresh_behavior = AuthTokenVerification.verify_refresh_behavior
+    verify_token_has_scopes = AuthTokenVerification.verify_token_has_scopes
 
     # Extraction utilities
     extract_basic_auth_credentials = AuthExtractionUtils.extract_basic_auth_credentials
@@ -28,8 +28,8 @@ class AuthVerificationHelpers:
     extract_jwt_payload = AuthExtractionUtils.extract_jwt_payload
 
     # Error verification methods
-    assert_auth_error_response = AuthErrorVerification.assert_auth_error_response
-    assert_rate_limit_headers = AuthErrorVerification.assert_rate_limit_headers
+    verify_auth_error_response = AuthErrorVerification.verify_auth_error_response
+    verify_rate_limit_headers = AuthErrorVerification.verify_rate_limit_headers
 
 
 # For backward compatibility

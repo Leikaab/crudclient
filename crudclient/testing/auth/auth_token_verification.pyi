@@ -8,7 +8,9 @@ including OAuth tokens, JWT tokens, and token refresh behavior.
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
+
 
 class AuthTokenVerification:
     """
@@ -70,11 +72,11 @@ class AuthTokenVerification:
         ...
 
     @staticmethod
-    def assert_token_usage(
+    def verify_token_usage(
         token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         """
-        Assert that a token is being used correctly.
+        Verify that a token is being used correctly.
 
         Args:
             token: The token to verify
@@ -83,14 +85,14 @@ class AuthTokenVerification:
             expected_user: The expected user
 
         Raises:
-            AssertionError: If the token is not being used correctly
+            VerificationError: If the token is not being used correctly
         """
         ...
 
     @staticmethod
-    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
+    def verify_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         """
-        Assert that token refresh behavior is correct.
+        Verify that token refresh behavior is correct.
 
         Args:
             old_token: The old token
@@ -98,20 +100,20 @@ class AuthTokenVerification:
             expected_client_id: The expected client ID
 
         Raises:
-            AssertionError: If the refresh behavior is incorrect
+            VerificationError: If the refresh behavior is incorrect
         """
         ...
 
     @staticmethod
-    def assert_token_has_scopes(token: str, required_scopes: List[str]) -> None:
+    def verify_token_has_scopes(token: str, required_scopes: List[str]) -> None:
         """
-        Assert that a token has the required scopes.
+        Verify that a token has the required scopes.
 
         Args:
             token: The token to verify
             required_scopes: List of required scopes
 
         Raises:
-            AssertionError: If the token does not have the required scopes
+            VerificationError: If the token does not have the required scopes
         """
         ...

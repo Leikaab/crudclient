@@ -1,8 +1,16 @@
 """
-Factory functions and classes for creating mock clients for testing.
+Factory Pattern Implementation for Mock Client Creation.
 
-This module provides factory functions and classes for creating and configuring
-mock clients for testing, including MockClient and SimpleMockClient instances.
+This module utilizes the **Factory pattern** to provide a centralized and
+flexible way to create and configure various mock client instances
+(`MockClient`, `SimpleMockClient`) needed for testing different scenarios.
+It encapsulates the complex setup logic behind simple creation methods.
+
+Key Components:
+- `MockClientFactory`: A class implementing Factory Methods (`create`,
+  `from_client_config`, etc.) to produce configured `MockClient` instances.
+- `create_simple_mock_client`: A factory function for creating `SimpleMockClient`
+  instances.
 """
 
 from typing import Any, Dict, List, Optional, Union
@@ -22,6 +30,7 @@ from crudclient.testing.types import Headers, ResponseData, StatusCode
 
 # --- Helper Functions ---
 
+
 def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     Creates API response patterns based on the specified API type.
@@ -35,6 +44,7 @@ def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     ...
 
+
 def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> None:
     """
     Adds common error response configurations to a MockClient.
@@ -45,6 +55,7 @@ def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> N
     """
     ...
 
+
 def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyAuthMock, CustomAuthMock, OAuthMock], config: Dict[str, Any]) -> None:
     """
     Configures advanced behaviors for an authentication mock object.
@@ -54,6 +65,7 @@ def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyA
         config: Dictionary containing configuration options
     """
     ...
+
 
 def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs: Dict[str, Any]) -> None:
     """
@@ -67,16 +79,26 @@ def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs:
 
 # --- MockClientFactory ---
 
+
 class MockClientFactory:
     """
-    Factory class for creating and configuring MockClient instances for testing.
+    Implements the **Factory Method pattern** for creating `MockClient` instances.
 
-    Provides methods to:
-    - Create basic MockClient instances.
-    - Create MockClient instances based on ClientConfig or existing Client objects.
-    - Configure success and error responses for specific API endpoints.
-    - Create pre-configured MockClient instances with authentication, API patterns,
-      and error responses.
+    This factory centralizes the creation logic for `MockClient`, allowing for
+    consistent setup and configuration based on different inputs (e.g., base URL,
+    `ClientConfig`, existing `Client`). It simplifies the process of obtaining
+    a ready-to-use mock client for various testing needs, including those
+    requiring specific response configurations or spying capabilities.
+
+    Key Factory Methods:
+    - `create`: Creates a basic `MockClient`.
+    - `from_client_config`: Creates a `MockClient` based on a `ClientConfig`.
+    - `from_real_client`: Creates a `MockClient` mimicking a real `Client`.
+    - `create_mock_client`: Creates a `MockClient` with advanced configurations.
+
+    Configuration helper methods (`configure_success_response`,
+    `configure_error_response`) are also provided for convenience, although they
+    don't strictly follow the Factory pattern themselves.
     """
 
     @classmethod
@@ -209,9 +231,15 @@ class MockClientFactory:
 
 # --- SimpleMockClient Creation ---
 
+
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
     """
-    Creates and configures a SimpleMockClient instance.
+    Acts as a **Simple Factory** for creating `SimpleMockClient` instances.
+
+    This function provides a straightforward way to instantiate and configure
+    a `SimpleMockClient`, hiding the underlying setup details. It allows
+    pre-configuration of response patterns and error handling based on common
+    API types or specific definitions.
 
     Args:
         **kwargs: Configuration options:

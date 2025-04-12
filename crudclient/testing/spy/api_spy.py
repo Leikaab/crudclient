@@ -4,6 +4,7 @@ from crudclient.api import API
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .enhanced import ClassSpy, EnhancedSpyBase
 
 
@@ -87,7 +88,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
             if call.args and call.args[0] == name:
                 return
 
-        raise AssertionError(f"Endpoint {name} was not registered via register_endpoint")
+        raise VerificationError(f"Endpoint {name} was not registered via register_endpoint")
 
     # Adjust other custom assertions similarly...
     def verify_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
@@ -95,7 +96,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
             if call.args and call.args[0] == name and "model" in call.kwargs and call.kwargs["model"] == model:
                 return
 
-        raise AssertionError(f"Endpoint {name} was not registered via register_endpoint with model {model.__name__}")
+        raise VerificationError(f"Endpoint {name} was not registered via register_endpoint with model {model.__name__}")
 
 
 # (Removed commented out original methods)

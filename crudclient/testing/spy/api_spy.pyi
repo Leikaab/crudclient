@@ -1,8 +1,10 @@
 """
-API spy implementation for recording and verifying API interactions.
+Concrete Test Spy for the `API` Interface using Enhanced Spying.
 
-This module provides a spy implementation of the API class that records
-all method calls for later verification.
+This module provides `ApiSpy`, a specific implementation of the **Test Spy
+pattern** tailored for the `crudclient.api.API` interface. It utilizes
+the `EnhancedSpyBase` and `ClassSpy` mechanisms to record and verify
+interactions made with the API component, such as endpoint registration.
 """
 
 from typing import Any, Optional, Type
@@ -12,47 +14,49 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud.base import Crud
 
-from .base import SpyBase
+from ..exceptions import VerificationError
+from .enhanced import EnhancedSpyBase
 
-class ApiSpy(API, SpyBase):
+
+class ApiSpy(EnhancedSpyBase, API):  # Inherits from EnhancedSpyBase and conforms to API interface
     """
-    Spy implementation of the API class.
+    A **Test Spy** specifically for the `crudclient.api.API` interface.
 
-    This class wraps an API instance and records all method calls for later verification.
-    It can be used to verify that the expected methods were called with the expected
-    arguments during testing.
+    This class acts as a test double that conforms to the `API` interface but
+    also inherits from `EnhancedSpyBase` to record method calls made to it
+    (primarily `register_endpoint`). It uses composition internally, wrapping a
+    concrete `API` subclass instance and spying on its methods using `ClassSpy`.
+
+    Tests can use the verification methods inherited from `EnhancedSpyBase` or
+    the dedicated `Verifier` class (`crudclient.testing.verification.Verifier`)
+    to assert how the API was interacted with. Custom verification methods
+    specific to API interactions are also provided.
     """
 
-    client_class: Type[Client]
-    delegate: API
+    client_class: Type[Client]  # Keep for API compatibility
 
-    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, delegate: Optional[API] = None, **kwargs: Any):
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
         """
         Initialize an ApiSpy instance.
 
         Args:
-            client: Optional client instance to use
-            client_config: Optional client configuration
-            delegate: Optional delegate API to forward calls to
-            **kwargs: Additional keyword arguments to pass to the API constructor
+            client: Optional client instance to use for the underlying API.
+            client_config: Optional client configuration for the underlying API.
+            **kwargs: Additional keyword arguments to pass to the API constructor.
         """
         ...
 
+    # --- API Interface Methods (for type checking) ---
+    # These methods are implemented via ClassSpy or __getattr__ in the .py file,
+    # but are declared here to satisfy the API interface for type checkers.
+
     def _register_endpoints(self) -> None:
-        """
-        Record and forward a call to _register_endpoints.
-
-        Returns:
-            Result from the delegate API
-
-        Raises:
-            Any exception raised by the delegate API
-        """
+        """Abstract method from API base class."""
         ...
 
     def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> Crud:
         """
-        Record and forward a call to register_endpoint.
+        Spy on an endpoint registration call.
 
         Args:
             name: Name of the endpoint
@@ -61,51 +65,48 @@ class ApiSpy(API, SpyBase):
             **kwargs: Additional keyword arguments
 
         Returns:
-            Crud instance for the registered endpoint
-
-        Raises:
-            ValueError: If client is not initialized
-            Any exception raised by the delegate API
+            Crud instance (typically mocked or from a wrapped API)
         """
         ...
 
     def __getattr__(self, name: str) -> Any:
         """
-        Record and forward attribute access to the delegate API.
+        Delegate attribute access to the spy wrapper, base class, or target API.
 
         Args:
             name: Attribute name
 
         Returns:
-            Attribute value from the delegate API
+            Attribute value from the appropriate source.
 
         Raises:
-            Any exception raised by the delegate API
+            AttributeError: If the attribute is not found.
         """
         ...
-    # Helper methods for verification
 
-    def assert_endpoint_registered(self, name: str) -> None:
+    # --- Custom Verification Methods ---
+
+    def verify_endpoint_registered(self, name: str) -> None:
         """
-        Assert that an endpoint was registered.
+        Verify that an endpoint with the given name was registered via `register_endpoint`.
 
         Args:
             name: Name of the endpoint
 
         Raises:
-            AssertionError: If the endpoint was not registered
+            VerificationError: If the endpoint was not registered
         """
         ...
 
-    def assert_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
+    def verify_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
         """
-        Assert that an endpoint was registered with a specific model.
+        Verify that an endpoint was registered via `register_endpoint` with a specific model.
 
         Args:
             name: Name of the endpoint
             model: Expected model class
 
         Raises:
-            AssertionError: If the endpoint was not registered with the specified model
+            VerificationError: If the endpoint was not registered with the specified model
         """
         ...

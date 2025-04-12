@@ -3,6 +3,7 @@ from typing import Any, Dict, Union
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .enhanced import ClassSpy, EnhancedSpyBase
 
 
@@ -65,7 +66,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
             if call.args and call.args[0] == endpoint:
                 return
 
-        raise AssertionError(f"Endpoint {endpoint} was not called")
+        raise VerificationError(f"Endpoint {endpoint} was not called")
 
     # Adjust other custom assertions similarly...
     def verify_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
@@ -73,14 +74,14 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
             if call.args and call.args[0] == endpoint:
                 return
 
-        raise AssertionError(f"Endpoint {endpoint} was not called with method {method}")
+        raise VerificationError(f"Endpoint {endpoint} was not called with method {method}")
 
     def verify_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
         for call in self.get_calls(method):
             if call.args and call.args[0] == endpoint and "json" in call.kwargs and call.kwargs["json"] == expected_json:
                 return
 
-        raise AssertionError(f"JSON payload {expected_json} was not sent to {endpoint} with method {method}")
+        raise VerificationError(f"JSON payload {expected_json} was not sent to {endpoint} with method {method}")
 
     # --- Deprecated/Removed methods ---
     # The following methods are handled by ClassSpy/EnhancedSpyBase or are no longer needed

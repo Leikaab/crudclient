@@ -1,9 +1,10 @@
 """
-Mock Client implementation for testing.
+Mock Object Pattern Implementation for `crudclient.Client`.
 
-This module provides a mock implementation of the crudclient.Client class
-that can be used in tests to simulate client behavior without making
-actual network calls.
+This module provides `MockClient`, an implementation of the **Mock Object pattern**
+for the `crudclient.client.Client` interface. It allows tests to simulate client
+behavior, configure specific responses or errors for defined request patterns,
+and verify interactions without making actual network calls.
 """
 
 import re
@@ -26,16 +27,25 @@ from ..types import (
 
 class MockClient(EnhancedSpyBase):
     """
-    Mock implementation of the crudclient.Client class.
+    Implements the **Mock Object pattern** for `crudclient.Client`.
 
-    This class simulates client behavior without making actual network calls.
-    It allows configuring expected requests and their responses for testing purposes.
+    This test double replaces the real `Client` in tests. It allows setting up
+    predefined responses or errors for specific HTTP requests based on method and
+    path (using `configure_response` or `with_response_pattern`). This enables
+    testing components that depend on the client in isolation.
 
-    Features:
-    - Configurable response patterns
-    - Request history tracking
-    - Authentication strategy support
-    - Verification helpers
+    As a Mock Object, its primary roles are:
+    1.  **Simulation:** Mimics the `Client` interface (`get`, `post`, etc.).
+    2.  **Expectation Setting:** Allows configuration of responses/errors for
+        specific request patterns.
+    3.  **Interaction Verification:** By inheriting from `EnhancedSpyBase`, it also
+        acts as a **Spy**, recording calls made to it. Tests can verify these
+        interactions using the inherited verification methods or the dedicated
+        `Verifier` class.
+
+    This differs from a simple Stub (which only provides canned responses) or a
+    pure Spy (which only records calls) by combining configurable behavior with
+    verification capabilities.
     """
 
     http_client: Any

@@ -4,6 +4,7 @@ from typing import Any, Optional
 from crudclient.client import Client
 from crudclient.crud.base import Crud as CrudBase
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .enhanced import ClassSpy, EnhancedSpyBase, MethodSpy
 
 
@@ -84,21 +85,21 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
             # Data is typically the first positional argument for create
             if call.args and call.args[0] == data:
                 return
-        raise AssertionError(f"Resource with data {data} was not created")
+        raise VerificationError(f"Resource with data {data} was not created")
 
     def verify_resource_updated(self, id: Any, data: Any) -> None:
         for call in self.get_calls("update"):
             # ID and data are typically the first two positional arguments for update
             if call.args and len(call.args) >= 2 and call.args[0] == id and call.args[1] == data:
                 return
-        raise AssertionError(f"Resource with ID {id} was not updated with data {data}")
+        raise VerificationError(f"Resource with ID {id} was not updated with data {data}")
 
     def verify_resource_deleted(self, id: Any) -> None:
         for call in self.get_calls("delete"):
             # ID is typically the first positional argument for delete
             if call.args and call.args[0] == id:
                 return
-        raise AssertionError(f"Resource with ID {id} was not deleted")
+        raise VerificationError(f"Resource with ID {id} was not deleted")
 
 
 # (Removed commented out original methods)

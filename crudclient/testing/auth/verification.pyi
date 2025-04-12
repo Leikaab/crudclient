@@ -7,10 +7,12 @@ including header validation, error handling, and token refresh verification.
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .auth_error_verification import AuthErrorVerification
 from .auth_extraction_utils import AuthExtractionUtils
 from .auth_header_verification import AuthHeaderVerification
 from .auth_token_verification import AuthTokenVerification
+
 
 class AuthVerificationHelpers:
     """
@@ -62,9 +64,9 @@ class AuthVerificationHelpers:
         ...
 
     @staticmethod
-    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
+    def verify_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         """
-        Assert that an authentication header has the correct format.
+        Verify that an authentication header has the correct format.
 
         Args:
             headers: The headers dictionary
@@ -72,10 +74,11 @@ class AuthVerificationHelpers:
             header_name: The name of the header (default: "Authorization")
 
         Raises:
-            AssertionError: If the header is missing or has an invalid format
+            VerificationError: If the header is missing or has an invalid format
         """
         ...
     # Token verification methods
+
     @staticmethod
     def verify_oauth_token(
         token: str,
@@ -128,11 +131,11 @@ class AuthVerificationHelpers:
         ...
 
     @staticmethod
-    def assert_token_usage(
+    def verify_token_usage(
         token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         """
-        Assert that a token is being used correctly.
+        Verify that a token is being used correctly.
 
         Args:
             token: The token to verify
@@ -141,14 +144,14 @@ class AuthVerificationHelpers:
             expected_user: The expected user
 
         Raises:
-            AssertionError: If the token is not being used correctly
+            VerificationError: If the token is not being used correctly
         """
         ...
 
     @staticmethod
-    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
+    def verify_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         """
-        Assert that token refresh behavior is correct.
+        Verify that token refresh behavior is correct.
 
         Args:
             old_token: The old token
@@ -156,24 +159,25 @@ class AuthVerificationHelpers:
             expected_client_id: The expected client ID
 
         Raises:
-            AssertionError: If the refresh behavior is incorrect
+            VerificationError: If the refresh behavior is incorrect
         """
         ...
 
     @staticmethod
-    def assert_token_has_scopes(token: str, required_scopes: List[str]) -> None:
+    def verify_token_has_scopes(token: str, required_scopes: List[str]) -> None:
         """
-        Assert that a token has the required scopes.
+        Verify that a token has the required scopes.
 
         Args:
             token: The token to verify
             required_scopes: List of required scopes
 
         Raises:
-            AssertionError: If the token does not have the required scopes
+            VerificationError: If the token does not have the required scopes
         """
         ...
     # Extraction utilities
+
     @staticmethod
     def extract_basic_auth_credentials(header_value: str) -> Tuple[str, str]:
         """
@@ -222,12 +226,13 @@ class AuthVerificationHelpers:
         """
         ...
     # Error verification methods
+
     @staticmethod
-    def assert_auth_error_response(
+    def verify_auth_error_response(
         response: Dict[str, Any], expected_status: int = 401, expected_error: Optional[str] = None, expected_error_description: Optional[str] = None
     ) -> None:
         """
-        Assert that an authentication error response is correct.
+        Verify that an authentication error response is correct.
 
         Args:
             response: The response to verify
@@ -236,16 +241,16 @@ class AuthVerificationHelpers:
             expected_error_description: The expected error description
 
         Raises:
-            AssertionError: If the response does not match the expected values
+            VerificationError: If the response does not match the expected values
         """
         ...
 
     @staticmethod
-    def assert_rate_limit_headers(
+    def verify_rate_limit_headers(
         headers: Dict[str, str], expected_limit: Optional[int] = None, expected_remaining: Optional[int] = None, expected_reset: Optional[int] = None
     ) -> None:
         """
-        Assert that rate limit headers are correct.
+        Verify that rate limit headers are correct.
 
         Args:
             headers: The headers to verify
@@ -254,9 +259,10 @@ class AuthVerificationHelpers:
             expected_reset: The expected reset time
 
         Raises:
-            AssertionError: If the headers do not match the expected values
+            VerificationError: If the headers do not match the expected values
         """
         ...
+
 
 # For backward compatibility
 __all__ = ["AuthVerificationHelpers", "AuthExtractionUtils", "AuthHeaderVerification", "AuthTokenVerification", "AuthErrorVerification"]

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
 
 
@@ -92,11 +93,11 @@ class AuthTokenVerification:
             return False  # Not a valid JWT
 
     @staticmethod
-    def assert_token_usage(
+    def verify_token_usage(
         token: str, required_scopes: Optional[List[str]] = None, expected_client_id: Optional[str] = None, expected_user: Optional[str] = None
     ) -> None:
         if not token:
-            raise AssertionError("Token is empty")
+            raise VerificationError("Token is empty")
 
         try:
             # Try to decode as JWT
@@ -106,34 +107,34 @@ class AuthTokenVerification:
             if "exp" in payload:
                 exp_timestamp = payload["exp"]
                 if datetime.now().timestamp() > exp_timestamp:
-                    raise AssertionError("Token is expired")
+                    raise VerificationError("Token is expired")
 
             # Check client ID
             if expected_client_id and "client_id" in payload:
                 if payload["client_id"] != expected_client_id:
-                    raise AssertionError(f"Token client ID mismatch: expected {expected_client_id}, got {payload['client_id']}")
+                    raise VerificationError(f"Token client ID mismatch: expected {expected_client_id}, got {payload['client_id']}")
 
             # Check user
             if expected_user and "sub" in payload:
                 if payload["sub"] != expected_user:
-                    raise AssertionError(f"Token user mismatch: expected {expected_user}, got {payload['sub']}")
+                    raise VerificationError(f"Token user mismatch: expected {expected_user}, got {payload['sub']}")
 
             # Check scopes
             if required_scopes and "scope" in payload:
                 token_scopes = payload["scope"].split()
                 for scope in required_scopes:
                     if scope not in token_scopes:
-                        raise AssertionError(f"Token missing required scope: {scope}")
+                        raise VerificationError(f"Token missing required scope: {scope}")
         except ValueError:
             # Not a JWT token, could be an opaque token
             # In a real implementation, you would validate against the token introspection endpoint
             pass
 
     @staticmethod
-    def assert_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
+    def verify_refresh_behavior(old_token: str, new_token: str, expected_client_id: Optional[str] = None) -> None:
         # Check that the tokens are different
         if old_token == new_token:
-            raise AssertionError("New token is the same as the old token")
+            raise VerificationError("New token is the same as the old token")
 
         try:
             # Try to decode as JWT
@@ -143,27 +144,27 @@ class AuthTokenVerification:
             # Check that the new token has a later expiration
             if "exp" in old_payload and "exp" in new_payload:
                 if new_payload["exp"] <= old_payload["exp"]:
-                    raise AssertionError("New token does not have a later expiration")
+                    raise VerificationError("New token does not have a later expiration")
 
             # Check that the client ID is the same
             if "client_id" in old_payload and "client_id" in new_payload:
                 if old_payload["client_id"] != new_payload["client_id"]:
-                    raise AssertionError("Client ID changed during refresh")
+                    raise VerificationError("Client ID changed during refresh")
 
                 if expected_client_id and new_payload["client_id"] != expected_client_id:
-                    raise AssertionError(f"Token client ID mismatch: expected {expected_client_id}, got {new_payload['client_id']}")
+                    raise VerificationError(f"Token client ID mismatch: expected {expected_client_id}, got {new_payload['client_id']}")
 
             # Check that the user is the same
             if "sub" in old_payload and "sub" in new_payload:
                 if old_payload["sub"] != new_payload["sub"]:
-                    raise AssertionError("User changed during refresh")
+                    raise VerificationError("User changed during refresh")
         except ValueError:
             # Not JWT tokens, could be opaque tokens
             # In a real implementation, you would validate against the token introspection endpoint
             pass
 
     @staticmethod
-    def assert_token_has_scopes(token: str, required_scopes: List[str]) -> None:
+    def verify_token_has_scopes(token: str, required_scopes: List[str]) -> None:
         try:
             # Try to decode as JWT
             payload = AuthExtractionUtils.extract_jwt_payload(token)
@@ -173,10 +174,10 @@ class AuthTokenVerification:
                 token_scopes = payload["scope"].split()
                 for scope in required_scopes:
                     if scope not in token_scopes:
-                        raise AssertionError(f"Token missing required scope: {scope}")
+                        raise VerificationError(f"Token missing required scope: {scope}")
             else:
-                raise AssertionError("Token does not contain scope claim")
+                raise VerificationError("Token does not contain scope claim")
         except ValueError as e:
             # Not a JWT token, could be an opaque token
             # In a real implementation, you would validate against the token introspection endpoint
-            raise AssertionError(f"Could not extract scopes from token: {str(e)}")
+            raise VerificationError(f"Could not extract scopes from token: {str(e)}")

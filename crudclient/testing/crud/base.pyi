@@ -1,8 +1,11 @@
 """
-Base class for CRUD operation mocks.
+Base Mock Object for CRUD Operations using Builder Configuration.
 
-This module provides the base class for all CRUD operation mocks, with common
-functionality for handling requests, responses, and assertions.
+This module provides `BaseCrudMock`, the foundation for mocking specific CRUD
+operations (like Create, Read, Update, Delete) within the `crudclient` testing
+framework. It implements the **Mock Object pattern** for simulating CRUD endpoint
+behavior and uses a **Builder pattern** variant (`with_...` methods) for flexible
+configuration.
 """
 
 import json
@@ -14,16 +17,26 @@ from requests import PreparedRequest  # Added
 from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
 
+
 class BaseCrudMock:
     """
-    Base class for CRUD operation mocks.
+    Base **Mock Object** for simulating CRUD endpoint interactions.
 
-    This class provides common functionality for all CRUD operation mocks,
-    including request handling, response configuration, and assertion methods
-    for verifying request patterns.
+    This class serves as the base for specific CRUD operation mocks (e.g.,
+    `CreateMock`, `ReadMock`). It combines several patterns:
 
-    response_patterns: List[Dict[str, Any]]
-    request_history: List[PreparedRequest]
+    1.  **Mock Object:** Simulates the behavior of a CRUD endpoint by matching
+        incoming requests against configured patterns and returning predefined
+        responses or errors.
+    2.  **Builder Pattern:** Uses a fluent interface with chainable `with_...`
+        methods (`with_response`, `with_validation_error`, etc.) to configure
+        the mock's response patterns and behavior step-by-step.
+    3.  **Spy Pattern:** Records incoming requests in `request_history` for later
+        verification using the provided `assert_...` methods.
+
+    Subclasses typically inherit from this base and implement specific CRUD
+    method interfaces (e.g., `create`, `list`, `retrieve`), delegating the core
+    request matching, response generation, and recording to this base class.
     """
 
     def __init__(self) -> None:

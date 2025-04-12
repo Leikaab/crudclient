@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
 
 
@@ -38,10 +39,10 @@ class AuthHeaderVerification:
         return True
 
     @staticmethod
-    def assert_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
+    def verify_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
         # Check if the header exists
         if header_name not in headers:
-            raise AssertionError(f"Missing {header_name} header")
+            raise VerificationError(f"Missing {header_name} header")
 
         header_value = headers[header_name]
 
@@ -49,13 +50,13 @@ class AuthHeaderVerification:
         auth_type_lower = auth_type.lower()
         if auth_type_lower == "basic":
             if not AuthHeaderVerification.verify_basic_auth_header(header_value):
-                raise AssertionError(f"Invalid Basic Auth header: {header_value}")
+                raise VerificationError(f"Invalid Basic Auth header: {header_value}")
         elif auth_type_lower == "bearer":
             if not AuthHeaderVerification.verify_bearer_auth_header(header_value):
-                raise AssertionError(f"Invalid Bearer Auth header: {header_value}")
+                raise VerificationError(f"Invalid Bearer Auth header: {header_value}")
         elif auth_type_lower == "apikey":
             # Assuming header_name might vary for ApiKey, but verification logic handles it
             if not AuthHeaderVerification.verify_api_key_header(header_value):
-                raise AssertionError(f"Invalid API Key header in {header_name}: {header_value}")
+                raise VerificationError(f"Invalid API Key header in {header_name}: {header_value}")
         else:
-            raise AssertionError(f"Unsupported auth type: {auth_type}")
+            raise VerificationError(f"Unsupported auth type: {auth_type}")

@@ -1,8 +1,10 @@
 """
-Client spy implementation for recording and verifying client interactions.
+Concrete Test Spy for the `Client` Interface using Enhanced Spying.
 
-This module provides a spy implementation of the Client class that records
-all method calls for later verification.
+This module provides `ClientSpy`, a specific implementation of the **Test Spy
+pattern** tailored for the `crudclient.client.Client` interface. It utilizes
+the `EnhancedSpyBase` and `ClassSpy` mechanisms to record and verify
+interactions made directly with the client component.
 """
 
 from typing import Any, Dict, Optional, Union
@@ -11,43 +13,49 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.types import RawResponseSimple
 
-from .base import SpyBase
+from ..exceptions import VerificationError
+from .enhanced import EnhancedSpyBase
 
-class ClientSpy(Client, SpyBase):
+
+class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and conforms to Client interface
     """
-    Spy implementation of the Client class.
+    A **Test Spy** specifically for the `crudclient.client.Client` interface.
 
-    This class wraps a Client instance and records all method calls for later verification.
-    It can be used to verify that the expected methods were called with the expected
-    arguments during testing.
+    This class acts as a test double that conforms to the `Client` interface but
+    also inherits from `EnhancedSpyBase` to record all method calls made to it
+    (e.g., `get`, `post`, `put`). It uses composition internally, wrapping a
+    real `Client` instance and spying on its methods using `ClassSpy`.
+
+    Tests can use the verification methods inherited from `EnhancedSpyBase` or
+    the dedicated `Verifier` class (`crudclient.testing.verification.Verifier`)
+    to assert how the client was interacted with. Custom verification methods
+    specific to client interactions are also provided.
     """
 
-    delegate: Client
-
-    def __init__(self, config: Union[ClientConfig, Dict[str, Any]], delegate: Optional[Client] = None, **kwargs: Any):
+    def __init__(self, config: Union[ClientConfig, Dict[str, Any]], **kwargs: Any):
         """
         Initialize a ClientSpy instance.
 
         Args:
-            config: Client configuration
-            delegate: Optional delegate client to forward calls to
-            **kwargs: Additional keyword arguments to pass to the Client constructor
+            config: Client configuration for the underlying real client.
+            **kwargs: Additional keyword arguments to pass to the Client constructor.
         """
         ...
 
+    # --- Client Interface Methods (for type checking) ---
+    # These methods are implemented via __getattr__ and ClassSpy in the .py file,
+    # but are declared here to satisfy the Client interface for type checkers.
+
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """
-        Record and forward a GET request.
+        Spy on a GET request.
 
         Args:
             endpoint: API endpoint
             params: Query parameters
 
         Returns:
-            API response
-
-        Raises:
-            Any exception raised by the delegate client
+            API response (typically mocked or from a wrapped client)
         """
         ...
 
@@ -59,7 +67,7 @@ class ClientSpy(Client, SpyBase):
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Record and forward a POST request.
+        Spy on a POST request.
 
         Args:
             endpoint: API endpoint
@@ -68,10 +76,7 @@ class ClientSpy(Client, SpyBase):
             files: Files to upload
 
         Returns:
-            API response
-
-        Raises:
-            Any exception raised by the delegate client
+            API response (typically mocked or from a wrapped client)
         """
         ...
 
@@ -83,7 +88,7 @@ class ClientSpy(Client, SpyBase):
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Record and forward a PUT request.
+        Spy on a PUT request.
 
         Args:
             endpoint: API endpoint
@@ -92,26 +97,20 @@ class ClientSpy(Client, SpyBase):
             files: Files to upload
 
         Returns:
-            API response
-
-        Raises:
-            Any exception raised by the delegate client
+            API response (typically mocked or from a wrapped client)
         """
         ...
 
     def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
         """
-        Record and forward a DELETE request.
+        Spy on a DELETE request.
 
         Args:
             endpoint: API endpoint
             **kwargs: Additional keyword arguments
 
         Returns:
-            API response
-
-        Raises:
-            Any exception raised by the delegate client
+            API response (typically mocked or from a wrapped client)
         """
         ...
 
@@ -123,7 +122,7 @@ class ClientSpy(Client, SpyBase):
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
-        Record and forward a PATCH request.
+        Spy on a PATCH request.
 
         Args:
             endpoint: API endpoint
@@ -132,49 +131,54 @@ class ClientSpy(Client, SpyBase):
             files: Files to upload
 
         Returns:
-            API response
-
-        Raises:
-            Any exception raised by the delegate client
-        """
-        ...
-    # Helper methods for verification
-
-    def assert_endpoint_called(self, endpoint: str) -> None:
-        """
-        Assert that an endpoint was called.
-
-        Args:
-            endpoint: API endpoint
-
-        Raises:
-            AssertionError: If the endpoint was not called
+            API response (typically mocked or from a wrapped client)
         """
         ...
 
-    def assert_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
+    # --- Custom Verification Methods ---
+
+    def verify_endpoint_called(self, endpoint: str) -> None:
         """
-        Assert that an endpoint was called with a specific method.
+        Verify that an endpoint was called via any HTTP method.
 
         Args:
-            method: HTTP method (get, post, put, delete, patch)
-            endpoint: API endpoint
+            endpoint: API endpoint string
 
         Raises:
-            AssertionError: If the endpoint was not called with the specified method
+            VerificationError: If the endpoint was not called
         """
         ...
 
-    def assert_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
+    def verify_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
         """
-        Assert that a JSON payload was sent to an endpoint.
+        Verify that an endpoint was called with a specific HTTP method.
 
         Args:
-            method: HTTP method (get, post, put, delete, patch)
-            endpoint: API endpoint
-            expected_json: Expected JSON payload
+            method: HTTP method name (lowercase, e.g., 'get', 'post')
+            endpoint: API endpoint string
 
         Raises:
-            AssertionError: If the JSON payload was not sent to the endpoint
+            VerificationError: If the endpoint was not called with the specified method
         """
+        ...
+
+    def verify_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
+        """
+        Verify that a specific JSON payload was sent to an endpoint via a specific method.
+
+        Args:
+            method: HTTP method name (lowercase, e.g., 'post', 'put', 'patch')
+            endpoint: API endpoint string
+            expected_json: The expected JSON payload structure/data
+
+        Raises:
+            VerificationError: If the specified JSON payload was not sent to the endpoint
+                               with the specified method
+        """
+        ...
+
+    # --- Magic Methods ---
+
+    def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the spy wrapper or base class."""
         ...

@@ -1,5 +1,7 @@
 import pytest
 
+from crudclient.testing.exceptions import VerificationError
+
 
 class TestAuthVerificationHelpers:
     """Tests for authentication verification helpers."""
@@ -44,11 +46,11 @@ class TestAuthVerificationHelpers:
         headers = auth_strategy.prepare_request_headers()
 
         # Act & Assert - Should not raise
-        mock_auth_verification.assert_auth_header_format(headers, "bearer")
+        mock_auth_verification.verify_auth_header_format(headers, "bearer")
 
         # Test with invalid format - Should raise
-        with pytest.raises(AssertionError):
-            mock_auth_verification.assert_auth_header_format({"Authorization": "Invalid format"}, "bearer")
+        with pytest.raises(VerificationError):
+            mock_auth_verification.verify_auth_header_format({"Authorization": "Invalid format"}, "bearer")
 
     def test_assert_token_usage(self, bearer_auth_client, mock_auth_verification):
         """Test assertion of token usage."""
@@ -78,8 +80,8 @@ class TestAuthVerificationHelpers:
         # Act & Assert - Should not raise
         old_token = mock_auth_verification.extract_bearer_token(old_headers["Authorization"])
         new_token = mock_auth_verification.extract_bearer_token(new_headers["Authorization"])
-        mock_auth_verification.assert_refresh_behavior(old_token, new_token, "bearer")
+        mock_auth_verification.verify_refresh_behavior(old_token, new_token, "bearer")
 
         # Test with same token (not refreshed) - Should raise
-        with pytest.raises(AssertionError):
-            mock_auth_verification.assert_refresh_behavior(old_token, old_token, "bearer")
+        with pytest.raises(VerificationError):
+            mock_auth_verification.verify_refresh_behavior(old_token, old_token, "bearer")

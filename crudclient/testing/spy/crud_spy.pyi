@@ -1,206 +1,195 @@
 """
-CRUD spy implementation for recording and verifying CRUD operations.
+Concrete Test Spy for the `CrudBase` Interface using Enhanced Spying.
 
-This module provides a spy implementation of the Crud class that records
-all method calls for later verification.
+This module provides `CrudSpy`, a specific implementation of the **Test Spy
+pattern** tailored for the `crudclient.crud.base.Crud` interface. It utilizes
+the `EnhancedSpyBase` and `ClassSpy` mechanisms to record and verify
+interactions made with the CRUD endpoint component.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
+from crudclient.client import Client
 from crudclient.crud.base import Crud as CrudBase
 from crudclient.crud.base import T
 from crudclient.models import ApiResponse
 from crudclient.types import JSONDict, JSONList
 
-from .base import SpyBase
+from ..exceptions import VerificationError
+from .enhanced import EnhancedSpyBase
 
-class CrudSpy(CrudBase, SpyBase):
+
+class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase and conforms to CrudBase interface
     """
-    Spy implementation of the Crud class.
+    A **Test Spy** specifically for the `crudclient.crud.base.Crud` interface.
 
-    This class wraps a Crud instance and records all method calls for later verification.
-    It can be used to verify that the expected methods were called with the expected
-    arguments during testing.
+    This class acts as a test double that conforms to the `CrudBase` interface but
+    also inherits from `EnhancedSpyBase` to record method calls made to it (e.g.,
+    `list`, `get`, `create`). It uses composition internally, wrapping a
+    real `CrudBase` instance and spying on its methods using `ClassSpy`.
+
+    Tests can use the verification methods inherited from `EnhancedSpyBase` or
+    the dedicated `Verifier` class (`crudclient.testing.verification.Verifier`)
+    to assert how the CRUD endpoint was interacted with. Custom verification methods
+    specific to CRUD interactions are also provided.
     """
 
-    _resource_path: str
-    delegate: CrudBase
-
-    def __init__(self, delegate: Optional[CrudBase] = None, **kwargs: Any):
+    def __init__(self, client: Client, resource_path: str = "/test", datamodel: Optional[Type[T]] = None, **kwargs: Any):
         """
         Initialize a CrudSpy instance.
 
         Args:
-            delegate: Optional delegate Crud to forward calls to
-            **kwargs: Additional keyword arguments to pass to the Crud constructor
-
-        Raises:
-            ValueError: If client is not provided
+            client: Client instance (real, spy, or mock) for the underlying CrudBase.
+            resource_path: The resource path for the underlying CrudBase.
+            datamodel: The data model for the underlying CrudBase.
+            **kwargs: Additional keyword arguments (currently unused by CrudBase).
         """
         ...
 
-    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Any:  # Return type kept as Any for spy simplicity
+    # --- CrudBase Interface Methods (for type checking) ---
+    # These methods are implemented via ClassSpy or __getattr__ in the .py file,
+    # but are declared here to satisfy the CrudBase interface for type checkers.
+
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[List[T], ApiResponse[List[T]]]:
         """
-        Record and forward a call to list.
+        Spy on a list operation.
 
         Args:
-            **kwargs: Keyword arguments for the list operation
+            parent_id: Optional parent resource ID.
+            params: Optional query parameters.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            List of resources or ApiResponse (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def get(self, id: Any, **kwargs: Any) -> Any:
+    def get(self, resource_id: str, parent_id: Optional[str] = None) -> T:
         """
-        Record and forward a call to get.
+        Spy on a get operation.
 
         Args:
-            id: Resource ID
-            **kwargs: Keyword arguments for the get operation
+            resource_id: ID of the resource to retrieve.
+            parent_id: Optional parent resource ID.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            The retrieved resource (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Any:  # Return type kept as Any
+    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> T:
         """
-        Record and forward a call to create.
+        Spy on a create operation.
 
         Args:
-            data: Resource data
-            **kwargs: Keyword arguments for the create operation
+            data: Data for the new resource.
+            parent_id: Optional parent resource ID.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            The created resource (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def update(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Any:  # Return type kept as Any
+    def update(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> T:
         """
-        Record and forward a call to update.
+        Spy on an update operation.
 
         Args:
-            id: Resource ID
-            data: Updated resource data
-            **kwargs: Keyword arguments for the update operation
+            resource_id: ID of the resource to update.
+            data: Updated data for the resource.
+            parent_id: Optional parent resource ID.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            The updated resource (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def delete(self, id: Any, **kwargs: Any) -> Any:
+    def delete(self, resource_id: str, parent_id: Optional[str] = None) -> None:
         """
-        Record and forward a call to delete.
+        Spy on a delete operation.
 
         Args:
-            id: Resource ID
-            **kwargs: Keyword arguments for the delete operation
+            resource_id: ID of the resource to delete.
+            parent_id: Optional parent resource ID.
+        """
+        ...
+
+    def bulk_create(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> List[T]:
+        """
+        Spy on a bulk_create operation.
+
+        Args:
+            data: List of data for the new resources.
+            parent_id: Optional parent resource ID.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            List of created resources (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def bulk_create(self, data: List[Any], **kwargs: Any) -> Any:
+    def bulk_update(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> List[T]:
         """
-        Record and forward a call to bulk_create.
+        Spy on a bulk_update operation.
 
         Args:
-            data: List of resource data
-            **kwargs: Keyword arguments for the bulk_create operation
+            data: List of updated data for the resources (must include identifiers).
+            parent_id: Optional parent resource ID.
 
         Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            List of updated resources (typically mocked or from a wrapped CrudBase).
         """
         ...
 
-    def bulk_update(self, data: List[Dict[str, Any]], **kwargs: Any) -> Any:
+    def bulk_delete(self, ids: List[str], parent_id: Optional[str] = None) -> None:
         """
-        Record and forward a call to bulk_update.
+        Spy on a bulk_delete operation.
 
         Args:
-            data: List of resource data with IDs
-            **kwargs: Keyword arguments for the bulk_update operation
-
-        Returns:
-            Result from the delegate Crud
-
-        Raises:
-            Any exception raised by the delegate Crud
+            ids: List of IDs of the resources to delete.
+            parent_id: Optional parent resource ID.
         """
         ...
 
-    def bulk_delete(self, ids: List[Any], **kwargs: Any) -> Any:
+    # --- Custom Verification Methods ---
+
+    def verify_resource_created(self, data: Any) -> None:
         """
-        Record and forward a call to bulk_delete.
+        Verify that a resource was created with specific data via the `create` method.
 
         Args:
-            ids: List of resource IDs
-            **kwargs: Keyword arguments for the bulk_delete operation
-
-        Returns:
-            Result from the delegate Crud
+            data: Expected resource data (first argument to `create`).
 
         Raises:
-            Any exception raised by the delegate Crud
-        """
-        ...
-    # Helper methods for verification
-
-    def assert_resource_created(self, data: Any) -> None:
-        """
-        Assert that a resource was created with specific data.
-
-        Args:
-            data: Expected resource data
-
-        Raises:
-            AssertionError: If the resource was not created with the specified data
+            VerificationError: If `create` was not called with the specified data.
         """
         ...
 
-    def assert_resource_updated(self, id: Any, data: Any) -> None:
+    def verify_resource_updated(self, id: Any, data: Any) -> None:
         """
-        Assert that a resource was updated with specific data.
+        Verify that a resource was updated with a specific ID and data via the `update` method.
 
         Args:
-            id: Resource ID
-            data: Expected updated resource data
+            id: Expected resource ID (first argument to `update`).
+            data: Expected updated resource data (second argument to `update`).
 
         Raises:
-            AssertionError: If the resource was not updated with the specified data
+            VerificationError: If `update` was not called with the specified ID and data.
         """
         ...
 
-    def assert_resource_deleted(self, id: Any) -> None:
+    def verify_resource_deleted(self, id: Any) -> None:
         """
-        Assert that a resource was deleted.
+        Verify that a resource was deleted with a specific ID via the `delete` method.
 
         Args:
-            id: Resource ID
+            id: Expected resource ID (first argument to `delete`).
 
         Raises:
-            AssertionError: If the resource was not deleted
+            VerificationError: If `delete` was not called with the specified ID.
         """
+        ...
+
+    # --- Magic Methods ---
+
+    def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the spy wrapper, base class, or target CrudBase."""
         ...
