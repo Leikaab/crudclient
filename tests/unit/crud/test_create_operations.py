@@ -9,6 +9,8 @@ import pytest
 
 # Import the custom ValidationError, which wraps the Pydantic one
 from crudclient.exceptions import ModelConversionError, ValidationError
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
@@ -31,7 +33,10 @@ def test_create_operation_success_with_model(test_crud: TestCrud, mock_client: M
 
     # WHEN
     result = test_crud.create(data=SAMPLE_MODEL)
-    mock_client.post.assert_called_once_with("test-resources", json=SAMPLE_PAYLOAD)
+
+    # THEN
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "post", "test-resources", json=SAMPLE_PAYLOAD)
     assert result == SAMPLE_MODEL
     assert isinstance(result, TestModel)
 
@@ -47,7 +52,10 @@ def test_create_operation_success_with_dict(test_crud: TestCrud, mock_client: Ma
 
     # WHEN
     result = test_crud.create(data=SAMPLE_PAYLOAD)
-    mock_client.post.assert_called_once_with("test-resources", json=SAMPLE_PAYLOAD)
+
+    # THEN
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "post", "test-resources", json=SAMPLE_PAYLOAD)
     assert result == SAMPLE_MODEL
 
 
@@ -63,7 +71,8 @@ def test_create_operation_with_parent_id(test_crud: TestCrud, mock_client: Magic
     # WHEN
     result = test_crud.create(data=SAMPLE_MODEL, parent_id="parent123")
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
-    # mock_client.post.assert_called_once_with("parents/parent123/test-resources", json=SAMPLE_PAYLOAD) # Example assertion
+    # translate_mock_calls_for_verifier(mock_client)
+    # Verifier.verify_called_once_with(mock_client, "post", "parents/parent123/test-resources", json=SAMPLE_PAYLOAD) # Example assertion
     assert result == SAMPLE_MODEL
 
 
