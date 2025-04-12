@@ -5,9 +5,18 @@ Global fixtures for both unit and integration tests.
 import json
 import time
 from contextlib import contextmanager
+
+# Removed incorrect imports for internal types: LogCaptureHandler, Config
+from typing import (  # Ensure List and Type are imported
+    Any,
+    List,
+    Optional,
+)
 from unittest.mock import Mock
 
 import pytest
+from pytest import Item  # Added import
+from xdist.scheduler import LoadScheduling  # Moved import to top level
 
 # Consider adding 'import xml.etree.ElementTree as ET' if XML parsing/mocking is needed
 
@@ -165,33 +174,73 @@ def timer():
     return ExecutionTimer()
 
 
-# Keep existing xdist scheduler configuration
-def pytest_xdist_make_scheduler(config, log):
+# TYPE_CHECKING block is no longer strictly necessary for LoadScheduling,
+# but keep Mark for type hints if used elsewhere or for clarity.
+    # Keep existing xdist scheduler configuration
+    # --- Custom xdist Scheduler ---
+
+    # Use Any for config and log types for robustness against internal API changes
+    # Cache items by nodeid during collection
+    # Use Any for config and items types for robustness against internal API changes
+
+
+def pytest_collection_modifyitems(session: Any, config: Any, items: List[Item]):
+    """
+    Hook to modify the list of collected items.
+    We use it to cache items by their nodeid on the config object.
+    """
+    config._nodeid_to_item = {item.nodeid: item for item in items}
+    # Optional: Log the number of items cached
+    # log = logging.getLogger(__name__)
+    # log.debug(f"Cached {len(config._nodeid_to_item)} items by nodeid.")
+
+
+# Define the custom scheduler class at the module level
+class CustomScheduling(LoadScheduling):
+    """
+    Custom xdist scheduler that groups tests marked with '@pytest.mark.no_parallel'
+    onto a single worker node for sequential execution, while distributing
+    other tests normally using file-based scoping.
+    """
+
+    # Store config for later access in _split_scope
+    # Use Any for config and log types for robustness against internal API changes
+    def __init__(self, config: Any, log: Any):
+        super().__init__(config, log)
+        self.config = config  # Store config instance
+        # Removed collection processing from __init__ as collection is not ready yet
+
+    def _split_scope(self, nodeid: str) -> str:
+        """Determine scheduling scope based on 'no_parallel' marker."""
+        # Retrieve the item from the cache created by pytest_collection_modifyitems
+        # Ensure the cache exists before trying to access it
+        item = getattr(self.config, '_nodeid_to_item', {}).get(nodeid)
+
+        # Check if the item exists and has the 'no_parallel' marker
+        if item and item.get_closest_marker("no_parallel"):
+            # Assign to a dedicated scope for sequential execution
+            return "no_parallel_group"
+
+        # Fallback to default file-based scheduling logic if no 'no_parallel' marker.
+        # Replicating default LoadScheduling behavior (scoping by file)
+        # by extracting the file path from the nodeid.
+        # This avoids the super() call that Pylance struggles with.
+        return nodeid.split("::")[0]
+
+# Scheduler factory function
+# Use Any for config and log types for robustness against internal API changes
+
+
+def pytest_xdist_make_scheduler(config: Any, log: Any) -> Optional[LoadScheduling]:
     """Custom scheduler for pytest-xdist to handle 'no_parallel' marker."""
     # Ensure xdist is installed or handle ImportError
-    try:
-        from xdist.scheduler import LoadScheduling
-    except ImportError:
+    # Check if LoadScheduling was successfully imported (i.e., xdist is installed)
+    # The import is now at the top level, but we still need to handle missing xdist.
+    # We can check if the name 'LoadScheduling' exists in globals.
+    if "LoadScheduling" not in globals():
         # If xdist is not installed, don't attempt to customize scheduling
-        return None  # Or potentially raise a warning/error if xdist is expected
+        # log object type and methods are not guaranteed, removed logging call
+        return None
 
-    class CustomScheduling(LoadScheduling):
-        def _split_scope(self, nodeid):
-            # This logic might need refinement based on how markers are accessed
-            # during scheduling in your specific pytest/xdist version.
-            # A common way is to access markers via the collected items.
-            # This simplified check looks for the marker name in the node ID string.
-            if "[no_parallel]" in nodeid or "::no_parallel" in nodeid:  # Adjust marker check as needed
-                # Group tests marked with no_parallel to run sequentially on one worker
-                return "no_parallel_group"
-
-            # Fallback to default scheduling logic
-            # Explicitly specify the class and instance for super() to help type checkers
-            return super(CustomScheduling, self)._split_scope(nodeid)  # type: ignore[attr-defined]
-
-        # Note: The original code had a complex way to access markers via config.hook.
-        # Accessing markers directly from nodeid or collected items is usually preferred.
-        # If the simple string check above doesn't work, you might need to investigate
-        # how to access item markers reliably within the scheduler context.
-
+    # Instantiate and return the custom scheduler (now defined at top level)
     return CustomScheduling(config, log)

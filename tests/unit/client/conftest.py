@@ -21,6 +21,7 @@ class MockBearerAuthConfig(ClientConfig):
     def __init__(self):
         super().__init__(hostname="https://api.example.com", version="v1")
         self.auth_strategy = BearerAuth(token="supersecret")
+        self.retries = 0
 
 
 class MockBasicAuthConfig(ClientConfig):

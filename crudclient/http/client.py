@@ -34,7 +34,7 @@ class HttpClient:
         self.request_formatter = request_formatter or RequestFormatter()
         self.response_handler = response_handler or ResponseHandler()
         self.error_handler = error_handler or ErrorHandler()
-        self.retry_handler = retry_handler or RetryHandler()
+        self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
 
     def _validate_request_params(
         self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool

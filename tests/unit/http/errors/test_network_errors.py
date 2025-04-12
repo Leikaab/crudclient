@@ -32,6 +32,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Connection refused" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_connection_reset_error(self, http_client, mock_request):
         """
         Test handling of connection reset errors.
@@ -50,6 +51,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Connection reset" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_timeout_error(self, http_client, mock_request):
         """
         Test handling of timeout errors.
@@ -68,6 +70,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "timed out" in str(excinfo.value).lower()
 
+    @pytest.mark.no_parallel
     def test_connect_timeout_error(self, http_client, mock_request):
         """
         Test handling of connection timeout errors.
@@ -122,6 +125,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Name or service not known" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_host_not_found_error(self, http_client, mock_request):
         """
         Test handling of host not found errors.
@@ -140,6 +144,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "No such host is known" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_proxy_error(self, http_client, mock_request):
         """
         Test handling of proxy errors.
@@ -158,6 +163,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Proxy" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_ssl_error(self, http_client, mock_request):
         """
         Test handling of SSL/TLS errors.
@@ -176,6 +182,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "SSL" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_network_unreachable_error(self, http_client, mock_request):
         """
         Test handling of network unreachable errors.
@@ -194,6 +201,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Network is unreachable" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_socket_timeout_error(self, http_client, mock_request):
         """
         Test handling of socket timeout errors.

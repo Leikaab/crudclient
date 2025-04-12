@@ -38,6 +38,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "Connection refused" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_client_handles_timeout(self, client, mock_request):
         """Test that the client handles timeouts correctly."""
         # Arrange
@@ -51,6 +52,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "Request timed out" in str(excinfo.value)
 
+    @pytest.mark.no_parallel
     def test_client_handles_ssl_error(self, client, mock_request):
         """Test that the client handles SSL errors correctly."""
         # Arrange
