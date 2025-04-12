@@ -24,12 +24,12 @@ Consider moving common constants (SAMPLE_PAYLOAD, etc.) to conftest.py.
 # from pydantic import ValidationError # Potentially needed by TestModel if constants stay
 # from crudclient.exceptions import AuthenticationError, CrudClientError, InvalidResponseError, ModelConversionError, NotFoundError # No longer needed if no tests here
 
-from .conftest import TestModel  # Keep if constants use TestModel
+from .conftest import BaseTestModel  # Keep if constants use BaseTestModel
 
 # Sample data (Consider moving to conftest.py)
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
+SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 SAMPLE_LIST_PAYLOAD = [{"id": 1, "name": "Resource 1"}, {"id": 2, "name": "Resource 2"}]
-SAMPLE_MODEL_LIST = [TestModel(**item) for item in SAMPLE_LIST_PAYLOAD]  # type: ignore[arg-type]
+SAMPLE_MODEL_LIST = [BaseTestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
 
 # --- All test functions have been moved to separate files ---

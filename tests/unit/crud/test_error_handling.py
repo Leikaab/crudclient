@@ -16,19 +16,22 @@ from crudclient.exceptions import (
     NotFoundError,
 )
 
-from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
+from .conftest import (  # Import fixtures/classes from conftest
+    BaseTestCrud,
+    BaseTestModel,
+)
 
 # Removed incorrect ExceptionInfo import
 
 
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
+SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 
 
 # === Error Handling Tests (Generic Client Errors) ===
 
 
-def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock):
+def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client raising network errors
     WHEN CRUD operations are called
@@ -37,11 +40,11 @@ def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock
     # GIVEN
     mock_client.get.side_effect = ConnectionError("Network issue")
     with pytest.raises(ConnectionError):
-        test_crud.list()
+        base_test_crud.list()
 
     mock_client.post.side_effect = TimeoutError("Request timed out")
     with pytest.raises(TimeoutError):
-        test_crud.create(data=SAMPLE_PAYLOAD)
+        base_test_crud.create(data=SAMPLE_PAYLOAD)
 
 
 # === API Error Handling Tests (4xx/5xx) ===
@@ -60,7 +63,7 @@ def test_crud_operation_client_error(test_crud: TestCrud, mock_client: MagicMock
     ],
 )
 def test_crud_operation_client_error_4xx(
-    test_crud: TestCrud,
+    base_test_crud: BaseTestCrud,
     mock_client: MagicMock,
     operation_name: str,
     operation_args: dict,
@@ -99,7 +102,7 @@ def test_crud_operation_client_error_4xx(
 
     client_method.side_effect = error  # Mock the http client method to raise the error
 
-    operation_func = getattr(test_crud, operation_name)
+    operation_func = getattr(base_test_crud, operation_name)
     with pytest.raises(expected_exception) as exc_info:
         operation_func(**operation_args)
     assert exc_info.value is error  # Check if the original exception is raised
@@ -117,7 +120,7 @@ def test_crud_operation_client_error_4xx(
         ("custom_action", {"action": "test-action", "method": "post"}),
     ],
 )
-def test_crud_operation_server_error_5xx(test_crud: TestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict):
+def test_crud_operation_server_error_5xx(base_test_crud: BaseTestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict):
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters
     WHEN operations that result in 5xx errors are called
@@ -148,7 +151,7 @@ def test_crud_operation_server_error_5xx(test_crud: TestCrud, mock_client: Magic
 
     client_method.side_effect = error  # Mock the http client method to raise the error
 
-    operation_func = getattr(test_crud, operation_name)
+    operation_func = getattr(base_test_crud, operation_name)
     with pytest.raises(CrudClientError) as exc_info:  # Expect base CrudClientError for 5xx
         operation_func(**operation_args)
     assert exc_info.value is error  # Check if the original exception is raised

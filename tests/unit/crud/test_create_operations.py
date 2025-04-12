@@ -12,17 +12,20 @@ from crudclient.exceptions import ModelConversionError, ValidationError
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
-from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
+from .conftest import (  # Import fixtures/classes from conftest
+    BaseTestCrud,
+    BaseTestModel,
+)
 
 # Sample data (Consider moving to conftest.py later if shared across more files)
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = TestModel(**SAMPLE_PAYLOAD)  # type: ignore[arg-type]
+SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 
 
 # === Create Operation Tests ===
 
 
-def test_create_operation_success_with_model(test_crud: TestCrud, mock_client: MagicMock):
+def test_create_operation_success_with_model(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance, a mocked client, and a model instance
     WHEN the create operation is called with the model
@@ -32,16 +35,16 @@ def test_create_operation_success_with_model(test_crud: TestCrud, mock_client: M
     mock_client.post.return_value = SAMPLE_PAYLOAD
 
     # WHEN
-    result = test_crud.create(data=SAMPLE_MODEL)
+    result = base_test_crud.create(data=SAMPLE_MODEL)
 
     # THEN
     translate_mock_calls_for_verifier(mock_client)
     Verifier.verify_called_once_with(mock_client, "post", "test-resources", json=SAMPLE_PAYLOAD)
     assert result == SAMPLE_MODEL
-    assert isinstance(result, TestModel)
+    assert isinstance(result, BaseTestModel)
 
 
-def test_create_operation_success_with_dict(test_crud: TestCrud, mock_client: MagicMock):
+def test_create_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance, a mocked client, and a dictionary
     WHEN the create operation is called with the dictionary
@@ -51,7 +54,7 @@ def test_create_operation_success_with_dict(test_crud: TestCrud, mock_client: Ma
     mock_client.post.return_value = SAMPLE_PAYLOAD
 
     # WHEN
-    result = test_crud.create(data=SAMPLE_PAYLOAD)
+    result = base_test_crud.create(data=SAMPLE_PAYLOAD)
 
     # THEN
     translate_mock_calls_for_verifier(mock_client)
@@ -59,7 +62,7 @@ def test_create_operation_success_with_dict(test_crud: TestCrud, mock_client: Ma
     assert result == SAMPLE_MODEL
 
 
-def test_create_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
+def test_create_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the create operation is called with a model and parent ID
@@ -69,14 +72,14 @@ def test_create_operation_with_parent_id(test_crud: TestCrud, mock_client: Magic
     mock_client.post.return_value = SAMPLE_PAYLOAD
 
     # WHEN
-    result = test_crud.create(data=SAMPLE_MODEL, parent_id="parent123")
+    result = base_test_crud.create(data=SAMPLE_MODEL, parent_id="parent123")
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
     # translate_mock_calls_for_verifier(mock_client)
     # Verifier.verify_called_once_with(mock_client, "post", "parents/parent123/test-resources", json=SAMPLE_PAYLOAD) # Example assertion
     assert result == SAMPLE_MODEL
 
 
-def test_create_operation_validation_error(test_crud: TestCrud, mock_client: MagicMock):
+def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and invalid data (non-integer ID)
     WHEN the create operation is called with the invalid data
@@ -88,10 +91,10 @@ def test_create_operation_validation_error(test_crud: TestCrud, mock_client: Mag
     # WHEN / THEN
     # Pydantic validation happens in _dump_data before the client call
     with pytest.raises(ValidationError):
-        test_crud.create(data=invalid_data)
+        base_test_crud.create(data=invalid_data)
 
 
-def test_create_operation_model_conversion_error(test_crud: TestCrud, mock_client: MagicMock):
+def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN the create operation is called
@@ -102,18 +105,18 @@ def test_create_operation_model_conversion_error(test_crud: TestCrud, mock_clien
 
     # WHEN / THEN
     with pytest.raises(ModelConversionError):
-        test_crud.create(data=SAMPLE_PAYLOAD)
+        base_test_crud.create(data=SAMPLE_PAYLOAD)
 
 
-def test_create_operation_action_not_allowed(test_crud: TestCrud):
+def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud):
     """
     GIVEN a TestCrud instance with 'create' action not in allowed_actions
     WHEN the create operation is called
     THEN it should raise a ValueError.
     """
     # GIVEN
-    original_actions = test_crud.allowed_actions
-    test_crud.allowed_actions = ["list", "read", "update", "destroy"]  # Exclude 'create'
+    original_actions = base_test_crud.allowed_actions
+    base_test_crud.allowed_actions = ["list", "read", "update", "destroy"]  # Exclude 'create'
     with pytest.raises(ValueError, match="Create action not allowed"):
-        test_crud.create(data=SAMPLE_PAYLOAD)
-    test_crud.allowed_actions = original_actions  # Restore
+        base_test_crud.create(data=SAMPLE_PAYLOAD)
+    base_test_crud.allowed_actions = original_actions  # Restore

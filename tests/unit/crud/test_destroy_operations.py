@@ -10,7 +10,7 @@ import pytest
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
-from .conftest import TestCrud  # Import fixtures/classes from conftest
+from .conftest import BaseTestCrud  # Import fixtures/classes from conftest
 
 # No sample data needed for destroy tests usually
 
@@ -18,28 +18,28 @@ from .conftest import TestCrud  # Import fixtures/classes from conftest
 # === Destroy Operation Tests ===
 
 
-def test_destroy_operation_success(test_crud: TestCrud, mock_client: MagicMock):
+def test_destroy_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN the destroy operation is called with a resource ID
     THEN it should call the client's delete method with the correct URL.
     """
     # GIVEN / WHEN
-    test_crud.destroy(resource_id="1")
+    base_test_crud.destroy(resource_id="1")
 
     # THEN
     translate_mock_calls_for_verifier(mock_client)
     Verifier.verify_called_once_with(mock_client, "delete", "test-resources/1")
 
 
-def test_destroy_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
+def test_destroy_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the destroy operation is called with a resource ID and parent ID
     THEN it should use the correct nested URL path.
     """
     # GIVEN / WHEN
-    test_crud.destroy(resource_id="1", parent_id="parent123")
+    base_test_crud.destroy(resource_id="1", parent_id="parent123")
 
     # THEN
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
@@ -47,15 +47,15 @@ def test_destroy_operation_with_parent_id(test_crud: TestCrud, mock_client: Magi
     # Verifier.verify_called_once_with(mock_client, "delete", "parents/parent123/test-resources/1") # Example assertion
 
 
-def test_destroy_operation_action_not_allowed(test_crud: TestCrud):
+def test_destroy_operation_action_not_allowed(base_test_crud: BaseTestCrud):
     """
     GIVEN a TestCrud instance with 'destroy' action not in allowed_actions
     WHEN the destroy operation is called
     THEN it should raise a ValueError.
     """
     # GIVEN
-    original_actions = test_crud.allowed_actions
-    test_crud.allowed_actions = ["list", "create", "read", "update"]  # Exclude 'destroy'
+    original_actions = base_test_crud.allowed_actions
+    base_test_crud.allowed_actions = ["list", "create", "read", "update"]  # Exclude 'destroy'
     with pytest.raises(ValueError, match="Destroy action not allowed"):
-        test_crud.destroy(resource_id="1")
-    test_crud.allowed_actions = original_actions  # Restore
+        base_test_crud.destroy(resource_id="1")
+    base_test_crud.allowed_actions = original_actions  # Restore

@@ -12,18 +12,18 @@ from crudclient.crud.base import Crud
 from crudclient.testing.simple_mock import SimpleMockClient
 
 
-class TestModel(BaseModel):
+class BaseTestModel(BaseModel):
     """Test model for CRUD operations."""
 
     id: int
     name: str
 
 
-class TestCrud(Crud[TestModel]):
+class BaseTestCrud(Crud[BaseTestModel]):
     """Test CRUD class."""
 
     _resource_path = "test-resources"
-    _datamodel = TestModel
+    _datamodel = BaseTestModel
 
 
 # Define a dummy Parent Crud class for nesting tests
@@ -55,9 +55,9 @@ def mock_client():
 
 
 @pytest.fixture
-def test_crud(mock_client):
-    """Return a TestCrud instance with a mock client."""
-    return TestCrud(mock_client)
+def base_test_crud(mock_client):
+    """Return a BaseTestCrud instance with a mock client."""
+    return BaseTestCrud(mock_client)
 
 
 @pytest.fixture
@@ -67,9 +67,9 @@ def simple_mock_client():
 
 
 @pytest.fixture
-def test_crud_with_simple_mock(simple_mock_client):
-    """Return a TestCrud instance with a SimpleMockClient."""
-    return TestCrud(simple_mock_client)
+def base_test_crud_with_simple_mock(simple_mock_client):
+    """Return a BaseTestCrud instance with a SimpleMockClient."""
+    return BaseTestCrud(simple_mock_client)
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def parent_crud(mock_client):
 
 
 @pytest.fixture
-def nested_test_crud(mock_client, parent_crud):
-    """Fixture for a TestCrud instance nested under ParentCrud."""
-    # Instantiate TestCrud with parent_crud as the parent
-    return TestCrud(mock_client, parent=parent_crud)
+def nested_base_test_crud(mock_client, parent_crud):
+    """Fixture for a BaseTestCrud instance nested under ParentCrud."""
+    # Instantiate BaseTestCrud with parent_crud as the parent
+    return BaseTestCrud(mock_client, parent=parent_crud)
