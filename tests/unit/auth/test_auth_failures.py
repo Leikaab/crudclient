@@ -4,10 +4,11 @@ Tests for general authentication setup failure handling in the crudclient librar
 
 import pytest
 
+from crudclient.auth.custom import CustomAuth
 from crudclient.client import Client
 
-# Import fixtures from conftest.py - Ensure all needed fixtures are imported
-from .conftest import MockBearerAuthConfig
+# Import fixtures from conftest.py - Fixtures are typically auto-discovered by pytest
+from .conftest import MockBearerAuthConfig  # Needed for test_auth_setup_failure
 
 
 class TestAuthFailures:
@@ -35,16 +36,42 @@ class TestAuthFailures:
         # Check that the exception contains the error details
         assert "Auth setup failed" in str(excinfo.value)
 
-    def test_auth_param_setup_failure(self, mock_request, mocker):
-        """Test handling of authentication parameter setup failures."""
+    def test_auth_param_setup_failure(self, mock_request, create_mock_client_config):
+        """
+        Test that exceptions during auth parameter setup are propagated.
 
+        Verifies that if an auth strategy's parameter setup (e.g., param_callback)
+        raises an exception, it happens before any network request and is
+        correctly raised by the client operation.
+        """
         # Arrange
-        # Create a custom auth mock with a failing param callback
-        def header_callback():
-            return {"X-Custom-Auth": "custom_value"}
+        exception_message = "Failed during auth param setup"
 
-        def param_callback():
-            return {"key": "value"}
+        def failing_param_callback():
+            """Simulates a failure during parameter preparation."""
+            raise ValueError(exception_message)
 
-        # Skip this test for now
-        pytest.skip("Test needs to be updated to work with the new testing module")
+        def dummy_header_callback():
+            """A placeholder header callback, not expected to be called."""
+            return {"X-Dummy-Header": "dummy_value"}
+
+        # Instantiate CustomAuth with the failing parameter callback
+        custom_auth = CustomAuth(
+            header_callback=dummy_header_callback,
+            param_callback=failing_param_callback,
+        )
+
+        # Configure a client with this auth strategy
+        # Configure a client using the factory to inject the custom auth strategy
+        config = create_mock_client_config(auth_strategy=custom_auth)
+        client = Client(config)
+
+        # Act & Assert
+        # Expect the ValueError from failing_param_callback to be raised
+        with pytest.raises(ValueError, match=exception_message) as excinfo:
+            client.get("/some/path")  # Attempting a request should trigger param setup
+
+        # Ensure the correct exception was raised (redundant with match, but good practice)
+        assert exception_message in str(excinfo.value)
+        # Ensure no request was actually sent (error happens before request)
+        assert not mock_request.called

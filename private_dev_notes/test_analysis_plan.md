@@ -74,7 +74,7 @@ Progress will be tracked to ensure all identified items are addressed. Choose on
 
 *   [x] `tests/unit/auth/test_custom_auth_failures.py::test_custom_auth_param_callback_failure` - Fixed (underlying issue in `crudclient/http/client.py` resolved, test enabled).
 *   [x] `tests/unit/auth/test_apikey_auth_failures.py:32` - Fixed (Test updated and enabled).
-*   [ ] `tests/unit/auth/test_auth_failures.py:50` - To Do (Needs update for new testing module).
+*   [x] `tests/unit/auth/test_auth_failures.py:50` - Fixed (Test updated and enabled).
 
 ## 6. Timeline/Prioritization (Optional)
 
