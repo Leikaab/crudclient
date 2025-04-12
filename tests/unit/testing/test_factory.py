@@ -12,42 +12,12 @@ from crudclient.config import ClientConfig
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient
 from crudclient.testing.factory import MockClientFactory
-from crudclient.testing.spy.method_call import MethodCall
 from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 
 class TestMockClientFactory:
     """Tests for the MockClientFactory class."""
-
-    def _translate_mock_calls_for_verifier(self, mock_target: MagicMock) -> None:
-        """
-        Translate unittest.mock.MagicMock calls to the format expected by Verifier.
-
-        This helper function reads the mock_calls attribute of a MagicMock instance,
-        converts each call to a MethodCall object, and assigns the resulting list
-        to the mock's calls attribute, making it compatible with the Verifier class.
-
-        Args:
-            mock_target: The MagicMock instance to adapt for use with Verifier
-        """
-        translated_calls = []
-
-        for call_obj in mock_target.mock_calls:
-            # Extract method name, args, and kwargs from the mock call
-            method_name = call_obj[0]
-            args = call_obj[1]
-            kwargs = call_obj[2]
-
-            # Create a MethodCall object and append it to the list
-            method_call = MethodCall(
-                method_name=method_name,
-                args=args,
-                kwargs=kwargs
-            )
-            translated_calls.append(method_call)
-
-        # Assign the translated calls to the mock's calls attribute
-        mock_target.calls = translated_calls
 
     def test_create_default(self):
         """Test create method with default parameters."""
@@ -179,7 +149,7 @@ class TestMockClientFactory:
         )
 
         # Translate mock calls to the format expected by Verifier
-        self._translate_mock_calls_for_verifier(mock_client)
+        translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(
@@ -197,7 +167,7 @@ class TestMockClientFactory:
         MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
         # Translate mock calls to the format expected by Verifier
-        self._translate_mock_calls_for_verifier(mock_client)
+        translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(
@@ -221,7 +191,7 @@ class TestMockClientFactory:
         )
 
         # Translate mock calls to the format expected by Verifier
-        self._translate_mock_calls_for_verifier(mock_client)
+        translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(

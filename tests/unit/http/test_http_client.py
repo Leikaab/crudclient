@@ -6,6 +6,8 @@ from crudclient.http.request import RequestFormatter
 from crudclient.http.response import ResponseHandler
 from crudclient.http.retry import RetryHandler
 from crudclient.http.session import SessionManager
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 # Import fixtures from conftest.py
 
@@ -149,4 +151,5 @@ class TestHttpClient:
         http_client.close()
 
         # Assert
-        mock_close.assert_called_once()
+        translate_mock_calls_for_verifier(mock_close)
+        Verifier.verify_call_count(mock_close, "", 1)
