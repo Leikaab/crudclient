@@ -27,7 +27,7 @@ The `crudclient.testing` module provides a comprehensive testing framework for a
 ### Basic Mock Client
 
 ```python
-from crudclient.testing import MockClientFactory
+from crudclient.testing import MockClientFactory, Verifier
 
 # Create a mock client
 mock_client = MockClientFactory.create(base_url="https://api.example.com")
@@ -45,8 +45,8 @@ response = mock_client.get("/users/123")
 assert response.status_code == 200
 assert response.json() == {"id": "123", "name": "Test User"}
 
-# Verify the underlying HTTP client mock was called (if MockClient was given one)
-# Example: Verifier.verify_called_once_with(mock_http_layer, "request", method="GET", path="/users/123")
+# Verify the call to the mock client instance
+Verifier.verify_called_with(mock_client, "get", path="/users/123")
 ```
 
 ### Using the FakeAPI
