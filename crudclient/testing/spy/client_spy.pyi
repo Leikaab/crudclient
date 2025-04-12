@@ -40,7 +40,6 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
             **kwargs: Additional keyword arguments to pass to the Client constructor.
         """
         ...
-
     # --- Client Interface Methods (for type checking) ---
     # These methods are implemented via __getattr__ and ClassSpy in the .py file,
     # but are declared here to satisfy the Client interface for type checkers.
@@ -133,7 +132,6 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
             API response (typically mocked or from a wrapped client)
         """
         ...
-
     # --- Custom Verification Methods ---
 
     def verify_endpoint_called(self, endpoint: str) -> None:
@@ -175,7 +173,6 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
                                with the specified method
         """
         ...
-
     # --- Magic Methods ---
 
     def __getattr__(self, name: str) -> Any:

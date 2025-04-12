@@ -30,7 +30,6 @@ from crudclient.testing.types import Headers, ResponseData, StatusCode
 
 # --- Helper Functions ---
 
-
 def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     Creates API response patterns based on the specified API type.
@@ -44,7 +43,6 @@ def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     """
     ...
 
-
 def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> None:
     """
     Adds common error response configurations to a MockClient.
@@ -55,7 +53,6 @@ def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> N
     """
     ...
 
-
 def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyAuthMock, CustomAuthMock, OAuthMock], config: Dict[str, Any]) -> None:
     """
     Configures advanced behaviors for an authentication mock object.
@@ -65,7 +62,6 @@ def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyA
         config: Dictionary containing configuration options
     """
     ...
-
 
 def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs: Dict[str, Any]) -> None:
     """
@@ -78,7 +74,6 @@ def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs:
     ...
 
 # --- MockClientFactory ---
-
 
 class MockClientFactory:
     """
@@ -230,7 +225,6 @@ class MockClientFactory:
         ...
 
 # --- SimpleMockClient Creation ---
-
 
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
     """

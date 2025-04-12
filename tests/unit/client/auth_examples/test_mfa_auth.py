@@ -104,7 +104,7 @@ class TestMultiFactorAuthExamples:
 
         # Verify the response - extract JSON data from the response object
         assert response.status_code == 200
-        response_data = response.json() if hasattr(response, 'json') else response
+        response_data = response.json() if hasattr(response, "json") else response
         assert response_data == {"data": "sensitive info"}
 
         # Verify the second request was made with the MFA token

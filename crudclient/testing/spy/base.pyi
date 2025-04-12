@@ -4,6 +4,7 @@ Base components for the Test Spy pattern.
 This module defines the foundational `SpyBase` class, which provides the core
 functionality for recording method calls in test doubles.
 """
+
 from typing import Any, Dict, List, Optional, Tuple
 
 from .method_call import MethodCall
@@ -135,7 +136,6 @@ class SpyBase:
     def clear_calls(self) -> None:
         """Clear all recorded calls."""
         ...
-
     # Deprecated methods for backward compatibility
     def assert_called(self, method_name: str) -> None:
         """

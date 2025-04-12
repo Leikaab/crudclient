@@ -44,7 +44,6 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
             **kwargs: Additional keyword arguments (currently unused by CrudBase).
         """
         ...
-
     # --- CrudBase Interface Methods (for type checking) ---
     # These methods are implemented via ClassSpy or __getattr__ in the .py file,
     # but are declared here to satisfy the CrudBase interface for type checkers.
@@ -147,7 +146,6 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
             parent_id: Optional parent resource ID.
         """
         ...
-
     # --- Custom Verification Methods ---
 
     def verify_resource_created(self, data: Any) -> None:
@@ -186,7 +184,6 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
             VerificationError: If `delete` was not called with the specified ID.
         """
         ...
-
     # --- Magic Methods ---
 
     def __getattr__(self, name: str) -> Any:

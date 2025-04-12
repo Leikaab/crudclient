@@ -20,10 +20,8 @@ RequestBody: TypeAlias = Union[Dict[str, Any], List[Any], str, bytes, None]
 ResponseBody: TypeAlias = Union[Dict[str, Any], List[Any], str, bytes, None]
 ResponseData: TypeAlias = Dict[str, Any]
 
-
 # We're using MethodCall directly instead of a separate CallRecord Protocol
 # since MethodCall already has the required attributes
-
 
 class SpyTarget(Protocol):
     """
@@ -34,7 +32,6 @@ class SpyTarget(Protocol):
     """
 
     calls: List[MethodCall]  # Using the concrete MethodCall type to match test implementation
-
 
 # Re-export MockResponse for convenience
 __all__ = [

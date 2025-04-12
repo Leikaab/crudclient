@@ -10,6 +10,7 @@ general `Verifier` class.
 These helpers typically raise `AssertionError` upon failure, making them suitable
 for direct use in test cases (e.g., with `pytest`).
 """
+
 from typing import Any, Dict, List
 
 from .enhanced import EnhancedSpyBase
@@ -42,7 +43,6 @@ def verify_call_sequence(spy: EnhancedSpyBase, *method_names: str) -> None:
     """
     ...
 
-
 def verify_no_unexpected_calls(spy: EnhancedSpyBase, expected_methods: List[str]) -> None:
     """
     Verifies that *only* the specified methods were called on the spy, any number of times.
@@ -66,7 +66,6 @@ def verify_no_unexpected_calls(spy: EnhancedSpyBase, expected_methods: List[str]
         >>> # This would raise AssertionError: spy.unexpected_method(); verify_no_unexpected_calls(spy, ["allowed_method_1", "allowed_method_2"])
     """
     ...
-
 
 def verify_call_timing(spy: EnhancedSpyBase, method_name: str, max_duration: float) -> None:
     """
@@ -93,7 +92,6 @@ def verify_call_timing(spy: EnhancedSpyBase, method_name: str, max_duration: flo
         >>> # This would raise AssertionError: verify_call_timing(spy, "non_existent_method", 1.0)
     """
     ...
-
 
 def verify_call_arguments(spy: EnhancedSpyBase, method_name: str, expected_args: Dict[str, Any]) -> None:
     """

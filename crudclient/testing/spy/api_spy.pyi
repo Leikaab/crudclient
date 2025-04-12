@@ -44,7 +44,6 @@ class ApiSpy(EnhancedSpyBase, API):  # Inherits from EnhancedSpyBase and conform
             **kwargs: Additional keyword arguments to pass to the API constructor.
         """
         ...
-
     # --- API Interface Methods (for type checking) ---
     # These methods are implemented via ClassSpy or __getattr__ in the .py file,
     # but are declared here to satisfy the API interface for type checkers.
@@ -82,7 +81,6 @@ class ApiSpy(EnhancedSpyBase, API):  # Inherits from EnhancedSpyBase and conform
             AttributeError: If the attribute is not found.
         """
         ...
-
     # --- Custom Verification Methods ---
 
     def verify_endpoint_registered(self, name: str) -> None:

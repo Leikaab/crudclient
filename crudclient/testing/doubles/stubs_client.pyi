@@ -74,12 +74,10 @@ class StubClient(EnhancedSpyBase, Client):
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
-
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
-
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         """
         Build the full URL from endpoint or use provided URL.

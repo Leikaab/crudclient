@@ -54,12 +54,7 @@ class MockClient(EnhancedSpyBase):
     _auth_strategy: Optional[AuthStrategy]
 
     def __init__(
-        self,
-        http_client: Any,
-        base_url: Optional[str] = None,
-        config: Optional[ClientConfig] = None,
-        enable_spy: bool = False,
-        **kwargs: Any
+        self, http_client: Any, base_url: Optional[str] = None, config: Optional[ClientConfig] = None, enable_spy: bool = False, **kwargs: Any
     ) -> None:
         """
         Initialize a new MockClient.
@@ -211,7 +206,6 @@ class MockClient(EnhancedSpyBase):
             applying the authentication strategy.
         """
         ...
-
     # HTTP method implementations
 
     def _execute_http_method(
@@ -221,7 +215,7 @@ class MockClient(EnhancedSpyBase):
         headers: Optional[Headers] = None,
         params: Optional[QueryParams] = None,
         data: Optional[RequestBody] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         """
         Internal helper to execute HTTP methods, apply auth, record calls, and handle timing.
@@ -329,7 +323,6 @@ class MockClient(EnhancedSpyBase):
             The response from the mock HTTP client.
         """
         ...
-
     # Verification methods
 
     def reset(self) -> None:

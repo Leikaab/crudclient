@@ -382,9 +382,7 @@ class DataStore:
         """
         ...
 
-    def create(
-        self, collection: str, data: Dict[str, Any], skip_validation: bool = False
-    ) -> Dict[str, Any]:
+    def create(self, collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
         """
         Creates a new item in the specified collection.
 

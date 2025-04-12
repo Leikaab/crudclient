@@ -120,7 +120,6 @@ class ResponseBuilder:
         """
         ...
 
-
 __all__ = [
     "MockResponse",
     "ResponseBuilder",

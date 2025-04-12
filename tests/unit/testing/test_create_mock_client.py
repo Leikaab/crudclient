@@ -1,6 +1,7 @@
 """
 Tests for the MockClientFactory.create_mock_client method.
 """
+
 from unittest.mock import MagicMock, patch
 
 from crudclient.auth.basic import BasicAuth
@@ -112,8 +113,9 @@ class TestCreateMockClient:
 
         # Assert
         # Adapt mocks to conform to SpyTarget protocol
-        mock_create_apikey.calls = [MethodCall("__call__", (), {"api_key": "test_key",
-                                               "header_name": None, "param_name": "api_key"}, mock_apikey_auth_instance)]
+        mock_create_apikey.calls = [
+            MethodCall("__call__", (), {"api_key": "test_key", "header_name": None, "param_name": "api_key"}, mock_apikey_auth_instance)
+        ]
         mock_configure_auth.calls = [MethodCall("__call__", (mock_apikey_auth_instance, auth_config), {}, None)]
         # Use Verifier instead of unittest.mock assertions
         Verifier.verify_called_once_with(mock_create_apikey, "__call__", api_key="test_key", header_name=None, param_name="api_key")
@@ -167,13 +169,23 @@ class TestCreateMockClient:
 
         # Assert
         # Adapt mocks to conform to SpyTarget protocol
-        mock_create_oauth.calls = [MethodCall(
-            "__call__", (), {
-                "client_id": "id", "client_secret": "secret", "token_url": "url",
-                "authorize_url": None, "grant_type": "authorization_code",
-                "scope": "read write", "access_token": None, "refresh_token": None
-            }, mock_oauth_auth_instance
-        )]
+        mock_create_oauth.calls = [
+            MethodCall(
+                "__call__",
+                (),
+                {
+                    "client_id": "id",
+                    "client_secret": "secret",
+                    "token_url": "url",
+                    "authorize_url": None,
+                    "grant_type": "authorization_code",
+                    "scope": "read write",
+                    "access_token": None,
+                    "refresh_token": None,
+                },
+                mock_oauth_auth_instance,
+            )
+        ]
         mock_configure_auth.calls = [MethodCall("__call__", (mock_oauth_auth_instance, auth_config), {}, None)]
         # Use Verifier instead of unittest.mock assertions
         Verifier.verify_called_once_with(
@@ -262,7 +274,9 @@ class TestCreateMockClient:
         else:
             # Adapt mock to conform to SpyTarget protocol
             mock_client.http_client.configure_response.calls = [
-                MethodCall("__call__", (), patterns[0], None), MethodCall("__call__", (), patterns[1], None)]
+                MethodCall("__call__", (), patterns[0], None),
+                MethodCall("__call__", (), patterns[1], None),
+            ]
             # Verify call count
             Verifier.verify_call_count(mock_client.http_client.configure_response, "__call__", 2)
 

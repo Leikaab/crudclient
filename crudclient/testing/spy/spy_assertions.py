@@ -8,27 +8,23 @@ EnhancedSpyBase = Any
 class SpyAssertionsMixin:
 
     def assert_called(self: Any, method_name: str) -> None:
-        assert self.was_called(method_name), \
-            f"Expected method '{method_name}' to have been called, but it was not."
+        assert self.was_called(method_name), f"Expected method '{method_name}' to have been called, but it was not."
 
     def assert_not_called(self: Any, method_name: str) -> None:
-        assert not self.was_called(method_name), \
-            f"Expected method '{method_name}' not to have been called, but it was."
+        assert not self.was_called(method_name), f"Expected method '{method_name}' not to have been called, but it was."
 
     def assert_called_with(self: Any, method_name: str, *args: Any, **kwargs: Any) -> None:
-        assert self.was_called_with(method_name, *args, **kwargs), \
-            (f"Expected method '{method_name}' to have been called with args={args}, kwargs={kwargs}. "
-             f"Actual calls: {self.get_calls(method_name)}")  # Include actual calls for better debugging
+        assert self.was_called_with(method_name, *args, **kwargs), (
+            f"Expected method '{method_name}' to have been called with args={args}, kwargs={kwargs}. " f"Actual calls: {self.get_calls(method_name)}"
+        )  # Include actual calls for better debugging
 
     def assert_called_once(self: Any, method_name: str) -> None:
         call_count = self.get_call_count(method_name)
-        assert call_count == 1, \
-            f"Expected method '{method_name}' to be called once, but was called {call_count} times."
+        assert call_count == 1, f"Expected method '{method_name}' to be called once, but was called {call_count} times."
 
     def assert_called_times(self: Any, method_name: str, count: int) -> None:
         call_count = self.get_call_count(method_name)
-        assert call_count == count, \
-            f"Expected method '{method_name}' to be called {count} times, but was called {call_count} times."
+        assert call_count == count, f"Expected method '{method_name}' to be called {count} times, but was called {call_count} times."
 
     def assert_called_with_params_matching(self: Any, method_name: str, param_matcher: Callable[[Dict[str, Any]], bool]) -> None:
         if not self.was_called(method_name):

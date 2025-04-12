@@ -181,20 +181,13 @@ class StubClient(EnhancedSpyBase, Client):
                     method_name=method,
                     args=(url,),
                     kwargs=kwargs,
-                    result=result if 'result' in locals() else None,
+                    result=result if "result" in locals() else None,
                     exception=exception,
-                    duration=duration
+                    duration=duration,
                 )
             except UnboundLocalError:
                 # Handle case where result might not be defined
-                self._record_call(
-                    method_name=method,
-                    args=(url,),
-                    kwargs=kwargs,
-                    result=None,
-                    exception=exception,
-                    duration=duration
-                )
+                self._record_call(method_name=method, args=(url,), kwargs=kwargs, result=None, exception=exception, duration=duration)
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         import json as json_module

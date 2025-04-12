@@ -67,11 +67,7 @@ def translate_mock_calls_for_verifier(mock_target: MagicMock) -> None:
         kwargs = call_obj[2]
 
         # Create a MethodCall object and append it to the list
-        method_call = MethodCall(
-            method_name=method_name,
-            args=args,
-            kwargs=kwargs
-        )
+        method_call = MethodCall(method_name=method_name, args=args, kwargs=kwargs)
         translated_calls.append(method_call)
 
     # Assign the translated calls to the mock's calls attribute

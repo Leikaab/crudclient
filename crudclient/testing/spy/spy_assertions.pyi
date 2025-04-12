@@ -5,11 +5,11 @@ This module provides the `SpyAssertionsMixin`, which adds various `assert_*` met
 to spy classes that conform to the `SpyProtocol`. These assertions help verify
 interactions recorded by the spy during tests.
 """
+
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 
 if TYPE_CHECKING:
     from .enhanced import CallRecord  # Avoid circular import
-
 
 class SpyProtocol(Protocol):
     """
@@ -34,7 +34,6 @@ class SpyProtocol(Protocol):
     def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]:
         """Retrieve recorded calls for a specific method or all methods."""
         ...
-
 
 class SpyAssertionsMixin:
     """

@@ -317,7 +317,6 @@ class FakeCrud:
         """
         ...
 
-
 class FakeAPI(API):
     """
     A test double (fake) implementation of `crudclient.api.API` for testing.
@@ -400,7 +399,9 @@ class FakeAPI(API):
     database: DataStore
     endpoints: Dict[str, FakeCrud]
 
-    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, database: Optional[DataStore] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, database: Optional[DataStore] = None, **kwargs: Any
+    ) -> None:
         """
         Initialize a FakeAPI instance.
 

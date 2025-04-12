@@ -24,15 +24,13 @@ class TestMockClientRequestMethods:
 
         # Verify client calls
         client.assert_called_times("GET", 1)
-        client.assert_called_with("GET", "/test", headers={"Authorization": "Bearer token"},
-                                  params={"param1": "value1"}, extra_arg="extra_value")
+        client.assert_called_with("GET", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value")
 
         # Verify http_client was called correctly
         translate_mock_calls_for_verifier(http_client)
-        Verifier.verify_called_once_with(http_client, "get", "/test",
-                                         headers={"Authorization": "Bearer token"},
-                                         params={"param1": "value1"},
-                                         extra_arg="extra_value")
+        Verifier.verify_called_once_with(
+            http_client, "get", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value"
+        )
 
         # Verify request details using get_calls
         calls = client.get_calls("GET")
@@ -58,16 +56,21 @@ class TestMockClientRequestMethods:
 
         # Verify client calls
         client.assert_called_times("POST", 1)
-        client.assert_called_with("POST", "/test", headers={"Authorization": "Bearer token"},
-                                  params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value")
+        client.assert_called_with(
+            "POST", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
+        )
 
         # Verify http_client was called correctly
         translate_mock_calls_for_verifier(http_client)
-        Verifier.verify_called_once_with(http_client, "post", "/test",
-                                         headers={"Authorization": "Bearer token"},
-                                         params={"param1": "value1"},
-                                         data={"key": "value"},
-                                         extra_arg="extra_value")
+        Verifier.verify_called_once_with(
+            http_client,
+            "post",
+            "/test",
+            headers={"Authorization": "Bearer token"},
+            params={"param1": "value1"},
+            data={"key": "value"},
+            extra_arg="extra_value",
+        )
 
         # Verify request details using get_calls
         calls = client.get_calls("POST")
@@ -93,16 +96,21 @@ class TestMockClientRequestMethods:
 
         # Verify client calls
         client.assert_called_times("PUT", 1)
-        client.assert_called_with("PUT", "/test", headers={"Authorization": "Bearer token"},
-                                  params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value")
+        client.assert_called_with(
+            "PUT", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
+        )
 
         # Verify http_client was called correctly
         translate_mock_calls_for_verifier(http_client)
-        Verifier.verify_called_once_with(http_client, "put", "/test",
-                                         headers={"Authorization": "Bearer token"},
-                                         params={"param1": "value1"},
-                                         data={"key": "value"},
-                                         extra_arg="extra_value")
+        Verifier.verify_called_once_with(
+            http_client,
+            "put",
+            "/test",
+            headers={"Authorization": "Bearer token"},
+            params={"param1": "value1"},
+            data={"key": "value"},
+            extra_arg="extra_value",
+        )
 
         # Verify request details using get_calls
         calls = client.get_calls("PUT")
@@ -126,15 +134,13 @@ class TestMockClientRequestMethods:
 
         # Verify client calls
         client.assert_called_times("DELETE", 1)
-        client.assert_called_with("DELETE", "/test", headers={"Authorization": "Bearer token"},
-                                  params={"param1": "value1"}, extra_arg="extra_value")
+        client.assert_called_with("DELETE", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value")
 
         # Verify http_client was called correctly
         translate_mock_calls_for_verifier(http_client)
-        Verifier.verify_called_once_with(http_client, "delete", "/test",
-                                         headers={"Authorization": "Bearer token"},
-                                         params={"param1": "value1"},
-                                         extra_arg="extra_value")
+        Verifier.verify_called_once_with(
+            http_client, "delete", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, extra_arg="extra_value"
+        )
 
         # Verify request details using get_calls
         calls = client.get_calls("DELETE")
@@ -160,16 +166,21 @@ class TestMockClientRequestMethods:
 
         # Verify client calls
         client.assert_called_times("PATCH", 1)
-        client.assert_called_with("PATCH", "/test", headers={"Authorization": "Bearer token"},
-                                  params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value")
+        client.assert_called_with(
+            "PATCH", "/test", headers={"Authorization": "Bearer token"}, params={"param1": "value1"}, data={"key": "value"}, extra_arg="extra_value"
+        )
 
         # Verify http_client was called correctly
         translate_mock_calls_for_verifier(http_client)
-        Verifier.verify_called_once_with(http_client, "patch", "/test",
-                                         headers={"Authorization": "Bearer token"},
-                                         params={"param1": "value1"},
-                                         data={"key": "value"},
-                                         extra_arg="extra_value")
+        Verifier.verify_called_once_with(
+            http_client,
+            "patch",
+            "/test",
+            headers={"Authorization": "Bearer token"},
+            params={"param1": "value1"},
+            data={"key": "value"},
+            extra_arg="extra_value",
+        )
 
         # Verify request details using get_calls
         calls = client.get_calls("PATCH")

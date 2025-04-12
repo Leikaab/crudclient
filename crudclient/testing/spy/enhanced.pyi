@@ -54,7 +54,6 @@ class CallRecord(MethodCall):
         """Return a developer-friendly representation of the call record."""
         ...
 
-
 class EnhancedSpyBase(SpyAssertionsMixin):
     """
     Base class for enhanced spies, providing call recording and retrieval logic.
@@ -130,7 +129,6 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         """Clears all recorded calls."""
         ...
 
-
 class MethodSpy:
     """
     Wraps a single method to spy on its calls, delegating to an EnhancedSpyBase.
@@ -160,7 +158,6 @@ class MethodSpy:
         the original method.
         """
         ...
-
 
 class ClassSpy(EnhancedSpyBase):
     """
@@ -194,7 +191,6 @@ class ClassSpy(EnhancedSpyBase):
         """
         ...
 
-
 class FunctionSpy(EnhancedSpyBase):
     """
     Spies on calls to a standalone function.
@@ -221,7 +217,6 @@ class FunctionSpy(EnhancedSpyBase):
         the original function.
         """
         ...
-
 
 class EnhancedSpyFactory:
     """

@@ -4,7 +4,7 @@ from .exceptions import VerificationError
 from .types import SpyTarget  # Keep the import for documentation purposes
 
 # Type variable for target objects
-T = TypeVar('T', bound=Union[SpyTarget, object])
+T = TypeVar("T", bound=Union[SpyTarget, object])
 
 
 class Verifier:
@@ -65,9 +65,7 @@ class Verifier:
         if len(matching_calls) == 0:
             raise VerificationError(f"Method {method_name} was not called with arguments ({all_args})")
         else:
-            raise VerificationError(
-                f"Method {method_name} was called {len(matching_calls)} times with arguments ({all_args}), expected exactly once"
-            )
+            raise VerificationError(f"Method {method_name} was called {len(matching_calls)} times with arguments ({all_args}), expected exactly once")
 
     @staticmethod
     def verify_not_called(target: Union[SpyTarget, object], method_name: str) -> bool:

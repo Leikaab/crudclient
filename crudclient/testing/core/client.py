@@ -28,11 +28,11 @@ class ResponseWrapper:
     def __init__(self, response):
         self.response = response
         self.data = None
-        if hasattr(response, '_content') and response._content is not None:
-            if response.headers.get('Content-Type') == 'application/json':
-                self.data = json.loads(response._content.decode('utf-8'))
+        if hasattr(response, "_content") and response._content is not None:
+            if response.headers.get("Content-Type") == "application/json":
+                self.data = json.loads(response._content.decode("utf-8"))
             else:
-                self.data = response._content.decode('utf-8')
+                self.data = response._content.decode("utf-8")
         else:
             self.data = {}
 
@@ -155,7 +155,7 @@ class MockClient(EnhancedSpyBase):
         headers: Optional[Headers] = None,
         params: Optional[QueryParams] = None,
         data: Optional[RequestBody] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         # Helper method to execute HTTP methods with timing and recording
         request_args = self._prepare_request_args(headers, params)
@@ -175,32 +175,36 @@ class MockClient(EnhancedSpyBase):
                 response = http_method(path, **request_args, **kwargs)
 
             # Check if the response is a MagicMock object (used in some tests)
-            if hasattr(response, '__class__') and response.__class__.__name__ == 'MagicMock':
+            if hasattr(response, "__class__") and response.__class__.__name__ == "MagicMock":
                 # If it's a MagicMock, just return it
                 result = response
                 return result
 
             # Special handling for MFA challenges - return the raw response
-            if hasattr(response, 'status_code') and hasattr(response, 'headers') and \
-               response.status_code == 401 and 'WWW-Authenticate' in response.headers:
-                auth_header = response.headers['WWW-Authenticate']
-                if 'mfa_token_required' in auth_header:
+            if (
+                hasattr(response, "status_code")
+                and hasattr(response, "headers")
+                and response.status_code == 401
+                and "WWW-Authenticate" in response.headers
+            ):
+                auth_header = response.headers["WWW-Authenticate"]
+                if "mfa_token_required" in auth_header:
                     result = response
                     return result
 
             # Check if the response indicates an error
-            if hasattr(response, 'status_code') and response.status_code >= 400:
+            if hasattr(response, "status_code") and response.status_code >= 400:
                 # Extract error message from response
                 error_message = ""
-                if hasattr(response, '_content') and response._content is not None:
-                    if response.headers.get('Content-Type') == 'application/json':
-                        error_data = json.loads(response._content.decode('utf-8'))
+                if hasattr(response, "_content") and response._content is not None:
+                    if response.headers.get("Content-Type") == "application/json":
+                        error_data = json.loads(response._content.decode("utf-8"))
                         if isinstance(error_data, dict):
-                            error_message = error_data.get('message', '')
-                            if not error_message and 'error' in error_data:
-                                error_message = error_data.get('error', '')
+                            error_message = error_data.get("message", "")
+                            if not error_message and "error" in error_data:
+                                error_message = error_data.get("error", "")
                     else:
-                        error_message = response._content.decode('utf-8')
+                        error_message = response._content.decode("utf-8")
 
                 # Raise appropriate exception based on status code
                 if response.status_code == 401 or response.status_code == 403:
@@ -225,12 +229,7 @@ class MockClient(EnhancedSpyBase):
 
             # Since MockClient inherits from EnhancedSpyBase, we can call _record_call directly
             self._record_call(  # type: ignore[attr-defined]
-                method_name=method_name.upper(),
-                args=(path,),
-                kwargs=call_kwargs,
-                result=result,
-                exception=exception,
-                duration=duration
+                method_name=method_name.upper(), args=(path,), kwargs=call_kwargs, result=result, exception=exception, duration=duration
             )
 
     def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Any:
@@ -261,9 +260,7 @@ class MockClient(EnhancedSpyBase):
         base_url: str,
         page: int = 1,
     ) -> MockResponse:
-        return PaginationResponseBuilder.create_paginated_response(
-            items=items, page=page, per_page=per_page, base_url=base_url
-        )
+        return PaginationResponseBuilder.create_paginated_response(items=items, page=page, per_page=per_page, base_url=base_url)
 
     def reset(self) -> None:
         # Call the parent reset method to clear call history

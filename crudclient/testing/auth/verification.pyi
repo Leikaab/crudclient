@@ -441,6 +441,5 @@ class AuthVerificationHelpers:
         """
         ...
 
-
 # For backward compatibility
 __all__ = ["AuthVerificationHelpers", "AuthExtractionUtils", "AuthHeaderVerification", "AuthTokenVerification", "AuthErrorVerification"]

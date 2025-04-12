@@ -153,8 +153,13 @@ class TestMockClientFactory:
 
         # Assert
         Verifier.verify_called_once_with(
-            mock_client, "configure_response",
-            method="GET", path="/test", status_code=200, data={"key": "value"}, headers={"Content-Type": "application/json"}
+            mock_client,
+            "configure_response",
+            method="GET",
+            path="/test",
+            status_code=200,
+            data={"key": "value"},
+            headers={"Content-Type": "application/json"},
         )
 
     def test_configure_error_response_with_error(self):
@@ -170,10 +175,7 @@ class TestMockClientFactory:
         translate_mock_calls_for_verifier(mock_client)
 
         # Assert
-        Verifier.verify_called_once_with(
-            mock_client, "configure_response",
-            method="GET", path="/test", error=error
-        )
+        Verifier.verify_called_once_with(mock_client, "configure_response", method="GET", path="/test", error=error)
 
     def test_configure_error_response_without_error(self):
         """Test configure_error_response method without an error."""
@@ -195,6 +197,11 @@ class TestMockClientFactory:
 
         # Assert
         Verifier.verify_called_once_with(
-            mock_client, "configure_response",
-            method="GET", path="/test", status_code=404, data={"error": "Not found"}, headers={"Content-Type": "application/json"}
+            mock_client,
+            "configure_response",
+            method="GET",
+            path="/test",
+            status_code=404,
+            data={"error": "Not found"},
+            headers={"Content-Type": "application/json"},
         )
