@@ -11,6 +11,8 @@ from crudclient.http.retry import (
     RetryEvent,
     RetryHandler,
 )
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 
 class TestRetryStrategies:
@@ -175,8 +177,10 @@ class TestRetryHandler:
 
         # Assert
         assert response == mock_response
-        request_func.assert_called_once()
-        mock_sleep.assert_not_called()
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 1)
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_not_called(mock_sleep, "")
 
     def test_execute_with_retry_success_after_retry(self, retry_handler, mocker):
         """Test that the retry handler retries and returns the response if a retry succeeds."""
@@ -198,8 +202,10 @@ class TestRetryHandler:
 
         # Assert
         assert response == mock_success_response
-        assert request_func.call_count == 2
-        mock_sleep.assert_called_once_with(0.01)
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 2)
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_called_once_with(mock_sleep, "", 0.01)
 
     def test_execute_with_retry_all_failures(self, retry_handler, mocker):
         """Test that the retry handler raises an exception if all retries fail."""
@@ -219,9 +225,11 @@ class TestRetryHandler:
         # Assert
         assert response == mock_error_response
         # Should call the request function max_retries + 1 times (initial + retries)
-        assert request_func.call_count == 4
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 4)
         # Should sleep max_retries times
-        assert mock_sleep.call_count == 3
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_call_count(mock_sleep, "", 3)
 
     def test_execute_with_retry_exception(self, retry_handler, mocker):
         """Test that the retry handler handles exceptions correctly."""
@@ -238,9 +246,11 @@ class TestRetryHandler:
         # Error message should mention the timeout
         assert "Connection timed out" in str(excinfo.value)
         # Should call the request function max_retries + 1 times (initial + retries)
-        assert request_func.call_count == 4
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 4)
         # Should sleep max_retries times
-        assert mock_sleep.call_count == 3
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_call_count(mock_sleep, "", 3)
 
     def test_execute_with_retry_non_retryable_exception(self, retry_handler, mocker):
         """Test that the retry handler doesn't retry on non-retryable exceptions."""
@@ -257,9 +267,11 @@ class TestRetryHandler:
         # Error message should be from the original exception
         assert "Invalid value" in str(excinfo.value)
         # Should call the request function only once
-        request_func.assert_called_once()
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 1)
         # Should not sleep
-        mock_sleep.assert_not_called()
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_not_called(mock_sleep, "")
 
     def test_maybe_retry_after_403(self, retry_handler, mocker):
         """Test the maybe_retry_after_403 method."""
@@ -281,8 +293,10 @@ class TestRetryHandler:
 
         # Assert
         assert result == retry_response
-        setup_auth_func.assert_called_once()
-        session.request.assert_called_once_with("GET", "https://example.com", **{})
+        translate_mock_calls_for_verifier(setup_auth_func)
+        Verifier.verify_call_count(setup_auth_func, "", 1)
+        translate_mock_calls_for_verifier(session.request)
+        Verifier.verify_called_once_with(session.request, "", "GET", "https://example.com", **{})
 
     def test_maybe_retry_after_403_non_403(self, retry_handler, mocker):
         """Test that maybe_retry_after_403 doesn't retry for non-403 responses."""
@@ -299,8 +313,10 @@ class TestRetryHandler:
 
         # Assert
         assert result == response_404
-        setup_auth_func.assert_not_called()
-        session.request.assert_not_called()
+        translate_mock_calls_for_verifier(setup_auth_func)
+        Verifier.verify_not_called(setup_auth_func, "")
+        translate_mock_calls_for_verifier(session.request)
+        Verifier.verify_not_called(session.request, "")
 
     def test_on_retry_callback(self, mocker):
         """Test that the on_retry_callback is called correctly."""
@@ -328,10 +344,13 @@ class TestRetryHandler:
 
         # Assert
         # Callback should be called twice (once for each retry)
-        assert callback.call_count == 2
+        translate_mock_calls_for_verifier(callback)
+        Verifier.verify_call_count(callback, "", 2)
 
         # First call should be with attempt=1, delay=0.01, response=mock_error_response
-        callback.assert_any_call(1, 0.01, mock_error_response, None)
+        translate_mock_calls_for_verifier(callback)
+        Verifier.verify_any_call(callback, "", 1, 0.01, mock_error_response, None)
 
         # Second call should be with attempt=2, delay=0.01, response=mock_error_response
-        callback.assert_any_call(2, 0.01, mock_error_response, None)
+        translate_mock_calls_for_verifier(callback)
+        Verifier.verify_any_call(callback, "", 2, 0.01, mock_error_response, None)
