@@ -36,9 +36,7 @@ class HttpClient:
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
 
-    def _validate_request_params(
-        self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool
-    ) -> None:
+    def _validate_request_params(self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool) -> None:
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
         if endpoint is not None and not isinstance(endpoint, str):
@@ -58,34 +56,34 @@ class HttpClient:
 
     def _prepare_auth_params(self, kwargs: Dict[str, Any]) -> None:
         auth_params: Dict[str, Any] = {}
-        if hasattr(self.config, "auth_strategy") and self.config.auth_strategy is not None and hasattr(self.config.auth_strategy, "prepare_request_params"):
+        if (
+            hasattr(self.config, "auth_strategy")
+            and self.config.auth_strategy is not None
+            and hasattr(self.config.auth_strategy, "prepare_request_params")
+        ):
             auth_params = self.config.auth_strategy.prepare_request_params()
             if not isinstance(auth_params, dict):
-                raise TypeError(
-                    f"Auth strategy's prepare_request_params must return a dictionary, "
-                    f"got {type(auth_params).__name__}"
-                )
+                raise TypeError(f"Auth strategy's prepare_request_params must return a dictionary, " f"got {type(auth_params).__name__}")
 
         if not auth_params:
             return  # No auth params to merge
 
         # Ensure 'params' exists in kwargs and is a dictionary
-        if 'params' not in kwargs or kwargs['params'] is None:
-            kwargs['params'] = {}
-        elif not isinstance(kwargs['params'], dict):
+        if "params" not in kwargs or kwargs["params"] is None:
+            kwargs["params"] = {}
+        elif not isinstance(kwargs["params"], dict):
             logger.warning(
-                f"Request 'params' has unexpected type: {type(kwargs['params']).__name__}. "
-                f"Attempting conversion to dict for auth param merging."
+                f"Request 'params' has unexpected type: {type(kwargs['params']).__name__}. " f"Attempting conversion to dict for auth param merging."
             )
             try:
-                kwargs['params'] = dict(kwargs['params'])
+                kwargs["params"] = dict(kwargs["params"])
             except (TypeError, ValueError) as e:
                 logger.error(f"Could not convert 'params' to dict: {e}. Auth params might be lost.")
-                kwargs['params'] = {}  # Fallback
+                kwargs["params"] = {}  # Fallback
 
         # Merge auth params, prioritizing auth params
-        if isinstance(kwargs['params'], dict):
-            kwargs['params'].update(auth_params)
+        if isinstance(kwargs["params"], dict):
+            kwargs["params"].update(auth_params)
         else:
             # This case should ideally not be reached
             logger.error("Failed to merge auth params: 'params' is not a dictionary.")
@@ -94,9 +92,7 @@ class HttpClient:
         def make_request() -> requests.Response:
             return self.session_manager.session.request(method, url, timeout=self.session_manager.timeout, **kwargs)
 
-        return self.retry_handler.execute_with_retry(
-            make_request, self.session_manager.session, self.session_manager.refresh_auth
-        )
+        return self.retry_handler.execute_with_retry(make_request, self.session_manager.session, self.session_manager.refresh_auth)
 
     def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
         if not handle_response:

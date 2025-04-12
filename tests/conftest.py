@@ -176,12 +176,12 @@ def timer():
 
 # TYPE_CHECKING block is no longer strictly necessary for LoadScheduling,
 # but keep Mark for type hints if used elsewhere or for clarity.
-    # Keep existing xdist scheduler configuration
-    # --- Custom xdist Scheduler ---
+# Keep existing xdist scheduler configuration
+# --- Custom xdist Scheduler ---
 
-    # Use Any for config and log types for robustness against internal API changes
-    # Cache items by nodeid during collection
-    # Use Any for config and items types for robustness against internal API changes
+# Use Any for config and log types for robustness against internal API changes
+# Cache items by nodeid during collection
+# Use Any for config and items types for robustness against internal API changes
 
 
 def pytest_collection_modifyitems(session: Any, config: Any, items: List[Item]):
@@ -214,7 +214,7 @@ class CustomScheduling(LoadScheduling):
         """Determine scheduling scope based on 'no_parallel' marker."""
         # Retrieve the item from the cache created by pytest_collection_modifyitems
         # Ensure the cache exists before trying to access it
-        item = getattr(self.config, '_nodeid_to_item', {}).get(nodeid)
+        item = getattr(self.config, "_nodeid_to_item", {}).get(nodeid)
 
         # Check if the item exists and has the 'no_parallel' marker
         if item and item.get_closest_marker("no_parallel"):
@@ -226,6 +226,7 @@ class CustomScheduling(LoadScheduling):
         # by extracting the file path from the nodeid.
         # This avoids the super() call that Pylance struggles with.
         return nodeid.split("::")[0]
+
 
 # Scheduler factory function
 # Use Any for config and log types for robustness against internal API changes

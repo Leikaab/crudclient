@@ -40,7 +40,6 @@ from .response import ResponseHandler
 from .retry import RetryHandler
 from .session import SessionManager
 
-
 class HttpClient:
     """
     Makes HTTP requests and delegates specialized concerns to other components.
@@ -95,9 +94,7 @@ class HttpClient:
         """
         ...
 
-    def _validate_request_params(
-        self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool
-    ) -> None:
+    def _validate_request_params(self, method: str, endpoint: Optional[str], url: Optional[str], handle_response: bool) -> None:
         """Validate the core parameters for the _request method."""
         ...
 
@@ -125,7 +122,6 @@ class HttpClient:
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
-
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any

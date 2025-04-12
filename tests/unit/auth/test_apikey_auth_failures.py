@@ -39,11 +39,7 @@ def test_apikey_param_auth_failure(apikey_param_client, mock_request):
     # The mock needs to match the URL *including* the query parameter
     # Assuming the key value is 'valid_api_key' based on the header test fixture setup
     mock_url_with_param = f"{expected_url}?api_key=valid_api_key"
-    mock_request.get(
-        mock_url_with_param,
-        status_code=401,
-        json={"error": "Unauthorized", "message": "Invalid API Key Param"}
-    )
+    mock_request.get(mock_url_with_param, status_code=401, json={"error": "Unauthorized", "message": "Invalid API Key Param"})
 
     # Act
     with pytest.raises(AuthenticationError) as excinfo:
