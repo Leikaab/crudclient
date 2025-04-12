@@ -18,7 +18,6 @@ from crudclient.types import JSONDict, JSONList
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
-
 class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase and conforms to CrudBase interface
     """
     A **Test Spy** specifically for the `crudclient.crud.base.Crud` interface.

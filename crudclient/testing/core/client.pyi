@@ -24,7 +24,6 @@ from ..types import (
     StatusCode,
 )
 
-
 class MockClient(EnhancedSpyBase):
     """
     Implements the **Mock Object pattern** for `crudclient.Client`.

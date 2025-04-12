@@ -7,7 +7,6 @@ from crudclient.config import ClientConfig
 
 from .data_store import DataStore
 
-
 class FakeCrud:
     """
     Internal helper simulating a single CRUD endpoint's operations for `FakeAPI`.

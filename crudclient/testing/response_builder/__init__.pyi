@@ -3,7 +3,6 @@ from typing import Dict, Optional, Union
 
 from .response import MockResponse
 
-
 class ResponseBuilder:
     """
     Utility class for creating common API error responses.

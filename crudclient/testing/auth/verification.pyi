@@ -23,7 +23,6 @@ from .auth_extraction_utils import AuthExtractionUtils
 from .auth_header_verification import AuthHeaderVerification
 from .auth_token_verification import AuthTokenVerification
 
-
 class AuthVerificationHelpers:
     """
     Aggregates static helper methods for verifying authentication behavior in tests.

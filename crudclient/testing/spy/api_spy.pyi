@@ -17,7 +17,6 @@ from crudclient.crud.base import Crud
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
-
 class ApiSpy(EnhancedSpyBase, API):  # Inherits from EnhancedSpyBase and conforms to API interface
     """
     A **Test Spy** specifically for the `crudclient.api.API` interface.

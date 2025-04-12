@@ -11,7 +11,6 @@ from crudclient.types import RawResponseSimple
 
 from .stubs import StubResponse
 
-
 class StubClient(EnhancedSpyBase, Client):
     """
     A stub implementation of the Client for testing purposes.

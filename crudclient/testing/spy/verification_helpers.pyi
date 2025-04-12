@@ -14,7 +14,6 @@ from typing import Any, Dict, List
 
 from .enhanced import EnhancedSpyBase
 
-
 def verify_call_sequence(spy: EnhancedSpyBase, *method_names: str) -> None:
     """
     Verifies methods were called in the exact sequence specified.

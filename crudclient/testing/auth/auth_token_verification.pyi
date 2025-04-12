@@ -16,7 +16,6 @@ from typing import Any, Dict, List, Optional
 from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
 
-
 class AuthTokenVerification:
     """
     Provides static methods focused on verifying authentication token properties.

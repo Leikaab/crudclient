@@ -38,7 +38,6 @@ from typing_extensions import TypeAlias
 from .exceptions import VerificationError
 from .types import SpyTarget
 
-
 class Verifier:
     """
     Provides static methods for verifying interactions with test doubles (Spies/Mocks).

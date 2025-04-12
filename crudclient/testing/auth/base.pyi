@@ -14,7 +14,6 @@ from typing import Any, Dict, Optional, Tuple
 from ..response_builder import ResponseBuilder
 from ..response_builder.response import MockResponse
 
-
 class AuthMockBase:
     """
     Base class for authentication mocks using a **Builder pattern** for configuration.

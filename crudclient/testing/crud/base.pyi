@@ -17,7 +17,6 @@ from requests import PreparedRequest  # Added
 from crudclient.exceptions import ValidationError as CrudValidationError
 from crudclient.testing.response_builder.response import MockResponse
 
-
 class BaseCrudMock:
     """
     Base **Mock Object** for simulating CRUD endpoint interactions.

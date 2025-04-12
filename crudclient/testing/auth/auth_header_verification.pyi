@@ -15,7 +15,6 @@ from typing import Any, Dict, Optional
 from ..exceptions import VerificationError  # Import VerificationError
 from .auth_extraction_utils import AuthExtractionUtils
 
-
 class AuthHeaderVerification:
     """
     Provides static methods focused on verifying authentication header formats.

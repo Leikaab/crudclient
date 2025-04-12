@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from .method_call import MethodCall
 from .spy_assertions import SpyAssertionsMixin
 
-
 class CallRecord(MethodCall):
     """
     Represents a single recorded method call with enhanced details.

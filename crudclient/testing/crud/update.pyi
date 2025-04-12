@@ -12,7 +12,6 @@ from crudclient.exceptions import NotFoundError
 
 from .base import BaseCrudMock
 
-
 class UpdateMock(BaseCrudMock):
     """
     Mocks CRUD update (PUT/PATCH) operations, allowing configuration of responses

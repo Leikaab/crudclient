@@ -14,7 +14,6 @@ from typing import Any, Dict, List, Optional
 
 from ..exceptions import VerificationError  # Import VerificationError
 
-
 class AuthErrorVerification:
     """
     Provides static methods focused on verifying auth error responses and rate limits.

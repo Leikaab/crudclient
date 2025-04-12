@@ -14,7 +14,6 @@ from crudclient.testing.crud.request_record import RequestRecord
 from crudclient.testing.response_builder.response import MockResponse
 from crudclient.testing.simple_mock.core import SimpleMockClientCore
 
-
 class SimpleMockClientRequestHandling(SimpleMockClientCore):
     """
     Request handling methods for the simple mock client.
