@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union
 
 from .response import MockResponse
 
+
 class ResponseBuilder:
     """
     Utility class for creating common API error responses.
@@ -86,8 +87,11 @@ class ResponseBuilder:
         """
         Create a mock response for an authentication error.
 
-        Generates a standardized authentication error response with appropriate
-        WWW-Authenticate header and error details.
+        Generates a standardized authentication error response. The response includes:
+        - A `WWW-Authenticate` header with the format:
+          `Bearer realm="api", error="{error_type}", error_description="{message}"`
+        - A JSON body with the structure:
+          `{"errors": [{"message": message, "code": error_type.upper(), "request_id": uuid}]}`
 
         Args:
             error_type: Type of authentication error. Supported values:
@@ -116,6 +120,7 @@ class ResponseBuilder:
             ```
         """
         ...
+
 
 __all__ = [
     "MockResponse",
