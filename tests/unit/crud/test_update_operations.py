@@ -9,6 +9,8 @@ import pytest
 
 # Import the custom ValidationError, which wraps the Pydantic one
 from crudclient.exceptions import ModelConversionError, ValidationError
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
@@ -33,7 +35,8 @@ def test_update_operation_success_with_model(test_crud: TestCrud, mock_client: M
 
     # WHEN
     result = test_crud.update(resource_id="1", data=updated_model)
-    mock_client.put.assert_called_once_with("test-resources/1", json=updated_payload)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "put", "test-resources/1", json=updated_payload)
     assert result == updated_model
 
 
@@ -51,7 +54,8 @@ def test_update_operation_success_with_dict(test_crud: TestCrud, mock_client: Ma
     result = test_crud.update(resource_id="1", data=updated_payload)
 
     # THEN
-    mock_client.put.assert_called_once_with("test-resources/1", json=updated_payload)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "put", "test-resources/1", json=updated_payload)
     assert result == TestModel(**updated_payload)  # type: ignore[arg-type]
 
 
@@ -137,7 +141,8 @@ def test_partial_update_operation_success(test_crud: TestCrud, mock_client: Magi
     # WHEN
     result = test_crud.partial_update(resource_id="1", data=partial_payload)
     # Note: _dump_data(partial=True) should handle partial model correctly if implemented
-    mock_client.patch.assert_called_once_with("test-resources/1", json=partial_payload)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "patch", "test-resources/1", json=partial_payload)
     assert result == TestModel(**final_payload)  # type: ignore[arg-type]
 
 
