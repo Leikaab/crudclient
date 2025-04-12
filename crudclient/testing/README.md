@@ -46,7 +46,7 @@ assert response.status_code == 200
 assert response.json() == {"id": "123", "name": "Test User"}
 
 # Verify the underlying HTTP client mock was called (if MockClient was given one)
-# Example: mock_http_layer.request.assert_called_once_with(...)
+# Example: Verifier.verify_called_once_with(mock_http_layer, "request", method="GET", path="/users/123")
 ```
 
 ### Using the FakeAPI
