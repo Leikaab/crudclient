@@ -6,11 +6,13 @@ import requests
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.testing.spy.enhanced import EnhancedSpyBase
 from crudclient.types import RawResponseSimple
 
 from .stubs import StubResponse
 
-class StubClient(Client):
+
+class StubClient(EnhancedSpyBase, Client):
     """
     A stub implementation of the Client for testing purposes.
 
@@ -23,7 +25,6 @@ class StubClient(Client):
     _response_map: Dict[str, Any]
     _error_rate: float
     _latency_ms: int
-    _request_history: List[Dict[str, Any]]
 
     def configure_get(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
         """
@@ -74,10 +75,12 @@ class StubClient(Client):
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
+
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         """
         Build the full URL from endpoint or use provided URL.
@@ -88,18 +91,6 @@ class StubClient(Client):
 
         Returns:
             The complete URL to use for the request.
-        """
-        ...
-
-    def _record_request(self, method: str, url: str, endpoint: Optional[str], kwargs: Dict[str, Any]) -> None:
-        """
-        Record the request in the history.
-
-        Args:
-            method: The HTTP method (e.g., 'GET', 'POST').
-            url: The full URL for the request.
-            endpoint: The API endpoint path.
-            kwargs: Additional request parameters.
         """
         ...
 
@@ -267,20 +258,6 @@ class StubClient(Client):
         Returns:
             The parsed JSON response or the raw response string if not valid JSON.
         """
-        ...
-
-    def get_request_history(self) -> List[Dict[str, Any]]:
-        """
-        Retrieve the history of requests made to this client.
-
-        Returns:
-            A list of dictionaries, each representing a request with details like
-            method, url, endpoint, kwargs, and timestamp.
-        """
-        ...
-
-    def clear_request_history(self) -> None:
-        """Clear the recorded request history."""
         ...
 
     def add_response(self, pattern: str, response: Any) -> None:

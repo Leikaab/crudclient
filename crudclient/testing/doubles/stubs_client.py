@@ -2,18 +2,18 @@ import json
 import random
 import re
 import time
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 import requests
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.testing.spy.enhanced import EnhancedSpyBase
 
 from .stubs import StubResponse  # Assuming StubResponse remains in stubs.py
 
 
-class StubClient(Client):
+class StubClient(EnhancedSpyBase, Client):
 
     def configure_get(self, response=None, handler=None):
         if handler:
@@ -39,7 +39,10 @@ class StubClient(Client):
         error_rate: float = 0.0,
         latency_ms: int = 0,
     ):
-        super().__init__(config)
+        # Initialize EnhancedSpyBase first
+        EnhancedSpyBase.__init__(self)
+        # Then initialize Client
+        Client.__init__(self, config)
 
         # Default response
         if default_response is None:
@@ -54,17 +57,10 @@ class StubClient(Client):
         self._error_rate = max(0.0, min(1.0, error_rate))
         self._latency_ms = max(0, latency_ms)
 
-        # Request history
-        self._request_history: List[Dict[str, Any]] = []
-
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
         if url is None and endpoint is not None:
             return f"{self.base_url}/{endpoint.lstrip('/')}"
         return url or self.base_url
-
-    def _record_request(self, method: str, url: str, endpoint: Optional[str], kwargs: Dict[str, Any]) -> None:
-        request_record = {"method": method, "url": url, "endpoint": endpoint, "kwargs": kwargs, "timestamp": datetime.now().isoformat()}
-        self._request_history.append(request_record)
 
     def _simulate_network_conditions(self) -> None:
         if self._latency_ms > 0:
@@ -145,26 +141,60 @@ class StubClient(Client):
         # Build the full URL
         url = self._build_full_url(endpoint, url)
 
-        # Record the request
-        self._record_request(method, url, endpoint, kwargs)
+        # Capture start time for duration measurement
+        start_time = time.time()
 
-        # Simulate network conditions (latency)
-        self._simulate_network_conditions()
+        # Initialize variables for try-except-finally block
+        result = None
+        exception = None
 
-        # Handle simulated errors
-        error_response = self._handle_simulated_error(handle_response)
-        if error_response:
-            return error_response
+        try:
+            # Simulate network conditions (latency)
+            self._simulate_network_conditions()
 
-        # Find a matching response
-        response = self._find_matching_response(method, url)
+            # Handle simulated errors
+            error_response = self._handle_simulated_error(handle_response)
+            if error_response:
+                result = error_response
+                return result
 
-        # Process callable responses
-        if callable(response):
-            response = self._process_callable_response(response, method, endpoint, url, kwargs)
+            # Find a matching response
+            response = self._find_matching_response(method, url)
 
-        # Convert response to string
-        return self._convert_response_to_string(response, handle_response)
+            # Process callable responses
+            if callable(response):
+                response = self._process_callable_response(response, method, endpoint, url, kwargs)
+
+            # Convert response to string
+            result = self._convert_response_to_string(response, handle_response)
+            return result
+        except Exception as e:
+            exception = e
+            raise
+        finally:
+            # Calculate duration
+            duration = time.time() - start_time
+
+            # Record the call using EnhancedSpyBase's _record_call method
+            try:
+                self._record_call(
+                    method_name=method,
+                    args=(url,),
+                    kwargs=kwargs,
+                    result=result if 'result' in locals() else None,
+                    exception=exception,
+                    duration=duration
+                )
+            except UnboundLocalError:
+                # Handle case where result might not be defined
+                self._record_call(
+                    method_name=method,
+                    args=(url,),
+                    kwargs=kwargs,
+                    result=None,
+                    exception=exception,
+                    duration=duration
+                )
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         import json as json_module
@@ -228,12 +258,6 @@ class StubClient(Client):
             return json_module.loads(response_str)
         except json_module.JSONDecodeError:
             return response_str
-
-    def get_request_history(self) -> List[Dict[str, Any]]:
-        return self._request_history
-
-    def clear_request_history(self) -> None:
-        self._request_history = []
 
     def add_response(self, pattern: str, response: Any) -> None:
         self._response_map[pattern] = response
