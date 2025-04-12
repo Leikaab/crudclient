@@ -142,7 +142,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
+    def verify_request_sequence(self, expected_sequence: List[Dict[str, Any]]) -> None:
         """
         Assert that requests were made in the expected sequence.
 
@@ -154,7 +154,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, path_pattern: Optional[str] = None) -> None:
+    def verify_request_params(self, expected_params: Dict[str, str], method: Optional[HttpMethod] = None, path_pattern: Optional[str] = None) -> None:
         """
         Assert that a request was made with the expected parameters.
 
@@ -343,7 +343,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_count(self, count: int, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that a specific number of matching requests were made.
 
@@ -357,7 +357,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that at least one matching request was made.
 
@@ -370,7 +370,7 @@ class MockClient:
         """
         ...
 
-    def assert_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
+    def verify_request_not_made(self, method: Optional[HttpMethod] = None, path_pattern: Optional[Union[str, Pattern]] = None) -> None:
         """
         Assert that no matching requests were made.
 
