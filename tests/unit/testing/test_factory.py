@@ -19,6 +19,36 @@ from crudclient.testing.verification import Verifier
 class TestMockClientFactory:
     """Tests for the MockClientFactory class."""
 
+    def _translate_mock_calls_for_verifier(self, mock_target: MagicMock) -> None:
+        """
+        Translate unittest.mock.MagicMock calls to the format expected by Verifier.
+
+        This helper function reads the mock_calls attribute of a MagicMock instance,
+        converts each call to a MethodCall object, and assigns the resulting list
+        to the mock's calls attribute, making it compatible with the Verifier class.
+
+        Args:
+            mock_target: The MagicMock instance to adapt for use with Verifier
+        """
+        translated_calls = []
+
+        for call_obj in mock_target.mock_calls:
+            # Extract method name, args, and kwargs from the mock call
+            method_name = call_obj[0]
+            args = call_obj[1]
+            kwargs = call_obj[2]
+
+            # Create a MethodCall object and append it to the list
+            method_call = MethodCall(
+                method_name=method_name,
+                args=args,
+                kwargs=kwargs
+            )
+            translated_calls.append(method_call)
+
+        # Assign the translated calls to the mock's calls attribute
+        mock_target.calls = translated_calls
+
     def test_create_default(self):
         """Test create method with default parameters."""
         # Act
@@ -142,28 +172,14 @@ class TestMockClientFactory:
         """Test configure_success_response method."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
-        # Add calls attribute to make it compatible with Verifier
-        mock_client.calls = []
 
         # Act
         MockClientFactory.configure_success_response(
             mock_client=mock_client, method="GET", path="/test", data={"key": "value"}, status_code=200, headers={"Content-Type": "application/json"}
         )
 
-        # Record the call in the format expected by Verifier
-        mock_client.calls.append(
-            MethodCall(
-                method_name="configure_response",
-                args=(),
-                kwargs={
-                    "method": "GET",
-                    "path": "/test",
-                    "status_code": 200,
-                    "data": {"key": "value"},
-                    "headers": {"Content-Type": "application/json"}
-                }
-            )
-        )
+        # Translate mock calls to the format expected by Verifier
+        self._translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(
@@ -175,25 +191,13 @@ class TestMockClientFactory:
         """Test configure_error_response method with an error."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
-        # Add calls attribute to make it compatible with Verifier
-        mock_client.calls = []
         error = ValueError("Test error")
 
         # Act
         MockClientFactory.configure_error_response(mock_client=mock_client, method="GET", path="/test", error=error)
 
-        # Record the call in the format expected by Verifier
-        mock_client.calls.append(
-            MethodCall(
-                method_name="configure_response",
-                args=(),
-                kwargs={
-                    "method": "GET",
-                    "path": "/test",
-                    "error": error
-                }
-            )
-        )
+        # Translate mock calls to the format expected by Verifier
+        self._translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(
@@ -205,8 +209,6 @@ class TestMockClientFactory:
         """Test configure_error_response method without an error."""
         # Arrange
         mock_client = MagicMock(spec=MockClient)
-        # Add calls attribute to make it compatible with Verifier
-        mock_client.calls = []
 
         # Act
         MockClientFactory.configure_error_response(
@@ -218,20 +220,8 @@ class TestMockClientFactory:
             headers={"Content-Type": "application/json"},
         )
 
-        # Record the call in the format expected by Verifier
-        mock_client.calls.append(
-            MethodCall(
-                method_name="configure_response",
-                args=(),
-                kwargs={
-                    "method": "GET",
-                    "path": "/test",
-                    "status_code": 404,
-                    "data": {"error": "Not found"},
-                    "headers": {"Content-Type": "application/json"}
-                }
-            )
-        )
+        # Translate mock calls to the format expected by Verifier
+        self._translate_mock_calls_for_verifier(mock_client)
 
         # Assert
         Verifier.verify_called_once_with(
