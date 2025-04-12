@@ -9,6 +9,15 @@ if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
+# Authenticate GitHub CLI if GITHUB_TOKEN is set
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "Attempting GitHub CLI authentication..."
+    echo "$GITHUB_TOKEN" | gh auth login --with-token
+    gh auth status # Optional: verify status
+else
+    echo "GITHUB_TOKEN not set, skipping GitHub CLI authentication."
+fi
+
 # set up pre-commit hooks, commented out for now
 poetry run pre-commit install -t pre-commit
 poetry run pre-commit install -t pre-push
