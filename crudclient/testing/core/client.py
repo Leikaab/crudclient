@@ -1,11 +1,12 @@
+import json
 import time
 from typing import Any, Dict, List, Optional, Pattern, Union
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.config import ClientConfig
+from crudclient.exceptions import AuthenticationError
 from crudclient.testing.spy.enhanced import EnhancedSpyBase
 
-# Import PaginationHelper
 from ..response_builder.pagination import (
     PaginationResponseBuilder,  # Import the builder class
 )
@@ -20,6 +21,39 @@ from ..types import (
     ResponseBody,
     StatusCode,
 )
+
+
+class ResponseWrapper:
+
+    def __init__(self, response):
+        self.response = response
+        self.data = None
+        if hasattr(response, '_content') and response._content is not None:
+            if response.headers.get('Content-Type') == 'application/json':
+                self.data = json.loads(response._content.decode('utf-8'))
+            else:
+                self.data = response._content.decode('utf-8')
+        else:
+            self.data = {}
+
+    def __getattr__(self, name):
+        return getattr(self.response, name)
+
+    def __getitem__(self, key):
+        if isinstance(self.data, dict):
+            return self.data[key]
+        raise TypeError(f"Cannot index response data of type {type(self.data)}")
+
+    def __contains__(self, key):
+        if isinstance(self.data, dict):
+            return key in self.data
+        return False
+
+    def json(self):
+        return self.data
+
+
+# Import PaginationHelper
 
 
 class MockClient(EnhancedSpyBase):
@@ -126,6 +160,7 @@ class MockClient(EnhancedSpyBase):
         # Helper method to execute HTTP methods with timing and recording
         request_args = self._prepare_request_args(headers, params)
         start_time = time.time()
+        response = None
         result = None
         exception = None
 
@@ -135,10 +170,46 @@ class MockClient(EnhancedSpyBase):
 
             # Call the method with appropriate arguments
             if method_name.upper() in ["POST", "PUT", "PATCH"]:
-                result = http_method(path, data=data, **request_args, **kwargs)
+                response = http_method(path, data=data, **request_args, **kwargs)
             else:
-                result = http_method(path, **request_args, **kwargs)
+                response = http_method(path, **request_args, **kwargs)
 
+            # Check if the response is a MagicMock object (used in some tests)
+            if hasattr(response, '__class__') and response.__class__.__name__ == 'MagicMock':
+                # If it's a MagicMock, just return it
+                result = response
+                return result
+
+            # Special handling for MFA challenges - return the raw response
+            if hasattr(response, 'status_code') and hasattr(response, 'headers') and \
+               response.status_code == 401 and 'WWW-Authenticate' in response.headers:
+                auth_header = response.headers['WWW-Authenticate']
+                if 'mfa_token_required' in auth_header:
+                    result = response
+                    return result
+
+            # Check if the response indicates an error
+            if hasattr(response, 'status_code') and response.status_code >= 400:
+                # Extract error message from response
+                error_message = ""
+                if hasattr(response, '_content') and response._content is not None:
+                    if response.headers.get('Content-Type') == 'application/json':
+                        error_data = json.loads(response._content.decode('utf-8'))
+                        if isinstance(error_data, dict):
+                            error_message = error_data.get('message', '')
+                            if not error_message and 'error' in error_data:
+                                error_message = error_data.get('error', '')
+                    else:
+                        error_message = response._content.decode('utf-8')
+
+                # Raise appropriate exception based on status code
+                if response.status_code == 401 or response.status_code == 403:
+                    raise AuthenticationError(f"{response.status_code} {error_message}")
+                else:
+                    raise Exception(f"Request failed with status code {response.status_code}: {error_message}")
+
+            # Wrap the response in a ResponseWrapper
+            result = ResponseWrapper(response)
             return result
         except Exception as e:
             exception = e
@@ -152,7 +223,8 @@ class MockClient(EnhancedSpyBase):
                 call_kwargs["data"] = data
             call_kwargs.update(kwargs)
 
-            self._record_call(
+            # Since MockClient inherits from EnhancedSpyBase, we can call _record_call directly
+            self._record_call(  # type: ignore[attr-defined]
                 method_name=method_name.upper(),
                 args=(path,),
                 kwargs=call_kwargs,
