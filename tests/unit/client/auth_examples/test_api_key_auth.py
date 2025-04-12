@@ -21,7 +21,7 @@ class TestApiKeyAuthExamples:
         client = create_mock_client(auth_type="apikey", auth_config={"api_key": "valid_api_key", "header_name": "X-API-Key"})
 
         # Configure a successful response
-        client.with_response_pattern(method="GET", url_pattern=r"/api/data", response={"data": [{"id": 1, "value": "Test Data"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/data", data={"data": [{"id": 1, "value": "Test Data"}]})
 
         # Make a request
         response = client.get("/api/data")
@@ -32,10 +32,10 @@ class TestApiKeyAuthExamples:
         assert response["data"][0]["value"] == "Test Data"
 
         # Verify the auth header was sent correctly
-        assert len(client.request_history) == 1
-        request = client.request_history[0]
-        assert "X-API-Key" in request["headers"]
-        assert request["headers"]["X-API-Key"] == "valid_api_key"
+        assert client.get_call_count() == 1
+        request = client.get_calls()[0]
+        assert "X-API-Key" in request.kwargs["headers"]
+        assert request.kwargs["headers"]["X-API-Key"] == "valid_api_key"
 
     def test_api_key_param_auth_success_scenario(self):
         """Example of testing a successful API Key param auth scenario."""
@@ -43,7 +43,7 @@ class TestApiKeyAuthExamples:
         client = create_mock_client(auth_type="apikey", auth_config={"api_key": "valid_api_key", "param_name": "api_key"})
 
         # Configure a successful response
-        client.with_response_pattern(method="GET", url_pattern=r"/api/data", response={"data": [{"id": 1, "value": "Test Data"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/data", data={"data": [{"id": 1, "value": "Test Data"}]})
 
         # Make a request
         response = client.get("/api/data")
@@ -54,11 +54,11 @@ class TestApiKeyAuthExamples:
         assert response["data"][0]["value"] == "Test Data"
 
         # Verify the auth param was sent correctly
-        assert len(client.request_history) == 1
-        request = client.request_history[0]
+        assert client.get_call_count() == 1
+        request = client.get_calls()[0]
         # Verify the parameters dictionary contains the API key
-        assert "api_key" in request["params"]
-        assert request["params"]["api_key"] == "valid_api_key"
+        assert "api_key" in request.kwargs["params"]
+        assert request.kwargs["params"]["api_key"] == "valid_api_key"
 
     def test_api_key_auth_failure_scenario(self):
         """Example of testing an API Key auth failure scenario."""
@@ -77,7 +77,7 @@ class TestApiKeyAuthExamples:
 
         # Configure an auth error response
         client.with_response_pattern(
-            method="GET", url_pattern=r"/api/data", response={"error": "Unauthorized", "message": "Invalid API Key"}, status_code=401
+            method="GET", path_pattern=r"/api/data", data={"error": "Unauthorized", "message": "Invalid API Key"}, status_code=401
         )
 
         # Make a request and expect it to fail

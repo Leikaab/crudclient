@@ -22,7 +22,7 @@ class TestBasicAuthExamples:
         client = create_mock_client(auth_type="basic", auth_config={"username": "testuser", "password": "testpass"})
 
         # Configure a successful response
-        client.with_response_pattern(method="GET", url_pattern=r"/api/users", response={"data": [{"id": 1, "name": "Test User"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/users", data={"data": [{"id": 1, "name": "Test User"}]})
 
         # Make a request
         response = client.get("/api/users")
@@ -33,14 +33,14 @@ class TestBasicAuthExamples:
         assert response["data"][0]["name"] == "Test User"
 
         # Verify the auth header was sent correctly
-        assert len(client.request_history) == 1
-        request = client.request_history[0]
-        assert "Authorization" in request["headers"]
-        assert request["headers"]["Authorization"].startswith("Basic ")
+        assert client.get_call_count() == 1
+        request = client.get_calls()[0]
+        assert "Authorization" in request.kwargs["headers"]
+        assert request.kwargs["headers"]["Authorization"].startswith("Basic ")
 
         # Use verification helpers
-        assert AuthVerificationHelpers.verify_basic_auth_header(request["headers"]["Authorization"])
-        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(request["headers"]["Authorization"])
+        assert AuthVerificationHelpers.verify_basic_auth_header(request.kwargs["headers"]["Authorization"])
+        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(request.kwargs["headers"]["Authorization"])
         assert username == "testuser"
         assert password == "testpass"
 
@@ -61,7 +61,7 @@ class TestBasicAuthExamples:
 
         # Configure an auth error response
         client.with_response_pattern(
-            method="GET", url_pattern=r"/api/users", response={"error": "Unauthorized", "message": "Invalid username or password"}, status_code=401
+            method="GET", path_pattern=r"/api/users", data={"error": "Unauthorized", "message": "Invalid username or password"}, status_code=401
         )
 
         # Make a request and expect it to fail

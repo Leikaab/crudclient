@@ -4,7 +4,7 @@ Examples of using the enhanced mock client for testing.
 
 import pytest
 
-from crudclient.testing import MockClient
+from crudclient.testing.core.client import MockClient
 from crudclient.testing.response_builder.pagination import (
     PaginationResponseBuilder,  # Added import
 )
@@ -127,15 +127,21 @@ class TestMockClientExamples:
         mock_client.get("/users", params={"page": "2"})
 
         # Verify request count
-        mock_client.verify_request_count(3)
-        mock_client.verify_request_count(2, method="GET")
-        mock_client.verify_request_count(1, method="POST")
+        assert mock_client.get_call_count() == 3
+        assert len([call for call in mock_client.get_calls() if call.method_name == "GET"]) == 2
+        assert len([call for call in mock_client.get_calls() if call.method_name == "POST"]) == 1
 
         # Verify request sequence
-        mock_client.verify_request_sequence([{"method": "GET"}, {"method": "POST"}, {"method": "GET"}])
+        calls = mock_client.get_calls()
+        assert len(calls) == 3
+        assert calls[0].method_name == "GET"
+        assert calls[1].method_name == "POST"
+        assert calls[2].method_name == "GET"
 
         # Verify request parameters
-        mock_client.verify_request_params({"page": "1"}, method="GET", path_pattern=r"/users$")
+        get_calls = [call for call in mock_client.get_calls() if call.method_name == "GET" and call.args[0] == "/users"]
+        assert len(get_calls) > 0
+        assert get_calls[0].kwargs.get("params", {}).get("page") == "1"
 
     def test_pagination_helper(self, mock_client: MockClient, create_user_data):
         """Test pagination helper."""

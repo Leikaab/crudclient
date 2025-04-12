@@ -4,10 +4,10 @@ from crudclient.testing.auth import (
     create_bearer_auth_mock,
     create_custom_auth_mock,
 )
-from crudclient.testing.core.http_client import MockHTTPClient
 
-# Import the backward compatible client from the new location
-from .client import BackwardCompatibleMockClient
+# Import the standard MockClient
+from crudclient.testing.core.client import MockClient
+from crudclient.testing.core.http_client import MockHTTPClient
 
 
 # Function for backward compatibility
@@ -19,7 +19,7 @@ def create_mock_client(**kwargs):
 
     # Create a mock client with the mock HTTP client
     enable_spy = kwargs.get("enable_spy", False)
-    mock_client = BackwardCompatibleMockClient(http_client=http_client, enable_spy=enable_spy)
+    mock_client = MockClient(http_client=http_client, enable_spy=enable_spy)
 
     # Configure auth if specified
     if "auth_type" in kwargs and "auth_config" in kwargs:

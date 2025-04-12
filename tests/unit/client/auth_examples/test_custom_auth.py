@@ -30,7 +30,7 @@ class TestCustomAuthExamples:
         client = create_mock_client(auth_type="custom", auth_config={"header_callback": header_callback, "param_callback": param_callback})
 
         # Configure a successful response
-        client.with_response_pattern(method="GET", url_pattern=r"/api/custom", response={"data": [{"id": 1, "name": "Custom Data"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/custom", data={"data": [{"id": 1, "name": "Custom Data"}]})
 
         # Make a request
         response = client.get("/api/custom")
@@ -41,14 +41,14 @@ class TestCustomAuthExamples:
         assert response["data"][0]["name"] == "Custom Data"
 
         # Verify the auth headers and params were sent correctly
-        assert len(client.request_history) == 1
-        request = client.request_history[0]
-        assert "X-Custom-Auth" in request["headers"]
-        assert request["headers"]["X-Custom-Auth"] == "custom_value"
-        assert "X-Timestamp" in request["headers"]
-        assert request["headers"]["X-Timestamp"] == "12345678"
+        assert client.get_call_count() == 1
+        request = client.get_calls()[0]
+        assert "X-Custom-Auth" in request.kwargs["headers"]
+        assert request.kwargs["headers"]["X-Custom-Auth"] == "custom_value"
+        assert "X-Timestamp" in request.kwargs["headers"]
+        assert request.kwargs["headers"]["X-Timestamp"] == "12345678"
         # Assuming 'path' contains the full URL or path with params
-        assert request["params"].get("tenant") == "test_tenant"
+        assert request.kwargs["params"].get("tenant") == "test_tenant"
 
     def test_custom_auth_failure_scenario(self):
         """Example of testing a Custom Auth failure scenario."""
@@ -65,7 +65,7 @@ class TestCustomAuthExamples:
         client.set_auth_strategy(auth_mock.get_auth_strategy())
 
         # Configure a response (though it won't be reached)
-        client.with_response_pattern(method="GET", url_pattern=r"/api/custom", response={"data": [{"id": 1, "name": "Custom Data"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/custom", data={"data": [{"id": 1, "name": "Custom Data"}]})
 
         # Make a request and expect it to fail
         with pytest.raises(ValueError) as excinfo:

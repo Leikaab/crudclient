@@ -8,11 +8,9 @@ This module now re-exports components from the 'common' subpackage.
 from .common.factory import create_mock_client
 
 # Optionally re-export others if needed elsewhere, but keep it minimal
-# from .common.client import BackwardCompatibleMockClient
 # from .common.mfa_auth import MockMFAAuth
 
 __all__ = [
     "create_mock_client",
-    # "BackwardCompatibleMockClient",
     # "MockMFAAuth",
 ]

@@ -22,7 +22,7 @@ class TestBearerAuthExamples:
         client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token"})
 
         # Configure a successful response
-        client.with_response_pattern(method="GET", url_pattern=r"/api/resources", response={"data": [{"id": 1, "name": "Resource 1"}]})
+        client.with_response_pattern(method="GET", path_pattern=r"/api/resources", data={"data": [{"id": 1, "name": "Resource 1"}]})
 
         # Make a request
         response = client.get("/api/resources")
@@ -33,10 +33,11 @@ class TestBearerAuthExamples:
         assert response["data"][0]["name"] == "Resource 1"
 
         # Verify the auth header was sent correctly
-        assert len(client.request_history) == 1
-        request = client.request_history[0]
-        assert "Authorization" in request["headers"]
-        assert request["headers"]["Authorization"] == "Bearer valid_token"
+        assert client.get_call_count() == 1
+        calls = client.get_calls()
+        request_call = calls[0]
+        assert "Authorization" in request_call.kwargs["headers"]
+        assert request_call.kwargs["headers"]["Authorization"] == "Bearer valid_token"
 
     def test_bearer_auth_token_expiration_scenario(self):
         """Example of testing a Bearer Auth token expiration scenario."""
@@ -45,7 +46,7 @@ class TestBearerAuthExamples:
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
+            method="GET", path_pattern=r"/api/resources", data={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Make a request and expect it to fail
@@ -66,14 +67,14 @@ class TestBearerAuthExamples:
 
         # Configure an auth error response for expired token
         client.with_response_pattern(
-            method="GET", url_pattern=r"/api/resources", response={"error": "Unauthorized", "message": "Token expired"}, status_code=401
+            method="GET", path_pattern=r"/api/resources", data={"error": "Unauthorized", "message": "Token expired"}, status_code=401
         )
 
         # Configure the token refresh endpoint response
         client.with_response_pattern(
             method="POST",
-            url_pattern=r"/oauth/token",
-            response={"access_token": "new_token", "refresh_token": "new_refresh_token", "expires_in": 3600},
+            path_pattern=r"/oauth/token",
+            data={"access_token": "new_token", "refresh_token": "new_refresh_token", "expires_in": 3600},
         )
 
         # In a real implementation, the client would handle token refresh automatically
@@ -103,8 +104,8 @@ class TestBearerAuthExamples:
         # Now configure the successful response for the resource endpoint *after* the failed attempt
         client.with_response_pattern(
             method="GET",
-            url_pattern=r"/api/resources",
-            response={"data": [{"id": 1, "name": "Resource 1"}]},
+            path_pattern=r"/api/resources",
+            data={"data": [{"id": 1, "name": "Resource 1"}]},
             status_code=200,  # Ensure status code is set for success
         )
 
@@ -117,7 +118,8 @@ class TestBearerAuthExamples:
         assert response["data"][0]["name"] == "Resource 1"
 
         # Optionally, verify the correct token was used in the second GET request header
-        assert len(client.request_history) == 3  # Initial GET, POST refresh, Second GET
-        second_get_request = client.request_history[2]
-        assert "Authorization" in second_get_request["headers"]
-        assert second_get_request["headers"]["Authorization"] == "Bearer new_token"
+        assert client.get_call_count() == 3  # Initial GET, POST refresh, Second GET
+        calls = client.get_calls()
+        second_get_request = calls[2]
+        assert "Authorization" in second_get_request.kwargs["headers"]
+        assert second_get_request.kwargs["headers"]["Authorization"] == "Bearer new_token"
