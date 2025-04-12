@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from crudclient.exceptions import ModelConversionError
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 from .conftest import TestCrud, TestModel  # Import fixtures/classes from conftest
 
@@ -30,7 +32,8 @@ def test_list_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     # GIVEN
     mock_client.get.return_value = SAMPLE_LIST_PAYLOAD
     result = test_crud.list()
-    mock_client.get.assert_called_once_with("test-resources", params=None)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "get", "test-resources", params=None)
     assert result == SAMPLE_MODEL_LIST
     assert all(isinstance(item, TestModel) for item in result)
 
@@ -45,7 +48,8 @@ def test_list_operation_with_params(test_crud: TestCrud, mock_client: MagicMock)
     params = {"page": 2, "limit": 10, "sort": "name"}
     mock_client.get.return_value = SAMPLE_LIST_PAYLOAD
     result = test_crud.list(params=params)
-    mock_client.get.assert_called_once_with("test-resources", params=params)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "get", "test-resources", params=params)
     assert result == SAMPLE_MODEL_LIST
 
 
@@ -59,7 +63,8 @@ def test_list_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMo
     mock_client.get.return_value = SAMPLE_LIST_PAYLOAD
     result = test_crud.list(parent_id="parent123")
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
-    # mock_client.get.assert_called_once_with("parents/parent123/test-resources", params=None) # Example assertion if needed
+    # translate_mock_calls_for_verifier(mock_client)
+    # Verifier.verify_called_once_with(mock_client, "get", "parents/parent123/test-resources", params=None) # Example assertion if needed
     assert result == SAMPLE_MODEL_LIST
 
 
@@ -72,7 +77,8 @@ def test_list_operation_empty(test_crud: TestCrud, mock_client: MagicMock):
     # GIVEN
     mock_client.get.return_value = []
     result = test_crud.list()
-    mock_client.get.assert_called_once_with("test-resources", params=None)
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "get", "test-resources", params=None)
     assert result == []
 
 
