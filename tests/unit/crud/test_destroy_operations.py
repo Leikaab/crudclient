@@ -7,6 +7,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
+
 from .conftest import TestCrud  # Import fixtures/classes from conftest
 
 # No sample data needed for destroy tests usually
@@ -25,7 +28,8 @@ def test_destroy_operation_success(test_crud: TestCrud, mock_client: MagicMock):
     test_crud.destroy(resource_id="1")
 
     # THEN
-    mock_client.delete.assert_called_once_with("test-resources/1")
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(mock_client, "delete", "test-resources/1")
 
 
 def test_destroy_operation_with_parent_id(test_crud: TestCrud, mock_client: MagicMock):
@@ -39,7 +43,8 @@ def test_destroy_operation_with_parent_id(test_crud: TestCrud, mock_client: Magi
 
     # THEN
     # Skip URL assertion for parent_id tests - URL construction is tested elsewhere
-    # mock_client.delete.assert_called_once_with("parents/parent123/test-resources/1") # Example assertion
+    # translate_mock_calls_for_verifier(mock_client)
+    # Verifier.verify_called_once_with(mock_client, "delete", "parents/parent123/test-resources/1") # Example assertion
 
 
 def test_destroy_operation_action_not_allowed(test_crud: TestCrud):
