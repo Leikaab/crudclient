@@ -43,7 +43,16 @@ from .api import API
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
-from .exceptions import APIError, ClientInitializationError, InvalidClientError, CrudClientError, AuthenticationError, NotFoundError, InvalidResponseError, ModelConversionError
+from .exceptions import (
+    APIError,
+    AuthenticationError,
+    ClientInitializationError,
+    CrudClientError,
+    InvalidClientError,
+    InvalidResponseError,
+    ModelConversionError,
+    NotFoundError,
+)
 from .models import ApiResponse
 from .types import JSONDict, JSONList, RawResponse
 

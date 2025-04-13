@@ -3,7 +3,15 @@ import random
 
 import pytest
 
-from .oneflow_resources.setup import DataField, OneflowAPI, OneflowConfig, TemplateType, TemplateTypesResponse, User, UsersResponse
+from .oneflow_resources.setup import (
+    DataField,
+    OneflowAPI,
+    OneflowConfig,
+    TemplateType,
+    TemplateTypesResponse,
+    User,
+    UsersResponse,
+)
 
 
 @pytest.fixture
@@ -18,6 +26,7 @@ def test_api_configuration(api):
     assert api.client.config.auth_strategy is not None
     # Check that the auth strategy is an ApiKeyAuth
     from crudclient.auth.custom import ApiKeyAuth
+
     assert isinstance(api.client.config.auth_strategy, ApiKeyAuth)
     # Check that the API key is set correctly
     assert api.client.config.auth_strategy.api_key == os.getenv("ONEFLOW_API_KEY")
@@ -50,6 +59,7 @@ def test_read_template_type(api):
     assert template_type.updated_time is not None
 
 
+@pytest.mark.no_parallel
 def test_update_data_field(api):
     template_type_id = api.template_types.read(220129)
     rand = random.randint(1, 1000)

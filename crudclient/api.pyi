@@ -39,6 +39,7 @@ Exceptions:
 
 import logging
 from abc import ABC, abstractmethod
+from types import TracebackType
 from typing import Any, Dict, Optional, Type, TypeVar, Union
 
 from .client import Client
@@ -46,9 +47,7 @@ from .config import ClientConfig
 from .crud import Crud
 from .exceptions import ClientInitializationError, InvalidClientError
 
-
-T = TypeVar('T', bound=Crud)
-
+T = TypeVar("T", bound=Crud)
 
 class API(ABC):
     """
@@ -80,7 +79,7 @@ class API(ABC):
         """
         ...
 
-    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs) -> None:
+    def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         """
         Initializes the API class.
 
@@ -135,18 +134,18 @@ class API(ABC):
         """
         ...
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[Any]) -> None:
         """
         Exits the runtime context related to this object.
 
         Closes the client session if it is open.
 
         @param exc_type: The exception type, if an exception was raised.
-        @type exc_type: type
+        @type exc_type: Optional[Type[BaseException]]
         @param exc_value: The exception instance, if an exception was raised.
-        @type exc_value: Exception
+        @type exc_value: Optional[BaseException]
         @param traceback: The traceback object, if an exception was raised.
-        @type traceback: traceback
+        @type traceback: Optional[Any]
         """
         ...
 
@@ -158,7 +157,7 @@ class API(ABC):
         """
         ...
 
-    def use_custom_resource(self, resource_class: Type[T], *args, **kwargs) -> T:
+    def use_custom_resource(self, resource_class: Type[T], *args: Any, **kwargs: Any) -> T:
         """
         Dynamically use custom resources that follow the CRUD structure,
         enabling the extension of the API without modifying the core API class.
@@ -169,11 +168,11 @@ class API(ABC):
             contact_list = contacts.list()
 
         @param resource_class: The class of the custom resource to be instantiated.
-        @type resource_class: Type[Crud]
+        @type resource_class: Type[T]
         @param args: Positional arguments to pass to the resource class constructor.
-        @type args: tuple
+        @type args: Any
         @param kwargs: Keyword arguments to pass to the resource class constructor.
-        @type kwargs: dict
+        @type kwargs: Any
 
         @return: An instance of the specified resource class, initialized with the provided arguments.
         @rtype: Crud

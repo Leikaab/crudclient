@@ -1,25 +1,5 @@
-"""
-Module `config.py`
-==================
-
-Defines the `ClientConfig` base class used for configuring API clients.
-
-This module provides a reusable configuration system for HTTP API clients,
-including support for base URLs, authentication strategies, headers, timeouts,
-and retry logic. Designed for subclassing and reuse across multiple APIs.
-
-Features:
-    - Support for Bearer, Basic, or no authentication
-    - Automatic generation of authentication headers
-    - Pre-request initialization and hook support
-    - Extensible retry logic, including 403-retry fallback for session-based APIs
-
-Classes:
-    - ClientConfig: Base configuration class for API clients.
-"""
-
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 from crudclient.auth.base import AuthStrategy
@@ -47,7 +27,7 @@ class ClientConfig:
         timeout: Optional[float] = None,
         retries: Optional[int] = None,
         auth_strategy: Optional[AuthStrategy] = None,
-        auth_type: Optional[str] = None
+        auth_type: Optional[str] = None,
     ) -> None:
         self.hostname = hostname or self.__class__.hostname
         self.version = version or self.__class__.version
@@ -72,36 +52,14 @@ class ClientConfig:
         return "Authorization"
 
     def prepare(self) -> None:
-        """
-        Hook for pre-request setup logic.
-
-        Override in subclasses to implement setup steps such as refreshing tokens,
-        validating credentials, or preparing session context.
-
-        This method is called once at client startup.
-        """
+        pass
 
     def get_auth_headers(self) -> Dict[str, str]:
-        """
-        Builds the authentication headers to use in requests.
-
-        If an AuthStrategy is set, uses it to prepare request headers.
-        Otherwise, returns an empty dictionary.
-
-        Returns:
-            Dict[str, str]: Headers to include in requests.
-        """
         if self.auth_strategy:
             return self.auth_strategy.prepare_request_headers()
         return {}
 
     def auth(self) -> Dict[str, str]:
-        """
-        Legacy method for backward compatibility.
-
-        Returns authentication headers based on the auth_type and token.
-        New code should use the AuthStrategy pattern instead.
-        """
         # If we have an AuthStrategy, use it
         if isinstance(self.auth_strategy, AuthStrategy):
             return self.get_auth_headers()
@@ -124,43 +82,42 @@ class ClientConfig:
             return {header_name: token}
 
     def should_retry_on_403(self) -> bool:
-        """
-        Indicates whether the client should retry once after a 403 Forbidden response.
-
-        Override in subclasses to enable fallback retry logic, typically used in APIs
-        where sessions or tokens may expire and require refresh.
-
-        Returns:
-            bool: True to enable 403 retry, False by default.
-        """
         return False
 
-    def handle_403_retry(self, client) -> None:
-        """
-        Hook to handle 403 response fallback logic (e.g. token/session refresh).
+    def handle_403_retry(self, client: Any) -> None:
+        return None
 
-        Called once when a 403 response is received and `should_retry_on_403()` returns True.
-        The method may update headers, refresh tokens, or mutate session state.
-
-        Args:
-            client: Reference to the API client instance making the request.
-        """
-
-    def __add__(self, other):
+    def merge(self, other: "ClientConfig") -> "ClientConfig":
         if not isinstance(other, self.__class__):
-            return NotImplemented
+            return NotImplemented  # type: ignore
 
         import copy
 
-        new_instance = copy.deepcopy(other)
+        # Create a deep copy of self as the base for the new instance
+        new_instance = copy.deepcopy(self)
 
-        if hasattr(self, "headers") and self.headers:
-            new_headers = copy.deepcopy(self.headers or {})
-            new_headers.update(new_instance.headers or {})
+        # Special handling for headers - merge them with other's headers taking precedence
+        if hasattr(other, "headers") and other.headers:
+            new_headers = copy.deepcopy(new_instance.headers or {})
+            new_headers.update(other.headers)
             new_instance.headers = new_headers
 
-        for key, value in self.__dict__.items():
-            if key != "headers" and key not in other.__dict__:
+        # Copy all other attributes from other, overriding self's values
+        for key, value in other.__dict__.items():
+            if key != "headers" and value is not None:
                 setattr(new_instance, key, copy.deepcopy(value))
 
         return new_instance
+
+    def __add__(self, other: "ClientConfig") -> "ClientConfig":
+        import warnings
+
+        warnings.warn("The __add__ method is deprecated. Use merge() instead.", DeprecationWarning, stacklevel=2)
+        return self.merge(other)
+
+    @staticmethod
+    def merge_configs(base_config: "ClientConfig", other_config: "ClientConfig") -> "ClientConfig":
+        if not isinstance(base_config, ClientConfig) or not isinstance(other_config, ClientConfig):
+            raise TypeError("Both arguments must be instances of ClientConfig")
+
+        return base_config.merge(other_config)

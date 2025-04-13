@@ -1,6 +1,6 @@
 from typing import Dict, Optional
-from .base import AuthStrategy
 
+from .base import AuthStrategy
 
 class BearerAuth(AuthStrategy):
     """

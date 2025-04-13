@@ -10,6 +10,7 @@ class TokenSession(BaseModel):
     """
     Represents a Tripletex API token session.
     """
+
     token: str
     expirationDate: datetime
     encryptionKey: Optional[str] = None
@@ -24,6 +25,7 @@ class TokenSessionResponse(BaseModel):
     """
     Represents the response from the Tripletex API token session endpoint.
     """
+
     value: TokenSession
     from_: Optional[datetime] = Field(None, alias="from")
     to: Optional[datetime] = None
@@ -37,6 +39,7 @@ class Country(BaseModel):
     """
     Represents a country in the Tripletex API.
     """
+
     id: Optional[int] = None
     version: Optional[int] = None
     changes: Optional[list] = None
@@ -57,6 +60,7 @@ class Supplier(BaseModel):
     """
     Represents a supplier in the Tripletex API.
     """
+
     id: Optional[int] = None
     version: Optional[int] = None
     changes: Optional[list] = None

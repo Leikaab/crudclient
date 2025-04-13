@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
-
 class AuthStrategy(ABC):
     """
     Abstract base class for authentication strategies.
@@ -38,7 +37,6 @@ class AuthStrategy(ABC):
             Dict[str, str]: A dictionary of query parameters for authentication.
         """
         ...
-
 
 def create_auth_strategy(auth_type: str, api_key: Optional[str] = None) -> AuthStrategy:
     """

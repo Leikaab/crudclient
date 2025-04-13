@@ -33,16 +33,36 @@ Type Variables:
 """
 
 import logging
-from typing import Any, Generic, List, Literal, Optional, Protocol, Type, TypeAlias, TypeVar, cast, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    Tuple,
+    Type,
+    TypeAlias,
+    TypeVar,
+    Union,
+    cast,
+)
+
+from pydantic import ValidationError as PydanticValidationError
 
 from .client import Client
+from .exceptions import ModelConversionError, ValidationError
 from .models import ApiResponse
+from .response_strategies import (
+    DefaultResponseModelStrategy,
+    ModelDumpable,
+    PathBasedResponseModelStrategy,
+    ResponseModelStrategy,
+    ResponseTransformer,
+)
 from .types import JSONDict, JSONList, RawResponse
-
-
-class ModelDumpable(Protocol):
-    def model_dump(self) -> dict: ...
-
 
 T = TypeVar("T", bound=ModelDumpable)
 HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]
@@ -51,7 +71,6 @@ CrudType: TypeAlias = Type[CrudInstance]
 ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
-
 
 class Crud(Generic[T]):
     """
@@ -83,8 +102,13 @@ class Crud(Generic[T]):
     _methods: List[str]
     _api_response_model: Optional[ApiResponseType]
     _list_return_keys: List[str]
+    _response_model_strategy: Optional[Type[ResponseModelStrategy[T]]]
+    _single_item_path: Optional[str]
+    _list_item_path: Optional[str]
+    _response_pre_transform: Optional[ResponseTransformer]
     client: Client
     _parent: Optional["Crud"]
+    _strategy: ResponseModelStrategy[T]
 
     def __init__(self, client: Client, parent: Optional["Crud"] = None) -> None:
         """
@@ -92,6 +116,15 @@ class Crud(Generic[T]):
 
         :param client: Client An instance of the API client.
         :param parent: Optional[Crud] Optional parent Crud instance for nested resources.
+        """
+        ...
+
+    def _init_response_strategy(self) -> None:
+        """
+        Initialize the response model strategy.
+
+        This method creates an instance of the appropriate response model strategy
+        based on the class configuration.
         """
         ...
 
@@ -109,6 +142,50 @@ class Crud(Generic[T]):
         ```
 
         :return: List[str] The endpoint prefix segments.
+        """
+        ...
+
+    def _validate_path_segments(self, *args: PathArgs) -> None:
+        """
+        Validate the types of path segments.
+
+        :param args: Variable number of path segments (e.g., resource IDs, actions).
+        :raises TypeError: If any arg is not None, str, or int.
+        """
+        ...
+
+    def _get_parent_path(self, parent_args: Optional[tuple] = None) -> str:
+        """
+        Get the parent path if a parent exists.
+
+        :param parent_args: Optional tuple containing path segments for the parent resource.
+        :return: str The parent path or empty string if no parent exists.
+        """
+        ...
+
+    def _build_resource_path(self, *args: PathArgs) -> List[str]:
+        """
+        Build the current resource path segments.
+
+        :param args: Variable number of path segments (e.g., resource IDs, actions).
+        :return: List[str] The resource path segments.
+        """
+        ...
+
+    def _get_prefix_segments(self) -> List[str]:
+        """
+        Get the prefix segments for the endpoint.
+
+        :return: List[str] The prefix segments.
+        """
+        ...
+
+    def _join_path_segments(self, segments: List[str]) -> str:
+        """
+        Join path segments into a URL.
+
+        :param segments: List of path segments.
+        :return: str The joined URL path.
         """
         ...
 
@@ -137,9 +214,13 @@ class Crud(Generic[T]):
         """
         Convert the API response to the datamodel type.
 
+        This method uses the configured response model strategy to convert the data.
+        The strategy handles extracting data from the response and converting it to
+        the appropriate model type.
+
         :param data: RawResponse The API response data.
         :return: Union[T, JSONDict] An instance of the datamodel or a dictionary.
-        :raises ValueError: If the response is an unexpected type.
+        :raises ValueError: If the response is an unexpected type or conversion fails.
         """
         ...
 
@@ -157,18 +238,41 @@ class Crud(Generic[T]):
         """
         Validate and convert the list response data.
 
+        This method uses the configured response model strategy to validate and convert
+        the list response data. It handles different response formats and extracts list
+        data according to the strategy.
+
         :param data: RawResponse The API response data.
         :return: Union[JSONList, List[T], ApiResponse] Validated and converted list data.
-        :raises ValueError: If the response format is unexpected.
+        :raises ValueError: If the response format is unexpected or conversion fails.
         """
         ...
 
-    def _dump_data(self, data: Optional[Union[JSONDict, T]]) -> JSONDict:
+    def _fallback_list_conversion(
+        self, validated_data: Union[JSONDict, JSONList], original_error: Exception
+    ) -> Union[JSONList, List[T], ApiResponse]:
+        """
+        Fallback conversion logic for list responses when the strategy fails.
+
+        This method implements the original behavior for backward compatibility.
+
+        :param validated_data: The validated response data.
+        :param original_error: The original exception from the strategy.
+        :return: Union[JSONList, List[T], ApiResponse] Converted list data.
+        :raises ValueError: If the response format is unexpected or conversion fails.
+        """
+        ...
+
+    def _dump_data(self, data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
         """
         Dump the data model to a JSON-serializable dictionary.
 
-        :param data: JSONDict | T The data to dump.
+        :param data: Optional[Union[JSONDict, T]] The data to dump.
+        :param partial: bool Whether this is a partial update (default: False).
         :return: JSONDict The dumped data.
+        :raises ValueError: If the data is not a dict, None, or an instance of the datamodel.
+        :raises TypeError: If the data is not of the expected type.
+        :raises ValidationError: If the data fails validation.
         """
         ...
 
@@ -186,9 +290,11 @@ class Crud(Generic[T]):
         """
         Create a new resource.
 
-        :param data: JSONDict The data for the new resource.
+        :param data: Union[JSONDict, T] The data for the new resource.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
         :return: Union[T, JSONDict] The created resource.
+        :raises ValidationError: If the input data fails validation.
+        :raises ModelConversionError: If the response data fails conversion.
         """
         ...
 
@@ -199,6 +305,7 @@ class Crud(Generic[T]):
         :param resource_id: str The ID of the resource to retrieve.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
         :return: Union[T, JSONDict] The retrieved resource.
+        :raises ModelConversionError: If the response data fails conversion.
         """
         ...
 
@@ -207,9 +314,11 @@ class Crud(Generic[T]):
         Update a specific resource.
 
         :param resource_id: str The ID of the resource to update.
-        :param data: JSONDict The updated data for the resource.
+        :param data: Union[JSONDict, T] The updated data for the resource.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
         :return: Union[T, JSONDict] The updated resource.
+        :raises ValidationError: If the input data fails validation.
+        :raises ModelConversionError: If the response data fails conversion.
         """
         ...
 
@@ -218,9 +327,11 @@ class Crud(Generic[T]):
         Partially update a specific resource.
 
         :param resource_id: str The ID of the resource to update.
-        :param data: JSONDict The partial updated data for the resource.
+        :param data: Union[JSONDict, T] The partial updated data for the resource.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
         :return: Union[T, JSONDict] The updated resource.
+        :raises ValidationError: If the input data fails validation.
+        :raises ModelConversionError: If the response data fails conversion.
         """
         ...
 
@@ -246,11 +357,14 @@ class Crud(Generic[T]):
         Perform a custom action on the resource.
 
         :param action: str The name of the custom action.
-        :param method: str The HTTP method to use. Defaults to "post".
+        :param method: HttpMethodString The HTTP method to use. Defaults to "post".
         :param resource_id: Optional[str] Optional resource ID if the action is for a specific resource.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
-        :param data: Optional[JSONDict] Optional data to send with the request.
+        :param data: Optional[Union[JSONDict, T]] Optional data to send with the request.
         :param params: Optional[JSONDict] Optional query parameters.
         :return: Union[T, JSONDict, List[JSONDict]] The API response.
+        :raises ValidationError: If the input data fails validation.
+        :raises ModelConversionError: If the response data fails conversion.
+        :raises TypeError: If the parameters are of incorrect types.
         """
         ...

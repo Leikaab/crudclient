@@ -11,3 +11,7 @@ class AuthStrategy(ABC):
     @abstractmethod
     def prepare_request_params(self) -> Dict[str, str]:
         pass
+
+
+# Alias for backward compatibility
+BaseAuthStrategy = AuthStrategy

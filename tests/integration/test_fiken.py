@@ -21,6 +21,7 @@ def test_api_configuration(api):
         assert api.client.config.auth_strategy is not None
         # Check that the auth strategy is a BearerAuth
         from crudclient.auth.bearer import BearerAuth
+
         assert isinstance(api.client.config.auth_strategy, BearerAuth)
         # Check that the token is set correctly
         assert api.client.config.auth_strategy.token == token
@@ -47,4 +48,5 @@ def test_list_contacts(api):
     contacts = api.contacts.bind_company("fiken-demo-faktisk-plante-as2").list()
     assert isinstance(contacts, list)
     assert len(contacts) > 0
+    assert all(isinstance(contact, Contact) for contact in contacts)
     assert all(isinstance(contact, Contact) for contact in contacts)

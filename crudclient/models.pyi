@@ -12,10 +12,9 @@ Classes:
     - ApiResponse: A generic model for API responses with pagination.
 """
 
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, ClassVar, Dict, Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl
-
+from pydantic import BaseModel, Field, HttpUrl, field_validator, validator
 
 class RoleBasedModel(BaseModel):
     """
@@ -24,6 +23,11 @@ class RoleBasedModel(BaseModel):
     This model allows for role-based field validation, where certain fields may be
     required or disallowed based on the current role. The role is specified using
     the `_role` field in the input data.
+
+    Note: This model is currently not used in the core library but is kept here
+    as it's intended to be the foundation for future enhancements to the library's
+    validation capabilities. Future plans include expanding this to support more
+    complex validation scenarios and integrating it with the CRUD operations.
 
     Attributes:
         _current_role (Optional[str]): The current role for validation.
@@ -47,9 +51,7 @@ class RoleBasedModel(BaseModel):
         """
         ...
 
-
 T = TypeVar("T")
-
 
 class Link(BaseModel):
     """
@@ -61,6 +63,11 @@ class Link(BaseModel):
 
     href: Optional[HttpUrl]
 
+    @field_validator("href")
+    @classmethod
+    def validate_href(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]:
+        """Validate the href URL if present."""
+        ...
 
 class PaginationLinks(BaseModel):
     """
@@ -74,8 +81,13 @@ class PaginationLinks(BaseModel):
 
     next: Optional[Link]
     previous: Optional[Link]
-    self: Link
+    self: Link = Field(..., description="Link to the current page")
 
+    @field_validator("self")
+    @classmethod
+    def validate_self_link(cls, v: Link) -> Link:
+        """Validate that the self link is present and properly formatted."""
+        ...
 
 class ApiResponse(BaseModel, Generic[T]):
     """
@@ -90,6 +102,12 @@ class ApiResponse(BaseModel, Generic[T]):
         data (List[T]): The actual data items.
     """
 
-    links: PaginationLinks
-    count: int
-    data: List[T]
+    links: PaginationLinks = Field(..., alias="_links", description="Pagination links")
+    count: int = Field(..., ge=0, description="Total number of items")
+    data: List[T] = Field(..., description="The actual data items")
+
+    @field_validator("count")
+    @classmethod
+    def validate_count(cls, v: int) -> int:
+        """Validate that count is non-negative."""
+        ...

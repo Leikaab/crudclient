@@ -10,7 +10,14 @@ from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 from crudclient.types import JSONDict
 
-from .models import DataField, DataFieldsResponse, TemplateType, TemplateTypesResponse, User, UsersResponse
+from .models import (
+    DataField,
+    DataFieldsResponse,
+    TemplateType,
+    TemplateTypesResponse,
+    User,
+    UsersResponse,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -56,11 +63,12 @@ class OneflowDataFields(Crud[DataField]):
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
-        converted_data: JSONDict = self._dump_data(data)
+        converted_data: JSONDict = self._dump_data(data, partial=True)
 
         converted_data["custom_id"] = resource_id
         passable_data = {"data_fields": [converted_data]}
-        endpoint = self._get_endpoint(parent_args=(parent_id,))
+        # Fix the endpoint construction
+        endpoint = f"template_types/{parent_id}/data_fields"
         response = self.client.put(endpoint, json=passable_data)
         assert isinstance(response, dict)
         for i in response["data_fields"]:

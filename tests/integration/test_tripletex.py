@@ -25,6 +25,7 @@ def test_api_configuration(api):
 
     # Check that the auth strategy is a TripletexAuthStrategy
     from .tripletex_resources.setup import TripletexAuthStrategy
+
     assert isinstance(api.client.config.auth_strategy, TripletexAuthStrategy)
 
     # Check that the session token is set
@@ -38,6 +39,7 @@ def test_api_configuration(api):
     assert api.client.config.auth_strategy.session_expires_at > datetime.now(timezone.utc)
 
 
+@pytest.mark.no_parallel
 def test_token_refresh(api):
     """
     Test that the token can be refreshed.
@@ -82,12 +84,12 @@ def test_list_countries(api):
     for country in countries:
         # The API returns dictionaries, not model objects
         assert isinstance(country, dict)
-        assert 'id' in country
-        assert 'isoAlpha2Code' in country
-        assert 'isoAlpha3Code' in country
-        assert 'isoNumericCode' in country
+        assert "id" in country
+        assert "isoAlpha2Code" in country
+        assert "isoAlpha3Code" in country
+        assert "isoNumericCode" in country
         # The API might use 'displayName' instead of 'name'
-        assert 'displayName' in country
+        assert "displayName" in country
 
 
 def test_read_country(api):
@@ -98,15 +100,15 @@ def test_read_country(api):
     countries = api.countries.list()
 
     # Get the first country's ID
-    first_country_id = countries[0]['id']
+    first_country_id = countries[0]["id"]
 
     # Read the country by ID
     country = api.countries.read(first_country_id)
 
     # Check that we got the expected country
     assert isinstance(country, dict)
-    assert country['id'] == first_country_id
-    assert 'displayName' in country
-    assert 'isoAlpha2Code' in country
-    assert 'isoAlpha3Code' in country
-    assert 'isoNumericCode' in country
+    assert country["id"] == first_country_id
+    assert "displayName" in country
+    assert "isoAlpha2Code" in country
+    assert "isoAlpha3Code" in country
+    assert "isoNumericCode" in country

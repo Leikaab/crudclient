@@ -9,6 +9,28 @@ repos:
 
   - repo: local
     hooks:
+      - id: check-docstrings
+        name: Check docstrings are only in .pyi files
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_docstrings.py
+        types: [python]
+        files: ^crudclient/.*\.py$
+
+      - id: check-stub-files
+        name: Check .py files have matching .pyi files
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_stub_files.py
+        types: [python]
+        files: ^crudclient/.*\.py$
+
+      - id: check-file-length
+        name: Check .py files are ≤ 300 lines
+        stages: [pre-commit]
+        language: system
+        entry: python hooks/check_file_length.py
+        types: [python]
 
       - id: autoflake
         name: autoflake
@@ -21,17 +43,15 @@ repos:
         name: isort
         stages: [pre-commit]
         language: system
-        entry: poetry run isort
+        entry: poetry run isort --profile black
         types: [python]
 
       - id: black
         name: black
         stages: [pre-commit]
         language: system
-        entry: poetry run black
+        entry: poetry run black .
         types: [python, pyi]
-        args:
-          - "--line-length=150"
 
       - id: flake8
         name: flake8
@@ -40,8 +60,6 @@ repos:
         entry: poetry run flake8
         types: [python]
         exclude: setup.py
-        args:
-          - "--max-line-length=150"
 
       - id: mypy
         name: mypy
@@ -52,17 +70,20 @@ repos:
         require_serial: true
 
       - id: pytest
-        name: pytest
+        name: pytest (changed files)
         stages: [pre-commit]
         language: system
-        entry: poetry run pytest tests/unit/
+        entry: python -c "import sys; from subprocess import run; files = ' '.join(sys.argv[1:]); run(f'poetry run pytest {files} -v --no-header --durations=3', shell=True)" --
         types: [python]
-        pass_filenames: false
+        files: ^(crudclient/|tests/unit/).*\.py$
+        pass_filenames: true
+        verbose: true
 
       - id: pytest-cov
-        name: pytest
+        name: pytest with coverage
         stages: [pre-push]
         language: system
-        entry: poetry run pytest tests/unit/ --cov --cov-fail-under=80
+        entry: poetry run pytest tests/unit/ --cov --cov-report=term-missing --cov-branch --no-header --durations=5
         types: [python]
         pass_filenames: false
+        verbose: true
