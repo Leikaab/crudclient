@@ -5,23 +5,27 @@ This module contains tests for how the ErrorHandler class handles various HTTP e
 including different status codes and malformed responses.
 """
 
-import json
 
 import pytest
 import requests
 
 from crudclient.exceptions import (
+    UnprocessableEntityError,  # Added UnprocessableEntityError here
+)
+from crudclient.exceptions import (  # Reverted to absolute import; DataValidationError, # Removed unused import
+    APIError,
     AuthenticationError,
-    CrudClientError,
-    InvalidResponseError,
+    BadRequestError,
+    ForbiddenError,
+    InternalServerError,
     NotFoundError,
+    ServiceUnavailableError,
 )
 
 
 @pytest.fixture
 def create_response_mock(mocker):
     """Create a mock response."""
-
     def _create_mock(status_code, json_data=None, headers=None, text=None):
         response = mocker.Mock(spec=requests.Response)
         response.status_code = status_code
@@ -43,6 +47,12 @@ def create_response_mock(mocker):
         else:
             response.ok = True
 
+        # Add a default mock request for error reporting consistency
+        mock_request = mocker.Mock(spec=requests.PreparedRequest)  # Use PreparedRequest as it's often what's attached
+        mock_request.method = "GET"
+        mock_request.url = "http://mock.test/api/resource"
+        response.request = mock_request
+
         return response
 
     return _create_mock
@@ -51,150 +61,145 @@ def create_response_mock(mocker):
 class TestErrorHandler:
     """Tests for the ErrorHandler class."""
 
-    # Using error_handler fixture from conftest.py
-
     def test_handle_error_response_400(self, error_handler, create_response_mock):
         """Test handling of 400 Bad Request responses."""
-        # Arrange
         response = create_response_mock(400, json_data={"error": "Bad Request", "message": "Invalid parameters"})
 
-        # Act & Assert
-        with pytest.raises(CrudClientError) as excinfo:
+        with pytest.raises(BadRequestError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "400" in str(excinfo.value)
-        assert "Bad Request" in str(excinfo.value)
-        assert "Invalid parameters" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 400
+        assert "Bad Request" in excinfo.value.message
+        assert "Invalid parameters" in excinfo.value.message
 
     def test_handle_error_response_401(self, error_handler, create_response_mock):
         """Test handling of 401 Unauthorized responses."""
-        # Arrange
         response = create_response_mock(401, json_data={"error": "Unauthorized", "message": "Invalid credentials"})
 
-        # Act & Assert
         with pytest.raises(AuthenticationError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "401" in str(excinfo.value)
-        assert "Authentication failed" in str(excinfo.value)
-        assert "Invalid credentials" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response.status_code == 401
+        assert excinfo.value.response.json()["message"] == "Invalid credentials"
 
     def test_handle_error_response_403(self, error_handler, create_response_mock):
         """Test handling of 403 Forbidden responses."""
-        # Arrange
         response = create_response_mock(403, json_data={"error": "Forbidden", "message": "Insufficient permissions"})
 
-        # Act & Assert
-        with pytest.raises(AuthenticationError) as excinfo:
+        with pytest.raises(ForbiddenError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "403" in str(excinfo.value)
-        assert "Authentication failed" in str(excinfo.value)
-        assert "Insufficient permissions" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 403
+        assert "Forbidden" in excinfo.value.message
+        assert "Insufficient permissions" in excinfo.value.message
 
-    def test_handle_error_response_404(self, error_handler, create_response_mock):
+    def test_handle_error_response_404(self, error_handler, create_response_mock, mocker):
         """Test handling of 404 Not Found responses."""
-        # Arrange
+        mock_request = mocker.Mock(spec=requests.Request)
+        mock_request.method = "GET"
+        mock_request.url = "http://mock.test/path"  # Added URL attribute
         response = create_response_mock(404, json_data={"error": "Not Found", "message": "Resource does not exist"})
+        response.request = mock_request
 
-        # Act & Assert
         with pytest.raises(NotFoundError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "404" in str(excinfo.value)
-        assert "Resource not found" in str(excinfo.value)
-        assert "Resource does not exist" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 404
+        assert "Not Found" in excinfo.value.message
+        assert "Resource does not exist" in excinfo.value.message
 
     def test_handle_error_response_422(self, error_handler, create_response_mock):
         """Test handling of 422 Unprocessable Entity responses."""
-        # Arrange
         response = create_response_mock(422, json_data={"error": "Validation Error", "fields": {"name": "Required"}})
 
-        # Act & Assert
-        with pytest.raises(InvalidResponseError) as excinfo:
+        with pytest.raises(UnprocessableEntityError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "422" in str(excinfo.value)
-        assert "Invalid response" in str(excinfo.value)
-        assert "Validation Error" in str(excinfo.value)
+        # UnprocessableEntityError specific checks
+        # Check that the message contains details from the response JSON
+        assert "Validation Error" in excinfo.value.message
+        assert "'fields': {'name': 'Required'}" in excinfo.value.message  # Check for field details representation
 
     def test_handle_error_response_500(self, error_handler, create_response_mock):
         """Test handling of 500 Internal Server Error responses."""
-        # Arrange
         response = create_response_mock(500, json_data={"error": "Internal Server Error"})
 
-        # Act & Assert
-        with pytest.raises(CrudClientError) as excinfo:
+        with pytest.raises(InternalServerError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "500" in str(excinfo.value)
-        assert "Internal Server Error" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 500
+        assert "Internal Server Error" in excinfo.value.message
 
     def test_handle_error_response_502(self, error_handler, create_response_mock):
         """Test handling of 502 Bad Gateway responses."""
-        # Arrange
         response = create_response_mock(502, json_data={"error": "Bad Gateway"})
 
-        # Act & Assert
-        with pytest.raises(CrudClientError) as excinfo:
+        with pytest.raises(APIError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "502" in str(excinfo.value)
-        assert "Bad Gateway" in str(excinfo.value)
+        # 502 is mapped to generic APIError
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 502
+        assert "Bad Gateway" in excinfo.value.message
 
     def test_handle_error_response_503(self, error_handler, create_response_mock):
         """Test handling of 503 Service Unavailable responses."""
-        # Arrange
         response = create_response_mock(503, json_data={"error": "Service Unavailable"})
 
-        # Act & Assert
-        with pytest.raises(CrudClientError) as excinfo:
+        with pytest.raises(ServiceUnavailableError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "503" in str(excinfo.value)
-        assert "Service Unavailable" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 503
+        assert "Service Unavailable" in excinfo.value.message
 
     def test_handle_error_response_invalid_json(self, error_handler, create_response_mock, mocker):
         """Test handling of responses with invalid JSON."""
-        # Arrange
         response = create_response_mock(400, text="Not a JSON response")
-        response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
+        response.json.side_effect = requests.exceptions.JSONDecodeError("Invalid JSON", "", 0)
         response.raise_for_status.side_effect = requests.HTTPError("400 Client Error")
 
-        # Act & Assert
-        with pytest.raises(CrudClientError) as excinfo:
+        # Expect BadRequestError because the status code is 400
+        # The ErrorHandler currently prioritizes status code mapping over JSON parsing errors
+        # when raising the final exception.
+        with pytest.raises(BadRequestError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "400" in str(excinfo.value)
-        assert "Not a JSON response" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 400
+        # Check that the message includes the raw text since JSON parsing failed
+        assert "Not a JSON response" in excinfo.value.message
 
-    def test_register_status_code_handler(self, error_handler, create_response_mock):
+    def test_register_status_code_handler(self, error_handler, create_response_mock, mocker):
         """Test registering a custom status code handler."""
 
-        # Arrange
-        # Create a custom exception class
-        class CustomError(CrudClientError):
+        class CustomError(APIError):
             pass
 
-        # Register a custom handler for status code 418
         error_handler.register_status_code_handler(418, CustomError)
 
-        # Create a mock response with a 418 status code
+        mock_request = mocker.Mock(spec=requests.Request)
+        mock_request.method = "GET"  # Added method attribute
+        mock_request.url = "http://mock.test/teapot"  # Added URL attribute
         response = create_response_mock(418, json_data={"error": "I'm a teapot"})
+        response.request = mock_request
 
-        # Act & Assert
         with pytest.raises(CustomError) as excinfo:
             error_handler.handle_error_response(response)
 
-        # Check that the exception contains the error details
-        assert "418" in str(excinfo.value)
-        assert "I'm a teapot" in str(excinfo.value)
+        assert excinfo.value.response is not None
+        assert excinfo.value.response is response
+        assert excinfo.value.response.status_code == 418
+        assert "I'm a teapot" in excinfo.value.message

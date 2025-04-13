@@ -38,9 +38,14 @@ def create_mock_client(create_mock_client_config: Callable[..., ClientConfig]) -
         else:
             client_config = create_mock_client_config(**kwargs.get("config_options", {}))
 
+        # Ensure hostname is set in the config object itself, even if overridden with None
+        # This prevents errors when accessing client.config.base_url later.
+        if client_config.hostname is None:
+            client_config.hostname = "https://api.example.com"  # Use a sensible default
+
         # Create the mock HTTP client and the main mock client
         # Provide a default hostname if None
-        base_url = client_config.hostname or "https://api.example.com"
+        base_url = client_config.hostname  # Should always have a value now
         http_client = MockHTTPClient(base_url=base_url)
         client = MockClient(http_client=http_client, base_url=base_url)
         client.config = client_config  # Assign the full config

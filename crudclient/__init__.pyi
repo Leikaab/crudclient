@@ -43,32 +43,49 @@ from .api import API
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
-from .exceptions import (
+from .exceptions import (  # Updated imports
     APIError,
     AuthenticationError,
-    ClientInitializationError,
+    BadRequestError,
+    ClientAuthenticationError,
+    ConfigurationError,  # Replaced ClientInitializationError, InvalidClientError
+    ConflictError,
     CrudClientError,
-    InvalidClientError,
-    InvalidResponseError,
-    ModelConversionError,
+    DataValidationError,  # Replaced ModelConversionError
+    ForbiddenError,
+    InternalServerError,
+    NetworkError,
     NotFoundError,
+    RateLimitError,
+    ResponseParsingError,
+    ServiceUnavailableError,
+    UnprocessableEntityError,  # Replaced InvalidResponseError
 )
 from .models import ApiResponse
 from .types import JSONDict, JSONList, RawResponse
 
-__all__ = [
+__all__ = [  # Updated __all__
     "API",
     "Client",
     "ClientConfig",
     "Crud",
     "APIError",
-    "InvalidClientError",
-    "ClientInitializationError",
+    "ConfigurationError",  # Replaced InvalidClientError, ClientInitializationError
     "CrudClientError",
     "AuthenticationError",
     "NotFoundError",
-    "InvalidResponseError",
-    "ModelConversionError",
+    "UnprocessableEntityError",  # Replaced InvalidResponseError
+    "DataValidationError",  # Replaced ModelConversionError
+    "NetworkError",
+    "ResponseParsingError",
+    # Specific API Errors (optional to export all, but good for discoverability)
+    "BadRequestError",
+    "ClientAuthenticationError",
+    "ForbiddenError",
+    "ConflictError",
+    "RateLimitError",
+    "InternalServerError",
+    "ServiceUnavailableError",
     "ApiResponse",
     "JSONDict",
     "JSONList",

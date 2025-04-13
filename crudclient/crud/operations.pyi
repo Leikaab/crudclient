@@ -15,9 +15,10 @@ from .base import T
 if TYPE_CHECKING:
     from .base import Crud
 
-from ..exceptions import ModelConversionError, ValidationError
+from ..exceptions import DataValidationError
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
+
 
 def list_operation(  # Note: self type added below
     self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
@@ -37,6 +38,7 @@ def list_operation(  # Note: self type added below
     """
     ...
 
+
 def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
     Create a new resource.
@@ -50,9 +52,10 @@ def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional
 
     Raises:
         ValueError: If create action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
     """
     ...
+
 
 def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
@@ -70,6 +73,7 @@ def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = No
     """
     ...
 
+
 def update_operation(  # Note: self type added below
     self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
 ) -> Union[T, JSONDict]:
@@ -86,9 +90,10 @@ def update_operation(  # Note: self type added below
 
     Raises:
         ValueError: If update action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
     """
     ...
+
 
 def partial_update_operation(  # Note: self type added below
     self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
@@ -106,9 +111,10 @@ def partial_update_operation(  # Note: self type added below
 
     Raises:
         ValueError: If partial_update action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
     """
     ...
+
 
 def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None:
     """
@@ -122,6 +128,7 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
         ValueError: If destroy action is not allowed for this resource.
     """
     ...
+
 
 def custom_action_operation(
     self: "Crud",
@@ -149,10 +156,12 @@ def custom_action_operation(
     Raises:
         TypeError: If the parameters are of incorrect types.
         ValueError: If the HTTP method is invalid.
-        ValidationError: If the input data fails validation.
-        ModelConversionError: If the response data fails conversion.
+        DataValidationError: If the input data fails validation.
+        # Response conversion errors (DataValidationError, ResponseParsingError)
+        # are handled within _convert_to_model now.
     """
     ...
+
 
 # Aliases for the Crud class methods
 list = list_operation

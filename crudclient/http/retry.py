@@ -1,132 +1,15 @@
 import logging
 import time
-from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Callable, List, Optional, Type, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import requests
+from requests.exceptions import ConnectionError, RequestException, Timeout
 
-from ..exceptions import CrudClientError
+from ..exceptions import CrudClientError, NetworkError
+from .retry_conditions import RetryCondition
+from .retry_strategies import ExponentialBackoffStrategy, RetryStrategy
 
-# Set up logging
 logger = logging.getLogger(__name__)
-
-
-class RetryEvent(Enum):
-    FORBIDDEN = 403
-    UNAUTHORIZED = 401
-    SERVER_ERROR = 500
-    TIMEOUT = "timeout"
-    CONNECTION_ERROR = "connection_error"
-    CUSTOM = "custom"
-
-
-class RetryStrategy(ABC):
-
-    @abstractmethod
-    def get_delay(self, attempt: int) -> float:
-        pass
-
-
-class FixedRetryStrategy(RetryStrategy):
-
-    def __init__(self, delay: float = 1.0) -> None:
-        self.delay = delay
-
-    def get_delay(self, attempt: int) -> float:
-        # Runtime type check
-        if not isinstance(attempt, int):
-            raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
-
-        if attempt < 1:
-            raise ValueError(f"attempt must be a positive integer, got {attempt}")
-        return self.delay
-
-
-class ExponentialBackoffStrategy(RetryStrategy):
-
-    def __init__(
-        self,
-        base_delay: float = 1.0,
-        max_delay: float = 60.0,
-        factor: float = 2.0,
-        jitter: bool = True,
-    ) -> None:
-        self.base_delay = base_delay
-        self.max_delay = max_delay
-        self.factor = factor
-        self.jitter = jitter
-
-    def get_delay(self, attempt: int) -> float:
-        # Runtime type check
-        if not isinstance(attempt, int):
-            raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
-
-        if attempt < 1:
-            raise ValueError(f"attempt must be a positive integer, got {attempt}")
-        import random
-
-        # Calculate exponential backoff
-        delay = min(self.base_delay * (self.factor ** (attempt - 1)), self.max_delay)
-
-        # Add jitter if enabled (up to 25% of the delay)
-        if self.jitter:
-            delay = delay * (0.75 + 0.5 * random.random())
-
-        return delay
-
-
-class RetryCondition:
-
-    def __init__(
-        self,
-        events: Optional[List[Union[RetryEvent, int]]] = None,
-        status_codes: Optional[List[int]] = None,
-        exceptions: Optional[List[Type[Exception]]] = None,
-        custom_condition: Optional[Callable[[Optional[requests.Response], Optional[Exception]], bool]] = None,
-    ) -> None:
-        self.events = events or []
-        self.status_codes = status_codes or []
-        self.exceptions = exceptions or []
-        self.custom_condition = custom_condition
-
-        # Convert RetryEvent enums to their values
-        for event in self.events:
-            if isinstance(event, RetryEvent):
-                if isinstance(event.value, int):
-                    self.status_codes.append(event.value)
-                elif event.value == "timeout":
-                    self.exceptions.append(requests.Timeout)
-                elif event.value == "connection_error":
-                    self.exceptions.append(requests.ConnectionError)
-
-    def should_retry(self, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
-        # Runtime type check - allow both real Response objects and mocks with spec=Response
-        if (
-            response is not None
-            and not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object or None, got {type(response).__name__}")
-
-        if exception is not None and not isinstance(exception, Exception):
-            raise TypeError(f"exception must be an Exception object or None, got {type(exception).__name__}")
-        # Check status codes
-        if response and response.status_code in self.status_codes:
-            return True
-
-        # Check exceptions
-        if exception:
-            for exc_type in self.exceptions:
-                if isinstance(exception, exc_type):
-                    return True
-
-        # Check custom condition
-        if self.custom_condition and callable(self.custom_condition):
-            return self.custom_condition(response, exception)
-
-        return False
 
 
 class RetryHandler:
@@ -138,55 +21,56 @@ class RetryHandler:
         retry_conditions: Optional[List[RetryCondition]] = None,
         on_retry_callback: Optional[Callable[[int, float, Optional[requests.Response], Optional[Exception]], None]] = None,
     ) -> None:
+        if not isinstance(max_retries, int) or max_retries < 0:
+            raise ValueError("max_retries must be a non-negative integer")
+        if retry_strategy is not None and not isinstance(retry_strategy, RetryStrategy):
+            raise TypeError("retry_strategy must be an instance of RetryStrategy or None")
+        if retry_conditions is not None and not isinstance(retry_conditions, list):
+            raise TypeError("retry_conditions must be a list of RetryCondition objects or None")
+        if retry_conditions and not all(isinstance(c, RetryCondition) for c in retry_conditions):
+            raise TypeError("All items in retry_conditions must be RetryCondition objects")
+        if on_retry_callback is not None and not callable(on_retry_callback):
+            raise TypeError("on_retry_callback must be callable or None")
+
         self.max_retries = max_retries
         self.retry_strategy = retry_strategy or ExponentialBackoffStrategy()
         self.on_retry_callback = on_retry_callback
 
-        # Default retry conditions if none provided
         if retry_conditions is None:
             self.retry_conditions = [
                 RetryCondition(
                     status_codes=[500, 502, 503, 504],
-                    exceptions=[requests.Timeout, requests.ConnectionError],
+                    exceptions=[Timeout, ConnectionError],
                 )
             ]
         else:
-            self.retry_conditions = retry_conditions
+            self.retry_conditions = retry_conditions if isinstance(retry_conditions, list) else [retry_conditions]
 
-    def should_retry(self, attempt: int, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
-        # Runtime type checks
+    def should_retry(
+        self,
+        attempt: int,
+        response: Optional[requests.Response] = None,
+        exception: Optional[Exception] = None
+    ) -> bool:
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
-        if (
-            response is not None
-            and not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object or None, got {type(response).__name__}")
+        # Removed redundant isinstance checks for response and exception,
+        # as type hints Optional[requests.Response] and Optional[Exception]
+        # already cover this for mypy.
 
-        if (
-            exception is not None
-            and not isinstance(exception, Exception)
-            and not hasattr(exception, "_mock_spec")
-            and Exception not in getattr(exception, "_mock_spec", [])
-        ):
-            raise TypeError(f"exception must be an Exception object or None, got {type(exception).__name__}")
-
-        # Check if we've exceeded the maximum number of retries
         if attempt >= self.max_retries:
+            logger.debug(f"Max retries ({self.max_retries}) reached. Not retrying.")
             return False
 
-        # Check each retry condition
         for condition in self.retry_conditions:
-            if condition.should_retry(response, exception):
+            if condition.should_retry(response=response, exception=exception):
+                logger.debug(f"Retry condition matched by {condition}. Will retry.")
                 return True
 
         return False
 
     def get_delay(self, attempt: int) -> float:
-        # Runtime type check
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
@@ -194,128 +78,165 @@ class RetryHandler:
             raise ValueError(f"attempt must be a positive integer, got {attempt}")
         return self.retry_strategy.get_delay(attempt)
 
-    def execute_with_retry(
+    def _execute_request(
         self,
         request_func: Callable[[], requests.Response],
-        session: Optional[requests.Session] = None,
+        method: str,
+        url: str,
+        attempt: int,
+    ) -> Tuple[Optional[requests.Response], Optional[Exception]]:
+        # Implementation moved from docstring
+        try:
+            response = request_func()
+            return response, None
+        except RequestException as e:
+            logger.error(
+                "Network error during request %s %s (attempt %d/%d): %s - %s",
+                method.upper(), url, attempt, self.max_retries + 1, type(e).__name__, e
+            )
+            return None, e
+        except Exception as e:
+            logger.exception(
+                "Unexpected error during request function execution for %s %s (attempt %d/%d)",
+                method.upper(), url, attempt, self.max_retries + 1
+            )
+            # Re-raise unexpected errors immediately
+            raise e
+
+    def _handle_response(
+        self,
+        response: Optional[requests.Response],
+        exception: Optional[Exception],
+        attempt: int,
+        method: str,
+        url: str,
+    ) -> Tuple[Optional[requests.Response], bool]:
+        # Implementation moved from docstring
+        if exception:
+            # Handle RequestException
+            if isinstance(exception, RequestException):
+                should_retry_flag = self.should_retry(attempt - 1, response=None, exception=exception)
+                if not should_retry_flag or attempt > self.max_retries:
+                    logger.error(
+                        f"Not retrying {method.upper()} {url} after exception {type(exception).__name__} on attempt {attempt}. "
+                        f"Retry flag: {should_retry_flag}, Max retries: {self.max_retries}"
+                    )
+                    raise NetworkError(
+                        message=f"Request failed after {attempt} attempts due to network error: {exception}",
+                        request=getattr(exception, 'request', None),
+                        original_exception=exception
+                    )
+                return None, True  # Retry needed
+            else:
+                # Unexpected exception already logged, re-raised by _execute_request
+                # This path shouldn't be hit if _execute_request raises correctly.
+                raise exception  # Should not happen
+
+        # Handle Response
+        if response is not None:
+            if response.ok:
+                logger.debug(f"Request {method.upper()} {url} successful on attempt {attempt} with status {response.status_code}")
+                return response, False  # No retry needed, success
+
+            # Non-OK response
+            logger.warning(
+                f"Request {method.upper()} {url} received non-OK status {response.status_code} on attempt {attempt}"
+            )
+            should_retry_flag = self.should_retry(attempt - 1, response=response, exception=None)
+            if not should_retry_flag or attempt > self.max_retries:
+                logger.warning(
+                    f"Not retrying {method.upper()} {url} after status {response.status_code} on attempt {attempt}. "
+                    f"Retry flag: {should_retry_flag}, Max retries: {self.max_retries}"
+                )
+                return response, False  # No retry needed, return non-OK response
+            return response, True  # Retry needed
+
+        # Should not happen if response or exception is always present
+        raise CrudClientError("Internal error: No response or exception received from request execution.")
+
+    def _perform_retry_delay_and_callbacks(
+        self,
+        attempt: int,
+        last_response: Optional[requests.Response],
+        last_exception: Optional[Exception],
+        setup_auth_func: Optional[Callable[[], None]],
+        method: str,
+        url: str,
+    ) -> None:
+        # Implementation moved from docstring
+        delay = self.get_delay(attempt)
+
+        if self.on_retry_callback:
+            try:
+                self.on_retry_callback(attempt, delay, last_response, last_exception)
+            except Exception as cb_exc:
+                logger.exception(f"Error in on_retry_callback during attempt {attempt}: {cb_exc}")
+
+        reason = "unknown condition"
+        if last_exception:
+            reason = f"exception '{type(last_exception).__name__}'"
+        elif last_response is not None:
+            reason = f"status code {last_response.status_code}"
+
+        logger.info(
+            "Retrying request %s %s (attempt %d/%d) in %.2fs due to %s.",
+            method.upper(), url, attempt + 1, self.max_retries + 1, delay, reason
+        )
+
+        # Attempt auth refresh on 401 before sleeping
+        if setup_auth_func and last_response is not None and last_response.status_code == 401:
+            logger.info("Attempting to refresh authentication before retry %d due to status 401", attempt + 1)
+            try:
+                setup_auth_func()
+                logger.info("Authentication refreshed successfully.")
+            except Exception as auth_exc:
+                logger.exception(f"Failed to refresh authentication during retry attempt {attempt + 1}: {auth_exc}")
+                # Decide if auth failure should prevent retry? Currently, it doesn't.
+
+        time.sleep(delay)
+
+    def execute_with_retry(
+        self,
+        method: str,
+        url: str,
+        request_func: Callable[[], requests.Response],
+        session: Optional[requests.Session] = None,  # session is passed to request_func closure, not directly used here
         setup_auth_func: Optional[Callable[[], None]] = None,
-    ) -> requests.Response:
-        # Runtime type checks
+    ) -> Tuple[Union[requests.Response, Exception], int]:
         if not callable(request_func):
             raise TypeError(f"request_func must be callable, got {type(request_func).__name__}")
-
-        if (
-            session is not None
-            and not isinstance(session, requests.Session)
-            and not hasattr(session, "_mock_spec")
-            and requests.Session not in getattr(session, "_mock_spec", [])
-        ):
-            raise TypeError(f"session must be a requests.Session object or None, got {type(session).__name__}")
-
         if setup_auth_func is not None and not callable(setup_auth_func):
             raise TypeError(f"setup_auth_func must be callable or None, got {type(setup_auth_func).__name__}")
+        # session validation removed as it's not directly used
+
         attempt = 0
-        last_exception = None
-        last_response = None
+        last_exception: Optional[Exception] = None
+        last_response: Optional[requests.Response] = None
 
         while True:
-            try:
-                # Make the request
-                response = request_func()
-                last_response = response
-
-                # If the request was successful, return the response
-                if response.ok:
-                    return response
-
-                # Check if we should retry
-                if not self.should_retry(attempt, response):
-                    return response
-
-            except Exception as e:
-                last_exception = e
-
-                # Check if we should retry based on the exception
-                if not self.should_retry(attempt, exception=e):
-                    if isinstance(e, requests.RequestException):
-                        raise CrudClientError(f"Request failed: {str(e)}", None) from e
-                    raise e
-
-            # Increment the attempt counter
             attempt += 1
+            response, exception = self._execute_request(request_func, method, url, attempt)
+            last_response, last_exception = response, exception
 
-            # Calculate the delay
-            delay = self.get_delay(attempt)
+            final_result, retry_needed = self._handle_response(response, exception, attempt, method, url)
 
-            # Call the retry callback if provided
-            if self.on_retry_callback:
-                self.on_retry_callback(attempt, delay, last_response, last_exception)
+            if not retry_needed:
+                # Return successful response or non-retried error response/exception
+                if isinstance(final_result, requests.Response):
+                    return final_result, attempt
+                # If _handle_response raises NetworkError, it propagates out.
+                # If _handle_response returns a non-OK response without retry, final_result is that response.
+                # The case where final_result is an Exception other than NetworkError shouldn't occur here.
+                else:  # Safeguard for unexpected state
+                    raise CrudClientError(f"Request failed after {attempt} attempts, but final state is unclear.")
 
-            # Log the retry
-            logger.debug(
-                f"Retrying request (attempt {attempt}/{self.max_retries}) after {delay:.2f}s delay. "
-                f"Reason: {last_exception or (last_response and last_response.status_code)}"
+            # If retry is needed, perform delay and callbacks
+            self._perform_retry_delay_and_callbacks(
+                attempt=attempt,
+                last_response=last_response,
+                last_exception=last_exception,
+                setup_auth_func=setup_auth_func,
+                method=method,
+                url=url
             )
-
-            # If we need to refresh auth before retrying
-            if setup_auth_func and last_response and last_response.status_code in (401, 403):
-                logger.debug("Refreshing authentication before retry")
-                setup_auth_func()
-
-            # Wait before retrying
-            time.sleep(delay)
-
-        # This should not be reached, but just in case
-        if last_exception:
-            if isinstance(last_exception, requests.RequestException):
-                raise CrudClientError(f"Request failed after {self.max_retries} retries: {str(last_exception)}", None) from last_exception
-            raise last_exception
-        elif last_response:
-            return last_response
-        else:
-            raise CrudClientError(f"Request failed after {self.max_retries} retries with no response", None)
-
-    def maybe_retry_after_403(
-        self, method: str, url: str, kwargs: dict, response: requests.Response, session: requests.Session, setup_auth_func: Callable[[], None]
-    ) -> requests.Response:
-        # Runtime type checks
-        if not isinstance(method, str):
-            raise TypeError(f"method must be a string, got {type(method).__name__}")
-
-        if not isinstance(url, str):
-            raise TypeError(f"url must be a string, got {type(url).__name__}")
-
-        if not isinstance(kwargs, dict):
-            raise TypeError(f"kwargs must be a dictionary, got {type(kwargs).__name__}")
-
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
-
-        if (
-            not isinstance(session, requests.Session)
-            and not hasattr(session, "_mock_spec")
-            and requests.Session not in getattr(session, "_mock_spec", [])
-        ):
-            raise TypeError(f"session must be a requests.Session object, got {type(session).__name__}")
-
-        if not callable(setup_auth_func):
-            raise TypeError(f"setup_auth_func must be callable, got {type(setup_auth_func).__name__}")
-        # Create a retry condition specifically for 403 responses
-        retry_condition = RetryCondition(status_codes=[403])
-
-        # Check if we should retry
-        if response.status_code != 403 or not retry_condition.should_retry(response):
-            return response
-
-        logger.debug("403 Forbidden received. Attempting retry.")
-
-        # Refresh authentication
-        setup_auth_func()
-
-        # Make the retry request
-        retry_response = session.request(method, url, **kwargs)
-        return retry_response
+        # The loop should only exit via return or exception.

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from crudclient.exceptions import ModelConversionError
+from crudclient.exceptions import DataValidationError  # Replaced ModelConversionError
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
@@ -144,5 +144,5 @@ def test_custom_action_model_conversion_error(base_test_crud: BaseTestCrud, mock
     mock_client.post.return_value = {"unexpected": "field"}
 
     # WHEN / THEN
-    with pytest.raises(ModelConversionError):
+    with pytest.raises(DataValidationError):
         base_test_crud.custom_action(action="do-something", data={})

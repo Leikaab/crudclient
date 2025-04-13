@@ -1,10 +1,18 @@
+import logging
+
 from .api import API
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
-from .exceptions import APIError, ClientInitializationError, InvalidClientError
+from .exceptions import APIError, ConfigurationError
 from .models import ApiResponse
 from .types import JSONDict, JSONList, RawResponse
+
+# Set up logging for the library.
+# By default, the library will not emit any logs.
+# It's up to the consuming application to configure logging.
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 __all__ = [
     "API",
@@ -12,8 +20,7 @@ __all__ = [
     "ClientConfig",
     "Crud",
     "APIError",
-    "InvalidClientError",
-    "ClientInitializationError",
+    "ConfigurationError",
     "ApiResponse",
     "JSONDict",
     "JSONList",

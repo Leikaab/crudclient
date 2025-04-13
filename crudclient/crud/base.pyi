@@ -25,7 +25,7 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from ..client import Client
-from ..exceptions import ModelConversionError, ValidationError
+from ..exceptions import DataValidationError  # Replaced ModelConversionError, ValidationError
 from ..models import ApiResponse
 from ..response_strategies import (
     DefaultResponseModelStrategy,
@@ -43,6 +43,7 @@ T = TypeVar("T", bound=ModelDumpable)
 HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]
 CrudInstance: TypeAlias = "Crud[Any]"
 CrudType: TypeAlias = Type[CrudInstance]
+
 
 class Crud(Generic[T]):
     """
@@ -97,6 +98,7 @@ class Crud(Generic[T]):
     def update(self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
     def partial_update(self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
     def destroy(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None: ...
+
     def custom_action(
         self: "Crud",
         action: str,

@@ -3,6 +3,7 @@ from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
 import requests
 
 from .config import ClientConfig
+from .exceptions import ConfigurationError
 from .http.client import HttpClient
 from .types import RawResponseSimple
 
@@ -14,6 +15,7 @@ Stub file for `client.py`
 This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
+
 
 class Client:
     """
@@ -41,7 +43,7 @@ class Client:
                 Can be a ClientConfig object or a dictionary of configuration parameters.
 
         Raises:
-            TypeError: If the provided config is neither a ClientConfig object nor a dict.
+            ConfigurationError: If the provided config is invalid (wrong type, missing fields, invalid values).
         """
         ...
 
@@ -163,10 +165,12 @@ class Client:
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
+
     @property
     def session(self) -> requests.Session:
         """

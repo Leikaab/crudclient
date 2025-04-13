@@ -5,9 +5,8 @@ from typing import Any, Optional, Type, Union
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
-from .exceptions import ClientInitializationError, InvalidClientError
+from .exceptions import ConfigurationError
 
-# Get a logger for this module
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +22,7 @@ class API(ABC):
                 expected_classes = Class.__name__
             message = f"Invalid {varname} provided: expected {expected_classes} or None, got {type(Instance).__name__}."
             logger.error(message)
-            raise InvalidClientError(message=message)
+            raise ConfigurationError(message=message)
 
     def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         logger.debug(f"Initializing API class with client: {client}, client_config: {client_config}")
@@ -58,12 +57,12 @@ class API(ABC):
         # check if client_class is defined
         if not self.client_class:
             logger.error("client_class is not defined. Cannot initialize the client.")
-            raise ClientInitializationError("Cannot initialize client because client_class is not set.")
+            raise ConfigurationError("Cannot initialize client because client_class is not set.")
 
         # check if client_config is defined
         if not self.client_config:
             logger.error("client_config is not defined. Cannot initialize the client.")
-            raise ClientInitializationError("Cannot initialize client because client_config is not set.")
+            raise ConfigurationError("Cannot initialize client because client_config is not set.")
 
         logger.debug(f"Initializing API class with client class {self.client_class.__name__}, using client_config: {self.client_config}")
 
@@ -71,7 +70,7 @@ class API(ABC):
             self.client = self.client_class(config=self.client_config)
         except Exception as e:
             logger.exception("Failed to initialize the client.")
-            raise ClientInitializationError("Failed to initialize the client.") from e
+            raise ConfigurationError("Failed to initialize the client.") from e
         logger.info("Client initialized successfully.")
 
     def __enter__(self) -> "API":

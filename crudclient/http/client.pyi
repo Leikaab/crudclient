@@ -34,11 +34,26 @@ import requests
 
 from ..config import ClientConfig
 from ..types import RawResponseSimple
+from ..exceptions import (
+    APIError,
+    BadRequestError,
+    ClientAuthenticationError,
+    ConflictError,
+    CrudClientError,
+    ForbiddenError,
+    InternalServerError,
+    NetworkError,
+    NotFoundError,
+    RateLimitError,
+    ServiceUnavailableError,
+    UnprocessableEntityError,
+)
 from .errors import ErrorHandler
 from .request import RequestFormatter
 from .response import ResponseHandler
 from .retry import RetryHandler
 from .session import SessionManager
+
 
 class HttpClient:
     """
@@ -122,6 +137,7 @@ class HttpClient:
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any

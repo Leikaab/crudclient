@@ -142,10 +142,13 @@ class TestClient:
         from crudclient.exceptions import CrudClientError
 
         response = mocker.Mock(spec=requests.Response)
-        response.json.side_effect = ValueError("Invalid JSON")
+        response.json.side_effect = requests.exceptions.JSONDecodeError("Invalid JSON", "", 0)
         response.text = "raw text error"
         response.status_code = 500
         response.raise_for_status.side_effect = requests.HTTPError("boom")
+        # Add the request attribute to prevent AttributeError in error handling
+        mock_request_obj = mocker.Mock(method='GET', url='http://mock.test')
+        response.request = mock_request_obj
 
         # Act & Assert
         with pytest.raises(CrudClientError) as excinfo:
@@ -159,6 +162,9 @@ class TestClient:
         from crudclient.exceptions import CrudClientError
 
         response = mocker.Mock(spec=requests.Response)
+        # Add the request attribute to prevent AttributeError in error handling
+        mock_request_obj = mocker.Mock(method='GET', url='http://mock.test')
+        response.request = mock_request_obj
         response.json.return_value = {"error": "Bad Request"}
         response.status_code = 400
         response.raise_for_status.return_value = None  # No exception

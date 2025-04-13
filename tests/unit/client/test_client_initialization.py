@@ -2,6 +2,7 @@ import pytest
 
 from crudclient.client import Client
 from crudclient.config import ClientConfig
+from crudclient.exceptions import ConfigurationError
 
 
 class TestClientInitialization:
@@ -12,10 +13,10 @@ class TestClientInitialization:
         invalid_config = 12345  # Not a ClientConfig or dict
 
         # Act & Assert
-        with pytest.raises(TypeError) as excinfo:
+        with pytest.raises(ConfigurationError) as excinfo:
             Client(invalid_config)  # type: ignore
 
-        assert "Invalid config provided" in str(excinfo.value)
+        assert "Invalid config type provided" in str(excinfo.value)
         assert "expected ClientConfig or dict" in str(excinfo.value)
         assert "got int" in str(excinfo.value)
 

@@ -1,80 +1,167 @@
-from typing import Any, Dict, Optional
+from typing import Union  # Added Union
+from typing import Any, Optional
 
 import requests
 from pydantic import ValidationError as PydanticValidationError
+from requests import PreparedRequest
+from requests import exceptions as requests_exceptions
 
 
-class APIError(Exception):
-    def __str__(self):
-        original_exception = f"\nCaused by: {self.__cause__}" if self.__cause__ else ""
-        exception_name = self.__class__.__name__
-        return f"{exception_name}: {super().__str__()}{original_exception}"
-
-
-class CrudClientError(APIError):
-    def __init__(self, message: str, response: Optional[requests.Response] = None):
+class CrudClientError(Exception):
+    def __init__(self, message: str):
         self.message = message
-        self.response = response
         super().__init__(message)
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}(message={self.message!r}, response={self.response!r})"
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}: {self.message}"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(message={self.message!r})"
+
+
+class ConfigurationError(CrudClientError):
+    pass
+
+
+class ClientInitializationError(ConfigurationError):
+    pass
+
+
+class InvalidClientError(ConfigurationError):
+    pass
 
 
 class AuthenticationError(CrudClientError):
     pass
 
 
-class NotFoundError(CrudClientError):
+class NetworkError(CrudClientError):
+    def __init__(
+        self,
+        message: str,
+        request: Optional[requests.Request],  # Changed to Optional
+        original_exception: requests_exceptions.RequestException,
+    ):
+        self.request = request
+        self.original_exception = original_exception
+        request_info = f"{request.method} {request.url}" if request else "N/A"
+        full_message = f"{message} (Request: {request_info})"
+        super().__init__(full_message)
+        self.__cause__ = original_exception
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(message={self.message!r}, "
+            f"request={self.request!r}, original_exception={self.original_exception!r})"  # repr is fine with None
+        )
+
+
+class APIError(CrudClientError):
+    def __init__(
+        self,
+        message: str,
+        *,  # Make subsequent arguments keyword-only
+        request: Optional[Union[requests.Request, PreparedRequest]] = None,
+        response: Optional[requests.Response] = None,
+    ):
+        self.request = request
+        self.response = response
+        status_code = response.status_code if response else "N/A"
+        request_info = f"{request.method} {request.url}" if request else "N/A"
+        full_message = (
+            f"{message} (Status Code: {status_code}, Request: {request_info})"
+        )
+        super().__init__(full_message)
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(message={self.message!r}, "
+            f"request={self.request!r}, response={self.response!r})"
+        )
+
+# Specific HTTP Status Code Errors
+
+
+class BadRequestError(APIError):
     pass
 
 
-class InvalidResponseError(CrudClientError):
+class ClientAuthenticationError(APIError, AuthenticationError):
     pass
 
 
-class ModelConversionError(CrudClientError):
-
-    def __init__(self, message: str, response: Optional[requests.Response] = None, data: Any = None):
-        self.data = data
-        super().__init__(message, response)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(message={self.message!r}, response={self.response!r}, data={self.data!r})"
+class ForbiddenError(APIError):
+    pass
 
 
-class ValidationError(CrudClientError):
+class NotFoundError(APIError):
+    pass
 
+
+class ConflictError(APIError):
+    pass
+
+
+class UnprocessableEntityError(APIError):
+    pass
+
+
+class RateLimitError(APIError):
+    pass
+
+
+class InternalServerError(APIError):
+    pass
+
+
+class ServiceUnavailableError(APIError):
+    pass
+
+
+# Other Error Types
+
+
+class DataValidationError(CrudClientError):
     def __init__(
         self,
         message: str,
         data: Any,
-        response: Optional[requests.Response] = None,
-        errors: Optional[Dict[str, Any]] = None,
-        pydantic_error: Optional[PydanticValidationError] = None,  # Added parameter
+        pydantic_error: Optional[PydanticValidationError] = None,
     ):
         self.data = data
-        self.errors = errors or {}
-        self.pydantic_error = pydantic_error  # Store the Pydantic error
-        super().__init__(message, response)
+        self.pydantic_error = pydantic_error
+        super().__init__(message)
+        if pydantic_error:
+            self.__cause__ = pydantic_error
 
-    def __repr__(self):
-        # Include pydantic_error in repr if it exists
-        pydantic_repr = f", pydantic_error={self.pydantic_error!r}" if self.pydantic_error else ""
+    def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}(message={self.message!r}, "
-            f"response={self.response!r}, data={self.data!r}, errors={self.errors!r}{pydantic_repr})"
+            f"data={self.data!r}, pydantic_error={self.pydantic_error!r})"
         )
 
 
-class InvalidClientError(APIError):
-    def __init__(self, message: str = "Invalid client provided"):
-        self.message = message
-        super().__init__(message)
-
-    def __repr__(self):
-        return f"InvalidClientError(message={self.message!r})"
-
-
-class ClientInitializationError(APIError):
+class ModelConversionError(CrudClientError):
     pass
+
+
+class ResponseParsingError(CrudClientError):
+    def __init__(
+        self,
+        message: str,
+        original_exception: Exception,
+        response: Optional[requests.Response] = None,
+    ):
+        self.response = response
+        self.original_exception = original_exception
+        status_code = response.status_code if response else "N/A"
+        request_info = f"{response.request.method} {response.request.url}" if response and response.request else "N/A"
+        full_message = f"{message} (Status Code: {status_code}, Request: {request_info})"
+        super().__init__(full_message)
+        self.__cause__ = original_exception
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(message={self.message!r}, "
+            f"response={self.response!r}, original_exception={self.original_exception!r})"
+        )

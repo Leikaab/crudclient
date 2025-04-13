@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from crudclient.exceptions import ModelConversionError
+from crudclient.exceptions import DataValidationError  # Replaced ModelConversionError
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
@@ -64,7 +64,7 @@ def test_read_operation_model_conversion_error(base_test_crud: BaseTestCrud, moc
     mock_client.get.return_value = {"unexpected": "field"}
 
     # WHEN / THEN
-    with pytest.raises(ModelConversionError):
+    with pytest.raises(DataValidationError):
         base_test_crud.read(resource_id="1")
 
 

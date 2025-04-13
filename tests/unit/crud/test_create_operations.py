@@ -8,7 +8,9 @@ from unittest.mock import MagicMock
 import pytest
 
 # Import the custom ValidationError, which wraps the Pydantic one
-from crudclient.exceptions import ModelConversionError, ValidationError
+from crudclient.exceptions import (
+    DataValidationError,  # Replaced ModelConversionError, ValidationError
+)
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
@@ -90,7 +92,7 @@ def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_cl
 
     # WHEN / THEN
     # Pydantic validation happens in _dump_data before the client call
-    with pytest.raises(ValidationError):
+    with pytest.raises(DataValidationError):
         base_test_crud.create(data=invalid_data)
 
 
@@ -104,7 +106,7 @@ def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, m
     mock_client.post.return_value = {"unexpected": "field"}  # Missing 'id' or 'name'
 
     # WHEN / THEN
-    with pytest.raises(ModelConversionError):
+    with pytest.raises(DataValidationError):
         base_test_crud.create(data=SAMPLE_PAYLOAD)
 
 

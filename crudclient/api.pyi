@@ -32,9 +32,7 @@ Classes:
     - API: Base class for creating API clients with CRUD resources.
 
 Exceptions:
-    - InvalidClientError: Raised when an invalid client is provided.
-    - InvalidClientConfigError: Raised when an invalid client configuration is provided.
-    - ClientInitializationError: Raised when the client could not be initialized.
+    - ConfigurationError: Raised for configuration-related issues, including invalid client/config or initialization problems.
 """
 
 import logging
@@ -45,9 +43,10 @@ from typing import Any, Dict, Optional, Type, TypeVar, Union
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
-from .exceptions import ClientInitializationError, InvalidClientError
+from .exceptions import ConfigurationError
 
 T = TypeVar("T", bound=Crud)
+
 
 class API(ABC):
     """
@@ -75,7 +74,7 @@ class API(ABC):
             Instance (Client | ClientConfig | None): The instance to be checked.
             Class (Type[Client] | Type[ClientConfig]): The expected class type.
         Raises:
-            InvalidClientError: If the `Instance` is not an instance of the specified `Class` or `None`.
+            ConfigurationError: If the `Instance` is not an instance of the specified `Class` or `None`.
         """
         ...
 
@@ -92,9 +91,7 @@ class API(ABC):
         @param kwargs: Additional keyword arguments for the API class. These are stored for potential use in API subclasses.
         @type kwargs: dict
 
-        @raises InvalidClientError: If the `client` is not an instance of Client or None.
-        @raises InvalidClientConfigError: If the `client_config` is not a ClientConfig or None.
-        @raises ClientInitializationError: If the client could not be initialized due to issues with the client_class or other factors.
+        @raises ConfigurationError: If the `client` or `client_config` is invalid, or if the client could not be initialized.
         """
         ...
 
@@ -114,7 +111,7 @@ class API(ABC):
         Initializes the client using the provided client configuration.
         This method is called automatically during initialization if a client instance is not provided.
 
-        @raises ClientInitializationError: If the client could not be initialized due to missing `client_class` or other issues.
+        @raises ConfigurationError: If the client could not be initialized due to missing `client_class` or other issues.
         """
         ...
 

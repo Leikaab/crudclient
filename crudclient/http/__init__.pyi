@@ -18,13 +18,12 @@ from .client import HttpClient
 from .errors import ErrorHandler
 from .request import RequestFormatter
 from .response import ResponseHandler
-from .retry import (
-    ExponentialBackoffStrategy,
-    FixedRetryStrategy,
-    RetryCondition,
-    RetryEvent,
-    RetryHandler,
-    RetryStrategy,
+from .retry import RetryHandler
+from .retry_conditions import RetryCondition as RetryCondition, RetryEvent as RetryEvent
+from .retry_strategies import (
+    RetryStrategy as RetryStrategy,
+    FixedRetryStrategy as FixedRetryStrategy,
+    ExponentialBackoffStrategy as ExponentialBackoffStrategy,
 )
 from .session import SessionManager
 

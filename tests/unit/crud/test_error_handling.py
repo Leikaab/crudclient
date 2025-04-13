@@ -1,34 +1,31 @@
-# tests/unit/crud/test_error_handling.py
 """
 Unit tests for error handling in the CRUD base class operations.
 Covers both generic client errors (network, timeouts) and API errors (4xx, 5xx).
 """
 
 from typing import Type
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
+import requests
 
+from crudclient.exceptions import ClientAuthenticationError  # Added import
+from crudclient.exceptions import ForbiddenError  # Added import
 from crudclient.exceptions import (
+    APIError,
     AuthenticationError,
     CrudClientError,
-    InvalidResponseError,
     NotFoundError,
+    UnprocessableEntityError,
 )
 
-from .conftest import (  # Import fixtures/classes from conftest
+from .conftest import (
     BaseTestCrud,
     BaseTestModel,
 )
 
-# Removed incorrect ExceptionInfo import
-
-
 SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
 SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
-
-
-# === Error Handling Tests (Generic Client Errors) ===
 
 
 def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
@@ -37,7 +34,6 @@ def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: 
     WHEN CRUD operations are called
     THEN the client errors should be propagated.
     """
-    # GIVEN
     mock_client.get.side_effect = ConnectionError("Network issue")
     with pytest.raises(ConnectionError):
         base_test_crud.list()
@@ -47,17 +43,14 @@ def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: 
         base_test_crud.create(data=SAMPLE_PAYLOAD)
 
 
-# === API Error Handling Tests (4xx/5xx) ===
-
-
 @pytest.mark.parametrize(
     "operation_name, operation_args, status_code, expected_exception, error_payload",
     [
         ("list", {}, 404, NotFoundError, {"error": "List Not Found"}),
         ("create", {"data": SAMPLE_PAYLOAD}, 401, AuthenticationError, {"error": "Unauthorized"}),
         ("read", {"resource_id": "1"}, 404, NotFoundError, {"error": "Resource Not Found"}),
-        ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}, 403, AuthenticationError, {"error": "Forbidden"}),
-        ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}, 422, InvalidResponseError, {"detail": "Validation Failed"}),
+        ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}, 403, ForbiddenError, {"error": "Forbidden"}),
+        ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}, 422, UnprocessableEntityError, {"detail": "Validation Failed"}),
         ("destroy", {"resource_id": "1"}, 400, CrudClientError, {"error": "Bad Request"}),
         ("custom_action", {"action": "test-action", "method": "post"}, 404, NotFoundError, {"error": "Action Not Found"}),
     ],
@@ -76,13 +69,45 @@ def test_crud_operation_client_error_4xx(
     WHEN operations that result in 4xx errors are called
     THEN the appropriate exception types should be raised with the correct error details.
     """
-    mock_response = MagicMock()
+    # Determine method based on operation_name and args
+    if operation_name in ["list", "read"]:
+        http_method = "GET"
+    elif operation_name == "create":
+        http_method = "POST"
+    elif operation_name == "update":
+        http_method = "PUT"
+    elif operation_name == "partial_update":
+        http_method = "PATCH"
+    elif operation_name == "destroy":
+        http_method = "DELETE"
+    elif operation_name == "custom_action":
+        http_method = operation_args.get("method", "post").upper()
+    else:
+        # This case should ideally not be reached due to pytest.fail later
+        http_method = "UNKNOWN"
+
+    mock_request = Mock(spec=requests.Request)
+    mock_request.method = http_method  # Set the method attribute
+    mock_request.url = "http://test.com/api"  # Add dummy URL for APIError
+    mock_response = Mock(spec=requests.Response)
     mock_response.status_code = status_code
     mock_response.json.return_value = error_payload
-    # The ErrorHandler creates the exception instance
-    error = expected_exception(f"HTTP error occurred: {status_code}, {error_payload}", response=mock_response)
+    mock_response.request = mock_request
 
-    # Get the client method corresponding to the operation
+    error: CrudClientError
+    message = f"HTTP error occurred: {status_code}, {error_payload}"
+    # Handle specific 401/403 API errors which require request/response kwargs
+    if status_code == 401:
+        error = ClientAuthenticationError(message, request=mock_request, response=mock_response)
+    elif status_code == 403:
+        error = ForbiddenError(message, request=mock_request, response=mock_response)
+    # Handle other APIError subclasses (like 404, 422) which also need kwargs
+    elif issubclass(expected_exception, APIError):
+        error = expected_exception(message, request=mock_request, response=mock_response)
+    # Handle base CrudClientError (like 400) or other non-API errors
+    else:
+        error = expected_exception(message)  # Assumes these don't need request/response
+
     if operation_name in ["list", "read"]:
         client_method = mock_client.get
     elif operation_name == "create":
@@ -94,18 +119,17 @@ def test_crud_operation_client_error_4xx(
     elif operation_name == "destroy":
         client_method = mock_client.delete
     elif operation_name == "custom_action":
-        # Ensure 'method' exists in operation_args for custom_action
         method = operation_args.get("method", "post").lower()
         client_method = getattr(mock_client, method)
     else:
         pytest.fail(f"Unknown operation: {operation_name}")
 
-    client_method.side_effect = error  # Mock the http client method to raise the error
+    client_method.side_effect = error
 
     operation_func = getattr(base_test_crud, operation_name)
     with pytest.raises(expected_exception) as exc_info:
         operation_func(**operation_args)
-    assert exc_info.value is error  # Check if the original exception is raised
+    assert exc_info.value is error
 
 
 @pytest.mark.parametrize(
@@ -116,7 +140,6 @@ def test_crud_operation_client_error_4xx(
         ("read", {"resource_id": "1"}),
         ("update", {"resource_id": "1", "data": SAMPLE_PAYLOAD}),
         ("partial_update", {"resource_id": "1", "data": {"name": "Partial"}}),
-        # Destroy might not raise ServerError directly, depends on client impl.
         ("custom_action", {"action": "test-action", "method": "post"}),
     ],
 )
@@ -130,10 +153,14 @@ def test_crud_operation_server_error_5xx(base_test_crud: BaseTestCrud, mock_clie
     mock_response.status_code = 500
     error_payload = {"error": "Internal Server Error"}
     mock_response.json.return_value = error_payload
-    # 5xx errors typically map to the base CrudClientError by default
-    error = CrudClientError(f"HTTP error occurred: 500, {error_payload}", response=mock_response)
+    mock_request_5xx = Mock(spec=requests.Request)
+    mock_response_5xx = Mock(spec=requests.Response)
+    mock_response_5xx.status_code = 500
+    mock_response_5xx.json.return_value = error_payload
+    mock_response_5xx.request = mock_request_5xx
 
-    # Get the client method corresponding to the operation (similar to 4xx test)
+    error = CrudClientError(f"HTTP error occurred: 500, {error_payload}")
+
     if operation_name in ["list", "read"]:
         client_method = mock_client.get
     elif operation_name == "create":
@@ -143,15 +170,14 @@ def test_crud_operation_server_error_5xx(base_test_crud: BaseTestCrud, mock_clie
     elif operation_name == "partial_update":
         client_method = mock_client.patch
     elif operation_name == "custom_action":
-        # Ensure 'method' exists in operation_args for custom_action
         method = operation_args.get("method", "post").lower()
         client_method = getattr(mock_client, method)
     else:
         pytest.fail(f"Unknown operation: {operation_name}")
 
-    client_method.side_effect = error  # Mock the http client method to raise the error
+    client_method.side_effect = error
 
     operation_func = getattr(base_test_crud, operation_name)
-    with pytest.raises(CrudClientError) as exc_info:  # Expect base CrudClientError for 5xx
+    with pytest.raises(CrudClientError) as exc_info:
         operation_func(**operation_args)
-    assert exc_info.value is error  # Check if the original exception is raised
+    assert exc_info.value is error

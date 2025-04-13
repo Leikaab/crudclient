@@ -7,9 +7,9 @@ import requests
 import requests_mock
 
 from crudclient.config import ClientConfig
+from crudclient.http import FixedRetryStrategy, RetryCondition, RetryHandler
 from crudclient.http.client import HttpClient
 from crudclient.http.errors import ErrorHandler
-from crudclient.http.retry import FixedRetryStrategy, RetryCondition, RetryHandler
 
 
 class MockClientConfig(ClientConfig):

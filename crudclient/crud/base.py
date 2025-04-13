@@ -68,9 +68,13 @@ class Crud(Generic[T]):
         _convert_to_list_model,
         _convert_to_model,
         _dump_data,
+        _dump_dictionary,
+        _dump_model_instance,
         _fallback_list_conversion,
         _init_response_strategy,
+        _validate_and_dump_full_dict,
         _validate_list_return,
+        _validate_partial_dict,
         _validate_response,
     )
 

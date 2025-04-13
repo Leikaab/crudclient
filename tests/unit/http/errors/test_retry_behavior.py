@@ -11,8 +11,8 @@ import pytest
 import requests
 
 from crudclient.exceptions import CrudClientError
+from crudclient.http import RetryCondition, RetryHandler
 from crudclient.http.client import HttpClient
-from crudclient.http.retry import RetryCondition, RetryHandler
 
 
 class TestHttpClientNetworkErrorRetries:
