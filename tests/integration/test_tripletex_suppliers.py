@@ -1,5 +1,5 @@
 import random
-import time  # <-- Added import
+import time
 import uuid
 
 import pytest
@@ -23,7 +23,7 @@ def generate_unique_name():
     return f"Test Supplier {uuid.uuid4()}"
 
 
-def generate_unique_supplier_number():  # <-- Added function
+def generate_unique_supplier_number():
     """
     Generate a unique supplier number to avoid conflicts.
     Using a large random number range to minimize collision probability.
@@ -31,7 +31,6 @@ def generate_unique_supplier_number():  # <-- Added function
     return random.randint(100000, 9999999)
 
 
-# Removed test_create_supplier - merged into test_create_and_destroy_supplier
 @pytest.mark.no_parallel
 def test_read_supplier(api):
     """
@@ -39,11 +38,11 @@ def test_read_supplier(api):
     """
     # Create a new supplier with a unique name and number
     supplier_name = generate_unique_name()
-    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_number = generate_unique_supplier_number()
     supplier_data = {
         "name": supplier_name,
         "email": "test@example.com",
-        "supplierNumber": supplier_number,  # <-- Added field
+        "supplierNumber": supplier_number,
     }
 
     # Create the supplier
@@ -56,7 +55,7 @@ def test_read_supplier(api):
     assert isinstance(supplier, dict)
     assert supplier["name"] == supplier_name
     assert supplier["email"] == "test@example.com"
-    assert supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
+    assert supplier["supplierNumber"] == supplier_number
     assert supplier["id"] == created_supplier["id"]
 
     # Clean up - delete the supplier
@@ -70,11 +69,11 @@ def test_update_supplier(api):
     """
     # Create a new supplier with a unique name and number
     supplier_name = generate_unique_name()
-    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_number = generate_unique_supplier_number()
     supplier_data = {
         "name": supplier_name,
         "email": "test@example.com",
-        "supplierNumber": supplier_number,  # <-- Added field
+        "supplierNumber": supplier_number,
     }
 
     # Create the supplier
@@ -97,7 +96,7 @@ def test_update_supplier(api):
     assert updated_supplier["id"] == created_supplier["id"]
     assert updated_supplier["email"] == "updated@example.com"
     assert updated_supplier["description"] == "Updated description"
-    assert updated_supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
+    assert updated_supplier["supplierNumber"] == supplier_number
 
     # Clean up - delete the supplier
     api.suppliers.destroy(updated_supplier["id"])
@@ -114,18 +113,17 @@ def test_list_suppliers(api):
 
     for _ in range(3):
         name = generate_unique_name()
-        number = generate_unique_supplier_number()  # <-- Generate number
+        number = generate_unique_supplier_number()
         supplier_info.append({"name": name, "number": number})
         supplier_data = {
             "name": name,
             "email": f"{name.replace(' ', '').lower()}@example.com",
-            "supplierNumber": number,  # <-- Added field
+            "supplierNumber": number,
         }
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
 
     # List all suppliers (consider filtering if possible and necessary)
-    # For now, list all and find ours
     suppliers = api.suppliers.list()
 
     # Check that we got a list of suppliers
@@ -144,7 +142,7 @@ def test_list_suppliers(api):
         # Find the original info by matching ID indirectly or store number with ID
         original_info = next(info for info in supplier_info if info["name"] == original_supplier["name"])
         assert found_supplier["name"] == original_info["name"]
-        assert found_supplier["supplierNumber"] == original_info["number"]  # <-- Corrected assertion
+        assert found_supplier["supplierNumber"] == original_info["number"]
 
     # Clean up - delete the suppliers
     time.sleep(2)  # Add delay before bulk delete
@@ -172,9 +170,7 @@ def test_create_and_destroy_supplier(api):
     }
 
     try:
-        print(f"Attempting to create supplier: {supplier_name}")
         created_supplier = api.suppliers.create(supplier_data)
-        print(f"Supplier created successfully: ID {created_supplier.get('id')}")
 
         # Assertions for creation
         assert isinstance(created_supplier, dict), "Create response should be a dict"
@@ -190,20 +186,16 @@ def test_create_and_destroy_supplier(api):
     # --- Destroy Step ---
     if supplier_id:
         try:
-            print(f"Attempting to destroy supplier ID: {supplier_id}")
             api.suppliers.destroy(supplier_id)
-            print(f"Supplier destroy call successful for ID: {supplier_id}")
 
             # Optional: Verify deletion by trying to read (expect failure/inactive)
             try:
-                print(f"Attempting to read supposedly deleted supplier ID: {supplier_id}")
                 deleted_supplier = api.suppliers.read(supplier_id)
                 # If read succeeds, check if it's marked inactive (depends on API behavior)
-                assert deleted_supplier.get("isInactive") is True, \
-                    f"Supplier {supplier_id} was readable after destroy and not marked inactive."
-                print(f"Read after delete confirmed supplier {supplier_id} is inactive.")
+                assert deleted_supplier.get("isInactive") is True, f"Supplier {supplier_id} was readable after destroy and not marked inactive."
             except Exception as read_error:
                 # This is often the expected path - read fails for deleted item
+                # Keep this one print for debugging potential issues
                 print(f"Read after delete failed as expected for supplier {supplier_id}: {read_error}")
                 pass  # Expected failure
 
@@ -226,13 +218,13 @@ def test_listcreate_suppliers(api):
 
     for _ in range(3):
         name = generate_unique_name()
-        number = generate_unique_supplier_number()  # <-- Generate number
+        number = generate_unique_supplier_number()
         supplier_info.append({"name": name, "number": number})
         supplier_data = {
             "name": name,
             "email": f"{name.replace(' ', '').lower()}@example.com",
             "isSupplier": True,
-            "supplierNumber": number,  # <-- Added field
+            "supplierNumber": number,
         }
         suppliers_data.append(supplier_data)
 
@@ -248,7 +240,7 @@ def test_listcreate_suppliers(api):
     for info in supplier_info:
         assert info["name"] in created_supplier_map
         created_supplier = created_supplier_map[info["name"]]
-        assert created_supplier["supplierNumber"] == info["number"]  # <-- Corrected assertion
+        assert created_supplier["supplierNumber"] == info["number"]
         assert "id" in created_supplier
 
     # Clean up - delete the suppliers
@@ -268,11 +260,11 @@ def test_listupdate_suppliers(api):
 
     for _ in range(3):
         name = generate_unique_name()
-        number = generate_unique_supplier_number()  # <-- Generate number
+        number = generate_unique_supplier_number()
         supplier_data = {
             "name": name,
             "email": f"{name.replace(' ', '').lower()}@example.com",
-            "supplierNumber": number,  # <-- Added field
+            "supplierNumber": number,
         }
         created_supplier = api.suppliers.create(supplier_data)
         created_suppliers.append(created_supplier)
@@ -305,7 +297,7 @@ def test_listupdate_suppliers(api):
         original_number = supplier_numbers[updated_supplier["id"]]
         assert updated_supplier["email"] == f"updated_{original_supplier['email']}"
         assert updated_supplier["description"] == f"Updated description for {original_supplier['name']}"
-        assert updated_supplier["supplierNumber"] == original_number  # <-- Corrected assertion
+        assert updated_supplier["supplierNumber"] == original_number
 
     # Clean up - delete the suppliers
     time.sleep(2)  # Add delay before bulk delete
