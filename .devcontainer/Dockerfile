@@ -23,7 +23,7 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml ./
 
 # Run poetry lock to update the lock file if needed
-RUN poetry lock --no-update
+RUN poetry lock
 
 # Now copy the lock file and other files
 COPY poetry.lock README.md ./

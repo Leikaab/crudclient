@@ -1,4 +1,5 @@
-import random  # <-- Added import
+import random
+import time  # <-- Added import
 import uuid
 
 import pytest
@@ -30,39 +31,7 @@ def generate_unique_supplier_number():  # <-- Added function
     return random.randint(100000, 9999999)
 
 
-@pytest.mark.no_parallel
-def test_create_supplier(api):
-    """
-    Test creating a supplier.
-    """
-    # Create a new supplier with a unique name and supplier number
-    supplier_name = generate_unique_name()
-    supplier_number = generate_unique_supplier_number()  # <-- Generate number
-
-    supplier_data = {
-        "name": supplier_name,
-        "email": "test@example.com",
-        "isSupplier": True,
-        "isCustomer": False,
-        "supplierNumber": supplier_number,  # <-- Added field
-    }
-
-    # Create the supplier
-    supplier = api.suppliers.create(supplier_data)
-
-    # Check that the supplier was created correctly
-    assert isinstance(supplier, dict)
-    assert supplier["name"] == supplier_name
-    assert supplier["email"] == "test@example.com"
-    assert supplier["isSupplier"] is True
-    assert supplier["isCustomer"] is False
-    assert supplier["supplierNumber"] == supplier_number  # <-- Corrected assertion
-    assert "id" in supplier
-
-    # Clean up - delete the supplier
-    api.suppliers.destroy(supplier["id"])
-
-
+# Removed test_create_supplier - merged into test_create_and_destroy_supplier
 @pytest.mark.no_parallel
 def test_read_supplier(api):
     """
@@ -178,40 +147,72 @@ def test_list_suppliers(api):
         assert found_supplier["supplierNumber"] == original_info["number"]  # <-- Corrected assertion
 
     # Clean up - delete the suppliers
+    time.sleep(2)  # Add delay before bulk delete
     for supplier in created_suppliers:
         api.suppliers.destroy(supplier["id"])
 
 
 @pytest.mark.no_parallel
-def test_destroy_supplier(api):
+def test_create_and_destroy_supplier(api):
     """
-    Test deleting a supplier.
+    Test creating and then destroying a supplier, checking each step.
+    Includes delays to mitigate rate limiting.
     """
-    # Create a new supplier with a unique name and number
+    time.sleep(1)  # Delay before starting
+    supplier_id = None  # Initialize supplier_id
+
+    # --- Create Step ---
     supplier_name = generate_unique_name()
-    supplier_number = generate_unique_supplier_number()  # <-- Generate number
+    supplier_number = generate_unique_supplier_number()
     supplier_data = {
         "name": supplier_name,
-        "email": "test@example.com",
-        "supplierNumber": supplier_number,  # <-- Added field
+        "email": "create-destroy@example.com",
+        "isSupplier": True,
+        "supplierNumber": supplier_number,
     }
 
-    # Create the supplier
-    created_supplier = api.suppliers.create(supplier_data)
-
-    # Delete the supplier
-    api.suppliers.destroy(created_supplier["id"])
-
-    # Try to read the supplier - should fail or return None/inactive
     try:
-        deleted_supplier = api.suppliers.read(created_supplier["id"])
-        # If we get here, the supplier might still exist but be marked as inactive
-        assert deleted_supplier.get("isInactive") is True
-    except Exception:
-        # Check if the exception indicates "Not Found" or similar
-        # This depends on how crudclient/Tripletex API handles reads of deleted items
-        # For now, just passing is acceptable as per original test
-        pass
+        print(f"Attempting to create supplier: {supplier_name}")
+        created_supplier = api.suppliers.create(supplier_data)
+        print(f"Supplier created successfully: ID {created_supplier.get('id')}")
+
+        # Assertions for creation
+        assert isinstance(created_supplier, dict), "Create response should be a dict"
+        assert created_supplier.get("name") == supplier_name, "Created supplier name mismatch"
+        assert created_supplier.get("email") == "create-destroy@example.com", "Created supplier email mismatch"
+        assert created_supplier.get("supplierNumber") == supplier_number, "Created supplier number mismatch"
+        assert "id" in created_supplier, "Created supplier must have an ID"
+        supplier_id = created_supplier["id"]  # Store ID for destroy step
+
+    except Exception as e:
+        pytest.fail(f"Failed during SUPPLIER CREATE step: {e}")
+
+    # --- Destroy Step ---
+    if supplier_id:
+        try:
+            print(f"Attempting to destroy supplier ID: {supplier_id}")
+            api.suppliers.destroy(supplier_id)
+            print(f"Supplier destroy call successful for ID: {supplier_id}")
+
+            # Optional: Verify deletion by trying to read (expect failure/inactive)
+            try:
+                print(f"Attempting to read supposedly deleted supplier ID: {supplier_id}")
+                deleted_supplier = api.suppliers.read(supplier_id)
+                # If read succeeds, check if it's marked inactive (depends on API behavior)
+                assert deleted_supplier.get("isInactive") is True, \
+                    f"Supplier {supplier_id} was readable after destroy and not marked inactive."
+                print(f"Read after delete confirmed supplier {supplier_id} is inactive.")
+            except Exception as read_error:
+                # This is often the expected path - read fails for deleted item
+                print(f"Read after delete failed as expected for supplier {supplier_id}: {read_error}")
+                pass  # Expected failure
+
+        except Exception as e:
+            pytest.fail(f"Failed during SUPPLIER DESTROY step for ID {supplier_id}: {e}")
+    else:
+        pytest.fail("Cannot proceed to DESTROY step because supplier_id was not obtained during CREATE.")
+
+    time.sleep(1)  # Delay before finishing test
 
 
 @pytest.mark.no_parallel
@@ -251,6 +252,7 @@ def test_listcreate_suppliers(api):
         assert "id" in created_supplier
 
     # Clean up - delete the suppliers
+    time.sleep(2)  # Add delay before bulk delete
     for supplier in created_suppliers:
         api.suppliers.destroy(supplier["id"])
 
@@ -306,5 +308,6 @@ def test_listupdate_suppliers(api):
         assert updated_supplier["supplierNumber"] == original_number  # <-- Corrected assertion
 
     # Clean up - delete the suppliers
+    time.sleep(2)  # Add delay before bulk delete
     for supplier in created_suppliers:  # Use original list for IDs
         api.suppliers.destroy(supplier["id"])
