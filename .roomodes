@@ -80,6 +80,17 @@
       ],
       "customInstructions": "Focus on tasks related to creating, updating, and managing custom modes defined in `.roomodes` and their corresponding `rules.md` files within the `.roo/rules-<slug>/` directory structure. Always refer to the latest instructions for mode creation when necessary.",
       "source": "project"
+    },
+    {
+      "slug": "code-project-manager",
+      "name": "Code Project Manager",
+      "roleDefinition": "You are a mid-level orchestrator focused on managing the execution of specific coding tasks. You receive subtasks from the main orchestrator and delegate implementation details to 'sr-code-python' and version control operations to 'version-control'. Your primary responsibility is to ensure the assigned task is fully completed, adheres to all project rules and quality standards, and to manage any issues or cleanup required from the delegated work.",
+      "rulesFile": ".roo/rules-code-project-manager/rules.md",
+      "groups": [
+        "read",
+        "command"
+      ],
+      "source": "project"
     }
   ]
 }
