@@ -13,13 +13,13 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
         *   `config.py` (`ClientConfig`): Handles client configuration (URL, timeouts, retries) and holds the authentication strategy.
         *   `auth/` (Authentication Strategies): Implements the Strategy Pattern for authentication, with different strategies for various authentication methods.
         *   `client.py` (`Client`): The high-level client orchestrator, applying configuration (auth, retries) and delegating actual HTTP communication to the `http/` layer.
-        *   `http/` (HTTP Layer): Contains components (`client.py`, `request.py`, `response.py`, `errors.py`, `retry.py`, `session.py`) responsible for raw HTTP communication, request/response object handling, HTTP-specific error management, retry logic, and session management (e.g., using `requests`).
+        *   `http/` (HTTP Layer): Contains components (`client.py`, `request.py`, `response.py`, `errors.py`, `retry.py`, `session.py`, `retry_strategies.py`, `retry_conditions.py`) responsible for raw HTTP communication, request/response object handling, HTTP-specific error management, sophisticated retry logic, and session management (e.g., using `requests`).
         *   `crud/` (CRUD Abstraction): Contains components (`base.py`, `endpoint.py`, `operations.py`, `response_conversion.py`) providing abstractions for defining and executing CRUD operations on API endpoints, including URL construction and Pydantic model conversion.
         *   `response_strategies/`: Provides different strategies (e.g., `DefaultResponseStrategy`, `PathBasedResponseStrategy`) for parsing and extracting relevant data from diverse API response structures.
         *   `api.py` (`API`): Acts as an entry point, composing the `Client` and registering `Crud` resource endpoints.
         *   `models.py`: Defines base Pydantic models for common API patterns (like `ApiResponse`).
         *   `exceptions.py`: Defines custom exceptions specific to the `crudclient` library's logic.
-        *   `testing/`: Contains a comprehensive testing framework with various test doubles (mocks, fakes, stubs, spies) to facilitate testing applications built with `crudclient`.
+        *   `testing/`: Contains a comprehensive testing framework with factories and various test doubles (mocks, stubs, spies) to facilitate testing applications built with `crudclient`. (See dedicated section below).
     *   This separation makes the library easier to understand, test, and maintain.
 
 2.  **Extensibility:**
@@ -32,19 +32,21 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
 
 1.  **Type Hinting Strategy:**
     *   **Emphasis on Static Typing:** We strive for comprehensive type hinting to improve code correctness and maintainability, leveraging Python's typing features.
-    *   **`.pyi` Stub Files:** Type hints for the public API and detailed docstrings are only located in `.pyi` stub files (`client.pyi`, `config.pyi`, etc.).
-        *   **Rationale:** This provides excellent type information and documentation for library *consumers* (e.g., via IDE autocompletion and type checkers) without cluttering the implementation (`.py`) files, keeping the core logic cleaner for *maintainers*.
-    *   **Mypy:** Static type checking is enforced using `mypy`. Configuration is in `mypy.ini`. (Note: Stricter checks may be enabled post-alpha).
+    *   **`.pyi` Stub Files:** Type hints for the public API and detailed docstrings are primarily located in `.pyi` stub files (`client.pyi`, `config.pyi`, etc.).
+        *   **Rationale:** This provides excellent type information and documentation for library *consumers* (e.g., via IDE autocompletion and type checkers) without cluttering the implementation (`.py`) files, keeping the core logic cleaner for *maintainers*. Custom hooks enforce stub file presence and consistency.
+    *   **Mypy:** Static type checking is enforced using `mypy`. Configuration is in `mypy.ini`.
 
-2.  **Code Style and Formatting:**
+2.  **Code Style, Formatting, and Linting:**
     *   **PEP 8:** We follow PEP 8 guidelines, particularly for naming conventions.
     *   **Black & isort:** Code formatting and import sorting are automated using `Black` and `isort`.
-    *   **Flake8:** Linting is performed using `Flake8`.
-    *   **Pre-Commit Hooks:** These tools are enforced automatically via pre-commit hooks to ensure consistency before code is committed.
+    *   **Flake8:** Linting is performed using `Flake8`. Configuration is in `.flake8`.
+    *   **Pre-Commit Hooks:** These tools, along with custom checks (like docstring validation, stub file checks, file length limits located in `hooks/`), are enforced automatically via pre-commit hooks defined in `.pre-commit-config.yaml` to ensure consistency and quality before code is committed.
+
 3.  **Design Patterns:**
-    *   **Strategy Pattern:** Used for authentication mechanisms and response parsing strategies.
-    *   **Template Method Pattern:** Used in the API class for endpoint registration.
-    *   **Composition over Inheritance:** While inheritance is used for extension, composition is preferred for core functionality (e.g., API composes Client).
+    *   **Strategy Pattern:** Used for authentication mechanisms, response parsing strategies, and retry logic.
+    *   **Factory Pattern:** Used extensively within the `crudclient.testing` framework to create various test doubles.
+    *   **Template Method Pattern:** Used in the `API` class for endpoint registration.
+    *   **Composition over Inheritance:** While inheritance is used for extension, composition is preferred for core functionality (e.g., `API` composes `Client`).
 
 4.  **Single Responsibility Principle (SRP):**
     *   We aim for classes and methods to have a single, well-defined purpose.
@@ -54,35 +56,45 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
     *   Pydantic is used extensively in the `Crud` layer for request data serialization (`model_dump`) and response data parsing/validation. This leverages Pydantic's powerful data validation capabilities.
 
 6.  **Testing Philosophy:**
-    *   **Pytest:** Tests are written using `pytest`.
-    *   **Unit Tests:** Focus on testing individual components in isolation, using mocking (`requests-mock` or the internal `crudclient.testing` framework) for external dependencies. Located in `tests/unit`.
-    *   **Integration Tests:** Validate the library against real or simulated external APIs (potentially using `crudclient.testing.FakeAPI`) to ensure end-to-end functionality. Located in `tests/integration`.
-    *   **High Coverage:** We aim for high test coverage, enforced via pre-commit/pre-push hooks.
+    *   **Pytest:** Tests are written using `pytest`. Configuration is in `pytest.ini`.
+    *   **Unit Tests:** Focus on testing individual components in isolation, using the `crudclient.testing` framework for mocking dependencies. Located in `tests/unit`.
+    *   **Integration Tests:** Validate the library against real or simulated external APIs (potentially using advanced features of `crudclient.testing`) to ensure end-to-end functionality. Located in `tests/integration`.
+    *   **High Coverage:** We aim for high test coverage, tracked using `coverage.py` (configured in `.coveragerc`) and often enforced as part of CI checks.
 
 7.  **Dependency Management:**
-    *   **Poetry:** Project dependencies, packaging, and publishing are managed using `Poetry`.
+    *   **Poetry:** Project dependencies, environment management, packaging, and publishing are managed using `Poetry`. Key files are `pyproject.toml` and `poetry.lock`.
 
 8.  **Development Environment:**
-    *   **Dev Containers:** A VS Code Dev Container configuration is provided (`.devcontainer/devcontainer.json`) to ensure a consistent and reproducible development environment for all contributors.
+    *   The project aims for a consistent development environment, primarily managed through `Poetry`. Using `poetry install` sets up the necessary dependencies within a virtual environment. While previously a Dev Container was used, the current standard relies on Poetry managing the environment directly.
+
+9.  **Continuous Integration / Continuous Deployment (CI/CD):**
+    *   The project utilizes CI/CD pipelines (e.g., GitHub Actions) to automate essential quality checks on every commit and pull request.
+    *   Typical CI steps include:
+        *   Running linters (`Flake8`)
+        *   Running formatters (`Black`, `isort` - check mode)
+        *   Performing static type checking (`Mypy`)
+        *   Executing the full test suite (`pytest`) with coverage analysis
+        *   Running pre-commit hooks in CI mode
 
 ## Testing Framework (`crudclient.testing`)
 
-The `crudclient.testing` module provides a comprehensive testing framework designed to facilitate testing applications that utilize the `crudclient` library. It offers a variety of test doubles, including mocks, stubs, fakes, and spies, allowing developers to simulate the behavior of `crudclient` components during tests.
+The `crudclient.testing` module provides a sophisticated, factory-based testing framework designed to facilitate testing applications that utilize the `crudclient` library. It offers a variety of configurable test doubles and verification tools.
 
-**Key Components:**
+**Key Concepts & Components:**
 
-*   **Core Mocks:** `MockClient` (simulates `crudclient.Client`) and `MockHTTPClient` (simulates the low-level HTTP layer).
-*   **Advanced Doubles:**
-    *   `FakeAPI`: A sophisticated, in-memory fake of `crudclient.API`, backed by a `DataStore` that simulates a database. Ideal for integration tests without external dependencies.
-    *   `StubClient`: A simpler stub returning predefined responses based on request patterns.
-*   **Verification:** `Verifier` class and specific helpers for asserting interactions with test doubles.
+*   **Factories:**
+    *   `MockClientFactory`: The primary factory for creating highly configurable mock `Client` instances. Allows specifying expected requests, responses, errors, and authentication behavior.
+    *   `SimpleMockFactory`: A simpler factory for scenarios where only basic request/response mocking is needed.
+    *   Specialized factories exist for components like authentication (`crudclient.testing.auth.factory`).
+*   **Test Doubles:** The framework provides various types of doubles (mocks, stubs, spies) generated via the factories, tailored for different testing needs (e.g., mocking HTTP interactions, simulating CRUD operations, testing authentication flows). Found within submodules like `crudclient.testing.doubles`.
+*   **Verification:** The `crudclient.testing.verification` module and associated helpers provide tools to assert that interactions with mock objects occurred as expected (e.g., specific requests were made, authentication headers were correct).
+*   **Response Building:** Helpers exist (`crudclient.testing.response_builder`) to easily construct mock `requests.Response` objects for use in tests.
+*   **Modular Structure:** The framework is organized into submodules (`auth`, `core`, `crud`, `doubles`, `helpers`, `response_builder`, `simple_mock`, `spy`, `verification`) reflecting the structure of the main library, allowing for targeted mocking and testing.
 
-**Structure:**
-
-The framework is organized into submodules like `core`, `auth`, `crud`, `doubles`, `spy`, `verification`, `helpers`, and `response_builder`, each focusing on specific aspects of testing.
+This framework enables robust unit and integration testing by providing fine-grained control over the simulated behavior of `crudclient` components. Refer to `crudclient/testing/README.md` for more detailed usage examples.
 
 ## Future Directions (Considerations)
 
-*   **Asynchronous Support:** Potential addition of `asyncio`/`httpx` support.
-*   **Enhanced Pydantic Strategies:** Refining how Pydantic models handle diverse API response structures.
-*   **Stricter Typing:** Enabling more rigorous `mypy` checks once the API stabilizes.
+*   **Asynchronous Support:** Potential addition of `asyncio`/`httpx` support remains a consideration.
+*   **Enhanced Pydantic Strategies:** Further refining how Pydantic models handle diverse API response structures.
+*   **Plugin System:** Exploring a plugin architecture for easier extension of core functionalities like authentication or response handling.
