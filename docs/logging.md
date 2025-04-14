@@ -1,50 +1,45 @@
-# Enhanced Logging and Error Handling in `crudclient`
+# Logging and Error Handling in `crudclient`
 
-The `crudclient` library incorporates comprehensive logging using Python's standard `logging` module and provides a structured exception hierarchy. This gives developers valuable insights into the client's behavior, aiding in debugging, monitoring, and robust error handling when interacting with APIs.
+The `crudclient` library uses Python's standard `logging` module for comprehensive logging and provides a structured exception hierarchy based on `crudclient.exceptions`. This documentation explains how to configure logging and handle errors effectively when using the library.
 
-## Default Behavior: `NullHandler` and `WARNING` Level
+## Default Logging Behavior
 
-By default, `crudclient` logging is configured for safety and minimal interference with consuming applications:
+By default, `crudclient` is configured to avoid interfering with the consuming application's logging setup:
 
-*   **Default Handler:** It attaches a `logging.NullHandler` to its root logger (`'crudclient'`). This means **no log output will be produced by `crudclient` unless you explicitly configure a handler** in your application.
-*   **Default Level:** The root logger `'crudclient'` is set to `logging.WARNING`. Even if you add a handler, only messages with severity `WARNING`, `ERROR`, or `CRITICAL` will be processed by default.
-
-## Why Configure Logging?
-
-Because `crudclient` uses a `NullHandler` by default, you **must** configure the Python `logging` system in your application to actually see or capture log messages from the library. This involves:
-
-1.  **Adding a Handler:** Specify *where* to send log messages (e.g., console, file).
-2.  **Setting the Level:** Specify the minimum severity level you want to see (e.g., `INFO`, `DEBUG`).
+*   **Default Handler:** A `logging.NullHandler` is attached to the library's root logger (`'crudclient'`). This means **`crudclient` produces no log output unless you configure a handler** in your application.
+*   **Default Level:** The root logger `'crudclient'` is set to `logging.WARNING`. Even with a handler configured, only messages with severity `WARNING`, `ERROR`, or `CRITICAL` will be processed by default.
 
 ## Configuring Logging
 
-Here are common ways to configure logging for `crudclient`:
+To capture log messages from `crudclient`, you must configure the Python `logging` system in your application. This typically involves adding a handler (to specify the destination, e.g., console or file) and setting the desired logging level (e.g., `INFO`, `DEBUG`).
 
-**1. Basic Configuration (Quick Setup)**
+Here are common configuration methods:
 
-Use `logging.basicConfig` for simple scripts or initial debugging. Call this early in your application startup.
+**1. Basic Configuration (`logging.basicConfig`)**
+
+Suitable for simple scripts or quick debugging. Call this early in your application startup.
 
 ```python
 import logging
 import crudclient # Or your SDK built on crudclient
 
-# Configure basic logging to see INFO level messages and above from ALL loggers
+# Configure basic logging to show INFO level messages and above from ALL loggers
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# To see DEBUG messages (very verbose, includes request/response bodies if enabled):
+# Example: To see DEBUG messages (very verbose, includes request/response bodies if enabled):
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-# Now, when you use crudclient or your SDK, logs will appear
+# Now, when you use crudclient, logs will appear based on this configuration
 # client = crudclient.Client(...)
 # ... operations ...
 ```
 
-**2. Direct Logger Configuration (More Control)**
+**2. Direct Logger Configuration**
 
-Configure the `'crudclient'` logger (or its children) directly for fine-grained control.
+Provides fine-grained control by configuring the `'crudclient'` logger (or its children) directly.
 
 ```python
 import logging
@@ -52,38 +47,45 @@ import sys
 import crudclient
 
 # 1. Get the desired logger
-logger = logging.getLogger('crudclient') # Or 'crudclient.http', 'crudclient.auth', etc.
-logger.setLevel(logging.DEBUG) # Set desired level
+logger = logging.getLogger('crudclient') # Or a specific child like 'crudclient.http'
+logger.setLevel(logging.DEBUG) # Set the minimum level this logger will process
 
-# 2. Create a handler (e.g., StreamHandler to output to console)
+# 2. Create a handler (e.g., StreamHandler for console output)
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG) # Process DEBUG and above if logger allows
+handler.setLevel(logging.DEBUG) # Set the minimum level this handler will process
 
-# 3. Create a formatter (optional)
+# 3. Create a formatter (optional, for log message format)
 formatter = logging.Formatter('CRUDCLIENT: %(levelname)s [%(name)s] %(message)s')
 handler.setFormatter(formatter)
 
 # 4. Add the handler to the logger
 logger.addHandler(handler)
 
-# Optional: Prevent propagation if root logger is already configured
+# Optional: Prevent messages from propagating to the root logger's handlers
 # logger.propagate = False
 
-# Now, logs will appear via this handler
+# Now, logs from 'crudclient' (at DEBUG level or higher) will be handled by this setup
 # client = crudclient.Client(...)
 # ... operations ...
 ```
 
-**3. Client Configuration Flags for Body Logging**
+**3. Client Configuration for Body Logging**
 
-Within the `ClientConfig`, you can control whether request and response bodies are included in `DEBUG` level logs:
+The `ClientConfig` allows controlling whether request and response bodies are included in `DEBUG` level logs generated by the `crudclient.http` logger.
 
 *   `log_request_body` (bool, default `False`): If `True`, includes the request body in `DEBUG` logs.
 *   `log_response_body` (bool, default `False`): If `True`, includes the response body in `DEBUG` logs.
 
 ```python
 from crudclient import Client, ClientConfig
+import logging # Make sure logging is configured
 
+# Example: Configure logging to see DEBUG messages from the HTTP component
+http_logger = logging.getLogger('crudclient.http')
+http_logger.setLevel(logging.DEBUG)
+# ... (add a handler to http_logger or a parent like 'crudclient' as shown above) ...
+
+# Configure the client to enable body logging
 config = ClientConfig(
     base_url="https://api.example.com",
     log_request_body=True,  # Enable request body logging at DEBUG level
@@ -91,118 +93,122 @@ config = ClientConfig(
 )
 client = Client(config=config)
 
-# Ensure logging is configured to DEBUG level to see these bodies
-# logging.getLogger('crudclient.http').setLevel(logging.DEBUG)
-# ... add handler ...
+# Now, DEBUG logs from crudclient.http will include redacted bodies
+# client.crud("items").read("some_id")
 ```
 
-Remember that enabling body logging can expose sensitive data (see "Data Redaction and Sensitivity").
+**Note:** Enabling body logging can expose sensitive data, even with redaction. See "Data Redaction and Sensitivity" below.
 
 ## Logger Hierarchy
 
-`crudclient` uses hierarchical logger names based on the module structure:
+`crudclient` uses hierarchical logger names, typically mirroring the module structure:
 
 *   `crudclient`: Root logger for the library.
-*   `crudclient.client`: Main `Client` class logs.
-*   `crudclient.config`: Configuration loading logs.
+*   `crudclient.client`: Logs from the main `Client` class.
+*   `crudclient.config`: Configuration-related logs.
 *   `crudclient.http`: General HTTP operations.
-    *   `crudclient.http.client`: Specific HTTP client interactions.
+    *   `crudclient.http.client`: Specific HTTP client interactions (e.g., using `httpx`).
     *   `crudclient.http.retry`: Request retry logic.
-    *   `crudclient.http.request`: Request preparation.
-    *   `crudclient.http.response`: Response processing.
-*   `crudclient.auth`: General authentication.
-    *   `crudclient.auth.basic`: Basic Authentication.
-    *   `crudclient.auth.bearer`: Bearer Token Authentication.
-    *   `crudclient.auth.custom`: Custom Authentication strategies.
-*   `crudclient.crud`: Generic CRUD operations.
-    *   `crudclient.crud.endpoint`: Endpoint interactions.
-    *   `crudclient.crud.validation`: Request/response data validation.
+    *   `crudclient.http.request`: Request preparation details.
+    *   `crudclient.http.response`: Response processing details.
+*   `crudclient.auth`: General authentication operations.
+    *   `crudclient.auth.basic`: Basic Authentication specifics.
+    *   `crudclient.auth.bearer`: Bearer Token Authentication specifics.
+    *   `crudclient.auth.custom`: Custom Authentication strategy specifics.
+*   `crudclient.crud`: Generic CRUD operation logic.
+    *   `crudclient.crud.endpoint`: Endpoint interaction details.
+    *   `crudclient.crud.validation`: Request/response data validation logs.
 
-Configuring a parent logger (e.g., `crudclient.http`) affects its children unless they are configured more specifically.
+Configuring a parent logger (e.g., setting the level on `crudclient.http`) affects its children (`crudclient.http.retry`, etc.) unless the children are configured more specifically.
 
 ## What is Logged?
 
-### HTTP Lifecycle Logging (`crudclient.http.*`)
+### HTTP Lifecycle (`crudclient.http.*`)
 
-*   **`DEBUG`:** Extremely detailed logs about the request/response cycle.
-    *   Outgoing request: Method, URL, headers (redacted), query parameters. Request body (bytes, redacted) included if `log_request_body=True`.
-    *   Incoming response: Status code, reason phrase, headers (redacted). Response body (bytes, redacted) included if `log_response_body=True`.
-    *   Details about retry attempts before they happen.
-*   **`INFO`:** Higher-level information about HTTP interactions.
-    *   Summary log after a request completes (or fails after retries): Method, URL, final status code, duration.
-    *   Retry attempts being made: Attempt number, delay, reason (status code or exception), method, URL.
+*   **`DEBUG`:** Very detailed logs for diagnosing request/response issues.
+    *   Outgoing request details: Method, URL, headers (redacted), query parameters. Request body (redacted, potentially truncated) included if `log_request_body=True`.
+    *   Incoming response details: Status code, reason phrase, headers (redacted). Response body (redacted, potentially truncated) included if `log_response_body=True`.
+    *   Retry attempt details *before* the attempt is made.
+*   **`INFO`:** High-level information about HTTP interactions.
+    *   Summary after a request completes (or fails after all retries): Method, URL, final status code, duration.
+    *   Notification when a retry attempt is being made: Attempt number, delay, reason (status code or exception), method, URL.
 
 ### Error Handling and Exceptions (`crudclient.exceptions`)
 
-`crudclient` uses a custom exception hierarchy, rooted in `CrudClientError`. Errors are typically logged just before an exception is raised.
+`crudclient` raises exceptions derived from `CrudClientError` for various error conditions. Errors are typically logged just before the corresponding exception is raised.
 
 *   **Exception Hierarchy:**
-    *   `CrudClientError`: Base class for all library-specific errors.
-    *   `ConfigurationError`: Errors during client configuration.
-    *   `NetworkError`: Issues connecting to the server or during data transmission (e.g., timeouts, connection errors). Often wraps `httpx` exceptions. Logged at `ERROR` level.
-    *   `APIError`: Base class for errors originating from the API response (HTTP status >= 400). Logged at `WARNING` (4xx) or `ERROR` (5xx) level.
-        *   Contains `request` (`httpx.Request`) and `response` (`httpx.Response`) attributes for context.
-        *   `AuthenticationError`: Specifically for 401/403 errors. Logged at `WARNING` level.
-        *   `ClientError`: Other 4xx errors (e.g., 400 Bad Request, 404 Not Found). Logged at `WARNING` level.
-        *   `ServerError`: 5xx errors. Logged at `ERROR` level.
-    *   `DataValidationError`: Errors during request/response Pydantic model validation. Logged at `ERROR` level. Contains validation error details (redacted).
-    *   `ResponseHandlingError`: Errors during the processing of a successful response (e.g., issues with custom response strategies). Logged at `ERROR` level.
+    *   `CrudClientError`: Base class for all library errors.
+    *   `ConfigurationError`: Invalid client configuration.
+    *   `NetworkError`: Network connectivity issues (e.g., timeouts, DNS errors). Often wraps underlying HTTP library exceptions. Logged at `ERROR`.
+    *   `APIError`: Errors indicated by the API response (HTTP status >= 400). Logged at `WARNING` (4xx) or `ERROR` (5xx).
+        *   Contains `request` and `response` attributes from the underlying HTTP library (e.g., `httpx`).
+        *   `AuthenticationError`: Specific subclass for 401/403 errors. Logged at `WARNING`.
+        *   `ClientError`: Other 4xx errors (e.g., 400 Bad Request, 404 Not Found). Logged at `WARNING`.
+        *   `ServerError`: 5xx errors. Logged at `ERROR`.
+    *   `DataValidationError`: Request or response data failed validation against Pydantic models. Logged at `ERROR`. Contains redacted validation details.
+    *   `ResponseHandlingError`: Error during custom processing of a successful response. Logged at `ERROR`.
 
-*   **Logging Pattern:** Errors like network issues, 5xx server errors, or validation failures are typically logged at the `ERROR` level before the corresponding exception is raised. Client-side errors (4xx) are logged at the `WARNING` level before raising `APIError` or its subclasses.
+*   **Logging Levels:** Network errors, server errors (5xx), validation errors, and response handling errors are typically logged at `ERROR`. Client errors (4xx), including authentication errors, are logged at `WARNING`.
 
-*   **Handling Exceptions:** You can catch specific exceptions to handle different error conditions gracefully.
+*   **Handling Exceptions:** Catch specific exceptions from `crudclient.exceptions` for robust error handling.
 
     ```python
     from crudclient import Client
-    from crudclient.exceptions import APIError, NetworkError, DataValidationError, AuthenticationError
+    from crudclient.exceptions import APIError, NetworkError, DataValidationError, AuthenticationError, CrudClientError, ClientError, ServerError
 
     client = Client(base_url="https://api.example.com")
 
     try:
-        # Example: Fetch a resource that might not exist or require auth
+        # Example operation
         resource = client.crud("items").read("item_id_123")
     except AuthenticationError as e:
-        logging.error(f"Authentication failed: {e.response.status_code}")
-        # Handle token refresh or prompt user for credentials
-    except APIError as e:
-        # Handle other API errors (e.g., 404 Not Found, 400 Bad Request, 5xx Server Error)
-        logging.error(f"API Error: Status={e.response.status_code}, Body={e.response.text}")
-        # Implement specific logic based on status code or response body
+        logging.error(f"Authentication failed: Status={e.response.status_code if e.response else 'N/A'}")
+        # Handle token refresh or re-authentication
+    except ClientError as e: # Catches 4xx errors (excluding 401/403 if AuthenticationError is caught first)
+        logging.warning(f"Client API Error: Status={e.response.status_code}, Body={e.response.text}")
+        # Handle specific 4xx errors like Not Found (404) or Bad Request (400)
+    except ServerError as e: # Catches 5xx errors
+        logging.error(f"Server API Error: Status={e.response.status_code}, Body={e.response.text}")
+        # Handle server-side issues, maybe retry later
+    except APIError as e: # Catch-all for any remaining API errors if needed
+        logging.error(f"Generic API Error: Status={e.response.status_code if e.response else 'N/A'}")
     except DataValidationError as e:
-        logging.error(f"Response data validation failed: {e}")
-        # Handle unexpected response structure
+        logging.error(f"Data validation failed: {e}")
+        # Handle unexpected data structure in request or response
     except NetworkError as e:
-        logging.error(f"Network error occurred: {e}")
-        # Handle connection issues, maybe retry later
+        logging.error(f"Network error: {e}")
+        # Handle connection issues
+    except CrudClientError as e: # Catch any other library-specific errors
+        logging.exception(f"An unexpected crudclient error occurred: {e}")
     except Exception as e:
-        logging.exception("An unexpected error occurred") # Catch-all
+        logging.exception("An unexpected non-crudclient error occurred") # General catch-all
     ```
 
-### Authentication Logging (`crudclient.auth.*`)
+### Authentication (`crudclient.auth.*`)
 
-*   **`DEBUG`:** Logs which authentication strategy is being applied to a request and details about token acquisition/refresh attempts.
-*   **`INFO`:** Logs successful token refresh operations.
-*   **`ERROR`:** Logs failures during token acquisition or refresh.
-*   **Note:** Sensitive credentials (passwords, full tokens, API keys) are **never** logged.
+*   **`DEBUG`:** Details about which authentication strategy is active and steps like token acquisition/refresh attempts.
+*   **`INFO`:** Successful token refresh operations.
+*   **`ERROR`:** Failures during token acquisition or refresh.
+*   **Note:** Sensitive credentials (passwords, full tokens, API keys) are **never** logged intentionally. Redaction is applied where possible (see below).
 
-### Data Validation Logging (`crudclient.crud.validation`)
+### Data Validation (`crudclient.crud.validation`)
 
-*   **`ERROR`:** Logs Pydantic `ValidationError` when validating outgoing request data or incoming response data against defined models.
-    *   The log message includes the model name and structured error details.
-    *   Sensitive data within the validation error context is automatically redacted.
+*   **`ERROR`:** Logs details when Pydantic `ValidationError` occurs during request or response validation.
+    *   Includes model name and structured (redacted) error details.
 
 ## Data Redaction and Sensitivity
 
-`crudclient` automatically attempts to redact sensitive information in logs and exceptions to prevent accidental exposure:
+`crudclient` automatically attempts to redact potentially sensitive information in logs and exception messages:
 
-*   **HTTP Headers:** Values for common sensitive headers (e.g., `Authorization`, `Set-Cookie`, `X-Api-Key`) are replaced with `[REDACTED]`.
-*   **Request/Response Bodies:** If body logging is enabled (`DEBUG` level with `log_request_body=True` or `log_response_body=True`), the logged bodies are scanned for keys matching common sensitive patterns (e.g., `password`, `token`, `secret`, `apiKey`), and their values are redacted. Bodies are also truncated if they exceed a certain length.
-*   **Validation Errors:** Data included in `DataValidationError` logs and exceptions is also subject to redaction based on sensitive key names.
+*   **HTTP Headers:** Values for common sensitive headers (e.g., `Authorization`, `Set-Cookie`, `X-Api-Key`, `Proxy-Authorization`) are replaced with `[REDACTED]`.
+*   **Request/Response Bodies:** When body logging is enabled (`DEBUG` level with `log_request_body=True` or `log_response_body=True`), logged bodies are scanned. Values associated with keys matching common sensitive patterns (e.g., containing `password`, `token`, `secret`, `key`, `auth`) are redacted. Bodies may also be truncated if they exceed a configured maximum length.
+*   **Validation Errors:** Data within `DataValidationError` details is subject to the same key-based redaction.
 
 **Important Considerations:**
 
-*   **Verbosity:** `DEBUG` level logging is extremely verbose. Enable it only when necessary for detailed debugging.
-*   **Sensitivity:** Despite redaction efforts, be cautious when enabling `DEBUG` logging (especially body logging) in production or when sharing logs. Sensitive information might still be present if it doesn't match standard patterns. Always review logs before sharing.
-*   **Performance:** Excessive logging (especially `DEBUG` level with large bodies) can have a minor performance impact. Configure levels appropriately for your environment.
+*   **Verbosity:** `DEBUG` level logging is very verbose. Use it judiciously, primarily for development or troubleshooting.
+*   **Sensitivity:** While redaction helps, it's pattern-based and might not catch all sensitive data formats. **Always review logs before sharing them**, especially if `DEBUG` level or body logging was enabled. Avoid logging sensitive data in production environments unless absolutely necessary and properly secured.
+*   **Performance:** High-volume logging, especially at `DEBUG` level with large bodies, can impact performance. Set appropriate logging levels for your environment (e.g., `INFO` or `WARNING` in production).
 
-By leveraging `crudclient`'s logging and structured exceptions, you can build more observable and resilient applications. Remember to configure logging according to your application's needs and handle potential exceptions gracefully.
+By configuring logging appropriately and handling the structured exceptions provided by `crudclient`, you can build more observable and resilient applications.

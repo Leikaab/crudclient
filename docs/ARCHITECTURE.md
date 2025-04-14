@@ -44,31 +44,29 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
 
 3.  **Design Patterns:**
     *   **Strategy Pattern:** Used for authentication mechanisms, response parsing strategies, and retry logic.
-    *   **Factory Pattern:** Used extensively within the `crudclient.testing` framework to create various test doubles.
+    *   **Factory Pattern:** Used extensively within the `crudclient.testing` framework.
     *   **Template Method Pattern:** Used in the `API` class for endpoint registration.
-    *   **Composition over Inheritance:** While inheritance is used for extension, composition is preferred for core functionality (e.g., `API` composes `Client`).
+    *   **Composition over Inheritance:** Preferred for core functionality (e.g., `API` composes `Client`).
 
 4.  **Single Responsibility Principle (SRP):**
-    *   We aim for classes and methods to have a single, well-defined purpose.
-    *   Functionality is organized into logically named files and modules.
+    *   Classes and methods aim for a single, well-defined purpose. Functionality is organized into logically named files and modules.
 
 5.  **Pydantic Integration:**
-    *   Pydantic is used extensively in the `Crud` layer for request data serialization (`model_dump`) and response data parsing/validation. This leverages Pydantic's powerful data validation capabilities.
+    *   Pydantic is used extensively in the `Crud` layer for request data serialization and response data parsing/validation, leveraging its data validation capabilities.
 
 6.  **Testing Philosophy:**
-    *   **Pytest:** Tests are written using `pytest`. Configuration is in `pytest.ini`.
-    *   **Unit Tests:** Focus on testing individual components in isolation, using the `crudclient.testing` framework for mocking dependencies. Located in `tests/unit`.
-    *   **Integration Tests:** Validate the library against real or simulated external APIs (potentially using advanced features of `crudclient.testing`) to ensure end-to-end functionality. Located in `tests/integration`.
-    *   **High Coverage:** We aim for high test coverage, tracked using `coverage.py` (configured in `.coveragerc`) and often enforced as part of CI checks.
+    *   **Pytest Framework:** Tests are written using `pytest`.
+    *   **Unit & Integration Tests:** The project includes both unit tests (isolating components using the `crudclient.testing` framework) and integration tests (validating against real or simulated APIs).
+    *   **High Coverage Goal:** Test coverage is tracked (`coverage.py`) and maintained at a high level.
 
 7.  **Dependency Management:**
     *   **Poetry:** Project dependencies, environment management, packaging, and publishing are managed using `Poetry`. Key files are `pyproject.toml` and `poetry.lock`.
 
 8.  **Development Environment:**
-    *   The project aims for a consistent development environment, primarily managed through `Poetry`. Using `poetry install` sets up the necessary dependencies within a virtual environment. While previously a Dev Container was used, the current standard relies on Poetry managing the environment directly.
+    *   The project aims for a consistent development environment, primarily managed through `Poetry`. Using `poetry install` sets up the necessary dependencies within a virtual environment.
 
-9.  **Continuous Integration / Continuous Deployment (CI/CD):**
-    *   The project utilizes CI/CD pipelines (e.g., GitHub Actions) to automate essential quality checks on every commit and pull request.
+9.  **Continuous Integration (CI):**
+    *   The project utilizes CI pipelines (e.g., GitHub Actions) to automate essential quality checks on every commit and pull request.
     *   Typical CI steps include:
         *   Running linters (`Flake8`)
         *   Running formatters (`Black`, `isort` - check mode)
@@ -83,17 +81,12 @@ The `crudclient.testing` module provides a sophisticated, factory-based testing 
 **Key Concepts & Components:**
 
 *   **Factories:**
-    *   `MockClientFactory`: The primary factory for creating highly configurable mock `Client` instances. Allows specifying expected requests, responses, errors, and authentication behavior.
-    *   `SimpleMockFactory`: A simpler factory for scenarios where only basic request/response mocking is needed.
-    *   Specialized factories exist for components like authentication (`crudclient.testing.auth.factory`).
-*   **Test Doubles:** The framework provides various types of doubles (mocks, stubs, spies) generated via the factories, tailored for different testing needs (e.g., mocking HTTP interactions, simulating CRUD operations, testing authentication flows). Found within submodules like `crudclient.testing.doubles`.
-*   **Verification:** The `crudclient.testing.verification` module and associated helpers provide tools to assert that interactions with mock objects occurred as expected (e.g., specific requests were made, authentication headers were correct).
-*   **Response Building:** Helpers exist (`crudclient.testing.response_builder`) to easily construct mock `requests.Response` objects for use in tests.
+    *   `MockClientFactory`: The primary factory for creating highly configurable mock `Client` instances.
+    *   `SimpleMockFactory`: A simpler factory for basic request/response mocking.
+    *   Specialized factories exist for components like authentication.
+*   **Test Doubles:** The framework provides various types of doubles (mocks, stubs, spies) generated via the factories, tailored for different testing needs.
+*   **Verification:** Tools are provided to assert that interactions with mock objects occurred as expected.
+*   **Response Building:** Helpers exist to easily construct mock `requests.Response` objects.
 *   **Modular Structure:** The framework is organized into submodules (`auth`, `core`, `crud`, `doubles`, `helpers`, `response_builder`, `simple_mock`, `spy`, `verification`) reflecting the structure of the main library, allowing for targeted mocking and testing.
 
 This framework enables robust unit and integration testing by providing fine-grained control over the simulated behavior of `crudclient` components. Refer to `crudclient/testing/README.md` for more detailed usage examples.
-
-## Future Directions (Considerations)
-
-*   **Enhanced Pydantic Strategies:** Further refining how Pydantic models handle diverse API response structures.
-*   **Plugin System:** Exploring a plugin architecture for easier extension of core functionalities like authentication or response handling.
