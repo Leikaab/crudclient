@@ -1,105 +1,146 @@
 # Response Model Strategies
 
-This document explains the response model strategy pattern implemented in the `Crud` class for handling different API response formats.
+This document explains the response model strategy pattern used by the `crudclient.Crud` class to handle different API response formats when converting them into Pydantic models.
 
 ## Overview
 
-The response model strategy pattern provides a flexible way to handle different API response formats when converting them to Pydantic models. This is particularly useful when working with APIs that have different response structures or when you need to extract data from nested structures.
+APIs can return data in various structures. The response model strategy pattern provides a flexible way for your `Crud` subclass to interpret these different structures and correctly map them to your defined Pydantic `_datamodel`. This allows you to configure how single items and lists of items are extracted and validated.
 
 ## Available Strategies
 
+The `crudclient` library provides two built-in strategies:
+
 ### DefaultResponseModelStrategy
 
-The `DefaultResponseModelStrategy` implements the original behavior of the `Crud` class for backward compatibility. It handles the following response formats:
+This is the default strategy used by `Crud` if no other strategy is specified. It handles common, straightforward response formats:
 
-1. Single item responses:
-   - Expects a dictionary that can be directly converted to the data model.
-
-2. List responses:
-   - A list of dictionaries that can be directly converted to the data model.
-   - A dictionary with a key from `_list_return_keys` (default: "data", "results", "items") containing a list of items.
-   - A dictionary that can be converted to an `ApiResponse` model if `_api_response_model` is specified.
+1.  **Single item responses:** Expects a JSON object (dictionary) that directly maps to the fields of your `_datamodel`.
+2.  **List responses:** Handles several formats:
+    *   A JSON array (list) where each element is an object mapping to your `_datamodel`.
+    *   A JSON object containing a specific key (defined in the `Crud` subclass's `_list_return_keys` attribute, defaulting to `["data", "results", "items"]`) whose value is the JSON array of items.
+    *   A JSON object that maps to an `ApiResponse` model, if the `Crud` subclass defines an `_api_response_model`.
 
 ### PathBasedResponseModelStrategy
 
-The `PathBasedResponseModelStrategy` allows for extracting data from nested structures using dot notation path expressions. This is useful when working with APIs that return deeply nested data.
+This strategy allows you to extract data from nested JSON structures using dot-notation paths. This is useful for APIs that wrap the core data within metadata or other containers.
 
-1. Single item responses:
-   - Uses `_single_item_path` to extract data from the response (e.g., "data.item" to access `response["data"]["item"]`).
-   - Optionally applies a pre-transform function to the data before extraction.
-
-2. List responses:
-   - Uses `_list_item_path` to extract list data from the response (e.g., "data.items" to access `response["data"]["items"]`).
-   - Optionally applies a pre-transform function to the data before extraction.
-   - Falls back to using the `ApiResponse` model if specified.
+1.  **Single item responses:** Uses the path specified in the `Crud` subclass's `_single_item_path` attribute to locate the JSON object representing the single item within the response (e.g., `"data.item"` accesses `response["data"]["item"]`).
+2.  **List responses:** Uses the path specified in the `Crud` subclass's `_list_item_path` attribute to locate the JSON array of items within the response (e.g., `"data.items"` accesses `response["data"]["items"]`).
 
 ## Using Response Model Strategies
 
-### Basic Usage
+You configure the strategy within your `Crud` subclass definition.
 
-To use the default strategy, you don't need to do anything special. The `Crud` class will use the `DefaultResponseModelStrategy` by default.
+### Default Strategy Usage
+
+If the `DefaultResponseModelStrategy` meets your needs, no extra configuration is required.
 
 ```python
+from crudclient import Crud
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    name: str
+
+# Uses DefaultResponseModelStrategy by default
 class UsersCrud(Crud[User]):
     _resource_path = "users"
     _datamodel = User
 ```
 
-### Using the Path-Based Strategy
+### Path-Based Strategy Usage
 
-To use the path-based strategy, set the `_response_model_strategy` class attribute to `PathBasedResponseModelStrategy` and specify the path expressions:
+To use the path-based strategy, set the `_response_model_strategy` class attribute to `PathBasedResponseModelStrategy` and define the necessary path attributes (`_single_item_path`, `_list_item_path`).
 
 ```python
+from crudclient import Crud
+from crudclient.response_strategies import PathBasedResponseModelStrategy
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    name: str
+
 class UsersCrud(Crud[User]):
     _resource_path = "users"
     _datamodel = User
+    # Specify the strategy
     _response_model_strategy = PathBasedResponseModelStrategy
+    # Specify paths to extract data
     _single_item_path = "data.user"
     _list_item_path = "data.users"
 ```
 
-### Creating a Custom Strategy
+## Creating a Custom Strategy
 
-You can create your own strategy by subclassing `ResponseModelStrategy` and implementing the required methods:
+For complex scenarios not covered by the built-in strategies, you can create your own. Subclass `crudclient.response_strategies.ResponseModelStrategy` and implement the `convert_single` and `convert_list` methods.
 
 ```python
-class CustomResponseModelStrategy(ResponseModelStrategy[T]):
+from typing import Type, Optional, Union, List, TypeVar
+from crudclient.response_strategies import ResponseModelStrategy
+from crudclient.types import JSONDict, JSONList, RawResponse, ApiResponse
+from pydantic import BaseModel
+
+T = TypeVar("T", bound=BaseModel)
+
+class CustomStrategy(ResponseModelStrategy[T]):
     def __init__(
         self,
         datamodel: Optional[Type[T]] = None,
         api_response_model: Optional[Type[ApiResponse]] = None,
-        # Add any additional parameters your strategy needs
+        # Add any other parameters your custom strategy needs
+        custom_config_value: str = "default",
     ):
+        # Ensure you call the superclass __init__ if it requires it
+        # super().__init__(datamodel=datamodel, api_response_model=api_response_model)
         self.datamodel = datamodel
         self.api_response_model = api_response_model
-        # Initialize any additional attributes
+        self.custom_config_value = custom_config_value
+        # Initialize other attributes
 
     def convert_single(self, data: RawResponse) -> Union[T, JSONDict]:
-        # Implement your custom logic for converting single item responses
-        pass
+        # Implement your logic to extract and convert a single item
+        # Example: Access data using self.custom_config_value
+        if not self.datamodel:
+            return data # Return raw if no datamodel
+        # ... custom extraction logic ...
+        extracted_data = data.get("payload", {})
+        return self.datamodel.model_validate(extracted_data)
 
     def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]:
-        # Implement your custom logic for converting list responses
-        pass
-```
+        # Implement your logic to extract and convert a list of items
+        if not self.datamodel:
+            return data # Return raw if no datamodel
+        # ... custom extraction logic ...
+        items_data = data.get("items_list", [])
+        return [self.datamodel.model_validate(item) for item in items_data]
 
-Then use it in your `Crud` subclass:
+# --- Usage in Crud subclass ---
+class User(BaseModel):
+    id: int
+    name: str
 
-```python
 class UsersCrud(Crud[User]):
     _resource_path = "users"
     _datamodel = User
-    _response_model_strategy = CustomResponseModelStrategy
-    # Add any additional configuration your strategy needs
+    # Use your custom strategy
+    _response_model_strategy = CustomStrategy
+    # You might pass configuration via __init_subclass__ or other means
+    # depending on how CustomStrategy is designed to be configured.
+    # For this example, assume CustomStrategy can be configured directly
+    # or picks up attributes from the Crud class if needed.
 ```
+
+Then, assign your custom class to the `_response_model_strategy` attribute in your `Crud` subclass. Ensure your strategy's `__init__` method handles any required parameters (like `datamodel`) and any custom configuration it needs.
 
 ## Fallback Behavior
 
-For backward compatibility, if the strategy fails to convert the response, the `Crud` class will fall back to the original behavior. This ensures that existing code continues to work even with the new strategy pattern.
+For backward compatibility, if the chosen strategy fails to convert the response (e.g., due to unexpected data format or an error within the strategy itself), the `Crud` class will attempt to fall back to its original, pre-strategy conversion logic. This helps ensure that existing code relying on the older behavior might still function even when introducing or modifying strategies. However, relying on this fallback is not recommended for new implementations; it's best to ensure your chosen strategy correctly handles all expected response formats.
 
-## Benefits
+## Why Use Strategies?
 
-1. **Flexibility**: Easily adapt to different API response formats without subclassing.
-2. **Reusability**: Create strategies that can be reused across different `Crud` subclasses.
-3. **Maintainability**: Separate the response conversion logic from the CRUD operations.
-4. **Extensibility**: Add new strategies as needed without modifying the core `Crud` class.
+*   **Flexibility**: Adapt to various API response structures without complex subclassing of `Crud`.
+*   **Reusability**: Define a strategy once and reuse it across multiple `Crud` endpoints sharing the same response format.
+*   **Separation of Concerns**: Keeps the logic for handling response formats separate from the core CRUD operation logic.
+*   **Extensibility**: Easily add new ways to handle responses as API requirements evolve.

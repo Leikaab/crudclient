@@ -4,6 +4,7 @@ Fixtures specific to unit tests.
 
 import uuid
 from typing import Any, Callable, Dict, Optional, Type
+from unittest.mock import MagicMock  # Add MagicMock import
 
 import pytest
 import requests_mock
@@ -101,6 +102,20 @@ def default_mock_client_config(create_mock_client_config: Callable[..., ClientCo
 def valid_config(create_mock_client_config: Callable[..., ClientConfig]) -> ClientConfig:
     """Provides a standard, valid ClientConfig instance."""
     return create_mock_client_config()
+
+
+@pytest.fixture
+def mock_client_config() -> MagicMock:
+    """Fixture for a mocked ClientConfig, available to all unit tests."""
+    config = MagicMock(spec=ClientConfig)
+    config.base_url = "http://test.com"
+    config.log_request_body = False
+    config.log_response_body = False
+    # Configure auth_strategy behavior to prevent TypeError
+    config.auth_strategy = MagicMock()
+    config.auth_strategy.prepare_request_params.return_value = {}
+    # Add other config defaults if needed
+    return config
 
 
 @pytest.fixture

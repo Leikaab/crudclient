@@ -6,8 +6,9 @@ Unit tests for the list operation of the CRUD base class.
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 
-from crudclient.exceptions import ModelConversionError
+from crudclient.exceptions import DataValidationError  # Replaced ModelConversionError
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
 
@@ -113,5 +114,10 @@ def test_list_operation_model_conversion_error(base_test_crud: BaseTestCrud, moc
     mock_client.get.return_value = [{"invalid": "data"}]  # Missing 'id' or 'name'
 
     # WHEN / THEN
-    with pytest.raises(ModelConversionError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.list()
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Data attribute should contain the invalid response data (the list with the invalid item)
+    assert excinfo.value.data == [{"invalid": "data"}]

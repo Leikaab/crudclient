@@ -33,6 +33,20 @@ from typing import Any, Dict, Literal, Optional, Union, overload
 import requests
 
 from ..config import ClientConfig
+from ..exceptions import (
+    APIError,
+    BadRequestError,
+    ClientAuthenticationError,
+    ConflictError,
+    CrudClientError,
+    ForbiddenError,
+    InternalServerError,
+    NetworkError,
+    NotFoundError,
+    RateLimitError,
+    ServiceUnavailableError,
+    UnprocessableEntityError,
+)
 from ..types import RawResponseSimple
 from .errors import ErrorHandler
 from .request import RequestFormatter
@@ -47,6 +61,10 @@ class HttpClient:
     This class is responsible for making HTTP requests while delegating session management,
     request preparation, response handling, error handling, and retry logic to specialized
     components.
+
+    Detailed logging of the HTTP request/response lifecycle (including potential
+    redaction of sensitive data) can be configured via the `ClientConfig`.
+    See `docs/logging.md` for more details.
 
     Attributes:
         config (ClientConfig): Configuration object for the client.

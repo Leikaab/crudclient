@@ -16,11 +16,22 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import (  # Added Tuple
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import requests
 
-from ..exceptions import CrudClientError
+from ..exceptions import CrudClientError, NetworkError  # Added NetworkError
+from .retry_conditions import RetryCondition  # Import conditions
+from .retry_strategies import RetryStrategy  # Import strategies
 
 class RetryEvent(Enum):
     """Enum representing different retry events."""
@@ -32,153 +43,12 @@ class RetryEvent(Enum):
     CONNECTION_ERROR = "connection_error"
     CUSTOM = "custom"
 
-class RetryStrategy(ABC):
-    """
-    Base class for retry strategies.
-
-    This abstract class defines the interface for retry strategies.
-    Concrete implementations should provide specific backoff algorithms.
-    """
-
-    @abstractmethod
-    def get_delay(self, attempt: int) -> float:
-        """
-        Calculate the delay before the next retry attempt.
-
-        Args:
-            attempt (int): The current retry attempt number (1-based).
-
-        Returns:
-            float: The delay in seconds before the next retry.
-        """
-        ...
-
-class FixedRetryStrategy(RetryStrategy):
-    """
-    Implements a fixed delay retry strategy.
-
-    This strategy uses the same delay between each retry attempt.
-    """
-
-    delay: float
-
-    def __init__(self, delay: float = ...) -> None:
-        """
-        Initialize the fixed retry strategy.
-
-        Args:
-            delay (float): The fixed delay in seconds between retry attempts.
-                Defaults to 1.0 second.
-        """
-        ...
-
-    def get_delay(self, attempt: int) -> float:
-        """
-        Calculate the delay before the next retry attempt.
-
-        Args:
-            attempt (int): The current retry attempt number (1-based).
-
-        Returns:
-            float: The fixed delay in seconds.
-        """
-        ...
-
-class ExponentialBackoffStrategy(RetryStrategy):
-    """
-    Implements an exponential backoff retry strategy.
-
-    This strategy increases the delay exponentially between retry attempts,
-    optionally with jitter to prevent synchronized retries.
-    """
-
-    base_delay: float
-    max_delay: float
-    factor: float
-    jitter: bool
-
-    def __init__(
-        self,
-        base_delay: float = ...,
-        max_delay: float = ...,
-        factor: float = ...,
-        jitter: bool = ...,
-    ) -> None:
-        """
-        Initialize the exponential backoff strategy.
-
-        Args:
-            base_delay (float): The base delay in seconds. Defaults to 1.0 second.
-            max_delay (float): The maximum delay in seconds. Defaults to 60.0 seconds.
-            factor (float): The exponential factor. Defaults to 2.0.
-            jitter (bool): Whether to add jitter to the delay. Defaults to True.
-        """
-        ...
-
-    def get_delay(self, attempt: int) -> float:
-        """
-        Calculate the delay before the next retry attempt.
-
-        Args:
-            attempt (int): The current retry attempt number (1-based).
-
-        Returns:
-            float: The calculated delay in seconds.
-        """
-        ...
-
-class RetryCondition:
-    """
-    Represents a condition for retrying a request.
-
-    This class encapsulates the logic for determining whether a request should be retried
-    based on the response or exception.
-    """
-
-    events: List[Union[RetryEvent, int]]
-    status_codes: List[int]
-    exceptions: List[Type[Exception]]
-    custom_condition: Optional[Callable[[Optional[requests.Response], Optional[Exception]], bool]]
-
-    def __init__(
-        self,
-        events: Optional[List[Union[RetryEvent, int]]] = ...,
-        status_codes: Optional[List[int]] = ...,
-        exceptions: Optional[List[Type[Exception]]] = ...,
-        custom_condition: Optional[Callable[[Optional[requests.Response], Optional[Exception]], bool]] = ...,
-    ) -> None:
-        """
-        Initialize the retry condition.
-
-        Args:
-            events (List[Union[RetryEvent, int]], optional): List of retry events or status codes.
-            status_codes (List[int], optional): List of status codes to retry on.
-            exceptions (List[Type[Exception]], optional): List of exception types to retry on.
-            custom_condition (Callable[[Optional[requests.Response], Optional[Exception]], bool], optional):
-                Custom function to determine whether to retry.
-        """
-        ...
-
-    def should_retry(self, response: Optional[requests.Response] = ..., exception: Optional[Exception] = ...) -> bool:
-        """
-        Determine whether a request should be retried.
-
-        Args:
-            response (Optional[requests.Response]): The response from the request, if any.
-            exception (Optional[Exception]): The exception raised by the request, if any.
-
-        Returns:
-            bool: True if the request should be retried, False otherwise.
-        """
-        ...
+# Note: RetryStrategy and RetryCondition definitions are now in their respective .pyi files
+# crudclient/http/retry_strategies.pyi
+# crudclient/http/retry_conditions.pyi
 
 class RetryHandler:
-    """
-    Manages retry policies and backoff strategies.
-
-    This class is responsible for determining whether a request should be retried
-    and calculating the delay before the next retry attempt.
-    """
+    """Handles the logic for retrying HTTP requests based on configured conditions."""
 
     max_retries: int
     retry_strategy: RetryStrategy
@@ -192,18 +62,21 @@ class RetryHandler:
         retry_conditions: Optional[List[RetryCondition]] = ...,
         on_retry_callback: Optional[Callable[[int, float, Optional[requests.Response], Optional[Exception]], None]] = ...,
     ) -> None:
-        """
-        Initialize the retry handler.
+        """Initializes the RetryHandler.
 
         Args:
-            max_retries (int): Maximum number of retry attempts. Defaults to 3.
-            retry_strategy (RetryStrategy, optional): The strategy to use for calculating
-                retry delays. Defaults to ExponentialBackoffStrategy.
-            retry_conditions (List[RetryCondition], optional): List of conditions for retrying
-                a request. Defaults to a condition that retries on 5xx status codes and
-                connection/timeout errors.
-            on_retry_callback (Callable, optional): Callback function to call before each retry.
-                The function receives the current attempt number, delay, response, and exception.
+            max_retries: Maximum number of retry attempts (0 means no retries).
+            retry_strategy: The strategy for calculating delays between retries.
+                            Defaults to ExponentialBackoffStrategy.
+            retry_conditions: A list of conditions that trigger a retry.
+                              Defaults to retrying on common server errors (500, 502, 503, 504)
+                              and network errors (Timeout, ConnectionError).
+            on_retry_callback: An optional function called before each retry attempt.
+                               It receives (attempt, delay, last_response, last_exception).
+
+        Raises:
+            ValueError: If max_retries is negative.
+            TypeError: If retry_strategy, retry_conditions, or on_retry_callback have incorrect types.
         """
         ...
 
@@ -235,43 +108,70 @@ class RetryHandler:
 
     def execute_with_retry(
         self,
+        method: str,
+        url: str,
         request_func: Callable[[], requests.Response],
-        session: Optional[requests.Session] = ...,
+        session: Optional[requests.Session] = ...,  # Session not directly used, passed for context
         setup_auth_func: Optional[Callable[[], None]] = ...,
-    ) -> requests.Response:
-        """
-        Execute a request function with retry logic.
+    ) -> Tuple[Union[requests.Response, Exception], int]:  # Corrected return type
+        """Executes a request function with retry logic.
+
+        Handles retries based on configured conditions and strategy. Logs errors
+        and raises NetworkError if retries are exhausted due to network issues.
+        Returns the final response or caught exception along with the attempt count.
 
         Args:
-            request_func (Callable[[], requests.Response]): Function that makes the HTTP request.
-            session (Optional[requests.Session]): The session to use for the request.
-            setup_auth_func (Optional[Callable[[], None]]): Function to call to refresh auth before retrying.
+            method: The HTTP method (for logging).
+            url: The request URL (for logging).
+            request_func: The function that executes the actual HTTP request.
+            session: The requests.Session object (optional, for context).
+            setup_auth_func: An optional function to refresh authentication,
+                             typically called on 401 errors before retrying.
 
         Returns:
-            requests.Response: The response from the successful request.
+            A tuple containing:
+            - The final `requests.Response` on success or retryable non-OK status.
+            - The caught `Exception` if the request function failed unexpectedly
+              (and was not retryable or retries exhausted).
+            - The total number of attempts made (including the final one).
 
         Raises:
-            CrudClientError: If all retry attempts fail.
+            NetworkError: If a `requests.RequestException` occurs and retries are
+                          exhausted or the exception is not configured for retry.
+            TypeError: If `request_func` or `setup_auth_func` are not callable.
         """
         ...
 
-    def maybe_retry_after_403(
-        self, method: str, url: str, kwargs: dict, response: requests.Response, session: requests.Session, setup_auth_func: Callable[[], None]
-    ) -> requests.Response:
-        """
-        Retry a request after receiving a 403 Forbidden response.
-
-        This method is extracted from the Client class and refactored to use the RetryHandler.
-
-        Args:
-            method (str): The HTTP method for the request.
-            url (str): The URL for the request.
-            kwargs (dict): Additional keyword arguments for the request.
-            response (requests.Response): The response from the original request.
-            session (requests.Session): The session to use for the retry.
-            setup_auth_func (Callable[[], None]): Function to call to refresh auth before retrying.
-
-        Returns:
-            requests.Response: The response from the retry or the original response if no retry.
-        """
+    def _execute_request(
+        self,
+        request_func: Callable[[], requests.Response],
+        method: str,
+        url: str,
+        attempt: int,
+    ) -> Tuple[Optional[requests.Response], Optional[Exception]]:
+        """Executes the request function and handles exceptions."""
         ...
+
+    def _handle_response(
+        self,
+        response: Optional[requests.Response],
+        exception: Optional[Exception],
+        attempt: int,
+        method: str,
+        url: str,
+    ) -> Tuple[Optional[requests.Response], bool]:
+        """Processes the response or exception, determining if retry is needed."""
+        ...
+
+    def _perform_retry_delay_and_callbacks(
+        self,
+        attempt: int,
+        last_response: Optional[requests.Response],
+        last_exception: Optional[Exception],
+        setup_auth_func: Optional[Callable[[], None]],
+        method: str,
+        url: str,
+    ) -> None:
+        """Calculates delay, sleeps, and calls callbacks before the next retry."""
+        ...
+    # maybe_retry_after_403 stub removed as method was removed from implementation.

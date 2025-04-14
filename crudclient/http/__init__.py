@@ -2,12 +2,11 @@ from .client import HttpClient
 from .errors import ErrorHandler
 from .request import RequestFormatter
 from .response import ResponseHandler
-from .retry import (
+from .retry import RetryHandler
+from .retry_conditions import RetryCondition, RetryEvent
+from .retry_strategies import (
     ExponentialBackoffStrategy,
     FixedRetryStrategy,
-    RetryCondition,
-    RetryEvent,
-    RetryHandler,
     RetryStrategy,
 )
 from .session import SessionManager

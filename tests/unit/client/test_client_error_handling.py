@@ -10,11 +10,13 @@ import json
 import pytest
 import requests
 
+from crudclient.exceptions import ResponseParsingError  # Added
 from crudclient.exceptions import (
     AuthenticationError,
     CrudClientError,
-    InvalidResponseError,
+    ForbiddenError,
     NotFoundError,
+    UnprocessableEntityError,
 )
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
@@ -86,11 +88,15 @@ class TestClientErrorHandling:
         mock_request.get(url, text="Not a JSON response", headers={"Content-Type": "application/json"})
 
         # Act & Assert
-        with pytest.raises(requests.exceptions.JSONDecodeError) as excinfo:
+        # Expect ResponseParsingError because ResponseHandler now wraps JSONDecodeError
+        with pytest.raises(ResponseParsingError) as excinfo:
             client.get("/users")
 
-        # Check that the exception contains the error details
-        assert "Expecting value" in str(excinfo.value)
+        # Check that the original exception was a JSONDecodeError
+        assert isinstance(excinfo.value.original_exception, requests.exceptions.JSONDecodeError)
+        assert "Expecting value" in str(excinfo.value.original_exception)
+        assert excinfo.value.response is not None  # Check response is attached
+        assert excinfo.value.response.url == url
 
     def test_client_handles_unexpected_response_format(self, client, mock_request):
         """Test that the client handles unexpected response formats correctly."""
@@ -164,7 +170,7 @@ class TestClientErrorHandling:
         mock_request.get(url, status_code=403, json={"error": "Forbidden"})
 
         # Act & Assert
-        with pytest.raises(AuthenticationError) as excinfo:
+        with pytest.raises(ForbiddenError) as excinfo:
             client.get("/users")
 
         # Check that the exception contains the error details
@@ -195,7 +201,7 @@ class TestClientErrorHandling:
         post_data = {"email": "test@example.com"}
 
         # Act & Assert
-        with pytest.raises(InvalidResponseError) as excinfo:
+        with pytest.raises(UnprocessableEntityError) as excinfo:
             client.post("/users", data=post_data)
 
         # Check that the exception contains the error details
@@ -209,8 +215,9 @@ class TestClientErrorHandling:
 
         # Configure client for retry
         mocker.patch.object(client.config, "should_retry_on_403", return_value=True)
-        mock_handle_403 = mocker.patch.object(client.config, "handle_403_retry")
-        mock_setup_auth = mocker.patch.object(client.http_client.session_manager, "refresh_auth")
+        # Patch the methods but don't need to store the mock objects locally
+        mocker.patch.object(client.config, "handle_403_retry")
+        mocker.patch.object(client.http_client.session_manager, "refresh_auth")
 
         # Mock HTTP responses: first 403, then 200
         mock_request.get(
@@ -228,13 +235,13 @@ class TestClientErrorHandling:
         # 1. Check final response is from the successful retry
         assert json.loads(response)["status"] == "success after retry"
 
-        # 2. Check config handler was called
-        translate_mock_calls_for_verifier(mock_handle_403)
-        Verifier.verify_called_once_with(mock_handle_403, "", client)
+        # 2. Check config handler was called (using attribute access on client)
+        translate_mock_calls_for_verifier(client.config.handle_403_retry)
+        Verifier.verify_called_once_with(client.config.handle_403_retry, "", client)
 
-        # 3. Check auth was refreshed
-        translate_mock_calls_for_verifier(mock_setup_auth)
-        Verifier.verify_call_count(mock_setup_auth, "", 1)
+        # 3. Check auth was refreshed (using attribute access on client)
+        translate_mock_calls_for_verifier(client.http_client.session_manager.refresh_auth)
+        Verifier.verify_call_count(client.http_client.session_manager.refresh_auth, "", 1)
 
         # 4. Check two requests were made to the same URL
         assert len(mock_request.request_history) == 2

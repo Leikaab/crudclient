@@ -9,6 +9,8 @@ content types.
 import pytest
 import requests
 
+from crudclient.exceptions import ResponseParsingError
+
 
 class TestHttpClientMalformedResponses:
     """Tests for handling malformed responses in the HTTP client."""
@@ -25,11 +27,12 @@ class TestHttpClientMalformedResponses:
         mock_request.get(url, text="Not a JSON response", headers={"Content-Type": "application/json"})
 
         # Make a request that will receive a malformed JSON response
-        with pytest.raises(requests.exceptions.JSONDecodeError) as excinfo:
+        with pytest.raises(ResponseParsingError) as excinfo:
             http_client.get("/users")
 
-        # Check that the exception contains the error details
-        assert "Expecting value" in str(excinfo.value)
+        # Check that the original exception was a JSONDecodeError
+        assert isinstance(excinfo.value.original_exception, requests.exceptions.JSONDecodeError)
+        assert "Expecting value" in str(excinfo.value.original_exception)
 
     def test_empty_response(self, http_client, mock_request):
         """

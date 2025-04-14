@@ -11,6 +11,10 @@ class CustomAuth(AuthStrategy):
     authentication. This is useful for complex authentication flows or
     when you need dynamic authentication logic.
 
+    Note:
+        Errors within the provided callbacks or incorrect authentication details
+        returned by them may result in an `AuthenticationError` when making requests.
+
     Attributes:
         header_callback (Callable[[], Dict[str, str]]): A function that returns
             headers for authentication.
@@ -60,6 +64,10 @@ class ApiKeyAuth(AuthStrategy):
 
     This strategy provides authentication using an API key, which can be
     included either as a header or as a query parameter.
+
+    Note:
+        An invalid API key may result in an `AuthenticationError` when
+        making requests using this strategy.
 
     Attributes:
         api_key (str): The API key for authentication.

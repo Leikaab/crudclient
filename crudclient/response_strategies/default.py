@@ -1,6 +1,8 @@
 import logging
 from typing import List, Optional, Type, Union
 
+from pydantic import ValidationError as PydanticValidationError
+
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 from .base import ResponseModelStrategy, T
@@ -51,55 +53,101 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if not isinstance(data, dict):
             raise ValueError(f"Expected dictionary response, got {type(data)}")
 
-        return self.datamodel(**data) if self.datamodel else data
+        if self.datamodel:
+            try:
+                return self.datamodel(**data)
+            except PydanticValidationError as e:
+                model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+                error_msg = f"Response data validation failed for model {model_name}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
+                raise  # Re-raise the original validation error
+        else:
+            return data
 
-    def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]:
+    def _prepare_data_for_conversion(self, data: RawResponse) -> Union[JSONDict, JSONList]:
+        # Implementation moved from docstring
         if data is None:
             raise ValueError("Response data is None")
 
-        # Handle string data by trying to parse it as JSON
         if isinstance(data, str):
             try:
                 import json
 
                 parsed_data = json.loads(data)
-                # Recursively call convert_list with the parsed data
-                return self.convert_list(parsed_data)
+                # Recursively call to handle the parsed data (could be dict or list)
+                # Ensure the recursive call returns a dict or list, otherwise raise
+                result = self._prepare_data_for_conversion(parsed_data)
+                if isinstance(result, (dict, list)):
+                    return result
+                else:
+                    # This case might occur if JSON parses to a non-dict/list type
+                    raise ValueError(f"Parsed JSON data is not a dictionary or list: {type(result)}")
             except json.JSONDecodeError:
-                # If it's not valid JSON, we can't convert it to a list
                 raise ValueError(f"Could not parse string as JSON: {data[:100]}...")
 
         if isinstance(data, bytes):
             try:
-                # Try to decode and parse as JSON
                 decoded = data.decode("utf-8")
-                return self.convert_list(decoded)
+                # Recursively call to handle the decoded string
+                return self._prepare_data_for_conversion(decoded)
             except UnicodeDecodeError:
                 raise ValueError("Could not decode binary data as UTF-8")
 
-        if isinstance(data, dict):
-            # Check if we should use a custom API response model
-            if self.api_response_model:
+        if isinstance(data, (dict, list)):
+            return data
+
+        raise ValueError(f"Unsupported data type for conversion: {type(data)}")
+
+    def _convert_items_to_datamodel(self, list_data: JSONList) -> Union[List[T], JSONList]:
+        # Implementation moved from docstring
+        if not self.datamodel:
+            # Return raw list if no datamodel specified
+            return list_data
+        try:
+            return [self.datamodel(**item) for item in list_data]
+        except PydanticValidationError as e:
+            model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+            error_msg = f"Response list item validation failed for model {model_name}"
+            logger.error(f"{error_msg}: errors={e.errors()}")
+            raise
+
+    def _handle_dict_response(self, data: JSONDict) -> Union[List[T], JSONList, ApiResponse]:
+        # Implementation moved from docstring
+        # Check for custom API response model first
+        if self.api_response_model:
+            try:
                 return self.api_response_model(**data)
+            except PydanticValidationError as e:
+                model_name = self.api_response_model.__name__ if self.api_response_model else "Unknown"
+                error_msg = f"Response data validation failed for API response model {model_name}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
+                raise
 
-            # Look for list data in known keys
-            for key in self.list_return_keys:
-                if key in data:
-                    list_data = data[key]
-                    if not isinstance(list_data, list):
-                        raise ValueError(f"Expected list data under key '{key}', got {type(list_data)}")
+        # Look for list data in known keys
+        for key in self.list_return_keys:
+            if key in data:
+                list_data = data[key]
+                if not isinstance(list_data, list):
+                    raise ValueError(f"Expected list data under key '{key}', got {type(list_data)}")
+                return self._convert_items_to_datamodel(list_data)
 
-                    if not self.datamodel:
-                        return list_data
+        raise ValueError(f"Could not find list data using keys {self.list_return_keys} in response: {list(data.keys())}")
 
-                    return [self.datamodel(**item) for item in list_data]
+    def _handle_list_response(self, data: JSONList) -> Union[List[T], JSONList]:
+        # Implementation moved from docstring
+        return self._convert_items_to_datamodel(data)
 
-            raise ValueError(f"Could not find list data in response: {data}")
+    def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]:
+        prepared_data = self._prepare_data_for_conversion(data)
 
-        if isinstance(data, list):
-            if not self.datamodel:
-                return data
-
-            return [self.datamodel(**item) for item in data]
-
-        raise ValueError(f"Unexpected response format: {type(data)}")
+        if isinstance(prepared_data, dict):
+            return self._handle_dict_response(prepared_data)
+        elif isinstance(prepared_data, list):
+            return self._handle_list_response(prepared_data)
+        else:
+            # This path should theoretically not be reached due to _prepare_data_for_conversion
+            # raising errors for unsupported types earlier.
+            # Raise explicitly for robustness and to satisfy linters like Pylance.
+            # Mypy knows it's unreachable, hence the ignore.
+            logger.error(f"Internal error: Unexpected data format after preparation: {type(prepared_data)}")  # type: ignore[unreachable]
+            raise ValueError(f"Unexpected data format after preparation: {type(prepared_data)}")

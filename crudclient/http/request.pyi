@@ -27,9 +27,13 @@ Classes:
     - RequestFormatter: Main class for request preparation and formatting.
 """
 
-from typing import Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+
+if TYPE_CHECKING:
+    from ..config import ClientConfig  # Import ClientConfig for type hinting
 
 class RequestFormatter:
+    _config: Optional["ClientConfig"]
     """
     Handles request preparation and content-type setting.
 
@@ -44,6 +48,69 @@ class RequestFormatter:
         prepare_multipart: Prepares multipart form data request.
         get_content_type_header: Returns the content-type header for a given content type.
     """
+
+    def __init__(self, config: Optional["ClientConfig"] = ...) -> None:
+        """
+        Initializes the RequestFormatter.
+
+        Args:
+            config (Optional[ClientConfig]): The client configuration, used for accessing
+                base_url and authentication strategy if needed.
+        """
+        ...
+
+    def validate_request_params(self, method: str, endpoint: Optional[str], url: Optional[str]) -> None:
+        """
+        Validates the core parameters for making a request.
+
+        Ensures that method, endpoint, and url have the correct types and that
+        either endpoint or url is provided.
+
+        Args:
+            method (str): The HTTP method (e.g., 'GET', 'POST').
+            endpoint (Optional[str]): The API endpoint path relative to the base URL.
+            url (Optional[str]): The full URL for the request.
+
+        Raises:
+            TypeError: If any parameter has an invalid type.
+            ValueError: If both endpoint and url are None.
+        """
+        ...
+
+    def build_request_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
+        """
+        Constructs the final URL for the request.
+
+        Uses the provided url directly if available. Otherwise, constructs the URL
+        by combining the base_url from the config with the endpoint.
+
+        Args:
+            endpoint (Optional[str]): The API endpoint path.
+            url (Optional[str]): The full URL.
+
+        Returns:
+            str: The final URL for the request.
+
+        Raises:
+            CrudClientError: If url is None and the config or base_url is missing.
+            TypeError: If endpoint or url have incorrect types (checked by validate_request_params).
+        """
+        ...
+
+    def prepare_auth_params(self, kwargs: Dict[str, Any]) -> None:
+        """
+        Injects authentication parameters into the request kwargs if applicable.
+
+        Checks the configured AuthStrategy (if any) for a `prepare_request_params`
+        method and merges the returned parameters into `kwargs['params']`.
+
+        Args:
+            kwargs (Dict[str, Any]): The request keyword arguments, potentially modified in-place.
+
+        Raises:
+            TypeError: If the auth strategy returns non-dict params.
+        """
+        ...
 
     def prepare_data(
         self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
@@ -130,5 +197,28 @@ class RequestFormatter:
 
         Raises:
             TypeError: If content_type is not a string.
+        """
+        ...
+
+    def format_request(self, method: str, endpoint: Optional[str], url: Optional[str], **kwargs: Any) -> Tuple[str, Dict[str, Any]]:
+        """
+        Formats the entire request, including URL, auth params, and body/headers.
+
+        Args:
+            method (str): HTTP method (e.g., 'GET', 'POST').
+            endpoint (Optional[str]): API endpoint path.
+            url (Optional[str]): Full request URL.
+            **kwargs: Additional request parameters (headers, params, data, json, files).
+
+        Returns:
+            Tuple[str, Dict[str, Any]]: A tuple containing:
+                - The final request URL.
+                - The prepared keyword arguments for the request function,
+                  including merged headers, auth params, and formatted body ('data', 'json', 'files').
+
+        Raises:
+            TypeError: If input parameters have incorrect types.
+            ValueError: If both endpoint and url are None.
+            CrudClientError: If URL construction fails due to missing config.
         """
         ...

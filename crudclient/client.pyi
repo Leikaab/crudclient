@@ -3,6 +3,7 @@ from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
 import requests
 
 from .config import ClientConfig
+from .exceptions import ConfigurationError
 from .http.client import HttpClient
 from .types import RawResponseSimple
 
@@ -36,12 +37,18 @@ class Client:
         """
         Initialize the Client.
 
+        Logging behavior (e.g., request/response body logging) can be controlled
+        via the `logging` section of the configuration. By default, logging is
+        disabled using a `NullHandler`. See `docs/logging.md` for details.
+
         Args:
             config (Union[ClientConfig, Dict[str, Any]]): Configuration for the client.
-                Can be a ClientConfig object or a dictionary of configuration parameters.
+                Can be a ClientConfig object or a dictionary containing parameters
+                like `base_url`, `auth`, `timeout`, and logging settings
+                (`log_request_body`, `log_response_body`).
 
         Raises:
-            TypeError: If the provided config is neither a ClientConfig object nor a dict.
+            ConfigurationError: If the provided config is invalid (wrong type, missing fields, invalid values).
         """
         ...
 

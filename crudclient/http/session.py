@@ -36,6 +36,7 @@ class SessionManager:
 
         # Try the new auth strategy first
         if hasattr(self.config, "auth_strategy") and isinstance(self.config.auth_strategy, AuthStrategy):
+            logger.debug("Applying authentication using %s", type(self.config.auth_strategy).__name__)
             auth_headers = self.config.get_auth_headers()
             if auth_headers:
                 self.session.headers.update(auth_headers)
@@ -48,10 +49,13 @@ class SessionManager:
             auth = self.config.auth()
             if auth is not None:
                 if isinstance(auth, dict):
+                    logger.debug("Applying authentication via direct header dictionary")
                     self.session.headers.update(auth)
                 elif isinstance(auth, tuple) and len(auth) == 2:
+                    logger.debug("Applying authentication via session.auth tuple")
                     self.session.auth = auth
                 elif callable(auth):
+                    logger.debug("Applying authentication via callable: %s", type(auth).__name__)
                     auth(self.session)
 
     def _setup_retries_and_timeouts(self) -> None:

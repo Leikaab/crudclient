@@ -10,6 +10,10 @@ class BearerAuth(AuthStrategy):
     in OAuth 2.0 and JWT-based APIs. It adds an "Authorization" header with the
     format "Bearer {token}" to each request.
 
+    Note:
+        An invalid or expired token may result in an `AuthenticationError` when
+        making requests using this strategy.
+
     Attributes:
         token (str): The bearer token to use for authentication.
         header_name (str): The name of the header to use for the token. Defaults to "Authorization".

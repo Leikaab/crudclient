@@ -15,7 +15,7 @@ from .base import T
 if TYPE_CHECKING:
     from .base import Crud
 
-from ..exceptions import ModelConversionError, ValidationError
+from ..exceptions import APIError, DataValidationError, NetworkError, NotFoundError
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
@@ -34,6 +34,9 @@ def list_operation(  # Note: self type added below
 
     Raises:
         ValueError: If list action is not allowed for this resource.
+        NotFoundError: If the parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -50,7 +53,10 @@ def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional
 
     Raises:
         ValueError: If create action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
+        NotFoundError: If the parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -67,6 +73,9 @@ def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = No
 
     Raises:
         ValueError: If read action is not allowed for this resource.
+        NotFoundError: If the resource or parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -86,7 +95,10 @@ def update_operation(  # Note: self type added below
 
     Raises:
         ValueError: If update action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
+        NotFoundError: If the resource or parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -106,7 +118,10 @@ def partial_update_operation(  # Note: self type added below
 
     Raises:
         ValueError: If partial_update action is not allowed for this resource.
-        ValidationError: If the input data fails validation.
+        DataValidationError: If the input data fails validation.
+        NotFoundError: If the resource or parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -120,6 +135,9 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
 
     Raises:
         ValueError: If destroy action is not allowed for this resource.
+        NotFoundError: If the resource or parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 
@@ -148,9 +166,11 @@ def custom_action_operation(
 
     Raises:
         TypeError: If the parameters are of incorrect types.
-        ValueError: If the HTTP method is invalid.
-        ValidationError: If the input data fails validation.
-        ModelConversionError: If the response data fails conversion.
+        ValueError: If the HTTP method is invalid or the action is not defined.
+        DataValidationError: If the input data fails validation.
+        NotFoundError: If the resource or parent resource (if applicable) is not found.
+        NetworkError: If a network-related error occurs during the request.
+        APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
 

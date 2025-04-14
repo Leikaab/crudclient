@@ -10,6 +10,10 @@ class BasicAuth(AuthStrategy):
     as a base64-encoded string in the format "username:password" in the
     Authorization header.
 
+    Note:
+        Incorrect credentials may result in an `AuthenticationError` when
+        making requests using this strategy.
+
     Attributes:
         username (str): The username for authentication.
         password (str): The password for authentication.

@@ -3,7 +3,9 @@ import pytest
 from crudclient.api import API
 from crudclient.client import Client
 from crudclient.config import ClientConfig
-from crudclient.exceptions import ClientInitializationError, InvalidClientError
+from crudclient.exceptions import (
+    ConfigurationError,  # Replaced ClientInitializationError, InvalidClientError
+)
 
 # Import fixtures from conftest.py
 from .conftest import MockAPI, MockCrud
@@ -37,7 +39,7 @@ class TestAPI:
         invalid_client = "invalid_client"
 
         # Act & Assert
-        with pytest.raises(InvalidClientError):
+        with pytest.raises(ConfigurationError):
             MockAPI(client=invalid_client)  # type: ignore
 
     def test_init_with_invalid_client_config(self):
@@ -45,7 +47,7 @@ class TestAPI:
         invalid_config = "invalid_config"
 
         # Act & Assert
-        with pytest.raises(InvalidClientError):
+        with pytest.raises(ConfigurationError):
             MockAPI(client_config=invalid_config)  # type: ignore
 
     def test_register_endpoints(self, default_mock_client_config):
@@ -78,7 +80,7 @@ class TestAPI:
         client_config = ClientConfig(hostname=standard_data.get("hostname"))
 
         # Act & Assert
-        with pytest.raises(ClientInitializationError):
+        with pytest.raises(ConfigurationError):
             FailingAPI(client_config=client_config)
 
     def test_context_manager(self, default_mock_client_config, requests_mocker, standard_data):
@@ -151,7 +153,7 @@ class TestAPI:
         client_config = ClientConfig(hostname="https://api.example.com")
 
         # Act & Assert
-        with pytest.raises(ClientInitializationError):
+        with pytest.raises(ConfigurationError):
             ErrorAPI(client_config=client_config)
 
     def test_exit_with_exception(self, default_mock_client_config, requests_mocker, standard_data):

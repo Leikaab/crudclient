@@ -1,7 +1,25 @@
-import pytest
+import logging  # &lt;-- Add import
 
-from crudclient.exceptions import AuthenticationError, CrudClientError, NotFoundError
+import pytest
+import requests  # Use requests library
+
+from crudclient.exceptions import InternalServerError  # Corrected name
+from crudclient.exceptions import (
+    APIError,
+    BadRequestError,
+    ClientAuthenticationError,
+    ConflictError,
+    CrudClientError,
+    ForbiddenError,
+    NotFoundError,
+    RateLimitError,
+    ServiceUnavailableError,
+    UnprocessableEntityError,
+)
 from crudclient.http.errors import ErrorHandler
+
+# Ensure HttpLifecycleLogger is imported if needed for type hints or direct use (though likely not needed here)
+# from crudclient.http.logging import HttpLifecycleLogger
 from crudclient.http.request import RequestFormatter
 from crudclient.http.response import ResponseHandler
 from crudclient.http.retry import RetryHandler
@@ -14,26 +32,26 @@ from tests.unit.helpers import translate_mock_calls_for_verifier
 
 class TestHttpClient:
 
-    def test_http_client_initialization(self, http_client, config):
+    def test_http_client_initialization(self, http_client, mock_client_config):
         """Test that the HttpClient is initialized correctly with all components."""
         # Arrange - done via fixtures
 
         # Act - HttpClient is already instantiated via fixture
 
         # Assert
-        assert http_client.config == config
+        assert http_client.config == mock_client_config
         assert isinstance(http_client.session_manager, SessionManager)
         assert isinstance(http_client.request_formatter, RequestFormatter)
         assert isinstance(http_client.response_handler, ResponseHandler)
         assert isinstance(http_client.error_handler, ErrorHandler)
         assert isinstance(http_client.retry_handler, RetryHandler)
 
-    def test_get_request(self, http_client, mock_request):
+    def test_get_request(self, http_client, requests_mock):
         """Test that the get method makes a GET request to the correct URL."""
         # Arrange
         endpoint = "users"
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.get(url, json={"status": "success"})
+        requests_mock.get(url, json={"status": "success"})
 
         # Act
         response = http_client.get(endpoint)
@@ -41,13 +59,13 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_post_request(self, http_client, mock_request):
+    def test_post_request(self, http_client, requests_mock):
         """Test that the post method makes a POST request to the correct URL."""
         # Arrange
         endpoint = "users"
         data = {"name": "John Doe"}
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.post(url, json={"status": "success"})
+        requests_mock.post(url, json={"status": "success"})
 
         # Act
         response = http_client.post(endpoint, data=data)
@@ -55,13 +73,13 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_put_request(self, http_client, mock_request):
+    def test_put_request(self, http_client, requests_mock):
         """Test that the put method makes a PUT request to the correct URL."""
         # Arrange
         endpoint = "users/1"
         data = {"name": "John Doe"}
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.put(url, json={"status": "success"})
+        requests_mock.put(url, json={"status": "success"})
 
         # Act
         response = http_client.put(endpoint, data=data)
@@ -69,12 +87,12 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_delete_request(self, http_client, mock_request):
+    def test_delete_request(self, http_client, requests_mock):
         """Test that the delete method makes a DELETE request to the correct URL."""
         # Arrange
         endpoint = "users/1"
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.delete(url, json={"status": "success"})
+        requests_mock.delete(url, json={"status": "success"})
 
         # Act
         response = http_client.delete(endpoint)
@@ -82,13 +100,13 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_patch_request(self, http_client, mock_request):
+    def test_patch_request(self, http_client, requests_mock):
         """Test that the patch method makes a PATCH request to the correct URL."""
         # Arrange
         endpoint = "users/1"
         data = {"name": "John Doe"}
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.patch(url, json={"status": "success"})
+        requests_mock.patch(url, json={"status": "success"})
 
         # Act
         response = http_client.patch(endpoint, data=data)
@@ -96,45 +114,71 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_request_with_error(self, http_client, mock_request):
-        """Test that errors are handled correctly."""
-        # Arrange
-        endpoint = "users/999"
-        url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.get(url, status_code=404, json={"error": "Not found"})
-
-        # Act & Assert
-        with pytest.raises(NotFoundError):
-            http_client.get(endpoint)
-
-    def test_request_with_auth_error(self, http_client, mock_request):
-        """Test that authentication errors are handled correctly."""
+    # Modified test
+    def test_request_with_server_error_logs_error(self, http_client, requests_mock, caplog):
+        """Test that server errors are handled correctly and logged at ERROR level."""
         # Arrange
         endpoint = "users"
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.get(url, status_code=401, json={"error": "Unauthorized"})
-
-        # Act & Assert
-        with pytest.raises(AuthenticationError):
-            http_client.get(endpoint)
-
-    def test_request_with_server_error(self, http_client, mock_request):
-        """Test that server errors are handled correctly."""
-        # Arrange
-        endpoint = "users"
-        url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.get(url, status_code=500, json={"error": "Server error"})
+        response_text = '{"error": "Server error"}'
+        requests_mock.get(url, status_code=500, text=response_text)
+        caplog.set_level(logging.ERROR, logger="crudclient.http.client")  # Capture ERROR logs
 
         # Act & Assert
         with pytest.raises(CrudClientError):
             http_client.get(endpoint)
 
-    def test_request_with_no_content(self, http_client, mock_request):
-        """Test that 204 No Content responses are handled correctly."""
+        # Assert Log
+        error_log_found = False
+        for record in caplog.records:
+            if (
+                record.name == "crudclient.http.client"
+                and record.levelno == logging.ERROR
+                and "HTTP error encountered for GET" in record.message
+                and url in record.message
+                and "Status 500" in record.message
+                and response_text in record.message
+            ):
+                error_log_found = True
+                break
+        assert error_log_found, "Expected ERROR log message not found"
+
+    # New test for 4xx logging
+
+    def test_request_logs_http_error_4xx(self, http_client, requests_mock, caplog):
+        """Test that 4xx HTTP errors are logged at WARNING level."""
+        # Arrange
+        endpoint = "users/missing"
+        url = f"{http_client.config.base_url}/{endpoint}"
+        response_text = '{"detail": "Not found here"}'
+        requests_mock.get(url, status_code=404, text=response_text)
+        caplog.set_level(logging.WARNING, logger="crudclient.http.client")  # Capture WARNING logs
+
+        # Act & Assert
+        with pytest.raises(NotFoundError):  # Expect NotFoundError for 404
+            http_client.get(endpoint)
+
+        # Assert Log
+        warning_log_found = False
+        for record in caplog.records:
+            if (
+                record.name == "crudclient.http.client"
+                and record.levelno == logging.WARNING
+                and "HTTP error encountered for GET" in record.message
+                and url in record.message
+                and "Status 404" in record.message
+                and response_text in record.message
+            ):
+                warning_log_found = True
+                break
+        assert warning_log_found, "Expected WARNING log message not found"
+
+    def test_request_with_no_content(self, http_client, requests_mock):
+        """Test that 204 No Content responses return None."""
         # Arrange
         endpoint = "users/1"
         url = f"{http_client.config.base_url}/{endpoint}"
-        mock_request.delete(url, status_code=204)
+        requests_mock.delete(url, status_code=204)
 
         # Act
         response = http_client.delete(endpoint)
@@ -153,3 +197,41 @@ class TestHttpClient:
         # Assert
         translate_mock_calls_for_verifier(mock_close)
         Verifier.verify_call_count(mock_close, "", 1)
+
+    @pytest.mark.parametrize(
+        "status_code, expected_exception",
+        [
+            (400, BadRequestError),
+            (401, ClientAuthenticationError),
+            (403, ForbiddenError),
+            (404, NotFoundError),
+            (409, ConflictError),
+            (422, UnprocessableEntityError),
+            (429, RateLimitError),
+            (500, InternalServerError),  # Corrected name
+            (503, ServiceUnavailableError),
+            (418, APIError),  # Generic APIError for unmapped 4xx/5xx
+        ],
+    )
+    def test_api_error_subclasses_raised(self, http_client, requests_mock, status_code, expected_exception):
+        """Test that specific APIError subclasses are raised for HTTP status codes."""
+        # Arrange
+        endpoint = f"test/{status_code}"
+        url = f"{http_client.config.base_url}/{endpoint}"
+        response_json = {"error": f"Error {status_code}"}
+        requests_mock.get(url, status_code=status_code, json=response_json)
+
+        # Act & Assert
+        with pytest.raises(expected_exception) as excinfo:
+            http_client.get(endpoint)
+
+        # Assert exception attributes
+        assert isinstance(excinfo.value, APIError)  # All are APIErrors
+        assert excinfo.value.request is not None
+        # Check for attributes common to requests.Request/PreparedRequest and the mock proxy
+        assert hasattr(excinfo.value.request, "method")
+        assert hasattr(excinfo.value.request, "url")
+        assert excinfo.value.response is not None
+        assert isinstance(excinfo.value.response, requests.Response)
+        assert excinfo.value.response.status_code == status_code
+        assert excinfo.value.response.request == excinfo.value.request

@@ -59,6 +59,8 @@ class ClientConfig:
     retries: int
     auth_strategy: Optional["AuthStrategy"]
     auth_type: str
+    log_request_body: bool
+    log_response_body: bool
 
     def __init__(
         self,
@@ -70,6 +72,8 @@ class ClientConfig:
         retries: Optional[int] = ...,
         auth_strategy: Optional[AuthStrategy] = ...,
         auth_type: Optional[str] = ...,
+        log_request_body: Optional[bool] = ...,
+        log_response_body: Optional[bool] = ...,
     ) -> None: ...
     def merge(self, other: "ClientConfig") -> "ClientConfig":
         """

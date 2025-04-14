@@ -25,7 +25,9 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from ..client import Client
-from ..exceptions import ModelConversionError, ValidationError
+from ..exceptions import (
+    DataValidationError,  # Replaced ModelConversionError, ValidationError
+)
 from ..models import ApiResponse
 from ..response_strategies import (
     DefaultResponseModelStrategy,

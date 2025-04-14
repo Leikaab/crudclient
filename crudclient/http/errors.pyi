@@ -50,24 +50,32 @@ class ErrorHandler:
         Raises:
             AuthenticationError: If the status code is 401 (Unauthorized) or 403 (Forbidden).
             NotFoundError: If the status code is 404 (Not Found).
-            InvalidResponseError: If the status code is 422 (Unprocessable Entity).
+            DataValidationError: If the status code is 422 (Unprocessable Entity).
             CrudClientError: For other error status codes.
             TypeError: If response is not a requests.Response object.
         """
         ...
 
     def register_status_code_handler(self, status_code: int, exception_class: Type[CrudClientError]) -> None:
-        """
-        Register a custom exception class for a specific status code.
+        """Registers a custom exception handler for a specific HTTP status code.
 
-        This method allows for extending the default status code to exception mappings
-        with custom handlers.
+        This allows users to override or extend the default behavior for handling
+        specific HTTP error codes by providing their own CrudClientError subclass.
 
         Args:
-            status_code: The HTTP status code to map.
-            exception_class: The exception class to raise for the status code.
+            status_code: The integer HTTP status code (e.g., 409).
+            exception_class: The subclass of CrudClientError to be raised when
+                this status code is encountered.
 
         Raises:
-            TypeError: If status_code is not an integer or exception_class is not a subclass of CrudClientError.
+            TypeError: If `status_code` is not an integer or if `exception_class`
+                is not a type or not a subclass of `CrudClientError`.
+
+        Example:
+            >>> class ConflictError(APIError):
+            ...     pass
+            ...
+            >>> error_handler = ErrorHandler()
+            >>> error_handler.register_status_code_handler(409, ConflictError)
         """
         ...
