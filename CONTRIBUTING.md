@@ -36,6 +36,10 @@ This project adheres to the Contributor Covenant Code of Conduct. Please review 
 - [Python](https://www.python.org/downloads/) (Version 3.8 or higher recommended)
 - [Poetry](https://python-poetry.org/docs/#installation) (for dependency management and virtual environments)
 
+- [Docker](https://www.docker.com/get-started)
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [Remote - Containers VS Code Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
 ### Setup Steps
 
 1.  **Clone the repository:**
@@ -54,6 +58,16 @@ This project adheres to the Contributor Covenant Code of Conduct. Please review 
     poetry shell
     ```
     (Alternatively, prefix commands with `poetry run`, e.g., `poetry run pytest`)
+### Using Dev Containers (Optional but Recommended)
+
+This project includes a Dev Container configuration, which allows you to use a pre-configured Docker container as a fully-featured development environment. This ensures consistency across different developer setups.
+
+1.  **Open the project in the container:**
+    -   If you have the prerequisites installed, VS Code should prompt you to "Reopen in Container" when you open the project folder. Click it.
+    -   Alternatively, open the VS Code Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and select "Remote-Containers: Reopen in Container".
+2.  **Wait for the container to build:** This might take a few minutes the first time.
+3.  **Develop inside the container:** VS Code will now be connected to the container. Your terminal, debugger, and extensions will run inside the container environment, which already has Python, Poetry, and project dependencies installed.
+
 
 ## Running Tests
 
