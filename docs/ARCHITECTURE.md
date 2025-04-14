@@ -95,6 +95,5 @@ This framework enables robust unit and integration testing by providing fine-gra
 
 ## Future Directions (Considerations)
 
-*   **Asynchronous Support:** Potential addition of `asyncio`/`httpx` support remains a consideration.
 *   **Enhanced Pydantic Strategies:** Further refining how Pydantic models handle diverse API response structures.
 *   **Plugin System:** Exploring a plugin architecture for easier extension of core functionalities like authentication or response handling.
