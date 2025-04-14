@@ -2,7 +2,6 @@ from typing import Dict, Optional
 
 from .base import AuthStrategy
 
-
 class BasicAuth(AuthStrategy):
     """
     Basic authentication strategy.

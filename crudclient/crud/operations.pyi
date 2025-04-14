@@ -19,7 +19,6 @@ from ..exceptions import APIError, DataValidationError, NetworkError, NotFoundEr
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
-
 def list_operation(  # Note: self type added below
     self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[JSONList, List[T], ApiResponse]:

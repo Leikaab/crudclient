@@ -1,6 +1,5 @@
 from typing import Any, Dict, Mapping, Set
 
-
 def redact_sensitive_headers(headers: Mapping[str, str]) -> Dict[str, str]:
     """
     Creates a copy of headers with sensitive values redacted.

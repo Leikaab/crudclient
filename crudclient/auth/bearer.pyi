@@ -2,7 +2,6 @@ from typing import Dict, Optional
 
 from .base import AuthStrategy
 
-
 class BearerAuth(AuthStrategy):
     """
     Bearer token authentication strategy.

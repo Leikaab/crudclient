@@ -2,7 +2,6 @@ from typing import Callable, Dict, Optional
 
 from .base import AuthStrategy
 
-
 class CustomAuth(AuthStrategy):
     """
     Custom authentication strategy.
