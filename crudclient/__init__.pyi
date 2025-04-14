@@ -43,15 +43,18 @@ from .api import API
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
+from .exceptions import (
+    ConfigurationError,  # Replaced ClientInitializationError, InvalidClientError
+)
+from .exceptions import DataValidationError  # Replaced ModelConversionError
+from .exceptions import UnprocessableEntityError  # Replaced InvalidResponseError
 from .exceptions import (  # Updated imports
     APIError,
     AuthenticationError,
     BadRequestError,
     ClientAuthenticationError,
-    ConfigurationError,  # Replaced ClientInitializationError, InvalidClientError
     ConflictError,
     CrudClientError,
-    DataValidationError,  # Replaced ModelConversionError
     ForbiddenError,
     InternalServerError,
     NetworkError,
@@ -59,7 +62,6 @@ from .exceptions import (  # Updated imports
     RateLimitError,
     ResponseParsingError,
     ServiceUnavailableError,
-    UnprocessableEntityError,  # Replaced InvalidResponseError
 )
 from .models import ApiResponse
 from .types import JSONDict, JSONList, RawResponse

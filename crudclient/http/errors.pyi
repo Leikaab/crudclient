@@ -16,7 +16,6 @@ import requests
 
 from ..exceptions import CrudClientError
 
-
 class ErrorHandler:
     """
     Centralizes error processing logic for HTTP responses.

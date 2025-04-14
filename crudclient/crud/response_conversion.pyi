@@ -27,7 +27,6 @@ from ..types import JSONDict, JSONList, RawResponse
 # Define T type variable
 T = TypeVar("T")
 
-
 def _init_response_strategy(self: "Crud") -> None:
     """
     Initialize the response model strategy.
@@ -38,7 +37,6 @@ def _init_response_strategy(self: "Crud") -> None:
     DefaultResponseModelStrategy.
     """
     ...
-
 
 def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONList]:
     """
@@ -55,7 +53,6 @@ def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONL
         ResponseParsingError: If the response is a string that cannot be parsed as JSON.
     """
     ...
-
 
 def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
     """
@@ -78,7 +75,6 @@ def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
     """
     ...
 
-
 def _convert_to_list_model(self: "Crud", data: JSONList) -> Union[List[T], JSONList]:
     """
     Convert the API response to a list of datamodel types.
@@ -93,7 +89,6 @@ def _convert_to_list_model(self: "Crud", data: JSONList) -> Union[List[T], JSONL
         DataValidationError: If list items fail Pydantic validation.
     """
     ...
-
 
 def _validate_list_return(self: "Crud", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
     """
@@ -116,7 +111,6 @@ def _validate_list_return(self: "Crud", data: RawResponse) -> Union[JSONList, Li
     """
     ...
 
-
 def _fallback_list_conversion(  # Note: self type added below
     self: "Crud", data: RawResponse
 ) -> Union[JSONList, List[T], ApiResponse]:  # Note: self added in the line above
@@ -135,7 +129,6 @@ def _fallback_list_conversion(  # Note: self type added below
         ValueError: If the response format is unexpected or conversion fails.
     """
     ...
-
 
 def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSONDict:
     """
@@ -156,7 +149,6 @@ def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSON
     """
     ...
 
-
 def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict) -> JSONDict:
     """
     Validate a dictionary against the full datamodel and dump the result.
@@ -172,7 +164,6 @@ def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict) -> JSONDict:
     """
     ...
 
-
 def _validate_partial_dict(self: "Crud", data_dict: JSONDict) -> None:
     """
     Validate provided fields in a dictionary against the datamodel for partial updates.
@@ -186,7 +177,6 @@ def _validate_partial_dict(self: "Crud", data_dict: JSONDict) -> None:
         DataValidationError: If validation fails for non-missing fields.
     """
     ...
-
 
 def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool) -> JSONDict:
     """
@@ -206,7 +196,6 @@ def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool) -> JSONDi
         DataValidationError: If validation fails.
     """
     ...
-
 
 def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
     """

@@ -1,10 +1,12 @@
 import json
 import logging
-from typing import List, Optional, TypeVar, Union, cast
+from typing import List as TypingList  # Rename List
+from typing import Optional, TypeVar, Union, cast
 
 from pydantic import ValidationError as PydanticValidationError
 
 from ..exceptions import CrudClientError, DataValidationError, ResponseParsingError
+from ..http.utils import redact_json_body  # Import redaction utility
 from ..models import ApiResponse
 
 # Import response strategies directly from their modules to avoid circular imports
@@ -94,14 +96,12 @@ def _convert_to_model(self, data: RawResponse) -> Union[T, JSONDict]:
 
     except PydanticValidationError as e:
         # Catch validation errors during single item conversion (likely within strategy)
-        error_msg = f"Response data validation failed for model {getattr(self._datamodel, '__name__', 'Unknown')}"
-        logger.warning(
-            "%s: %s - Data: %s",
-            error_msg,
-            json.dumps(e.errors(), indent=2),
-            str(validated_data)[:200],  # Log snippet of validated data
-        )
-        raise DataValidationError(error_msg, data=validated_data, pydantic_error=e) from e
+        model_name = getattr(self._datamodel, "__name__", "Unknown")
+        error_msg = f"Response data validation failed for model {model_name}"
+        # Redact data before logging or raising
+        redacted_data = redact_json_body(validated_data) if isinstance(validated_data, (dict, TypingList)) else validated_data
+        logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")  # Log structured errors
+        raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
         # Catch unexpected errors during conversion
         logger.error(f"Unexpected error converting response to model: {e}", exc_info=True)
@@ -110,7 +110,7 @@ def _convert_to_model(self, data: RawResponse) -> Union[T, JSONDict]:
         raise
 
 
-def _convert_to_list_model(self, data: JSONList) -> Union[List[T], JSONList]:
+def _convert_to_list_model(self, data: JSONList) -> Union[TypingList[T], JSONList]:
     if not self._datamodel:
         return data
 
@@ -118,21 +118,19 @@ def _convert_to_list_model(self, data: JSONList) -> Union[List[T], JSONList]:
         return [self._datamodel(**item) for item in data]
     except PydanticValidationError as e:
         # Catch validation errors during list item conversion
-        error_msg = f"Response list item validation failed for model {getattr(self._datamodel, '__name__', 'Unknown')}"
-        logger.warning(
-            "%s: %s - Data: %s",
-            error_msg,
-            json.dumps(e.errors(), indent=2),
-            str(data)[:200],  # Log snippet of original list data
-        )
-        raise DataValidationError(error_msg, data=data, pydantic_error=e) from e
+        model_name = getattr(self._datamodel, "__name__", "Unknown")
+        error_msg = f"Response list item validation failed for model {model_name}"
+        # Redact data before logging or raising
+        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")  # Log structured errors
+        raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
         # Catch unexpected errors during list conversion
         logger.error(f"Unexpected error converting list response to model: {e}", exc_info=True)
         raise
 
 
-def _validate_list_return(self, data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _validate_list_return(self, data: RawResponse) -> Union[JSONList, TypingList[T], ApiResponse]:
     try:
         # Validate the response data
         validated_data = self._validate_response(data)
@@ -146,24 +144,22 @@ def _validate_list_return(self, data: RawResponse) -> Union[JSONList, List[T], A
 
     except PydanticValidationError as e:
         # Catch validation errors during list conversion (likely within strategy)
-        error_msg = f"Response list validation failed for model {getattr(self._datamodel, '__name__', 'Unknown')}"
-        logger.warning(
-            "%s: %s - Data: %s",
-            error_msg,
-            json.dumps(e.errors(), indent=2),
-            str(validated_data)[:200],  # Log snippet of validated data
-        )
-        raise DataValidationError(error_msg, data=validated_data, pydantic_error=e) from e
+        model_name = getattr(self._datamodel, "__name__", "Unknown")
+        error_msg = f"Response list validation failed for model {model_name}"
+        # Redact data before logging or raising
+        redacted_data = redact_json_body(validated_data) if isinstance(validated_data, (dict, TypingList)) else validated_data
+        logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")  # Log structured errors
+        raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
         logger.error(f"Unexpected error validating list return: {e}", exc_info=True)
         # Re-raise unexpected errors
         raise
 
 
-def _fallback_list_conversion(self, data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _fallback_list_conversion(self, data: RawResponse) -> Union[JSONList, TypingList[T], ApiResponse]:
     # If the data is already a list, convert it directly
     if isinstance(data, list):
-        return self._convert_to_list_model(data)
+        return self._convert_to_list_model(data)  # type: ignore[arg-type] # data is list here
 
     # If the data is a dict, try to extract the list data
     if isinstance(data, dict):
@@ -178,19 +174,19 @@ def _fallback_list_conversion(self, data: RawResponse) -> Union[JSONList, List[T
         # Try to extract list data from known keys
         for key in self._list_return_keys:
             if key in data and isinstance(data[key], list):
-                return self._convert_to_list_model(data[key])
+                return self._convert_to_list_model(data[key])  # type: ignore[arg-type] # data[key] is list here
 
     # If the data is a string, try to handle it
     if isinstance(data, str):
         try:
             parsed_data = json.loads(data)
             if isinstance(parsed_data, list):
-                return self._convert_to_list_model(parsed_data)
+                return self._convert_to_list_model(parsed_data)  # type: ignore[arg-type] # parsed_data is list here
             elif isinstance(parsed_data, dict):
                 # Try to extract list data from known keys
                 for key in self._list_return_keys:
                     if key in parsed_data and isinstance(parsed_data[key], list):
-                        return self._convert_to_list_model(parsed_data[key])
+                        return self._convert_to_list_model(parsed_data[key])  # type: ignore[arg-type] # parsed_data[key] is list here
         except json.JSONDecodeError as e:
             # Log the error but don't raise, as this is a fallback path
             logger.warning(f"Could not parse string response as JSON in fallback: {e}", exc_info=True)
@@ -222,14 +218,16 @@ def _validate_partial_dict(self, data_dict: JSONDict) -> None:
     except PydanticValidationError as e:
         non_missing_errors = [err for err in e.errors() if err.get("type") != "missing"]
         if non_missing_errors:
-            error_msg = f"Partial update data validation failed for provided fields in model {self._datamodel.__name__}"
+            error_msg = f"Partial update data validation failed for provided fields in model {self._datamodel.__name__}"  # type: ignore[attr-defined]
+            # Redact data before logging or raising
+            redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, TypingList)) else data_dict
             logger.warning(
-                "%s: %s - Data: %s",
+                "%s: %s",  # Avoid logging raw data
                 error_msg,
                 json.dumps(non_missing_errors, indent=2),
-                str(data_dict)[:200],
+                # str(redacted_data)[:200], # Avoid logging even redacted data snippet here
             )
-            raise DataValidationError(error_msg, data=data_dict, pydantic_error=e) from e
+            raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
         # If only 'missing' errors, we ignore them for partial updates.
 
 
@@ -245,13 +243,15 @@ def _validate_and_dump_full_dict(self, data_dict: JSONDict) -> JSONDict:
         # Re-raise validation errors for full updates
         model_name = getattr(self._datamodel, "__name__", "Unknown")
         error_msg = f"Input data validation failed for model {model_name}"
+        # Redact data before logging or raising
+        redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, TypingList)) else data_dict
         logger.warning(
-            "%s: %s - Data: %s",
+            "%s: %s",  # Avoid logging raw data
             error_msg,
             json.dumps(e.errors(), indent=2),
-            str(data_dict)[:200],
+            # str(redacted_data)[:200], # Avoid logging even redacted data snippet here
         )
-        raise DataValidationError(error_msg, data=data_dict, pydantic_error=e) from e
+        raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
 def _dump_dictionary(self, data_dict: JSONDict, partial: bool) -> JSONDict:

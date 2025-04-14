@@ -47,7 +47,6 @@ from .exceptions import ConfigurationError
 
 T = TypeVar("T", bound=Crud)
 
-
 class API(ABC):
     """
     Base class for creating API clients with CRUD resources.

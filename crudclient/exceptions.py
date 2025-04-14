@@ -68,16 +68,12 @@ class APIError(CrudClientError):
         self.response = response
         status_code = response.status_code if response else "N/A"
         request_info = f"{request.method} {request.url}" if request else "N/A"
-        full_message = (
-            f"{message} (Status Code: {status_code}, Request: {request_info})"
-        )
+        full_message = f"{message} (Status Code: {status_code}, Request: {request_info})"
         super().__init__(full_message)
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(message={self.message!r}, "
-            f"request={self.request!r}, response={self.response!r})"
-        )
+        return f"{self.__class__.__name__}(message={self.message!r}, " f"request={self.request!r}, response={self.response!r})"
+
 
 # Specific HTTP Status Code Errors
 
@@ -135,10 +131,7 @@ class DataValidationError(CrudClientError):
             self.__cause__ = pydantic_error
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(message={self.message!r}, "
-            f"data={self.data!r}, pydantic_error={self.pydantic_error!r})"
-        )
+        return f"{self.__class__.__name__}(message={self.message!r}, " f"data={self.data!r}, pydantic_error={self.pydantic_error!r})"
 
 
 class ModelConversionError(CrudClientError):
@@ -161,7 +154,4 @@ class ResponseParsingError(CrudClientError):
         self.__cause__ = original_exception
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(message={self.message!r}, "
-            f"response={self.response!r}, original_exception={self.original_exception!r})"
-        )
+        return f"{self.__class__.__name__}(message={self.message!r}, " f"response={self.response!r}, original_exception={self.original_exception!r})"

@@ -1,9 +1,9 @@
 from typing import Any, Optional, Union  # Added Union
 
 import requests
-from requests import exceptions as requests_exceptions, PreparedRequest  # Added PreparedRequest
 from pydantic import ValidationError as PydanticValidationError
-
+from requests import PreparedRequest
+from requests import exceptions as requests_exceptions  # Added PreparedRequest
 
 class CrudClientError(Exception):
     """Base exception for all crudclient errors.
@@ -11,12 +11,12 @@ class CrudClientError(Exception):
     Attributes:
         message (str): A descriptive error message.
     """
+
     message: str
 
     def __init__(self, message: str) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-
 
 class ConfigurationError(CrudClientError):
     """Error related to client configuration or initialization.
@@ -24,8 +24,8 @@ class ConfigurationError(CrudClientError):
     Raised for issues like invalid base URLs, missing required settings,
     or incompatible configurations.
     """
-    pass
 
+    pass
 
 class ClientInitializationError(ConfigurationError):
     """Error specifically during the initialization phase of the HTTP client.
@@ -34,13 +34,13 @@ class ClientInitializationError(ConfigurationError):
     instantiated, often due to issues passed from the underlying HTTP library
     or configuration problems detected during setup.
     """
-    pass
 
+    pass
 
 class InvalidClientError(ConfigurationError):
     """Error raised when an operation requires a client but none is available or initialized."""
-    pass
 
+    pass
 
 class AuthenticationError(CrudClientError):
     """Error related to authentication or authorization.
@@ -53,11 +53,11 @@ class AuthenticationError(CrudClientError):
         response (Optional[requests.Response]): The HTTP response that indicated
             the authentication failure, if available.
     """
+
     response: Optional[requests.Response]
 
     def __init__(self, message: str, response: Optional[requests.Response] = None) -> None: ...
     def __repr__(self) -> str: ...
-
 
 class NetworkError(CrudClientError):
     """Error related to network connectivity during an HTTP request.
@@ -72,6 +72,7 @@ class NetworkError(CrudClientError):
             (e.g., requests.exceptions.Timeout, requests.exceptions.ConnectionError)
             that caused this error.
     """
+
     request: Optional[requests.Request]  # Changed to Optional
     original_exception: requests_exceptions.RequestException
 
@@ -82,7 +83,6 @@ class NetworkError(CrudClientError):
         original_exception: requests_exceptions.RequestException,
     ) -> None: ...
     def __repr__(self) -> str: ...
-
 
 class APIError(CrudClientError):
     """Error related to the API response itself (e.g., HTTP status codes >= 400).
@@ -96,66 +96,64 @@ class APIError(CrudClientError):
         request (Optional[Union[requests.Request, PreparedRequest]]): The HTTP request that resulted in the error response, if available.
         response (Optional[requests.Response]): The HTTP response received from the API, if available.
     """
+
     request: Optional[Union[requests.Request, PreparedRequest]]  # Changed type
     response: Optional[requests.Response]  # Changed type
 
     def __init__(self, message: str, request: Optional[Union[requests.Request, PreparedRequest]], response: Optional[requests.Response]) -> None: ...
     def __repr__(self) -> str: ...
 
-
 # Specific HTTP Status Code Errors
-
 
 class BadRequestError(APIError):
     """API error corresponding to HTTP status code 400 (Bad Request)."""
-    pass
 
+    pass
 
 class ClientAuthenticationError(APIError, AuthenticationError):
     """API error corresponding to HTTP status code 401 (Unauthorized).
 
     Inherits from both APIError and AuthenticationError.
     """
-    pass
 
+    pass
 
 class ForbiddenError(APIError):
     """API error corresponding to HTTP status code 403 (Forbidden)."""
-    pass
 
+    pass
 
 class NotFoundError(APIError):
     """API error corresponding to HTTP status code 404 (Not Found)."""
-    pass
 
+    pass
 
 class ConflictError(APIError):
     """API error corresponding to HTTP status code 409 (Conflict)."""
-    pass
 
+    pass
 
 class UnprocessableEntityError(APIError):
     """API error corresponding to HTTP status code 422 (Unprocessable Entity)."""
-    pass
 
+    pass
 
 class RateLimitError(APIError):
     """API error corresponding to HTTP status code 429 (Too Many Requests)."""
-    pass
 
+    pass
 
 class InternalServerError(APIError):
     """API error corresponding to HTTP status code 500 (Internal Server Error)."""
-    pass
 
+    pass
 
 class ServiceUnavailableError(APIError):
     """API error corresponding to HTTP status code 503 (Service Unavailable)."""
+
     pass
 
-
 # Other Error Types
-
 
 class DataValidationError(CrudClientError):
     """Error related to data validation, often wrapping Pydantic errors.
@@ -169,6 +167,7 @@ class DataValidationError(CrudClientError):
         pydantic_error (Optional[PydanticValidationError]): The underlying Pydantic
             validation error, if the validation was performed using Pydantic.
     """
+
     data: Any
     pydantic_error: Optional[PydanticValidationError]
 
@@ -180,7 +179,6 @@ class DataValidationError(CrudClientError):
     ) -> None: ...
     def __repr__(self) -> str: ...
 
-
 class ModelConversionError(CrudClientError):
     """Error during the conversion of response data to a Pydantic model.
 
@@ -189,8 +187,8 @@ class ModelConversionError(CrudClientError):
     model instantiation. This is distinct from DataValidationError which typically
     wraps Pydantic's own validation exceptions.
     """
-    pass
 
+    pass
 
 class ResponseParsingError(CrudClientError):
     """Error encountered while parsing or decoding an HTTP response body.
@@ -204,6 +202,7 @@ class ResponseParsingError(CrudClientError):
         original_exception (Exception): The underlying exception (e.g., json.JSONDecodeError)
             that occurred during parsing.
     """
+
     response: Optional[requests.Response]
     original_exception: Exception
 

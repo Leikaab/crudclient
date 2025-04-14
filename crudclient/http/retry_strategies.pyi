@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class RetryStrategy(ABC):
     """Abstract base class for retry delay strategies."""
 
@@ -20,9 +19,9 @@ class RetryStrategy(ABC):
         """
         ...
 
-
 class FixedRetryStrategy(RetryStrategy):
     """A retry strategy with a fixed delay between attempts."""
+
     delay: float
 
     def __init__(self, delay: float = 1.0) -> None:
@@ -51,9 +50,9 @@ class FixedRetryStrategy(RetryStrategy):
         """
         ...
 
-
 class ExponentialBackoffStrategy(RetryStrategy):
     """A retry strategy with exponentially increasing delay, optionally with jitter."""
+
     base_delay: float
     max_delay: float
     factor: float

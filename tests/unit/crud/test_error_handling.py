@@ -24,7 +24,11 @@ from .conftest import (
     BaseTestModel,
 )
 
-SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
+# Assuming redact_json_body is needed for verifying exception data (optional based on task focus)
+# from crudclient.http.utils import redact_json_body
+
+
+SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource", "secret": "password123"}  # Added sensitive field
 SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 
 

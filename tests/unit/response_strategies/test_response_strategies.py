@@ -1,8 +1,11 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
+import pytest
 from pydantic import BaseModel
+from pydantic import ValidationError as PydanticValidationError
 
 from crudclient.crud import Crud
+from crudclient.exceptions import DataValidationError
 from crudclient.models import ApiResponse
 from crudclient.response_strategies import (
     PathBasedResponseModelStrategy,
@@ -158,6 +161,40 @@ def test_default_strategy_dict_with_data_key(client):
     assert result[1].id == 2
 
 
+def test_default_strategy_single_item_validation_error(client):
+    """Test default strategy raises DataValidationError for invalid single item."""
+    # Arrange
+    crud = _TestCrud(client)
+    invalid_data = {"id": "not-an-int", "name": "Test Item"}  # Invalid ID type
+
+    # Act & Assert
+    with pytest.raises(DataValidationError) as excinfo:
+        crud._convert_to_model(invalid_data)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    assert excinfo.value.data == invalid_data
+
+
+def test_default_strategy_list_item_validation_error(client):
+    """Test default strategy raises DataValidationError for invalid item in list."""
+    # Arrange
+    crud = _TestCrud(client)
+    invalid_list_data: List[Dict[str, Any]] = [  # Explicitly type the list
+        {"id": 1, "name": "Valid Item"},
+        {"id": "invalid-id", "name": "Invalid Item"},  # Invalid ID type
+    ]
+
+    # Act & Assert
+    with pytest.raises(DataValidationError) as excinfo:
+        crud._validate_list_return(invalid_list_data)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # The 'data' attribute should contain the original input data that caused the error
+    assert excinfo.value.data == invalid_list_data
+
+
 def test_path_based_strategy_single_item(client):
     # Arrange
     crud = _TestPathBasedCrud(client)
@@ -170,6 +207,22 @@ def test_path_based_strategy_single_item(client):
     assert isinstance(result, _TestModel)
     assert result.id == 1
     assert result.name == "Test Item"
+
+
+def test_path_based_strategy_single_item_validation_error(client):
+    """Test path-based strategy raises DataValidationError for invalid single item."""
+    # Arrange
+    crud = _TestPathBasedCrud(client)
+    invalid_data_nested = {"data": {"item": {"id": "not-an-int", "name": "Test Item"}}}
+
+    # Act & Assert
+    with pytest.raises(DataValidationError) as excinfo:
+        crud._convert_to_model(invalid_data_nested)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Data attribute should contain the original input data that caused the error
+    assert excinfo.value.data == invalid_data_nested
 
 
 def test_path_based_strategy_list(client):
@@ -188,6 +241,29 @@ def test_path_based_strategy_list(client):
     assert isinstance(result[1], _TestModel)
     assert result[0].id == 1
     assert result[1].id == 2
+
+
+def test_path_based_strategy_list_item_validation_error(client):
+    """Test path-based strategy raises DataValidationError for invalid item in list."""
+    # Arrange
+    crud = _TestPathBasedCrud(client)
+    invalid_list_data_nested = {
+        "data": {
+            "items": [
+                {"id": 1, "name": "Valid Item"},
+                {"id": "invalid-id", "name": "Invalid Item"},
+            ]
+        }
+    }
+
+    # Act & Assert
+    with pytest.raises(DataValidationError) as excinfo:
+        crud._validate_list_return(invalid_list_data_nested)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Data attribute should contain the original input data that caused the error
+    assert excinfo.value.data == invalid_list_data_nested
 
 
 def test_custom_strategy(client):

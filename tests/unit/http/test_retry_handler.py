@@ -1,9 +1,11 @@
+import logging  # <-- Add import
 from unittest.mock import MagicMock
 
 import pytest
 import requests
+from requests import exceptions as requests_exceptions  # Import requests exceptions
 
-from crudclient.exceptions import CrudClientError
+from crudclient.exceptions import CrudClientError, NetworkError
 from crudclient.http import (
     ExponentialBackoffStrategy,
     FixedRetryStrategy,
@@ -126,8 +128,10 @@ class TestRetryHandler:
         assert retry_handler.should_retry(0, exception=value_error) is False
         assert retry_handler.should_retry(3, exception=timeout_exception) is False
 
-    def test_get_delay(self, retry_handler):
+    def test_get_delay(self):
         """Test that the retry handler correctly calculates the delay."""
+        # Instantiate specific handler for this test
+        retry_handler = RetryHandler(retry_strategy=FixedRetryStrategy(delay=0.01))
 
         assert retry_handler.get_delay(1) == 0.01
         assert retry_handler.get_delay(2) == 0.01
@@ -149,8 +153,11 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(mock_sleep)
         Verifier.verify_not_called(mock_sleep, "")
 
-    def test_execute_with_retry_success_after_retry(self, retry_handler, mocker):
+    def test_execute_with_retry_success_after_retry(self, mocker):
         """Test that the retry handler retries and returns the response if a retry succeeds."""
+        # Instantiate specific handler for this test
+        # Use jitter=False for predictable delay, default base_delay is 0.5
+        retry_handler = RetryHandler(retry_strategy=ExponentialBackoffStrategy(jitter=False))
         mock_sleep = mocker.patch("time.sleep")
 
         mock_error_response = mocker.Mock(spec=requests.Response)
@@ -169,7 +176,7 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(request_func)
         Verifier.verify_call_count(request_func, "", 2)
         translate_mock_calls_for_verifier(mock_sleep)
-        Verifier.verify_called_once_with(mock_sleep, "", 0.01)
+        Verifier.verify_called_once_with(mock_sleep, "", 1.0)  # Expect default base delay (1.0)
 
     def test_execute_with_retry_all_failures(self, retry_handler, mocker):
         """Test that the retry handler raises an exception if all retries fail."""
@@ -189,20 +196,38 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(mock_sleep)
         Verifier.verify_call_count(mock_sleep, "", 3)
 
-    def test_execute_with_retry_exception(self, retry_handler, mocker):
-        """Test that the retry handler handles exceptions correctly."""
+    # Modified test
+    def test_execute_with_retry_exception_logs_error(self, retry_handler, mocker, caplog):
+        """Test that the retry handler handles exceptions correctly and logs an error."""
         mock_sleep = mocker.patch("time.sleep")
+        exception_instance = requests.Timeout("Connection timed out")
+        request_func = mocker.Mock(side_effect=exception_instance)
 
-        request_func = mocker.Mock(side_effect=requests.Timeout("Connection timed out"))
+        # Capture ERROR logs from the retry handler
+        caplog.set_level(logging.ERROR, logger="crudclient.http.retry")
 
         with pytest.raises(CrudClientError) as excinfo:
             retry_handler.execute_with_retry("GET", "http://test.com/retry", request_func)
 
         assert "Connection timed out" in str(excinfo.value)
         translate_mock_calls_for_verifier(request_func)
-        Verifier.verify_call_count(request_func, "", 4)
+        Verifier.verify_call_count(request_func, "", 4)  # Default max_retries is 3, so 4 attempts
         translate_mock_calls_for_verifier(mock_sleep)
         Verifier.verify_call_count(mock_sleep, "", 3)
+
+        # Assert Log
+        error_log_found = False
+        for record in caplog.records:
+            if (
+                record.name == "crudclient.http.retry"
+                and record.levelno == logging.ERROR
+                and "Not retrying" in record.message  # Check for the correct message
+                and "GET http://test.com/retry" in record.message
+                and "after exception Timeout" in record.message
+            ):  # Check for exception context
+                error_log_found = True
+                break
+        assert error_log_found, "Expected ERROR log for exhausted retries due to exception not found"
 
     def test_execute_with_retry_non_retryable_exception(self, retry_handler, mocker):
         """Test that the retry handler doesn't retry on non-retryable exceptions."""
@@ -240,9 +265,7 @@ class TestRetryHandler:
             retry_conditions=[RetryCondition(status_codes=[403])],
         )
 
-        response, attempts = retry_handler.execute_with_retry(
-            "GET", "http://test.com/retry", request_func, setup_auth_func=setup_auth_func
-        )
+        response, attempts = retry_handler.execute_with_retry("GET", "http://test.com/retry", request_func, setup_auth_func=setup_auth_func)
 
         assert response == response_ok
         assert attempts == 2
@@ -270,9 +293,7 @@ class TestRetryHandler:
             retry_conditions=[RetryCondition(status_codes=[403])],
         )
 
-        response, attempts = retry_handler.execute_with_retry(
-            "GET", "http://test.com/retry", request_func, setup_auth_func=setup_auth_func
-        )
+        response, attempts = retry_handler.execute_with_retry("GET", "http://test.com/retry", request_func, setup_auth_func=setup_auth_func)
 
         assert response == response_404
         assert attempts == 1
@@ -311,3 +332,28 @@ class TestRetryHandler:
 
         translate_mock_calls_for_verifier(callback)
         Verifier.verify_any_call(callback, "", 2, 0.01, mock_error_response, None)
+
+    def test_execute_with_retry_raises_network_error(self, retry_handler, mocker):
+        """Test that NetworkError is raised for requests.exceptions.RequestException."""
+        mock_sleep = mocker.patch("time.sleep")
+        original_exception = requests_exceptions.ConnectionError("Failed to connect")
+        request_func = mocker.Mock(side_effect=original_exception)
+        method = "GET"
+        url = "http://test.com/network-error"
+
+        # No need to mock requests.Request as the handler currently doesn't capture it on network errors
+
+        with pytest.raises(NetworkError) as excinfo:
+            retry_handler.execute_with_retry(method, url, request_func)
+
+        # Assert NetworkError attributes
+        assert excinfo.value.original_exception is original_exception
+        # Assert that the request attribute is None, reflecting current RetryHandler behavior
+        assert excinfo.value.request is None
+        assert "(Request: N/A)" in str(excinfo.value)
+
+        # Assert retry attempts
+        translate_mock_calls_for_verifier(request_func)
+        Verifier.verify_call_count(request_func, "", 4)  # Default max_retries is 3 -> 4 attempts
+        translate_mock_calls_for_verifier(mock_sleep)
+        Verifier.verify_call_count(mock_sleep, "", 3)

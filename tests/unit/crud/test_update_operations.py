@@ -6,6 +6,7 @@ Unit tests for the update and partial_update operations of the CRUD base class.
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 # Import the custom ValidationError, which wraps the Pydantic one
 from crudclient.exceptions import (
@@ -97,8 +98,12 @@ def test_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_cl
 
     # WHEN / THEN
     # Pydantic validation happens in _dump_data before the client call
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.update(resource_id="1", data=invalid_data)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    assert excinfo.value.data == invalid_data
 
 
 def test_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
@@ -182,8 +187,12 @@ def test_partial_update_operation_validation_error(base_test_crud: BaseTestCrud,
     # WHEN / THEN
     # Pydantic validation happens in _dump_data before the client call
     # Expect the custom ValidationError, which wraps the Pydantic one
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.partial_update(resource_id="1", data=invalid_data)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    assert excinfo.value.data == invalid_data
 
 
 def test_partial_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):

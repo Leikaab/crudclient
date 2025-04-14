@@ -6,6 +6,7 @@ Unit tests for the create operation of the CRUD base class.
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 # Import the custom ValidationError, which wraps the Pydantic one
 from crudclient.exceptions import (
@@ -92,8 +93,14 @@ def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_cl
 
     # WHEN / THEN
     # Pydantic validation happens in _dump_data before the client call
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.create(data=invalid_data)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Check that sensitive data might be redacted (implementation dependent)
+    # For this test, we assume the original invalid data is attached
+    assert excinfo.value.data == invalid_data
 
 
 def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
@@ -106,8 +113,13 @@ def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, m
     mock_client.post.return_value = {"unexpected": "field"}  # Missing 'id' or 'name'
 
     # WHEN / THEN
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.create(data=SAMPLE_PAYLOAD)
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Data attribute should contain the invalid response data
+    assert excinfo.value.data == {"unexpected": "field"}
 
 
 def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud):

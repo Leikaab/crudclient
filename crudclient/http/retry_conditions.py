@@ -67,13 +67,13 @@ class RetryCondition:
                 seen_exceptions.add(exc)
         self.exceptions = unique_exceptions
 
-    def should_retry(
-        self,
-        response: Optional[requests.Response] = None,
-        exception: Optional[Exception] = None
-    ) -> bool:
+    def should_retry(self, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
         # Basic type validation (lenient with mocks)
-        if response is not None and not isinstance(response, requests.Response) and not (hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", [])):
+        if (
+            response is not None
+            and not isinstance(response, requests.Response)
+            and not (hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", []))
+        ):
             logger.warning(f"Invalid type for response: {type(response).__name__}. Expected requests.Response or compatible mock.")
             return False
 

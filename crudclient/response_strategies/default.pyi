@@ -15,7 +15,6 @@ from ..types import JSONDict, JSONList, RawResponse
 from .base import ModelDumpable, ResponseModelStrategy, T
 from .types import ApiResponseType
 
-
 class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
     """
     Default implementation of the response model strategy.
@@ -35,7 +34,6 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
     ) -> None: ...
     def convert_single(self, data: RawResponse) -> Union[T, JSONDict]: ...
     def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]: ...
-
     def _prepare_data_for_conversion(self, data: RawResponse) -> Union[JSONDict, JSONList]:
         """Handles initial data type checks and parsing (None, str, bytes)."""
         ...

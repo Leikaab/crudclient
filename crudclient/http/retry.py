@@ -46,12 +46,7 @@ class RetryHandler:
         else:
             self.retry_conditions = retry_conditions if isinstance(retry_conditions, list) else [retry_conditions]
 
-    def should_retry(
-        self,
-        attempt: int,
-        response: Optional[requests.Response] = None,
-        exception: Optional[Exception] = None
-    ) -> bool:
+    def should_retry(self, attempt: int, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
@@ -91,14 +86,12 @@ class RetryHandler:
             return response, None
         except RequestException as e:
             logger.error(
-                "Network error during request %s %s (attempt %d/%d): %s - %s",
-                method.upper(), url, attempt, self.max_retries + 1, type(e).__name__, e
+                "Network error during request %s %s (attempt %d/%d): %s - %s", method.upper(), url, attempt, self.max_retries + 1, type(e).__name__, e
             )
             return None, e
         except Exception as e:
             logger.exception(
-                "Unexpected error during request function execution for %s %s (attempt %d/%d)",
-                method.upper(), url, attempt, self.max_retries + 1
+                "Unexpected error during request function execution for %s %s (attempt %d/%d)", method.upper(), url, attempt, self.max_retries + 1
             )
             # Re-raise unexpected errors immediately
             raise e
@@ -123,8 +116,8 @@ class RetryHandler:
                     )
                     raise NetworkError(
                         message=f"Request failed after {attempt} attempts due to network error: {exception}",
-                        request=getattr(exception, 'request', None),
-                        original_exception=exception
+                        request=getattr(exception, "request", None),
+                        original_exception=exception,
                     )
                 return None, True  # Retry needed
             else:
@@ -139,9 +132,7 @@ class RetryHandler:
                 return response, False  # No retry needed, success
 
             # Non-OK response
-            logger.warning(
-                f"Request {method.upper()} {url} received non-OK status {response.status_code} on attempt {attempt}"
-            )
+            logger.warning(f"Request {method.upper()} {url} received non-OK status {response.status_code} on attempt {attempt}")
             should_retry_flag = self.should_retry(attempt - 1, response=response, exception=None)
             if not should_retry_flag or attempt > self.max_retries:
                 logger.warning(
@@ -179,8 +170,7 @@ class RetryHandler:
             reason = f"status code {last_response.status_code}"
 
         logger.info(
-            "Retrying request %s %s (attempt %d/%d) in %.2fs due to %s.",
-            method.upper(), url, attempt + 1, self.max_retries + 1, delay, reason
+            "Retrying request %s %s (attempt %d/%d) in %.2fs due to %s.", method.upper(), url, attempt + 1, self.max_retries + 1, delay, reason
         )
 
         # Attempt auth refresh on 401 before sleeping
@@ -232,11 +222,6 @@ class RetryHandler:
 
             # If retry is needed, perform delay and callbacks
             self._perform_retry_delay_and_callbacks(
-                attempt=attempt,
-                last_response=last_response,
-                last_exception=last_exception,
-                setup_auth_func=setup_auth_func,
-                method=method,
-                url=url
+                attempt=attempt, last_response=last_response, last_exception=last_exception, setup_auth_func=setup_auth_func, method=method, url=url
             )
         # The loop should only exit via return or exception.

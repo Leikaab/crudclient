@@ -1,10 +1,12 @@
 import json
 import logging
-from typing import List, Optional, Union
+from typing import List as TypingList  # Rename List to avoid conflict
+from typing import Optional, Union
 
 from pydantic import ValidationError as PydanticValidationError
 
 from ..exceptions import DataValidationError
+from ..http.utils import redact_json_body
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList
 from .base import T
@@ -12,7 +14,7 @@ from .base import T
 logger = logging.getLogger(__name__)
 
 
-def list_operation(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, List[T], ApiResponse]:
+def list_operation(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, TypingList[T], ApiResponse]:
     if "list" not in self.allowed_actions:
         raise ValueError(f"List action not allowed for {self.__class__.__name__}")
 
@@ -37,14 +39,16 @@ def create_operation(self, data: Union[JSONDict, T], parent_id: Optional[str] = 
         return self._convert_to_model(response)
 
     except PydanticValidationError as e:
-        logger.warning(
-            "Request data validation failed for model %s: %s",
+        # Redact sensitive data before logging or raising
+        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        logger.error(
+            "Request data validation failed during 'create' for resource '%s'. Errors: %s",
             getattr(self._datamodel, "__name__", "Unknown"),
-            json.dumps(e.errors(), indent=2),
+            json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
             f"Request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
-            data=data,
+            data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
     except Exception as e:
@@ -77,14 +81,16 @@ def update_operation(self, resource_id: str, data: Union[JSONDict, T], parent_id
         return self._convert_to_model(response)
 
     except PydanticValidationError as e:
-        logger.warning(
-            "Request data validation failed for model %s: %s",
+        # Redact sensitive data before logging or raising
+        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        logger.error(
+            "Request data validation failed during 'update' for resource '%s'. Errors: %s",
             getattr(self._datamodel, "__name__", "Unknown"),
-            json.dumps(e.errors(), indent=2),
+            json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
             f"Request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
-            data=data,
+            data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
     except Exception as e:
@@ -108,14 +114,16 @@ def partial_update_operation(self, resource_id: str, data: Union[JSONDict, T], p
         return self._convert_to_model(response)
 
     except PydanticValidationError as e:
-        logger.warning(
-            "Partial update request data validation failed for model %s: %s",
+        # Redact sensitive data before logging or raising
+        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        logger.error(
+            "Request data validation failed during 'partial_update' for resource '%s'. Errors: %s",
             getattr(self._datamodel, "__name__", "Unknown"),
-            json.dumps(e.errors(), indent=2),
+            json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
             f"Partial update request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
-            data=data,
+            data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
     except Exception as e:
@@ -139,7 +147,7 @@ def custom_action_operation(
     parent_id: Optional[str] = None,
     data: Optional[Union[JSONDict, T]] = None,
     params: Optional[JSONDict] = None,
-) -> Union[T, JSONDict, List[JSONDict]]:
+) -> Union[T, JSONDict, TypingList[JSONDict]]:
     # Runtime type checks for critical parameters
     if not isinstance(action, str):
         raise TypeError(f"Action must be a string, got {type(action).__name__}")
@@ -198,16 +206,19 @@ def custom_action_operation(
             raise
 
     except PydanticValidationError as e:
+        # Redact sensitive data before logging or raising
+        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
         # Assuming data validation might happen implicitly if data is a dict
         # and needs conversion before sending, although the code tries to dump models directly.
         # Logging here provides visibility if Pydantic validation occurs unexpectedly at this stage.
-        logger.warning(
-            "Custom action request data validation failed: %s",
-            json.dumps(e.errors(), indent=2),
+        logger.error(
+            "Request data validation failed during custom action '%s'. Errors: %s",
+            action,  # Use the action name for context
+            json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
             "Custom action request data validation failed",
-            data=data,  # Pass the original data that caused the error
+            data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
     except Exception as e:

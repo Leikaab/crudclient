@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class RequestFormatter:
-    def __init__(self, config: Optional['ClientConfig'] = None):
+    def __init__(self, config: Optional["ClientConfig"] = None):
         # Store config if provided, needed for base_url and auth_strategy
         self._config = config
 
@@ -43,26 +43,25 @@ class RequestFormatter:
         if self._config is None or self._config.auth_strategy is None:
             return  # No auth strategy configured
 
-        auth_strategy: 'AuthStrategy' = self._config.auth_strategy
+        auth_strategy: "AuthStrategy" = self._config.auth_strategy
         if not hasattr(auth_strategy, "prepare_request_params"):
             return  # Strategy doesn't support param preparation
 
         auth_params: Dict[str, Any] = auth_strategy.prepare_request_params()
         if not isinstance(auth_params, dict):
-            raise TypeError(f"Auth strategy's prepare_request_params must return a dictionary, "
-                            f"got {type(auth_params).__name__}")
+            raise TypeError(f"Auth strategy's prepare_request_params must return a dictionary, " f"got {type(auth_params).__name__}")
 
         if not auth_params:
             return
 
         # Ensure kwargs['params'] exists and is a dictionary for merging.
         # Handle cases where 'params' is missing, None, or not a dict.
-        params = kwargs.get('params')
+        params = kwargs.get("params")
         if not isinstance(params, dict):
             if params is not None:
                 logger.warning(f"Request 'params' has unexpected type: {type(params).__name__}. Overwriting with auth params.")
             params = {}  # Initialize as empty dict if None or not a dict
-            kwargs['params'] = params
+            kwargs["params"] = params
 
         # Merge auth params, logging potential overwrites
         for key, value in auth_params.items():
@@ -119,29 +118,23 @@ class RequestFormatter:
             raise TypeError(f"content_type must be a string, got {type(content_type).__name__}")
         return {"Content-Type": content_type}
 
-    def format_request(
-        self, method: str, endpoint: Optional[str], url: Optional[str], **kwargs: Any
-    ) -> Tuple[str, Dict[str, Any]]:
+    def format_request(self, method: str, endpoint: Optional[str], url: Optional[str], **kwargs: Any) -> Tuple[str, Dict[str, Any]]:
         # Docstring moved to .pyi
         self.validate_request_params(method, endpoint, url)
         final_url = self.build_request_url(endpoint, url)
         self.prepare_auth_params(kwargs)  # Modifies kwargs in-place
 
         # Prepare data/json/files payload using existing methods
-        data_kwargs, headers = self.prepare_data(
-            data=kwargs.pop('data', None),
-            json=kwargs.pop('json', None),
-            files=kwargs.pop('files', None)
-        )
+        data_kwargs, headers = self.prepare_data(data=kwargs.pop("data", None), json=kwargs.pop("json", None), files=kwargs.pop("files", None))
         kwargs.update(data_kwargs)  # Add 'json', 'data', or 'files' back to kwargs
 
         # Merge content-type headers if any were generated
         if headers:
-            existing_headers = kwargs.setdefault('headers', {})
+            existing_headers = kwargs.setdefault("headers", {})
             if not isinstance(existing_headers, dict):
                 logger.warning("Overwriting non-dict 'headers' with Content-Type header.")
                 existing_headers = {}
             existing_headers.update(headers)
-            kwargs['headers'] = existing_headers
+            kwargs["headers"] = existing_headers
 
         return final_url, kwargs

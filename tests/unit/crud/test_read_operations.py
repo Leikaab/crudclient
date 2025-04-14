@@ -6,6 +6,7 @@ Unit tests for the read operation of the CRUD base class.
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 from crudclient.exceptions import DataValidationError  # Replaced ModelConversionError
 from crudclient.testing.verification import Verifier
@@ -64,8 +65,13 @@ def test_read_operation_model_conversion_error(base_test_crud: BaseTestCrud, moc
     mock_client.get.return_value = {"unexpected": "field"}
 
     # WHEN / THEN
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError) as excinfo:
         base_test_crud.read(resource_id="1")
+
+    # Assert exception attributes
+    assert isinstance(excinfo.value.pydantic_error, PydanticValidationError)
+    # Data attribute should contain the invalid response data
+    assert excinfo.value.data == {"unexpected": "field"}
 
 
 def test_read_operation_action_not_allowed(base_test_crud: BaseTestCrud):

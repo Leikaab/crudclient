@@ -57,11 +57,9 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
             try:
                 return self.datamodel(**data)
             except PydanticValidationError as e:
-                logger.warning(
-                    "Response data validation failed for model %s: %s",
-                    self.datamodel.__name__,
-                    e,
-                )
+                model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+                error_msg = f"Response data validation failed for model {model_name}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
                 raise  # Re-raise the original validation error
         else:
             return data
@@ -74,6 +72,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 # Recursively call to handle the parsed data (could be dict or list)
                 # Ensure the recursive call returns a dict or list, otherwise raise
@@ -107,11 +106,9 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         try:
             return [self.datamodel(**item) for item in list_data]
         except PydanticValidationError as e:
-            logger.warning(
-                "Response list item validation failed for model %s: %s",
-                self.datamodel.__name__,
-                e,
-            )
+            model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+            error_msg = f"Response list item validation failed for model {model_name}"
+            logger.error(f"{error_msg}: errors={e.errors()}")
             raise
 
     def _handle_dict_response(self, data: JSONDict) -> Union[List[T], JSONList, ApiResponse]:
@@ -121,11 +118,9 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
             try:
                 return self.api_response_model(**data)
             except PydanticValidationError as e:
-                logger.warning(
-                    "Response data validation failed for API response model %s: %s",
-                    self.api_response_model.__name__,
-                    e,
-                )
+                model_name = self.api_response_model.__name__ if self.api_response_model else "Unknown"
+                error_msg = f"Response data validation failed for API response model {model_name}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
                 raise
 
         # Look for list data in known keys

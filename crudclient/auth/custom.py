@@ -1,6 +1,9 @@
+import logging
 from typing import Callable, Dict, Optional
 
 from crudclient.auth.base import AuthStrategy
+
+log = logging.getLogger(__name__)
 
 
 class CustomAuth(AuthStrategy):
@@ -13,6 +16,7 @@ class CustomAuth(AuthStrategy):
 
     def prepare_request_headers(self) -> Dict[str, str]:
         if self.header_callback:
+            log.debug("[CustomAuth] Invoking custom header callback to modify request")
             result = self.header_callback()
             if not isinstance(result, dict):
                 raise TypeError("Header callback must return a dictionary")
@@ -21,6 +25,7 @@ class CustomAuth(AuthStrategy):
 
     def prepare_request_params(self) -> Dict[str, str]:
         if self.param_callback:
+            log.debug("[CustomAuth] Invoking custom parameter callback to modify request")
             result = self.param_callback()
             if not isinstance(result, dict):
                 raise TypeError("Parameter callback must return a dictionary")

@@ -36,7 +36,12 @@ class Client:
             raise ConfigurationError(f"Invalid base_url configuration: {e}") from e
 
         self.http_client = HttpClient(self.config)
-        log.info("Client configuration processed successfully. Base URL: %s", self.base_url)
+        log.info(
+            "Client configuration processed successfully. Base URL: %s, Log Request Body: %s, Log Response Body: %s",
+            self.base_url,
+            self.config.log_request_body,
+            self.config.log_response_body,
+        )
 
         self._session = self.http_client.session_manager.session
 

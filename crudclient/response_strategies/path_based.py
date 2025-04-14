@@ -51,6 +51,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
             str_data = data
             try:
                 import json
+
                 parsed_data: Any = json.loads(str_data)
                 if not isinstance(parsed_data, (dict, list)):
                     raise ValueError(f"Parsed JSON is not a dictionary or list, got {type(parsed_data)}")
@@ -102,12 +103,10 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
             try:
                 return self.datamodel(**final_data)
             except PydanticValidationError as e:
-                logger.warning(
-                    "Response data validation failed for model %s (path: %s): %s",
-                    self.datamodel.__name__,
-                    self.single_item_path,
-                    e,
-                )
+                model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+                path_info = f" (path: {self.single_item_path})" if self.single_item_path else ""
+                error_msg = f"Response data validation failed for model {model_name}{path_info}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
                 raise
         else:
             # Return the dictionary if no datamodel
@@ -121,6 +120,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if isinstance(data, str):
             try:
                 import json
+
                 parsed_data = json.loads(data)
                 if isinstance(parsed_data, (dict, list)):
                     return parsed_data
@@ -153,11 +153,9 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
             try:
                 return self.api_response_model(**data)
             except PydanticValidationError as e:
-                logger.warning(
-                    "Response data validation failed for API response model %s: %s",
-                    self.api_response_model.__name__,
-                    e,
-                )
+                model_name = self.api_response_model.__name__ if self.api_response_model else "Unknown"
+                error_msg = f"Response data validation failed for API response model {model_name}"
+                logger.error(f"{error_msg}: errors={e.errors()}")
                 raise
         return None
 
@@ -187,12 +185,10 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         try:
             return [self.datamodel(**item) for item in list_data]
         except PydanticValidationError as e:
-            logger.warning(
-                "Response list item validation failed for model %s (path: %s): %s",
-                self.datamodel.__name__,
-                self.list_item_path,
-                e,
-            )
+            model_name = self.datamodel.__name__ if self.datamodel else "Unknown"
+            path_info = f" (path: {self.list_item_path})" if self.list_item_path else ""
+            error_msg = f"Response list item validation failed for model {model_name}{path_info}"
+            logger.error(f"{error_msg}: errors={e.errors()}")
             raise
 
     def convert_list(self, data: RawResponse) -> Union[List[T], JSONList, ApiResponse]:

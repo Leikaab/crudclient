@@ -2,6 +2,7 @@ from typing import Dict, Optional
 
 from .base import AuthStrategy
 
+
 class BearerAuth(AuthStrategy):
     """
     Bearer token authentication strategy.
@@ -9,6 +10,10 @@ class BearerAuth(AuthStrategy):
     This strategy implements the Bearer token authentication scheme, commonly used
     in OAuth 2.0 and JWT-based APIs. It adds an "Authorization" header with the
     format "Bearer {token}" to each request.
+
+    Note:
+        An invalid or expired token may result in an `AuthenticationError` when
+        making requests using this strategy.
 
     Attributes:
         token (str): The bearer token to use for authentication.

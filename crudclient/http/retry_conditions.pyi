@@ -3,9 +3,9 @@ from typing import Callable, List, Optional, Type, Union
 
 import requests
 
-
 class RetryEvent(Enum):
     """Enumeration of common events that might trigger a retry."""
+
     FORBIDDEN = ...
     UNAUTHORIZED = ...
     SERVER_ERROR = ...
@@ -13,9 +13,9 @@ class RetryEvent(Enum):
     CONNECTION_ERROR = ...
     CUSTOM = ...
 
-
 class RetryCondition:
     """Defines conditions under which a request should be retried."""
+
     events: List[Union[RetryEvent, int]]
     status_codes: List[int]
     exceptions: List[Type[Exception]]
@@ -43,11 +43,7 @@ class RetryCondition:
         """
         ...
 
-    def should_retry(
-        self,
-        response: Optional[requests.Response] = None,
-        exception: Optional[Exception] = None
-    ) -> bool:
+    def should_retry(self, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
         """Checks if a retry should occur based on the response or exception.
 
         Checks against `status_codes`, `exceptions`, and `custom_condition` in that order.

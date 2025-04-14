@@ -49,8 +49,7 @@ class ResponseHandler:
             return response.json()
         except JSONDecodeError as e:
             logger.error(
-                "Failed to parse JSON response despite 'application/json' Content-Type. "
-                "Status: %s, URL: %s, Error: %s",
+                "Failed to parse JSON response despite 'application/json' Content-Type. " "Status: %s, URL: %s, Error: %s",
                 response.status_code,
                 response.url,
                 e,

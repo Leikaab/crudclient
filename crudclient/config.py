@@ -17,6 +17,8 @@ class ClientConfig:
     retries: int = 3
     auth_strategy: Optional[AuthStrategy] = None
     auth_type: str = "bearer"  # For backward compatibility
+    log_request_body: bool = False
+    log_response_body: bool = False
 
     def __init__(
         self,
@@ -28,6 +30,8 @@ class ClientConfig:
         retries: Optional[int] = None,
         auth_strategy: Optional[AuthStrategy] = None,
         auth_type: Optional[str] = None,
+        log_request_body: Optional[bool] = None,
+        log_response_body: Optional[bool] = None,
     ) -> None:
         self.hostname = hostname or self.__class__.hostname
         self.version = version or self.__class__.version
@@ -37,6 +41,8 @@ class ClientConfig:
         self.retries = retries if retries is not None else self.__class__.retries
         self.auth_strategy = auth_strategy or self.__class__.auth_strategy
         self.auth_type = auth_type or self.__class__.auth_type
+        self.log_request_body = log_request_body if log_request_body is not None else self.__class__.log_request_body
+        self.log_response_body = log_response_body if log_response_body is not None else self.__class__.log_response_body
 
     @property
     def base_url(self) -> str:

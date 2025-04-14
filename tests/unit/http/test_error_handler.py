@@ -5,16 +5,15 @@ This module contains tests for how the ErrorHandler class handles various HTTP e
 including different status codes and malformed responses.
 """
 
-
 import pytest
 import requests
 
+from crudclient.exceptions import ClientAuthenticationError  # Added specific auth error
 from crudclient.exceptions import (
     UnprocessableEntityError,  # Added UnprocessableEntityError here
 )
 from crudclient.exceptions import (  # Reverted to absolute import; DataValidationError, # Removed unused import
     APIError,
-    AuthenticationError,
     BadRequestError,
     ForbiddenError,
     InternalServerError,
@@ -26,6 +25,7 @@ from crudclient.exceptions import (  # Reverted to absolute import; DataValidati
 @pytest.fixture
 def create_response_mock(mocker):
     """Create a mock response."""
+
     def _create_mock(status_code, json_data=None, headers=None, text=None):
         response = mocker.Mock(spec=requests.Response)
         response.status_code = status_code
@@ -78,7 +78,7 @@ class TestErrorHandler:
         """Test handling of 401 Unauthorized responses."""
         response = create_response_mock(401, json_data={"error": "Unauthorized", "message": "Invalid credentials"})
 
-        with pytest.raises(AuthenticationError) as excinfo:
+        with pytest.raises(ClientAuthenticationError) as excinfo:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None

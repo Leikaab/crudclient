@@ -147,7 +147,7 @@ class TestClient:
         response.status_code = 500
         response.raise_for_status.side_effect = requests.HTTPError("boom")
         # Add the request attribute to prevent AttributeError in error handling
-        mock_request_obj = mocker.Mock(method='GET', url='http://mock.test')
+        mock_request_obj = mocker.Mock(method="GET", url="http://mock.test")
         response.request = mock_request_obj
 
         # Act & Assert
@@ -163,7 +163,7 @@ class TestClient:
 
         response = mocker.Mock(spec=requests.Response)
         # Add the request attribute to prevent AttributeError in error handling
-        mock_request_obj = mocker.Mock(method='GET', url='http://mock.test')
+        mock_request_obj = mocker.Mock(method="GET", url="http://mock.test")
         response.request = mock_request_obj
         response.json.return_value = {"error": "Bad Request"}
         response.status_code = 400

@@ -2,6 +2,7 @@ from typing import Dict, Optional
 
 from .base import AuthStrategy
 
+
 class BasicAuth(AuthStrategy):
     """
     Basic authentication strategy.
@@ -9,6 +10,10 @@ class BasicAuth(AuthStrategy):
     This strategy implements HTTP Basic Authentication, which sends credentials
     as a base64-encoded string in the format "username:password" in the
     Authorization header.
+
+    Note:
+        Incorrect credentials may result in an `AuthenticationError` when
+        making requests using this strategy.
 
     Attributes:
         username (str): The username for authentication.

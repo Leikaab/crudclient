@@ -16,14 +16,22 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, Union, Tuple  # Added Tuple
+from typing import (  # Added Tuple
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import requests
 
 from ..exceptions import CrudClientError, NetworkError  # Added NetworkError
-from .retry_strategies import RetryStrategy  # Import strategies
 from .retry_conditions import RetryCondition  # Import conditions
-
+from .retry_strategies import RetryStrategy  # Import strategies
 
 class RetryEvent(Enum):
     """Enum representing different retry events."""
@@ -34,7 +42,6 @@ class RetryEvent(Enum):
     TIMEOUT = "timeout"
     CONNECTION_ERROR = "connection_error"
     CUSTOM = "custom"
-
 
 # Note: RetryStrategy and RetryCondition definitions are now in their respective .pyi files
 # crudclient/http/retry_strategies.pyi
@@ -167,5 +174,4 @@ class RetryHandler:
     ) -> None:
         """Calculates delay, sleeps, and calls callbacks before the next retry."""
         ...
-
     # maybe_retry_after_403 stub removed as method was removed from implementation.
