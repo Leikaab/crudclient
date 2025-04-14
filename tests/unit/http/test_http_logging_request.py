@@ -147,7 +147,7 @@ def test_log_request_details_with_long_body_truncated(
 
     # Extract the snippet part after the prefix
     prefix = "Request body (application/json (redacted)... (truncated)): "
-    logged_body_snippet = full_log_message[len(prefix):]
+    logged_body_snippet = full_log_message[len(prefix) :]
 
     assert isinstance(logged_body_snippet, str)
     assert len(logged_body_snippet) <= EXPECTED_MAX_LOG_LEN  # Check it's truncated
@@ -305,20 +305,11 @@ def test_log_request_details_body_redaction_nested(
     body = {
         "config_id": 123,
         "settings": {
-            "credentials": {
-                "username": "admin",
-                "password": "nested_secret_password",
-                "auth": {
-                    "token": "deeply_nested_token"
-                }
-            },
+            "credentials": {"username": "admin", "password": "nested_secret_password", "auth": {"token": "deeply_nested_token"}},
             "feature_flags": ["A", "B"],
-            "secrets": [
-                {"name": "db_conn", "value": "conn_string_secret"},
-                {"name": "api_key", "value": "another_api_key_secret"}
-            ]
+            "secrets": [{"name": "db_conn", "value": "conn_string_secret"}, {"name": "api_key", "value": "another_api_key_secret"}],
         },
-        "metadata": {"timestamp": "now"}
+        "metadata": {"timestamp": "now"},
     }
     kwargs = {"headers": headers, "json": body}
 

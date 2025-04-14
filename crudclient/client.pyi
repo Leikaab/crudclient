@@ -16,7 +16,6 @@ This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
 
-
 class Client:
     """
     Client class for making API requests.
@@ -171,12 +170,10 @@ class Client:
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
-
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
-
     @property
     def session(self) -> requests.Session:
         """

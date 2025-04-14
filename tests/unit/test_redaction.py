@@ -38,9 +38,9 @@ def test_log_response_body_redaction_simple(
         "user_details": {
             "email": "test@example.com",
             "password_hash": "should-not-be-logged",  # Assuming password_hash is sensitive
-            "api_key": "user-specific-key"
+            "api_key": "user-specific-key",
         },
-        "permissions": ["read", "write"]
+        "permissions": ["read", "write"],
     }
     # Simulate logging the response body (adapt based on actual HttpLifecycleLogger method)
     # Assuming a method like log_response_body exists or is part of log_request_completion
@@ -88,7 +88,7 @@ def test_log_response_body_redaction_nested_list(
             {"id": 2, "data": "def", "credentials": {"token": "beta-token"}},
             {"id": 3, "data": "ghi", "value": "gamma-value-visible"},  # Assuming 'value' itself isn't always sensitive
         ],
-        "metadata": {"count": 3}
+        "metadata": {"count": 3},
     }
     redacted_body = redact_json_body(response_body)
     test_logger.debug(f"Response body (redacted): {redacted_body}")
@@ -126,6 +126,7 @@ def test_log_response_body_redaction_nested_list(
 
 # --- Test DataValidationError Redaction ---
 
+
 class SensitiveModel(BaseModel):
     user_id: int
     username: str
@@ -136,6 +137,7 @@ class SensitiveModel(BaseModel):
 
 # Removed defunct test_data_validation_error_log_redaction
 
+
 def test_data_validation_error_exception_redaction():
     """Verify sensitive data is redacted in DataValidationError exception attributes."""
     invalid_data = {
@@ -143,9 +145,7 @@ def test_data_validation_error_exception_redaction():
         "username": "testuser",
         "password": "plain_password_secret_ex",
         "api_key": "plain_api_key_secret_ex",
-        "nested": {
-            "access_token": "nested_access_token_secret_ex"
-        }
+        "nested": {"access_token": "nested_access_token_secret_ex"},
     }
 
     try:
@@ -160,12 +160,12 @@ def test_data_validation_error_exception_redaction():
             raise DataValidationError(
                 "Validation failed",  # message (positional)
                 data=redacted_input_data_for_exception,  # data (keyword)
-                pydantic_error=e  # pydantic_error (keyword)
+                pydantic_error=e,  # pydantic_error (keyword)
             )
         except DataValidationError as dve:
             # Inspect the exception instance attributes
             # The redacted data is stored in the 'data' attribute
-            assert hasattr(dve, 'data'), "Exception missing 'data' attribute"
+            assert hasattr(dve, "data"), "Exception missing 'data' attribute"
             redacted_data = dve.data  # Access the correct attribute
 
             assert isinstance(redacted_data, dict)

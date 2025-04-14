@@ -58,7 +58,6 @@ class CustomAuth(AuthStrategy):
         """
         ...
 
-
 class ApiKeyAuth(AuthStrategy):
     """
     API key authentication strategy.

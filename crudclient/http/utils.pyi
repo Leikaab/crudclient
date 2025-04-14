@@ -14,7 +14,6 @@ def redact_sensitive_headers(headers: Mapping[str, str]) -> Dict[str, str]:
 
 # Note: The default value _SENSITIVE_BODY_KEYS_LOWER is defined in the .py file
 
-
 def redact_json_body(data: Any, sensitive_keys: Set[str] = ...) -> Any:
     """
     Recursively redact sensitive information from a JSON-like structure (dicts and lists).

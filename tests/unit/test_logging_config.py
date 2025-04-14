@@ -49,16 +49,13 @@ def test_logging_default_configuration(caplog):
     """
     # 1. Check for handlers on the library's logger
     # It should ideally be empty, or contain only a NullHandler added by the library itself.
-    has_only_null_handler = (
-        len(crud_logger.handlers) == 1
-        and isinstance(crud_logger.handlers[0], logging.NullHandler)
-    )
-    assert len(crud_logger.handlers) == 0 or has_only_null_handler, \
-        f"Expected 0 handlers or 1 NullHandler on {crud_logger.name}, found: {crud_logger.handlers}"
+    has_only_null_handler = len(crud_logger.handlers) == 1 and isinstance(crud_logger.handlers[0], logging.NullHandler)
+    assert (
+        len(crud_logger.handlers) == 0 or has_only_null_handler
+    ), f"Expected 0 handlers or 1 NullHandler on {crud_logger.name}, found: {crud_logger.handlers}"
 
     # 2. Check if propagation is enabled (standard practice)
-    assert crud_logger.propagate is True, \
-        f"Expected {crud_logger.name} to propagate messages by default."
+    assert crud_logger.propagate is True, f"Expected {crud_logger.name} to propagate messages by default."
 
     # 3. Verify logs *are* captured by root logger config (using caplog) due to propagation
     caplog.set_level(logging.DEBUG, logger="crudclient")  # Ensure caplog listens
@@ -105,7 +102,7 @@ def test_logging_set_level_sub_logger(caplog):
     # Trigger logs
     crud_logger.debug("Root debug again.")
     http_logger.debug("HTTP debug filtered.")  # Should be filtered by http_logger's level
-    http_logger.info("HTTP info allowed.")   # Should be allowed by http_logger
+    http_logger.info("HTTP info allowed.")  # Should be allowed by http_logger
     crud_logger.warning("Root warning again.")
 
     # Assert filtering worked
@@ -121,7 +118,7 @@ def test_logging_add_handler_captures_logs():
     """Verify adding a standard handler captures logs."""
     log_stream = io.StringIO()
     handler = logging.StreamHandler(log_stream)
-    formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
+    formatter = logging.Formatter("%(name)s:%(levelname)s:%(message)s")
     handler.setFormatter(formatter)
 
     # Add handler specifically to the crud logger
