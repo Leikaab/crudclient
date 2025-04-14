@@ -7,7 +7,7 @@ Thank you for your interest in contributing to CrudClient! We welcome contributi
 - [Code of Conduct](#code-of-conduct)
 - [Setting Up the Development Environment](#setting-up-the-development-environment)
   - [Prerequisites](#prerequisites)
-  - [Using Dev Containers](#using-dev-containers)
+  - [Setup Steps](#setup-steps)
 - [Running Tests](#running-tests)
   - [Unit Tests](#unit-tests)
   - [Integration Tests](#integration-tests)
@@ -15,7 +15,8 @@ Thank you for your interest in contributing to CrudClient! We welcome contributi
 - [Code Style and Quality](#code-style-and-quality)
   - [Linters and Formatters](#linters-and-formatters)
   - [Type Checking](#type-checking)
-  - [Pre-Commit Hooks](#pre-commit-hooks)
+- [Authentication Strategies](#authentication-strategies)
+- [Pre-Commit Hooks](#pre-commit-hooks)
 - [Managing Dependencies](#managing-dependencies)
   - [Adding Dependencies](#adding-dependencies)
   - [Updating Dependencies](#updating-dependencies)
@@ -32,33 +33,35 @@ This project adheres to the Contributor Covenant Code of Conduct. Please review 
 
 ### Prerequisites
 
-- [Docker](https://www.docker.com/get-started)
-- [Visual Studio Code](https://code.visualstudio.com/)
-- [Remote - Containers VS Code Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [Python](https://www.python.org/downloads/) (Version 3.8 or higher recommended)
+- [Poetry](https://python-poetry.org/docs/#installation) (for dependency management and virtual environments)
 
-### Using Dev Containers
-
-This project is configured to use VS Code Dev Containers for a consistent development environment.
+### Setup Steps
 
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/Leikaab/crudclient.git
     cd crudclient
     ```
-2.  **Open in Container:**
-    - Open the cloned repository folder in VS Code.
-    - VS Code should prompt you to "Reopen in Container". Click it.
-    - Alternatively, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and select "Remote-Containers: Reopen in Container".
-
-The dev container includes Python, Poetry, and all necessary tools and VS Code extensions pre-configured. Dependencies specified in `poetry.lock` will be installed automatically within the container.
+2.  **Install dependencies:**
+    - Poetry manages project dependencies and creates a virtual environment.
+    - Run the following command to install all required dependencies, including development tools:
+    ```bash
+    poetry install --all-extras
+    ```
+    - Activate the virtual environment created by Poetry:
+    ```bash
+    poetry shell
+    ```
+    (Alternatively, prefix commands with `poetry run`, e.g., `poetry run pytest`)
 
 ## Running Tests
 
-Tests are written using `pytest`.
+Tests are written using `pytest` and leverage custom factories for mocking (see `crudclient/testing/`).
 
 ### Unit Tests
 
-Unit tests mock external dependencies and test individual components.
+Unit tests mock external dependencies and test individual components in isolation.
 
 ```bash
 pytest tests/unit
@@ -79,23 +82,24 @@ pytest tests/integration/test_jsonplaceholder.py
 
 ### Coverage
 
-To run all tests and generate a coverage report:
+To run all unit tests and generate a coverage report:
 
 ```bash
-pytest --cov=crudclient --cov-report=term-missing --cov-report=html
+pytest tests/unit --cov=crudclient --cov-report=term-missing --cov-report=html
 ```
 
-This will print a summary to the terminal and create an HTML report in the `coverage_html_report/` directory. The pre-push hook enforces 100% coverage.
+This will print a summary to the terminal and create an HTML report in the `coverage_html_report/` directory. The pre-push hook (see below) enforces 100% unit test coverage.
 
 ## Code Style and Quality
 
-We use several tools to maintain code quality and consistency.
+We use several tools to maintain code quality and consistency. These are typically run automatically via pre-commit hooks.
 
 ### Linters and Formatters
 
 - **Black:** For code formatting.
 - **isort:** For sorting imports.
-- **Flake8:** For general linting.
+- **Flake8:** For general linting (style guide enforcement, complexity checks).
+- **autoflake:** Removes unused imports and variables.
 
 Configuration for these tools can be found in `pyproject.toml` and `.flake8`.
 
@@ -108,25 +112,39 @@ Configuration for these tools can be found in `pyproject.toml` and `.flake8`.
 When contributing to the authentication system, follow these guidelines:
 
 1. **Strategy Pattern:** All authentication strategies must implement the `AuthStrategy` abstract base class defined in `crudclient/auth/base.py`.
-2. **Required Methods:** Each strategy must implement:
-   - `prepare_request_headers()`: Returns a dictionary of headers for authentication.
-   - `prepare_request_params()`: Returns a dictionary of query parameters for authentication.
+2. **Required Methods:** Each strategy must implement methods necessary for applying authentication details to requests (e.g., `prepare_request_headers`, `prepare_request_params`). Refer to the base class and existing strategies.
 3. **Naming Convention:** Name your strategy class with a descriptive suffix followed by `Auth` (e.g., `BearerAuth`, `ApiKeyAuth`).
-4. **Immutability:** Authentication strategies should be immutable after initialization.
+4. **Immutability:** Authentication strategies should generally be immutable after initialization.
 5. **Documentation:** Include comprehensive docstrings explaining the strategy's purpose and usage.
-6. **Testing:** Write unit tests for each new authentication strategy.
+6. **Testing:** Write unit tests for each new authentication strategy using the testing framework provided in `crudclient/testing/`.
 
-### Pre-Commit Hooks
+## Pre-Commit Hooks
 
-We use `pre-commit` to automatically run these checks before you commit changes. Ensure it's installed in your environment (it should be in the dev container).
+We use [`pre-commit`](https://pre-commit.com/) to automatically run checks before commits and pushes. This helps ensure code quality and consistency before changes enter the main codebase.
+
+**Installation:**
+
+Ensure `pre-commit` is installed (it's included in the development dependencies via `poetry install`). Then, install the git hooks:
 
 ```bash
-# Install hooks (usually needed only once)
-pre-commit install
-pre-commit install --hook-type pre-push
+# Install hooks (run once per clone)
+pre-commit install       # Installs pre-commit hooks
+pre-commit install --hook-type pre-push  # Installs pre-push hooks
 ```
 
-Now, the checks (black, isort, flake8, mypy, pytest unit tests) will run automatically on `git commit`. The pre-push hook runs `pytest` with coverage checks.
+**Checks Performed:**
+
+-   **On `git commit`:**
+    -   Basic checks (trailing whitespace, end-of-file fix, etc.).
+    -   Code Formatting (`autoflake`, `isort`, `black`).
+    -   Linting (`flake8`).
+    -   Static Type Checking (`mypy`).
+    -   Custom Project Checks (`check-docstrings`, `check-stub-files`, `check-file-length`).
+    -   Unit tests (`pytest`) are run *only on changed files* relevant to the commit for faster feedback.
+-   **On `git push`:**
+    -   Full unit test suite (`pytest tests/unit`) with 100% code coverage enforcement (`--cov`).
+
+If any hook fails, the commit or push will be aborted. Address the reported issues and try committing/pushing again. You can also run all pre-commit hooks manually: `pre-commit run --all-files`.
 
 ## Managing Dependencies
 
@@ -138,7 +156,7 @@ We use [Poetry](https://python-poetry.org/) to manage project dependencies.
   ```bash
   poetry add <package_name>
   ```
-- **Development Dependency:**
+- **Development Dependency (tools, testing, etc.):**
   ```bash
   poetry add --group dev <package_name>
   ```
@@ -171,19 +189,19 @@ Examples:
 
 - `feat: add support for custom authentication headers`
 - `fix: correct handling of non-JSON error responses`
-- `docs: update CONTRIBUTING.md with commit guidelines`
+- `docs: update CONTRIBUTING.md with poetry setup`
 - `refactor: simplify endpoint construction logic in Crud class`
 - `test: add unit tests for ClientConfig merging`
 
 ## Pull Request (PR) Process
 
-1.  Ensure all tests pass and pre-commit checks are successful.
+1.  Ensure all tests pass (`pytest tests/unit`) and pre-commit/pre-push checks are successful locally.
 2.  Push your feature branch to your fork on GitHub.
 3.  Create a Pull Request targeting the `main` branch of the `Leikaab/crudclient` repository.
 4.  Provide a clear description of the changes in the PR. Link to any relevant issues.
-5.  Ensure CI checks pass on the PR.
-6.  Engage in code review and address any feedback.
+5.  **CI Checks:** Automated checks (including linters, type checkers, and tests across multiple Python versions) will run via GitHub Actions on your PR. Ensure these pass.
+6.  Engage in code review and address any feedback promptly.
 
 ## Reporting Issues
 
-If you encounter a bug or have a feature request, please check existing issues first. If it's a new issue, create one using the appropriate template on GitHub Issues. Provide as much detail as possible.
+If you encounter a bug or have a feature request, please check existing issues first. If it's a new issue, create one using the appropriate template on GitHub Issues. Provide as much detail as possible, including steps to reproduce, expected behavior, and actual behavior.
