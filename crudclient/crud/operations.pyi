@@ -150,6 +150,30 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
     ...
 
 
+def _prepare_request_body_kwargs(
+    self: "Crud",
+    data: Optional[Union[JSONDict, T]],
+    files: Optional[JSONDict],
+    content_type: Optional[str],
+) -> Dict[str, Any]:
+    """
+    Prepare request body keyword arguments based on content type and data.
+
+    Args:
+        data: Optional data to send with the request.
+        files: Optional dictionary of files to upload (for multipart/form-data requests).
+        content_type: Optional content type for the request.
+
+    Returns:
+        Dict[str, Any]: Dictionary of keyword arguments for the request body.
+
+    Raises:
+        TypeError: If the data type is incompatible with the content type.
+        ValueError: If an unsupported content type is provided.
+    """
+    ...
+
+
 def custom_action_operation(
     self: "Crud",
     action: str,
@@ -158,6 +182,8 @@ def custom_action_operation(
     parent_id: Optional[str] = None,
     data: Optional[Union[JSONDict, T]] = None,
     params: Optional[JSONDict] = None,
+    files: Optional[JSONDict] = None,
+    content_type: Optional[str] = None,
 ) -> Union[T, JSONDict, List[JSONDict]]:
     """
     Perform a custom action on the resource.
@@ -169,13 +195,17 @@ def custom_action_operation(
         parent_id: Optional ID of the parent resource for nested resources.
         data: Optional data to send with the request.
         params: Optional query parameters.
+        files: Optional dictionary of files to upload (for multipart/form-data requests).
+        content_type: Optional content type for the request. If not provided, defaults to
+                     "application/json" unless files are provided (which uses multipart/form-data).
+                     Supported values: "application/json", "application/x-www-form-urlencoded".
 
     Returns:
         Union[T, JSONDict, List[JSONDict]]: The API response.
 
     Raises:
         TypeError: If the parameters are of incorrect types.
-        ValueError: If the HTTP method is invalid or the action is not defined.
+        ValueError: If the HTTP method is invalid, the action is not defined, or an unsupported content_type is provided.
         DataValidationError: If the input data fails validation.
         NotFoundError: If the resource or parent resource (if applicable) is not found.
         NetworkError: If a network-related error occurs during the request.

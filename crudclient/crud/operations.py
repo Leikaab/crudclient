@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Any, Dict
 from typing import List as TypingList  # Rename List to avoid conflict
 from typing import Optional, Union
 
@@ -139,6 +140,57 @@ def destroy_operation(self, resource_id: str, parent_id: Optional[str] = None) -
     self.client.delete(endpoint)
 
 
+def _prepare_request_body_kwargs(
+    self,
+    data: Optional[Union[JSONDict, T]],
+    files: Optional[JSONDict],
+    content_type: Optional[str],
+) -> Dict[str, Any]:
+    request_body_kwargs = {}
+
+    # a. Multipart/Form-Data (Files)
+    if files is not None:
+        request_body_kwargs["files"] = files
+
+        # If data is also provided (for additional form fields)
+        if data is not None:
+            if hasattr(data, "model_dump") and callable(data.model_dump):  # type: ignore[attr-defined]
+                request_body_kwargs["data"] = data.model_dump()  # type: ignore[attr-defined]
+            elif isinstance(data, dict):
+                request_body_kwargs["data"] = data
+            else:
+                raise TypeError("For multipart/form-data with files, 'data' must be a dict or a Pydantic model")
+
+    # b. Application/x-www-form-urlencoded
+    elif content_type == "application/x-www-form-urlencoded":
+        if data is not None:
+            if hasattr(data, "model_dump") and callable(data.model_dump):  # type: ignore[attr-defined]
+                request_body_kwargs["data"] = data.model_dump()  # type: ignore[attr-defined]
+            elif isinstance(data, dict):
+                request_body_kwargs["data"] = data
+            else:
+                raise TypeError("For application/x-www-form-urlencoded, 'data' must be a dict or a Pydantic model")
+
+    # c. Application/json (Default)
+    elif files is None and (content_type is None or content_type == "application/json"):
+        if data is not None:
+            if hasattr(data, "model_dump") and callable(data.model_dump):  # type: ignore[attr-defined]
+                request_body_kwargs["json"] = data.model_dump()  # type: ignore[attr-defined]
+            elif isinstance(data, dict):
+                request_body_kwargs["json"] = data
+            else:
+                raise TypeError("For application/json, 'data' must be a dict or a Pydantic model")
+        else:
+            # Explicitly set json=None if no data is provided
+            request_body_kwargs["json"] = None
+
+    # d. Unsupported Content-Type with Data
+    elif data is not None and content_type is not None:
+        raise ValueError(f"Unsupported content_type '{content_type}' for provided 'data'")
+
+    return request_body_kwargs
+
+
 def custom_action_operation(
     self,
     action: str,
@@ -147,6 +199,8 @@ def custom_action_operation(
     parent_id: Optional[str] = None,
     data: Optional[Union[JSONDict, T]] = None,
     params: Optional[JSONDict] = None,
+    files: Optional[JSONDict] = None,
+    content_type: Optional[str] = None,
 ) -> Union[T, JSONDict, TypingList[JSONDict]]:
     # Runtime type checks for critical parameters
     if not isinstance(action, str):
@@ -165,30 +219,18 @@ def custom_action_operation(
     endpoint_args = [arg for arg in [resource_id, action] if arg is not None]
     endpoint = self._get_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
 
-    kwargs = {}
+    final_kwargs = {}
     if params:
-        kwargs["params"] = params
+        final_kwargs["params"] = params
 
     try:
         # Handle data payload for methods that use a request body
         if method.lower() in ["post", "put", "patch"]:
-            if data is not None:
-                # If data is a model instance, dump it (assuming it has model_dump)
-                # Custom actions might use different models, so don't validate against self._datamodel here.
-                if hasattr(data, "model_dump") and callable(data.model_dump):  # type: ignore[attr-defined]
-                    kwargs["json"] = data.model_dump()  # type: ignore[attr-defined]
-                elif isinstance(data, dict):
-                    # Pass dictionaries directly for custom actions
-                    kwargs["json"] = data
-                else:
-                    # Raise error for unsupported data types
-                    raise TypeError(f"Unsupported data type for custom action payload: {type(data).__name__}")
-            else:
-                # Explicitly set json=None if no data is provided
-                kwargs["json"] = None
+            request_body_kwargs = self._prepare_request_body_kwargs(data, files, content_type)
+            final_kwargs.update(request_body_kwargs)
 
         # Make the API request
-        response = getattr(self.client, method.lower())(endpoint, **kwargs)
+        response = getattr(self.client, method.lower())(endpoint, **final_kwargs)
 
         # Handle the response
         try:
