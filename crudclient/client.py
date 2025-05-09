@@ -76,6 +76,7 @@ class Client:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -86,8 +87,11 @@ class Client:
         if files is not None and not isinstance(files, dict):
             raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
 
+        if params is not None and not isinstance(params, dict):
+            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+
         try:
-            raw_response = self.http_client.request_raw("POST", endpoint, data=data, json=json, files=files)
+            raw_response = self.http_client.request_raw("POST", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
             kwargs = {}
@@ -97,6 +101,8 @@ class Client:
                 kwargs["json"] = json
             if files:
                 kwargs["files"] = files
+            if params:
+                kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
             raw_response = self._maybe_retry_after_403("POST", url, kwargs, e.response)
             if raw_response.status_code == 403:

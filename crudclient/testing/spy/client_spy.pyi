@@ -16,6 +16,7 @@ from crudclient.types import RawResponseSimple
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
+
 class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and conforms to Client interface
     """
     A **Test Spy** specifically for the `crudclient.client.Client` interface.
@@ -63,6 +64,7 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Spy on a POST request.
@@ -72,6 +74,7 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
             data: Form data
             json: JSON data
             files: Files to upload
+            params: Query parameters
 
         Returns:
             API response (typically mocked or from a wrapped client)

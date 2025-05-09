@@ -19,6 +19,7 @@ from ..exceptions import APIError, DataValidationError, NetworkError, NotFoundEr
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
+
 def list_operation(  # Note: self type added below
     self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[JSONList, List[T], ApiResponse]:
@@ -40,13 +41,16 @@ def list_operation(  # Note: self type added below
     """
     ...
 
-def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
+
+# Note: self type added below
+def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[T, JSONDict]:
     """
     Create a new resource.
 
     Args:
         data: The data for the new resource.
         parent_id: Optional ID of the parent resource for nested resources.
+        params: Optional query parameters.
 
     Returns:
         Union[T, JSONDict]: The created resource.
@@ -59,6 +63,7 @@ def create_operation(self: "Crud", data: Union[JSONDict, T], parent_id: Optional
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
@@ -78,6 +83,7 @@ def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = No
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 def update_operation(  # Note: self type added below
     self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
@@ -102,6 +108,7 @@ def update_operation(  # Note: self type added below
     """
     ...
 
+
 def partial_update_operation(  # Note: self type added below
     self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
 ) -> Union[T, JSONDict]:
@@ -125,6 +132,7 @@ def partial_update_operation(  # Note: self type added below
     """
     ...
 
+
 def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None:
     """
     Delete a specific resource.
@@ -140,6 +148,7 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 def custom_action_operation(
     self: "Crud",
@@ -173,6 +182,7 @@ def custom_action_operation(
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 # Aliases for the Crud class methods
 list = list_operation

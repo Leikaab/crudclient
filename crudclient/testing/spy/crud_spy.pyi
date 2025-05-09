@@ -18,6 +18,7 @@ from crudclient.types import JSONDict, JSONList
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
+
 class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase and conforms to CrudBase interface
     """
     A **Test Spy** specifically for the `crudclient.crud.base.Crud` interface.
@@ -74,13 +75,14 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> T:
+    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> T:
         """
         Spy on a create operation.
 
         Args:
             data: Data for the new resource.
             parent_id: Optional parent resource ID.
+            params: Optional query parameters.
 
         Returns:
             The created resource (typically mocked or from a wrapped CrudBase).

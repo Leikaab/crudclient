@@ -134,3 +134,31 @@ def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud):
     with pytest.raises(ValueError, match="Create action not allowed"):
         base_test_crud.create(data=SAMPLE_PAYLOAD)
     base_test_crud.allowed_actions = original_actions  # Restore
+
+
+def test_create_operation_with_params(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+    """
+    GIVEN a TestCrud instance, a mocked client, and query parameters
+    WHEN the create operation is called with params
+    THEN it should pass the params to the client's post method.
+    """
+    # GIVEN
+    mock_client.post.return_value = SAMPLE_PAYLOAD
+    query_params = {"filter": "active", "sort": "name"}
+
+    # WHEN - Using create method with params parameter
+    # The type error is expected because the stub file hasn't been updated,
+    # but the implementation supports the params parameter
+    result = base_test_crud.create(data=SAMPLE_MODEL, params=query_params)
+
+    # THEN
+    translate_mock_calls_for_verifier(mock_client)
+    Verifier.verify_called_once_with(
+        mock_client,
+        "post",
+        "test-resources",
+        json=SAMPLE_PAYLOAD,
+        params=query_params
+    )
+    assert result == SAMPLE_MODEL
+    assert isinstance(result, BaseTestModel)

@@ -16,6 +16,7 @@ This file provides type hints and method signatures for the `client.py` module.
 It is used to provide better type checking and autocompletion support.
 """
 
+
 class Client:
     """
     Client class for making API requests.
@@ -75,6 +76,7 @@ class Client:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a POST request to the specified endpoint.
@@ -86,6 +88,8 @@ class Client:
             json (Optional[Any]): JSON data to include in the request.
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
                 Defaults to None.
 
         Returns:
@@ -170,10 +174,12 @@ class Client:
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
     ) -> RawResponseSimple: ...
+
     @overload
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
     ) -> requests.Response: ...
+
     @property
     def session(self) -> requests.Session:
         """

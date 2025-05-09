@@ -23,7 +23,7 @@ def list_operation(self, parent_id: Optional[str] = None, params: Optional[JSOND
     return self._validate_list_return(response)
 
 
-def create_operation(self, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
+def create_operation(self, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[T, JSONDict]:
     if "create" not in self.allowed_actions:
         raise ValueError(f"Create action not allowed for {self.__class__.__name__}")
 
@@ -33,7 +33,7 @@ def create_operation(self, data: Union[JSONDict, T], parent_id: Optional[str] = 
 
         # Make the API request
         endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
-        response = self.client.post(endpoint, json=converted_data)
+        response = self.client.post(endpoint, json=converted_data, params=params)
 
         # Convert the response to a model instance
         return self._convert_to_model(response)
