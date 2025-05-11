@@ -46,7 +46,6 @@ HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "
 CrudInstance: TypeAlias = "Crud[Any]"
 CrudType: TypeAlias = Type[CrudInstance]
 
-
 class Crud(Generic[T]):
     """
     Base class for CRUD operations on API resources, supporting both top-level and nested resources.
@@ -100,7 +99,6 @@ class Crud(Generic[T]):
     def update(self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
     def partial_update(self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]: ...
     def destroy(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None: ...
-
     def custom_action(
         self: "Crud",
         action: str,

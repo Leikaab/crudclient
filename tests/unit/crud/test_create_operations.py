@@ -153,12 +153,6 @@ def test_create_operation_with_params(base_test_crud: BaseTestCrud, mock_client:
 
     # THEN
     translate_mock_calls_for_verifier(mock_client)
-    Verifier.verify_called_once_with(
-        mock_client,
-        "post",
-        "test-resources",
-        json=SAMPLE_PAYLOAD,
-        params=query_params
-    )
+    Verifier.verify_called_once_with(mock_client, "post", "test-resources", json=SAMPLE_PAYLOAD, params=query_params)
     assert result == SAMPLE_MODEL
     assert isinstance(result, BaseTestModel)

@@ -16,7 +16,6 @@ from crudclient.types import RawResponseSimple
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
-
 class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and conforms to Client interface
     """
     A **Test Spy** specifically for the `crudclient.client.Client` interface.
