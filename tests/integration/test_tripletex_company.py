@@ -23,6 +23,7 @@ def generate_unique_name():
     return f"Test Company {uuid.uuid4()}"
 
 
+@pytest.mark.no_parallel
 def test_update_company_minimal(api):
     """
     Test updating a company with minimal data.
