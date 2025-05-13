@@ -70,12 +70,7 @@ def test_custom_action_with_files(base_test_crud: BaseTestCrud, mock_client: Mag
     files = {"file": ("filename.txt", b"file content")}
 
     # WHEN - This would previously fail with AttributeError
-    result = base_test_crud.custom_action(
-        action="upload",
-        method="post",
-        data=TEST_DATA,
-        files=files
-    )
+    result = base_test_crud.custom_action(action="upload", method="post", data=TEST_DATA, files=files)
 
     # THEN - If we get here without exception, the fix is working
     assert result is not None
@@ -91,12 +86,7 @@ def test_custom_action_with_content_type(base_test_crud: BaseTestCrud, mock_clie
     mock_client.post.return_value = {"id": 1, "name": "Test"}
 
     # WHEN - This would previously fail with AttributeError
-    result = base_test_crud.custom_action(
-        action="form-submit",
-        method="post",
-        data=TEST_DATA,
-        content_type="application/x-www-form-urlencoded"
-    )
+    result = base_test_crud.custom_action(action="form-submit", method="post", data=TEST_DATA, content_type="application/x-www-form-urlencoded")
 
     # THEN - If we get here without exception, the fix is working
     assert result is not None

@@ -72,7 +72,6 @@ ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
 
-
 class Crud(Generic[T]):
     """
     Base class for CRUD operations on API resources, supporting both top-level and nested resources.
@@ -310,7 +309,13 @@ class Crud(Generic[T]):
         """
         ...
 
-    def update(self, data: Optional[Union[JSONDict, T]], resource_id: Optional[str] = None, parent_id: Optional[str] = None, update_mode: Optional[str] = None) -> Union[T, JSONDict]:
+    def update(
+        self,
+        data: Optional[Union[JSONDict, T]],
+        resource_id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        update_mode: Optional[str] = None,
+    ) -> Union[T, JSONDict]:
         """
         Update a specific resource.
 

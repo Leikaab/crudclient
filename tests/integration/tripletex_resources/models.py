@@ -105,6 +105,7 @@ class Address(BaseModel):
     """
     Represents an address in the Tripletex API.
     """
+
     id: Optional[int] = None
     version: Optional[int] = None
     changes: Optional[list] = None
@@ -121,6 +122,7 @@ class Company(BaseModel):
     """
     Represents a company in the Tripletex API.
     """
+
     id: Optional[int] = None
     version: Optional[int] = None
     changes: Optional[list] = None

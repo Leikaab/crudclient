@@ -5,7 +5,6 @@ from pydantic import ValidationError as PydanticValidationError
 from requests import PreparedRequest
 from requests import exceptions as requests_exceptions  # Added PreparedRequest
 
-
 class CrudClientError(Exception):
     """Base exception for all crudclient errors.
 
@@ -19,7 +18,6 @@ class CrudClientError(Exception):
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
 
-
 class ConfigurationError(CrudClientError):
     """Error related to client configuration or initialization.
 
@@ -28,7 +26,6 @@ class ConfigurationError(CrudClientError):
     """
 
     pass
-
 
 class ClientInitializationError(ConfigurationError):
     """Error specifically during the initialization phase of the HTTP client.
@@ -40,12 +37,10 @@ class ClientInitializationError(ConfigurationError):
 
     pass
 
-
 class InvalidClientError(ConfigurationError):
     """Error raised when an operation requires a client but none is available or initialized."""
 
     pass
-
 
 class AuthenticationError(CrudClientError):
     """Error related to authentication or authorization.
@@ -63,7 +58,6 @@ class AuthenticationError(CrudClientError):
 
     def __init__(self, message: str, response: Optional[requests.Response] = None) -> None: ...
     def __repr__(self) -> str: ...
-
 
 class NetworkError(CrudClientError):
     """Error related to network connectivity during an HTTP request.
@@ -90,7 +84,6 @@ class NetworkError(CrudClientError):
     ) -> None: ...
     def __repr__(self) -> str: ...
 
-
 class APIError(CrudClientError):
     """Error related to the API response itself (e.g., HTTP status codes >= 400).
 
@@ -112,12 +105,10 @@ class APIError(CrudClientError):
 
 # Specific HTTP Status Code Errors
 
-
 class BadRequestError(APIError):
     """API error corresponding to HTTP status code 400 (Bad Request)."""
 
     pass
-
 
 class ClientAuthenticationError(APIError, AuthenticationError):
     """API error corresponding to HTTP status code 401 (Unauthorized).
@@ -127,18 +118,15 @@ class ClientAuthenticationError(APIError, AuthenticationError):
 
     pass
 
-
 class ForbiddenError(APIError):
     """API error corresponding to HTTP status code 403 (Forbidden)."""
 
     pass
 
-
 class NotFoundError(APIError):
     """API error corresponding to HTTP status code 404 (Not Found)."""
 
     pass
-
 
 class MultipleResourcesFoundError(NotFoundError):
     """Raised when a search expecting one result finds multiple.
@@ -149,30 +137,25 @@ class MultipleResourcesFoundError(NotFoundError):
 
     pass
 
-
 class ConflictError(APIError):
     """API error corresponding to HTTP status code 409 (Conflict)."""
 
     pass
-
 
 class UnprocessableEntityError(APIError):
     """API error corresponding to HTTP status code 422 (Unprocessable Entity)."""
 
     pass
 
-
 class RateLimitError(APIError):
     """API error corresponding to HTTP status code 429 (Too Many Requests)."""
 
     pass
 
-
 class InternalServerError(APIError):
     """API error corresponding to HTTP status code 500 (Internal Server Error)."""
 
     pass
-
 
 class ServiceUnavailableError(APIError):
     """API error corresponding to HTTP status code 503 (Service Unavailable)."""
@@ -180,7 +163,6 @@ class ServiceUnavailableError(APIError):
     pass
 
 # Other Error Types
-
 
 class DataValidationError(CrudClientError):
     """Error related to data validation, often wrapping Pydantic errors.
@@ -206,7 +188,6 @@ class DataValidationError(CrudClientError):
     ) -> None: ...
     def __repr__(self) -> str: ...
 
-
 class ModelConversionError(CrudClientError):
     """Error during the conversion of response data to a Pydantic model.
 
@@ -218,7 +199,6 @@ class ModelConversionError(CrudClientError):
 
     pass
 
-
 class DeprecatedEndpointError(CrudClientError):
     """Raised when attempting to use a deprecated endpoint.
 
@@ -227,7 +207,6 @@ class DeprecatedEndpointError(CrudClientError):
     """
 
     pass
-
 
 class ResponseParsingError(CrudClientError):
     """Error encountered while parsing or decoding an HTTP response body.

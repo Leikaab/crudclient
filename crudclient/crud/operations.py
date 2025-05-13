@@ -71,7 +71,7 @@ def update_operation(
     resource_id: Optional[str] = None,
     data: Optional[Union[JSONDict, T]] = None,
     parent_id: Optional[str] = None,
-    update_mode: Optional[str] = None
+    update_mode: Optional[str] = None,
 ) -> Union[T, JSONDict]:
     if "update" not in self.allowed_actions:
         raise ValueError(f"Update action not allowed for {self.__class__.__name__}")
