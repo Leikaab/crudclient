@@ -11,7 +11,7 @@
 
     *   **If any check fails:** You MUST fix the code immediately, re-apply the changes, and re-run *all* checks until they pass.
 3.  **Architecture & Conventions (`ARCHITECTURE.md`, `CONTRIBUTING.md`):**
-    *   **`.pyi` Files & Comment Handling:** Place public API type hints and detailed docstrings **exclusively** in the corresponding `.pyi` stub file. Keep implementation (`.py`) files focused purely on logic. **Remove** explanatory comments (single or multi-line) that describe implementation steps (e.g., `# Make the API request`, `# Assuming data validation...`). **Keep** comments essential for tooling, such as `# type: ignore[...]`.
+    *   **Type Annotations & Comment Handling:** Include type hints and detailed docstrings directly in the `.py` files. **Remove** explanatory comments (single or multi-line) that describe implementation steps (e.g., `# Make the API request`, `# Assuming data validation...`). **Keep** comments essential for tooling, such as `# type: ignore[...]`.
     *   **Single Responsibility Principle (SRP):** Ensure classes and functions have a single, well-defined purpose.
     *   **Pydantic:** Use Pydantic for data modeling, serialization, and validation where appropriate.
     *   **File Structure:** Organize code logically. Generally, limit files to a single class definition.

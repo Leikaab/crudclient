@@ -9,22 +9,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: check-docstrings
-        name: Check docstrings are only in .pyi files
-        stages: [pre-commit]
-        language: system
-        entry: python hooks/check_docstrings.py
-        types: [python]
-        files: ^crudclient/.*\.py$
-
-      - id: check-stub-files
-        name: Check .py files have matching .pyi files
-        stages: [pre-commit]
-        language: system
-        entry: python hooks/check_stub_files.py
-        types: [python]
-        files: ^crudclient/.*\.py$
-
       - id: check-file-length
         name: Check .py files are ≤ 300 lines
         stages: [pre-commit]
@@ -51,7 +35,7 @@ repos:
         stages: [pre-commit]
         language: system
         entry: poetry run black .
-        types: [python, pyi]
+        types: [python]
 
       - id: flake8
         name: flake8
@@ -66,7 +50,7 @@ repos:
         stages: [pre-commit]
         language: system
         entry: poetry run mypy
-        types: [python, pyi]
+        types: [python]
         require_serial: true
 
       - id: pytest

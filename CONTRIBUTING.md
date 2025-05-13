@@ -119,7 +119,7 @@ Configuration for these tools can be found in `pyproject.toml` and `.flake8`.
 
 ### Type Checking
 
-- **Mypy:** For static type checking. Configuration is in `mypy.ini`. Type hints should be added for all code, primarily within `.pyi` stub files.
+- **Mypy:** For static type checking. Configuration is in `mypy.ini`. Type hints should be added directly within the `.py` files.
 
 ## Authentication Strategies
 
@@ -153,7 +153,7 @@ pre-commit install --hook-type pre-push  # Installs pre-push hooks
     -   Code Formatting (`autoflake`, `isort`, `black`).
     -   Linting (`flake8`).
     -   Static Type Checking (`mypy`).
-    -   Custom Project Checks (`check-docstrings`, `check-stub-files`, `check-file-length`).
+    -   Custom Project Checks (`check-docstrings`, `check-file-length`).
     -   Unit tests (`pytest`) are run *only on changed files* relevant to the commit for faster feedback.
 -   **On `git push`:**
     -   Full unit test suite (`pytest tests/unit`) with 100% code coverage enforcement (`--cov`).
