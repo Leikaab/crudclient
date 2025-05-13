@@ -94,6 +94,10 @@ class NotFoundError(APIError):
     pass
 
 
+class MultipleResourcesFoundError(NotFoundError):
+    pass
+
+
 class ConflictError(APIError):
     pass
 
@@ -135,6 +139,10 @@ class DataValidationError(CrudClientError):
 
 
 class ModelConversionError(CrudClientError):
+    pass
+
+
+class DeprecatedEndpointError(CrudClientError):
     pass
 
 

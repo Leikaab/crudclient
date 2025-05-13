@@ -1,7 +1,7 @@
 from crudclient.api import API
 from crudclient.client import Client
 
-from .resources import TripletexCountries, TripletexSuppliers
+from .resources import TripletexCompany, TripletexCountries, TripletexSuppliers
 
 
 class TripletexClient(Client):
@@ -35,3 +35,4 @@ class TripletexAPI(API):
         assert self.client is not None, "Client is required!"
         self.countries = TripletexCountries(self.client)
         self.suppliers = TripletexSuppliers(self.client)
+        self.company = TripletexCompany(self.client)

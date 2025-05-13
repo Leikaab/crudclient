@@ -33,6 +33,7 @@ class Crud(Generic[T]):
     _api_response_model: Optional[Type[ApiResponse]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
+    _update_mode: str = "standard"  # Default update mode: "standard" or "no_resource_id"
     allowed_actions: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
 
     def __init__(self, client: Client, parent: Optional["Crud"] = None):
@@ -56,6 +57,7 @@ class Crud(Generic[T]):
         _validate_path_segments,
     )
     from .operations import (
+        _prepare_request_body_kwargs,
         create,
         custom_action,
         destroy,

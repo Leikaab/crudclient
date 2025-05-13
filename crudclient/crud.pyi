@@ -53,7 +53,7 @@ from typing import (
 from pydantic import ValidationError as PydanticValidationError
 
 from .client import Client
-from .exceptions import ModelConversionError, ValidationError
+from .exceptions import DataValidationError, ModelConversionError
 from .models import ApiResponse
 from .response_strategies import (
     DefaultResponseModelStrategy,
@@ -71,6 +71,7 @@ CrudType: TypeAlias = Type[CrudInstance]
 ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
+
 
 class Crud(Generic[T]):
     """
@@ -309,13 +310,17 @@ class Crud(Generic[T]):
         """
         ...
 
-    def update(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
+    def update(self, data: Optional[Union[JSONDict, T]], resource_id: Optional[str] = None, parent_id: Optional[str] = None, update_mode: Optional[str] = None) -> Union[T, JSONDict]:
         """
         Update a specific resource.
 
-        :param resource_id: str The ID of the resource to update.
-        :param data: Union[JSONDict, T] The updated data for the resource.
+        :param data: Optional[Union[JSONDict, T]] The updated data for the resource.
+        :param resource_id: Optional[str] The ID of the resource to update. Can be None for non-standard APIs.
         :param parent_id: Optional[str] ID of the parent resource for nested resources.
+        :param update_mode: Optional[str] The update mode to use. If None, uses the class's _update_mode.
+            Supported modes:
+            - "standard": Standard RESTful update (default)
+            - "no_resource_id": Update without resource ID in URL (e.g., Tripletex company)
         :return: Union[T, JSONDict] The updated resource.
         :raises ValidationError: If the input data fails validation.
         :raises ModelConversionError: If the response data fails conversion.

@@ -19,6 +19,7 @@ from ..exceptions import APIError, DataValidationError, NetworkError, NotFoundEr
 from ..models import ApiResponse
 from ..types import JSONDict, JSONList, RawResponse
 
+
 def list_operation(  # Note: self type added below
     self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[JSONList, List[T], ApiResponse]:
@@ -41,6 +42,8 @@ def list_operation(  # Note: self type added below
     ...
 
 # Note: self type added below
+
+
 def create_operation(
     self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[T, JSONDict]:
@@ -64,6 +67,7 @@ def create_operation(
     """
     ...
 
+
 def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:  # Note: self type added below
     """
     Retrieve a specific resource.
@@ -83,16 +87,25 @@ def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = No
     """
     ...
 
+
 def update_operation(  # Note: self type added below
-    self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
+    self: "Crud",
+    resource_id: Optional[str] = None,
+    data: Optional[Union[JSONDict, T]] = None,
+    parent_id: Optional[str] = None,
+    update_mode: Optional[str] = None
 ) -> Union[T, JSONDict]:
     """
-    Update a specific resource.
+    Update a resource.
 
     Args:
-        resource_id: The ID of the resource to update.
-        data: The updated data for the resource.
-        parent_id: Optional ID of the parent resource for nested resources.
+        resource_id: The ID of the resource to update. Can be None for non-standard APIs.
+        data: The data to update the resource with.
+        parent_id: Optional parent ID if this is a nested resource.
+        update_mode: The update mode to use. If None, uses the class's _update_mode.
+            Supported modes:
+            - "standard": Standard RESTful update (default)
+            - "no_resource_id": Update without resource ID in URL (e.g., Tripletex company)
 
     Returns:
         Union[T, JSONDict]: The updated resource.
@@ -105,6 +118,7 @@ def update_operation(  # Note: self type added below
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 def partial_update_operation(  # Note: self type added below
     self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None
@@ -129,6 +143,7 @@ def partial_update_operation(  # Note: self type added below
     """
     ...
 
+
 def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None:
     """
     Delete a specific resource.
@@ -144,6 +159,7 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 def _prepare_request_body_kwargs(
     self: "Crud",
@@ -167,6 +183,7 @@ def _prepare_request_body_kwargs(
         ValueError: If an unsupported content type is provided.
     """
     ...
+
 
 def custom_action_operation(
     self: "Crud",
@@ -206,6 +223,7 @@ def custom_action_operation(
         APIError: For other API-related errors (e.g., 4xx/5xx responses).
     """
     ...
+
 
 # Aliases for the Crud class methods
 list = list_operation

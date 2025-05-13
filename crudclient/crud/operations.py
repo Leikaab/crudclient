@@ -66,17 +66,41 @@ def read_operation(self, resource_id: str, parent_id: Optional[str] = None) -> U
     return self._convert_to_model(response)
 
 
-def update_operation(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
+def update_operation(
+    self,
+    resource_id: Optional[str] = None,
+    data: Optional[Union[JSONDict, T]] = None,
+    parent_id: Optional[str] = None,
+    update_mode: Optional[str] = None
+) -> Union[T, JSONDict]:
     if "update" not in self.allowed_actions:
         raise ValueError(f"Update action not allowed for {self.__class__.__name__}")
+
+    # Determine the update mode to use
+    effective_mode = update_mode or getattr(self, "_update_mode", "standard")
 
     try:
         # Validate and convert input data
         converted_data = self._dump_data(data)
 
-        # Make the API request
-        endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
-        response = self.client.put(endpoint, json=converted_data)
+        # Make the API request based on the update mode
+        if effective_mode == "no_resource_id":
+            # For APIs that don't use resource_id in the URL (e.g., Tripletex company)
+            endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
+            # Skip data validation and conversion for non-standard APIs
+            # Use the original data directly, similar to the working implementation
+            if isinstance(data, dict):
+                json_data = data
+            else:
+                # If it's not a dict, we still need to convert it
+                json_data = converted_data
+            response = self.client.put(endpoint, json=json_data)
+        else:
+            # Standard RESTful update
+            if resource_id is None:
+                raise ValueError("resource_id is required for standard update mode")
+            endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
+            response = self.client.put(endpoint, json=converted_data)
 
         # Convert the response to a model instance
         return self._convert_to_model(response)

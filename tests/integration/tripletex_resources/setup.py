@@ -10,13 +10,15 @@ from .client import TripletexAPI, TripletexClient
 from .config import TripletexConfig, TripletexTestConfig
 from .crud import TripletexCrud
 from .models import (
+    Company,
+    CompanyResponse,
     Country,
     CountryResponse,
     Supplier,
     SupplierResponse,
     TokenSessionResponse,
 )
-from .resources import TripletexCountries, TripletexSuppliers
+from .resources import TripletexCompany, TripletexCountries, TripletexSuppliers
 
 T = TypeVar("T", bound=ModelDumpable)
 
@@ -34,8 +36,11 @@ __all__ = [
     "TripletexConfig",
     "TripletexTestConfig",
     "TripletexCrud",
+    "TripletexCompany",
     "TripletexCountries",
     "TripletexSuppliers",
+    "Company",
+    "CompanyResponse",
     "Country",
     "CountryResponse",
     "Supplier",
