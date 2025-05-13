@@ -72,6 +72,7 @@ ApiResponseInstance: TypeAlias = "ApiResponse[Any]"
 ApiResponseType: TypeAlias = Type[ApiResponseInstance]
 PathArgs: TypeAlias = str | int | None
 
+
 class Crud(Generic[T]):
     """
     Base class for CRUD operations on API resources, supporting both top-level and nested resources.
@@ -362,6 +363,8 @@ class Crud(Generic[T]):
         parent_id: Optional[str] = None,
         data: Optional[Union[JSONDict, T]] = None,
         params: Optional[JSONDict] = None,
+        files: Optional[JSONDict] = None,
+        content_type: Optional[str] = None,
     ) -> Union[T, JSONDict, List[JSONDict]]:
         """
         Perform a custom action on the resource.
