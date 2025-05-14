@@ -49,7 +49,7 @@ repos:
         name: mypy
         stages: [pre-commit]
         language: system
-        entry: poetry run mypy
+        entry: poetry run mypy .
         types: [python]
         require_serial: true
 
