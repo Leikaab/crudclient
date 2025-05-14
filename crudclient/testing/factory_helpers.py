@@ -15,6 +15,18 @@ from crudclient.testing.simple_mock import SimpleMockClient
 
 
 def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
+    """
+    Create API response patterns based on the specified API type and configuration.
+
+    Args:
+        api_type: The type of API to create patterns for ('rest', 'oauth').
+        **kwargs: Additional configuration parameters specific to the API type.
+            For 'rest': 'api_resources' dictionary with resource configurations.
+            For 'oauth': 'oauth_config' dictionary with OAuth flow configuration.
+
+    Returns:
+        A list of API pattern dictionaries that can be used to configure mock responses.
+    """
     patterns = []
 
     if api_type.lower() == "rest":
@@ -79,6 +91,17 @@ def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
 
 
 def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> None:
+    """
+    Add common error responses to a MockClient instance.
+
+    Configures the client with predefined error responses for validation errors,
+    rate limiting, and authentication failures based on the provided configurations.
+
+    Args:
+        client: The MockClient instance to configure.
+        error_configs: Dictionary containing error configuration settings.
+            Supported keys: 'validation', 'rate_limit', 'auth'.
+    """
     # Add validation error response
     if "validation" in error_configs:
         config = error_configs["validation"]
@@ -139,6 +162,16 @@ def _add_error_responses(client: MockClient, error_configs: Dict[str, Any]) -> N
 
 
 def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyAuthMock, CustomAuthMock, OAuthMock], config: Dict[str, Any]) -> None:
+    """
+    Configure an authentication mock with various settings.
+
+    Sets up authentication behavior including failure scenarios, token expiration,
+    refresh tokens, MFA requirements, and custom headers/parameters.
+
+    Args:
+        auth_mock: The authentication mock instance to configure.
+        config: Dictionary containing configuration settings for the auth mock.
+    """
     # Configure failure behavior
     if config.get("should_fail", False):
         auth_mock.with_failure(
@@ -183,6 +216,17 @@ def _configure_auth_mock(auth_mock: Union[BasicAuthMock, BearerAuthMock, ApiKeyA
 
 
 def _add_error_responses_to_simple_mock(client: SimpleMockClient, error_configs: Dict[str, Any]) -> None:
+    """
+    Add common error responses to a SimpleMockClient instance.
+
+    Configures the client with predefined error responses for validation errors,
+    rate limiting, and authentication failures based on the provided configurations.
+
+    Args:
+        client: The SimpleMockClient instance to configure.
+        error_configs: Dictionary containing error configuration settings.
+            Supported keys: 'validation', 'rate_limit', 'auth'.
+    """
     # Add validation error response
     if "validation" in error_configs:
         config = error_configs["validation"]
