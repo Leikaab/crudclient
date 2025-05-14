@@ -1,5 +1,12 @@
+"""
+Handles HTTP response processing and validation.
+
+This module provides functionality for processing HTTP responses based on their content type
+and validating response status. It supports JSON, binary, and text responses.
+"""
+
 import logging
-from typing import Union
+from typing import Any, Dict, List, Union, cast
 
 import requests
 from requests.exceptions import JSONDecodeError
@@ -11,14 +18,44 @@ logger = logging.getLogger(__name__)
 
 
 class ResponseHandler:
+    """
+    Handles HTTP response processing and validation.
+
+    This class is responsible for processing HTTP responses based on their content type
+    and validating response status. It supports JSON, binary, and text responses.
+
+    Methods:
+        handle_response: Processes an HTTP response and returns the parsed data.
+        parse_json_response: Parses a JSON response.
+        parse_binary_response: Parses a binary response.
+        parse_text_response: Parses a text response.
+    """
 
     def handle_response(self, response: requests.Response) -> RawResponseSimple:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
+        """
+        Process an HTTP response and return the parsed data.
+
+        This method checks if the response is successful and then parses the response
+        based on its content type. It delegates to specific parsing methods based on
+        the content type.
+
+        Args:
+            response (requests.Response): The HTTP response to process.
+
+        Returns:
+            RawResponseSimple: The parsed response data, which could be a JSON dictionary,
+                               binary content, or text.
+
+        Raises:
+            requests.HTTPError: If the response status code indicates an error.
+            TypeError: If response is not a requests.Response object.
+
+        Note:
+            This method does not handle error responses. It assumes that error handling
+            is done by the caller before this method is called.
+        """
+        self._validate_response_object(response)
+
         if not response.ok:
             logger.debug(f"Response not OK: {response.status_code}")
             response.raise_for_status()
@@ -37,16 +74,34 @@ class ResponseHandler:
         else:
             return self.parse_text_response(response)
 
-    def parse_json_response(self, response: requests.Response) -> Union[dict, list, str]:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
+    def parse_json_response(self, response: requests.Response) -> Union[Dict[str, Any], List[Any], str]:
+        """
+        Parse a JSON response.
+
+        Args:
+            response (requests.Response): The HTTP response with JSON content.
+
+        Returns:
+            Union[Dict[str, Any], List[Any], str]: The parsed JSON data.
+
+        Raises:
+            TypeError: If response is not a requests.Response object.
+            ResponseParsingError: If the response cannot be parsed as JSON.
+        """
+        self._validate_response_object(response)
+
         logger.debug("Parsing JSON response")
         try:
-            return response.json()
+            # Parse the JSON response
+            result = response.json()
+
+            # Return the result with appropriate type
+            if isinstance(result, dict):
+                return cast(Dict[str, Any], result)
+            elif isinstance(result, list):
+                return result  # No need for cast, mypy can infer this
+            else:
+                return cast(str, result)
         except JSONDecodeError as e:
             logger.error(
                 "Failed to parse JSON response despite 'application/json' Content-Type. " "Status: %s, URL: %s, Error: %s",
@@ -62,21 +117,53 @@ class ResponseHandler:
             ) from e
 
     def parse_binary_response(self, response: requests.Response) -> bytes:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
+        """
+        Parse a binary response.
+
+        Args:
+            response (requests.Response): The HTTP response with binary content.
+
+        Returns:
+            bytes: The binary content of the response.
+
+        Raises:
+            TypeError: If response is not a requests.Response object.
+        """
+        self._validate_response_object(response)
+
         logger.debug("Parsing binary response")
         return response.content
 
     def parse_text_response(self, response: requests.Response) -> str:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
-            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
+        """
+        Parse a text response.
+
+        Args:
+            response (requests.Response): The HTTP response with text content.
+
+        Returns:
+            str: The text content of the response.
+
+        Raises:
+            TypeError: If response is not a requests.Response object.
+        """
+        self._validate_response_object(response)
+
         logger.debug("Parsing text response")
         return response.text
+
+    def _validate_response_object(self, response: Any) -> None:
+        """
+        Validate that the response is a valid Response object or a mock.
+
+        Args:
+            response: The response object to validate.
+
+        Raises:
+            TypeError: If response is not a valid Response object or mock.
+        """
+        is_response = isinstance(response, requests.Response)
+        is_mock = hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", [])
+
+        if not is_response and not is_mock:
+            raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
