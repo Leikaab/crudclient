@@ -1,5 +1,12 @@
+"""
+Client module for making API requests.
+
+This module provides the Client class for making API requests to RESTful services.
+It handles request preparation, authentication, response handling, and error handling.
+"""
+
 import logging
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
 
 import requests
 
@@ -12,22 +19,44 @@ log = logging.getLogger(__name__)
 
 
 class Client:
+    """
+    Client class for making API requests.
+
+    This class delegates HTTP operations to the HttpClient class, which handles
+    request preparation, authentication, response handling, and error handling.
+
+    Attributes:
+        config (ClientConfig): Configuration object for the client.
+        http_client (HttpClient): The HTTP client used for making requests.
+        base_url (str): The base URL for the API.
+    """
+
+    config: ClientConfig
+    http_client: HttpClient
+    base_url: str
 
     def __init__(self, config: Union[ClientConfig, Dict[str, Any]]) -> None:
-        log.info("Initializing Client and processing configuration...")
-        if not isinstance(config, (ClientConfig, dict)):
-            message = f"Invalid config type provided: expected ClientConfig or dict, got {type(config).__name__}."
-            log.error(message)
-            raise ConfigurationError(message)
-        if isinstance(config, dict):
-            try:
-                config = ClientConfig(**config)
-            except (TypeError, ValueError) as e:  # Catch ValueError too for Pydantic validation
-                log.error("Configuration validation failed when creating ClientConfig from dict: %s", e, exc_info=True)
-                raise ConfigurationError(f"Invalid configuration dictionary provided: {e}") from e
+        """
+        Initialize the Client.
 
-        assert isinstance(config, ClientConfig)
-        self.config = config
+        Logging behavior (e.g., request/response body logging) can be controlled
+        via the `logging` section of the configuration. By default, logging is
+        disabled using a `NullHandler`. See `docs/logging.md` for details.
+
+        Args:
+            config (Union[ClientConfig, Dict[str, Any]]): Configuration for the client.
+                Can be a ClientConfig object or a dictionary containing parameters
+                like `base_url`, `auth`, `timeout`, and logging settings
+                (`log_request_body`, `log_response_body`).
+
+        Raises:
+            ConfigurationError: If the provided config is invalid (wrong type, missing fields, invalid values).
+        """
+        log.info("Initializing Client and processing configuration...")
+
+        # Use a helper function to process the config
+        # This avoids mypy unreachable code warnings
+        self.config = self._process_config(config)
 
         try:
             self.base_url = str(self.config.base_url)  # Ensure it's a string after validation
@@ -46,9 +75,29 @@ class Client:
         self._session = self.http_client.session_manager.session
 
     def _setup_auth(self) -> None:
+        """
+        Set up authentication for the session.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's session_manager.
+        """
         self.http_client.session_manager.refresh_auth()
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
+        """
+        Make a GET request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
@@ -78,6 +127,26 @@ class Client:
         files: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
+        """
+        Make a POST request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
@@ -117,6 +186,24 @@ class Client:
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
+        """
+        Make a PUT request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
@@ -145,6 +232,19 @@ class Client:
         return self._handle_response(raw_response)
 
     def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
+        """
+        Make a DELETE request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            **kwargs: Additional keyword arguments to pass to the request.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
@@ -169,6 +269,24 @@ class Client:
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
+        """
+        Make a PATCH request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
@@ -196,6 +314,18 @@ class Client:
 
         return self._handle_response(raw_response)
 
+    @overload
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
+    ) -> RawResponseSimple:
+        pass
+
+    @overload
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
+    ) -> requests.Response:
+        pass
+
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any
     ) -> Union[RawResponseSimple, requests.Response]:
@@ -210,14 +340,33 @@ class Client:
 
         if not isinstance(handle_response, bool):
             raise TypeError(f"handle_response must be a boolean, got {type(handle_response).__name__}")
-        return self.http_client._request(method, endpoint, url, handle_response, **kwargs)
+        # Use the correct return type based on handle_response
+        if handle_response:
+            return self.http_client._request(method, endpoint, url, True, **kwargs)
+        else:
+            return self.http_client._request(method, endpoint, url, False, **kwargs)
 
     def close(self) -> None:
+        """
+        Close the HTTP client and clean up resources.
+
+        This method should be called when the client is no longer needed
+        to ensure proper cleanup of resources.
+        """
         self.http_client.close()
         log.debug("Client closed.")
 
     @property
     def session(self) -> requests.Session:
+        """
+        Get the HTTP session.
+
+        This property is provided for backward compatibility with existing tests.
+        It returns the session from the HTTP client's session manager.
+
+        Returns:
+            requests.Session: The HTTP session.
+        """
         if not hasattr(self._session, "is_closed"):
             setattr(self._session.__class__, "is_closed", property(lambda s: getattr(self.http_client.session_manager, "is_closed", False)))
         return self._session
@@ -225,6 +374,22 @@ class Client:
     def _prepare_data(
         self, data: Optional[Dict[str, Any]] = None, json: Optional[Any] = None, files: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, str], Dict[str, Any]]:
+        """
+        Prepare request data based on the provided parameters.
+
+        This method is provided for backward compatibility with existing tests.
+        It returns headers and request kwargs instead of modifying session state directly.
+
+        Args:
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+            json (Optional[Any]): JSON data to include in the request.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+
+        Returns:
+            Tuple[Dict[str, str], Dict[str, Any]]: A tuple containing:
+                - Headers dictionary with the appropriate content-type.
+                - A dictionary containing the prepared request data.
+        """
         if data is not None and not isinstance(data, dict):
             raise TypeError(f"data must be a dictionary or None, got {type(data).__name__}")
 
@@ -248,6 +413,21 @@ class Client:
         return headers, request_kwargs
 
     def _maybe_retry_after_403(self, method: str, url: str, kwargs: Dict[str, Any], response: requests.Response) -> requests.Response:
+        """
+        Retry a request after receiving a 403 Forbidden response.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's retry_handler.
+
+        Args:
+            method (str): The HTTP method for the request.
+            url (str): The URL for the request.
+            kwargs (dict): Additional keyword arguments for the request.
+            response (requests.Response): The response from the original request.
+
+        Returns:
+            requests.Response: The response from the retry or the original response if no retry.
+        """
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
 
@@ -257,11 +437,11 @@ class Client:
         if not isinstance(kwargs, dict):
             raise TypeError(f"kwargs must be a dictionary, got {type(kwargs).__name__}")
 
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
+        # Simplified type checking for response
+        is_response = isinstance(response, requests.Response)
+        is_mock = hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", [])
+
+        if not (is_response or is_mock):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         if response.status_code != 403:
             return response
@@ -276,11 +456,23 @@ class Client:
         return retry_response
 
     def _handle_response(self, response: requests.Response) -> RawResponseSimple:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
+        """
+        Handle the response from the API based on the content type.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's response_handler.
+
+        Args:
+            response (requests.Response): The response object from the API.
+
+        Returns:
+            RawResponseSimple: The parsed response content.
+        """
+        # Simplified type checking for response
+        is_response = isinstance(response, requests.Response)
+        is_mock = hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", [])
+
+        if not (is_response or is_mock):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
 
         try:
@@ -290,10 +482,56 @@ class Client:
             return None  # Should not be reached, but satisfies type checker
 
     def _handle_error_response(self, response: requests.Response) -> None:
-        if (
-            not isinstance(response, requests.Response)
-            and not hasattr(response, "_mock_spec")
-            and requests.Response not in getattr(response, "_mock_spec", [])
-        ):
+        """
+        Handle error responses from the API.
+
+        This method is provided for backward compatibility with existing tests.
+        It delegates to the HttpClient's error_handler.
+
+        Args:
+            response (requests.Response): The response object from the API.
+
+        Raises:
+            AuthenticationError: If the status code is 401 (Unauthorized).
+            NotFoundError: If the status code is 404 (Not Found).
+            CrudClientError: For other error status codes.
+        """
+        # Simplified type checking for response
+        is_response = isinstance(response, requests.Response)
+        is_mock = hasattr(response, "_mock_spec") and requests.Response in getattr(response, "_mock_spec", [])
+
+        if not (is_response or is_mock):
             raise TypeError(f"response must be a requests.Response object, got {type(response).__name__}")
         self.http_client.error_handler.handle_error_response(response)
+
+    def _process_config(self, config: Union[ClientConfig, Dict[str, Any]]) -> ClientConfig:
+        """
+        Process and validate the configuration.
+
+        Args:
+            config: The configuration object or dictionary.
+
+        Returns:
+            ClientConfig: The processed configuration object.
+
+        Raises:
+            ConfigurationError: If the configuration is invalid.
+        """
+        # Simple implementation that handles all cases
+        if isinstance(config, ClientConfig):
+            return config
+
+        # Using a separate variable to help mypy understand the control flow
+        is_dict = isinstance(config, dict)
+
+        if is_dict:
+            try:
+                return ClientConfig(**config)
+            except (TypeError, ValueError) as e:
+                log.error("Configuration validation failed when creating ClientConfig from dict: %s", e, exc_info=True)
+                raise ConfigurationError(f"Invalid configuration dictionary provided: {e}") from e
+
+        # This will only be reached if config is neither ClientConfig nor dict
+        message = f"Invalid config type provided: expected ClientConfig or dict, got {type(config).__name__}."
+        log.error(message)
+        raise ConfigurationError(message)
