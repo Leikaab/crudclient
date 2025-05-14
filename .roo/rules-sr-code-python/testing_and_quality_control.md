@@ -32,8 +32,9 @@ To properly delegate testing:
 2. Provide clear instructions on which tests to run
 3. Wait for the results before reporting completion
 
-Example delegation:
+Example delegations:
 
+**For code changes:**
 ```
 <new_task>
 <mode>test-runner-summarizer</mode>
@@ -44,9 +45,30 @@ Example delegation:
 </new_task>
 ```
 
+**For routine checks after file modifications:**
+```
+<new_task>
+<mode>test-runner-summarizer</mode>
+<message>Run pre-commit checks on the modified files:
+pre-commit run
+</message>
+</new_task>
+```
+
+**For comprehensive testing:**
+```
+<new_task>
+<mode>test-runner-summarizer</mode>
+<message>Run full test suite and all quality checks:
+1. pytest
+2. pre-commit run --all-files
+</message>
+</new_task>
+```
+
 ### 3. Interpreting Test Results
 
-- Wait for the `test-runner-summarizer` to complete its execution and report results
+- After creating a `test-runner-summarizer` subtask, you'll receive the test results in the next message
 - Review the test summary provided
 - Address any failures before reporting completion
 - Include a reference to the test results in your completion message
@@ -67,11 +89,31 @@ Example delegation:
    - Report completion only after all delegated tests pass
    - Include a summary of what tests were run and their results
 
-## Common Mistakes to Avoid
+   ## Processing Test Results
 
-- **NEVER** run `pytest` directly
-- **NEVER** run `pre-commit` directly
-- **NEVER** attempt to bypass test delegation
-- **NEVER** report completion before receiving test results from `test-runner-summarizer`
+   It is **CRITICAL** that you:
 
-Following these guidelines ensures consistent quality control and proper separation of responsibilities between development and testing activities.
+   1. After creating a `test-runner-summarizer` subtask, you'll receive the test results in the next message
+   2. Do not proceed with further development or report completion until you have received and analyzed the test results
+   3. If tests fail, address the issues before continuing
+   4. Reference the test results in your completion message
+
+   Example workflow:
+   ```
+   1. Implement feature
+   2. Run mypy directly
+   3. Delegate pre-commit and pytest to test-runner-summarizer
+   4. Receive test results in the next message
+   5. Fix any issues if tests fail
+   6. Only then report completion
+   ```
+
+   ## Common Mistakes to Avoid
+
+   - **NEVER** run `pytest` directly
+   - **NEVER** run `pre-commit` directly
+   - **NEVER** attempt to bypass test delegation
+   - **NEVER** report completion before receiving test results from `test-runner-summarizer`
+   - **NEVER** assume tests will pass without verification
+
+   Following these guidelines ensures consistent quality control and proper separation of responsibilities between development and testing activities.
