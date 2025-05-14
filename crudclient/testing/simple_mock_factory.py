@@ -10,6 +10,23 @@ from crudclient.testing.simple_mock import SimpleMockClient
 
 
 def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
+    """
+    Create and configure a SimpleMockClient instance with specified behaviors.
+
+    This factory function creates a SimpleMockClient and configures it based on the provided
+    keyword arguments. It can set up default responses, API-specific patterns, error responses,
+    and custom response patterns.
+
+    Args:
+        **kwargs: Configuration options for the mock client, which may include:
+            - default_response: A response to use when no patterns match
+            - api_type: Type of API to create patterns for (uses _create_api_patterns helper)
+            - error_responses: Common error responses to add (uses _add_error_responses_to_simple_mock helper)
+            - response_patterns: List of custom response patterns to add
+
+    Returns:
+        SimpleMockClient: A configured mock client ready for testing
+    """
     client = SimpleMockClient()
 
     # Set default response if specified
