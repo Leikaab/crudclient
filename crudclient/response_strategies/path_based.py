@@ -1,3 +1,13 @@
+"""
+Module `response_strategies.path_based`
+=====================================
+
+This module defines the path-based response model strategy for handling API responses.
+
+Classes:
+    - PathBasedResponseModelStrategy: Strategy for extracting data using path expressions.
+"""
+
 import logging
 from typing import Any, List, Optional, Type, Union
 
@@ -13,6 +23,18 @@ logger = logging.getLogger(__name__)
 
 
 class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
+    """
+    A response model strategy that extracts data using path expressions.
+
+    This strategy allows for extracting data from nested structures using dot notation
+    path expressions (e.g., "data.items" to access data["data"]["items"]).
+    """
+
+    datamodel: Optional[Type[T]]
+    api_response_model: Optional[ApiResponseType]
+    single_item_path: Optional[str]
+    list_item_path: Optional[str]
+    pre_transform: Optional[ResponseTransformer]
 
     def __init__(
         self,
@@ -40,9 +62,8 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
 
         return current
 
-    # New helper method
     def _prepare_single_data(self, data: RawResponse) -> Union[JSONDict, JSONList]:
-        # Implementation similar to lines 44-75 of the current convert_single
+        """Handles initial data type checks and parsing for single item conversion."""
         if data is None:
             raise ValueError("Response data is None")
 
@@ -113,7 +134,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
             return final_data
 
     def _prepare_data_for_conversion(self, data: RawResponse) -> Union[JSONDict, JSONList]:
-        # Implementation moved from docstring
+        """Handles initial data type checks and parsing (None, str, bytes)."""
         if data is None:
             raise ValueError("Response data is None")
 
@@ -148,7 +169,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         raise ValueError(f"Unsupported data type for conversion: {type(data)}")
 
     def _apply_api_response_model(self, data: JSONDict) -> Optional[ApiResponse]:
-        # Implementation moved from docstring
+        """Applies the api_response_model if configured and data is a dict."""
         if self.api_response_model:
             try:
                 return self.api_response_model(**data)
@@ -160,7 +181,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         return None
 
     def _extract_and_validate_list(self, data: Union[JSONDict, JSONList]) -> JSONList:
-        # Implementation moved from docstring
+        """Extracts list data using list_item_path and validates it's a list."""
         list_data = data
         if self.list_item_path:
             try:
@@ -178,7 +199,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         return list_data
 
     def _convert_items_to_datamodel(self, list_data: JSONList) -> List[T]:
-        # Implementation moved from docstring
+        """Converts items in the list to the specified datamodel."""
         if not self.datamodel:
             # Should not happen if called correctly, but safeguard
             raise TypeError("Datamodel is not set, cannot convert list items.")
