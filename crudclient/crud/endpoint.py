@@ -1,5 +1,17 @@
+"""
+Module `endpoint.py`
+===================
+
+This module provides functions for building and manipulating API endpoints.
+It handles the construction of resource paths, including nested resources,
+and ensures proper formatting of URL paths.
+"""
+
 import logging
-from typing import List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
+
+if TYPE_CHECKING:
+    from .base import Crud
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -8,29 +20,64 @@ logger = logging.getLogger(__name__)
 PathArgs = Optional[Union[str, int]]
 
 
-def _endpoint_prefix(self) -> Union[Tuple[Optional[str], ...], List[Optional[str]]]:
+def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
+    """
+    Construct the endpoint prefix.
+
+    This method can be overridden in subclasses to provide a custom endpoint prefix.
+
+    Returns:
+        Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]: The endpoint prefix segments.
+    """
     if self.parent:
         # For nested resources, include the parent resource path and ID
         return (self.parent._resource_path, None)
     return []
 
 
-def _validate_path_segments(self, *args: PathArgs) -> None:
+def _validate_path_segments(self: "Crud", *args: PathArgs) -> None:
+    """
+    Validate the types of path segments.
+
+    Args:
+        *args: Variable number of path segments (e.g., resource IDs, actions).
+
+    Raises:
+        TypeError: If any arg is not None, str, or int.
+    """
     for arg in args:
         if arg is not None and not isinstance(arg, (str, int)):
             raise TypeError(f"Path segment must be a string, integer, or None, got {type(arg).__name__}")
 
 
-def _get_parent_path(self, parent_args: Optional[tuple] = None) -> str:
+def _get_parent_path(self: "Crud", parent_args: Optional[tuple] = None) -> str:
+    """
+    Get the parent path if a parent exists.
+
+    Args:
+        parent_args: Optional tuple containing path segments for the parent resource.
+
+    Returns:
+        str: The parent path or empty string if no parent exists.
+    """
     if not self.parent:
         return ""
 
     if parent_args:
-        return self.parent._get_endpoint(*parent_args)
-    return self.parent._get_endpoint()
+        return cast(str, self.parent._get_endpoint(*parent_args))
+    return cast(str, self.parent._get_endpoint())
 
 
-def _build_resource_path(self, *args: PathArgs) -> List[str]:
+def _build_resource_path(self: "Crud", *args: PathArgs) -> List[str]:
+    """
+    Build the current resource path segments.
+
+    Args:
+        *args: Variable number of path segments (e.g., resource IDs, actions).
+
+    Returns:
+        List[str]: The resource path segments.
+    """
     segments = []
     for arg in args:
         if arg is not None:
@@ -38,14 +85,29 @@ def _build_resource_path(self, *args: PathArgs) -> List[str]:
     return segments
 
 
-def _get_prefix_segments(self) -> List[str]:
+def _get_prefix_segments(self: "Crud") -> List[str]:
+    """
+    Get the prefix segments for the endpoint.
+
+    Returns:
+        List[str]: The prefix segments.
+    """
     prefix = self._endpoint_prefix()
     if isinstance(prefix, tuple):
-        return self._build_resource_path(*prefix)
-    return self._build_resource_path(*prefix)
+        return cast(List[str], self._build_resource_path(*prefix))
+    return cast(List[str], self._build_resource_path(*prefix))
 
 
-def _join_path_segments(self, segments: List[str]) -> str:
+def _join_path_segments(self: "Crud", segments: List[str]) -> str:
+    """
+    Join path segments into a URL.
+
+    Args:
+        segments: List of path segments.
+
+    Returns:
+        str: The joined URL path.
+    """
     if not segments:
         return ""
 
@@ -54,7 +116,20 @@ def _join_path_segments(self, segments: List[str]) -> str:
     return path
 
 
-def _get_endpoint(self, *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str:
+def _get_endpoint(self: "Crud", *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str:
+    """
+    Construct the endpoint path.
+
+    Args:
+        *args: Variable number of path segments (e.g., resource IDs, actions).
+        parent_args: Optional tuple containing path segments for the parent resource.
+
+    Returns:
+        str: The constructed endpoint path.
+
+    Raises:
+        TypeError: If arg in args or parent_args is not None, str, or int.
+    """
     # Validate path segments
     self._validate_path_segments(*args)
 
