@@ -127,11 +127,11 @@ def test_custom_action_type_error(base_test_crud: BaseTestCrud):
     """
     # GIVEN / WHEN / THEN
     with pytest.raises(TypeError, match="Action must be a string"):
-        base_test_crud.custom_action(action=123)  # type: ignore[arg-type]
+        base_test_crud.custom_action(action=123)
     with pytest.raises(TypeError, match="Resource ID must be a string or None"):
-        base_test_crud.custom_action(action="test", resource_id=123)  # type: ignore[arg-type]
+        base_test_crud.custom_action(action="test", resource_id=123)
     with pytest.raises(TypeError, match="Parent ID must be a string or None"):
-        base_test_crud.custom_action(action="test", parent_id=123)  # type: ignore[arg-type]
+        base_test_crud.custom_action(action="test", parent_id=123)
 
 
 def test_custom_action_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):

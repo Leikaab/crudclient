@@ -14,11 +14,12 @@ from crudclient.crud.base import Crud as CrudBase
 from crudclient.crud.base import T
 from crudclient.models import ApiResponse
 from crudclient.types import JSONDict, JSONList
+from typing_extensions import TypeAlias
 
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
 
-class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase and conforms to CrudBase interface
+class CrudSpy(EnhancedSpyBase):  # Only inherit from EnhancedSpyBase to avoid signature conflicts
     """
     A **Test Spy** specifically for the `crudclient.crud.base.Crud` interface.
 
@@ -48,7 +49,7 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
     # These methods are implemented via ClassSpy or __getattr__ in the .py file,
     # but are declared here to satisfy the CrudBase interface for type checkers.
 
-    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[List[T], ApiResponse[List[T]]]:
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, List[T], ApiResponse]:
         """
         Spy on a list operation.
 
@@ -61,7 +62,7 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def get(self, resource_id: str, parent_id: Optional[str] = None) -> T:
+    def read(self, resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:
         """
         Spy on a get operation.
 
@@ -74,7 +75,7 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> T:
+    def create(self, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[T, JSONDict]:
         """
         Spy on a create operation.
 
@@ -88,7 +89,13 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def update(self, resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> T:
+    def update(
+        self,
+        resource_id: Optional[str] = None,
+        data: Optional[Union[JSONDict, T]] = None,
+        parent_id: Optional[str] = None,
+        update_mode: Optional[str] = None,
+    ) -> Union[T, JSONDict]:
         """
         Spy on an update operation.
 
@@ -102,17 +109,17 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def delete(self, resource_id: str, parent_id: Optional[str] = None) -> None:
+    def destroy(self, resource_id: str, parent_id: Optional[str] = None) -> None:
         """
-        Spy on a delete operation.
+        Spy on a destroy operation.
 
         Args:
-            resource_id: ID of the resource to delete.
+            resource_id: ID of the resource to destroy.
             parent_id: Optional parent resource ID.
         """
         ...
 
-    def bulk_create(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> List[T]:
+    def bulk_create(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> Union[List[T], List[JSONDict]]:
         """
         Spy on a bulk_create operation.
 
@@ -125,7 +132,7 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
         """
         ...
 
-    def bulk_update(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> List[T]:
+    def bulk_update(self, data: List[Union[JSONDict, T]], parent_id: Optional[str] = None) -> Union[List[T], List[JSONDict]]:
         """
         Spy on a bulk_update operation.
 
@@ -176,13 +183,13 @@ class CrudSpy(EnhancedSpyBase, CrudBase[T]):  # Inherits from EnhancedSpyBase an
 
     def verify_resource_deleted(self, id: Any) -> None:
         """
-        Verify that a resource was deleted with a specific ID via the `delete` method.
+        Verify that a resource was deleted with a specific ID via the `destroy` method.
 
         Args:
-            id: Expected resource ID (first argument to `delete`).
+            id: Expected resource ID (first argument to `destroy`).
 
         Raises:
-            VerificationError: If `delete` was not called with the specified ID.
+            VerificationError: If `destroy` was not called with the specified ID.
         """
         ...
     # --- Magic Methods ---
