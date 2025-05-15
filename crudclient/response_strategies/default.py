@@ -9,7 +9,7 @@ Classes:
 """
 
 import logging
-from typing import List, Optional, Type, Union
+from typing import Any, List, Optional, Type, Union
 
 from pydantic import ValidationError as PydanticValidationError
 
@@ -132,7 +132,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
             logger.error(f"{error_msg}: errors={e.errors()}")
             raise
 
-    def _handle_dict_response(self, data: JSONDict) -> Union[List[T], JSONList, ApiResponse]:
+    def _handle_dict_response(self, data: JSONDict) -> Union[List[T], JSONList, ApiResponse[Any]]:
         """Handles the case where the prepared data is a dictionary."""
         # Implementation moved from docstring
         # Check for custom API response model first

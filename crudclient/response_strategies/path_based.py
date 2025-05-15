@@ -168,7 +168,7 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         # If it's none of the above, raise an error
         raise ValueError(f"Unsupported data type for conversion: {type(data)}")
 
-    def _apply_api_response_model(self, data: JSONDict) -> Optional[ApiResponse]:
+    def _apply_api_response_model(self, data: JSONDict) -> Optional[ApiResponse[Any]]:
         """Applies the api_response_model if configured and data is a dict."""
         if self.api_response_model:
             try:
