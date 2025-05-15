@@ -4,6 +4,8 @@ Exceptions for the crudclient testing framework.
 This module defines exceptions that can be raised by the testing framework.
 """
 
+from typing import Any, Dict, Optional
+
 class TestingError(Exception):
     """Base class for all testing framework exceptions."""
 
@@ -48,3 +50,11 @@ class SpyError(TestingError):
     """Raised when there is an error with a spy."""
 
     ...
+
+class FakeAPIError(TestingError):
+    """Raised when there is an error with the FakeAPI."""
+
+    def __init__(self, status_code: int, detail: Any, headers: Optional[Dict[str, str]] = None): ...
+    status_code: int
+    detail: Any
+    headers: Dict[str, str]
