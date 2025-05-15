@@ -1,3 +1,13 @@
+"""
+Module `response_strategies.default`
+==================================
+
+This module defines the default response model strategy for handling API responses.
+
+Classes:
+    - DefaultResponseModelStrategy: Default implementation for backward compatibility.
+"""
+
 import logging
 from typing import List, Optional, Type, Union
 
@@ -13,13 +23,22 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
+    """
+    Default implementation of the response model strategy.
+
+    This strategy implements the original behavior of the Crud class for backward compatibility.
+    """
+
+    datamodel: Optional[Type[T]]
+    api_response_model: Optional[ApiResponseType]
+    list_return_keys: List[str]
 
     def __init__(
         self,
         datamodel: Optional[Type[T]] = None,
         api_response_model: Optional[ApiResponseType] = None,
         list_return_keys: List[str] = ["data", "results", "items"],
-    ):
+    ) -> None:
         self.datamodel = datamodel
         self.api_response_model = api_response_model
         self.list_return_keys = list_return_keys
@@ -65,6 +84,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
             return data
 
     def _prepare_data_for_conversion(self, data: RawResponse) -> Union[JSONDict, JSONList]:
+        """Handles initial data type checks and parsing (None, str, bytes)."""
         # Implementation moved from docstring
         if data is None:
             raise ValueError("Response data is None")
@@ -99,6 +119,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         raise ValueError(f"Unsupported data type for conversion: {type(data)}")
 
     def _convert_items_to_datamodel(self, list_data: JSONList) -> Union[List[T], JSONList]:
+        """Converts items in the list to the specified datamodel, or returns raw list."""
         # Implementation moved from docstring
         if not self.datamodel:
             # Return raw list if no datamodel specified
@@ -112,6 +133,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
             raise
 
     def _handle_dict_response(self, data: JSONDict) -> Union[List[T], JSONList, ApiResponse]:
+        """Handles the case where the prepared data is a dictionary."""
         # Implementation moved from docstring
         # Check for custom API response model first
         if self.api_response_model:
@@ -134,6 +156,7 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         raise ValueError(f"Could not find list data using keys {self.list_return_keys} in response: {list(data.keys())}")
 
     def _handle_list_response(self, data: JSONList) -> Union[List[T], JSONList]:
+        """Handles the case where the prepared data is a list."""
         # Implementation moved from docstring
         return self._convert_items_to_datamodel(data)
 
