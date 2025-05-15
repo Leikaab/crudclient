@@ -1,20 +1,40 @@
+"""
+Custom authentication mock for testing.
+
+This module provides a mock for Custom Authentication strategy with enhanced
+validation capabilities for headers and parameters.
+"""
+
 import time
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from crudclient.auth.base import AuthStrategy
 from crudclient.auth.custom import CustomAuth
 
-# Import necessary components from spy and base auth mock
+from ..response_builder.response import MockResponse
 from ..spy.enhanced import EnhancedSpyBase, FunctionSpy
 from .base import AuthMockBase
-
-if TYPE_CHECKING:
-    from ..response_builder import MockResponse
 
 
 # Inherit from both EnhancedSpyBase (for spying) and AuthMockBase (for auth mock state/config)
 class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
-    def __init__(self, header_callback: Optional[Callable[[], Dict[str, str]]] = None, param_callback: Optional[Callable[[], Dict[str, str]]] = None):
+    """
+    Mock for Custom Authentication strategy with enhanced capabilities.
+
+    This class provides a configurable mock implementation of the Custom Authentication
+    strategy, with support for header and parameter callbacks, validation, and error simulation.
+    """
+
+    def __init__(
+        self, header_callback: Optional[Callable[[], Dict[str, str]]] = None, param_callback: Optional[Callable[[], Dict[str, str]]] = None
+    ) -> None:
+        """
+        Initialize a Custom Authentication mock.
+
+        Args:
+            header_callback: Callback function that returns authentication headers
+            param_callback: Callback function that returns authentication parameters
+        """
         # Initialize both base classes
         EnhancedSpyBase.__init__(self)
         AuthMockBase.__init__(self)
@@ -25,7 +45,7 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
         self._original_param_callback = param_callback
 
         # Default callbacks if none provided
-        def default_header_callback():
+        def default_header_callback() -> Dict[str, str]:
             return {"X-Custom-Auth": "custom_value"}
 
         if header_callback is None and param_callback is None:
@@ -39,7 +59,7 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
         # FunctionSpy records calls internally, no need to set .spy
 
         # Use the spied callbacks (or lambdas if None) for the actual auth strategy
-        safe_spied_header_callback = self.header_callback_spy if self.header_callback_spy else lambda: {}
+        safe_spied_header_callback: Callable[[], Dict[str, str]] = self.header_callback_spy if self.header_callback_spy else lambda: {}
         spied_param_callback = self.param_callback_spy if self.param_callback_spy else None
 
         self.auth_strategy = CustomAuth(header_callback=safe_spied_header_callback, param_callback=spied_param_callback)
@@ -53,6 +73,15 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
         self.param_validators: Dict[str, Callable[[str], bool]] = {}
 
     def with_header_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
+        """
+        Set the header callback for the Custom Auth mock.
+
+        Args:
+            callback: Callback function that returns authentication headers
+
+        Returns:
+            Self for method chaining
+        """
         self._original_header_callback = callback
         self.header_callback_spy = FunctionSpy(callback, record_only=False)
         # FunctionSpy records calls internally, no need to set .spy
@@ -62,41 +91,117 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
         return self
 
     def with_param_callback(self, callback: Callable[[], Dict[str, str]]) -> "CustomAuthMock":
+        """
+        Set the parameter callback for the Custom Auth mock.
+
+        Args:
+            callback: Callback function that returns authentication parameters
+
+        Returns:
+            Self for method chaining
+        """
         self._original_param_callback = callback
         self.param_callback_spy = FunctionSpy(callback, record_only=False)
         # FunctionSpy records calls internally, no need to set .spy
         # Use the new spied callback
-        safe_spied_header_callback = self.header_callback_spy if self.header_callback_spy else lambda: {}
+        safe_spied_header_callback: Callable[[], Dict[str, str]] = self.header_callback_spy if self.header_callback_spy else lambda: {}
         self.auth_strategy = CustomAuth(header_callback=safe_spied_header_callback, param_callback=self.param_callback_spy)
         return self
 
     def with_expected_header(self, name: str, value: str) -> "CustomAuthMock":
+        """
+        Set an expected header for validation.
+
+        Args:
+            name: Header name
+            value: Expected header value
+
+        Returns:
+            Self for method chaining
+        """
         self.expected_headers[name] = value
         return self
 
     def with_expected_param(self, name: str, value: str) -> "CustomAuthMock":
+        """
+        Set an expected parameter for validation.
+
+        Args:
+            name: Parameter name
+            value: Expected parameter value
+
+        Returns:
+            Self for method chaining
+        """
         self.expected_params[name] = value
         return self
 
     def with_required_header(self, name: str) -> "CustomAuthMock":
+        """
+        Add a required header for validation.
+
+        Args:
+            name: Required header name
+
+        Returns:
+            Self for method chaining
+        """
         if name not in self.required_headers:
             self.required_headers.append(name)
         return self
 
     def with_required_param(self, name: str) -> "CustomAuthMock":
+        """
+        Add a required parameter for validation.
+
+        Args:
+            name: Required parameter name
+
+        Returns:
+            Self for method chaining
+        """
         if name not in self.required_params:
             self.required_params.append(name)
         return self
 
     def with_header_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
+        """
+        Add a custom validator for a header.
+
+        Args:
+            name: Header name
+            validator: Function that validates the header value
+
+        Returns:
+            Self for method chaining
+        """
         self.header_validators[name] = validator
         return self
 
     def with_param_validator(self, name: str, validator: Callable[[str], bool]) -> "CustomAuthMock":
+        """
+        Add a custom validator for a parameter.
+
+        Args:
+            name: Parameter name
+            validator: Function that validates the parameter value
+
+        Returns:
+            Self for method chaining
+        """
         self.param_validators[name] = validator
         return self
 
     def verify_headers(self, headers: Dict[str, str]) -> bool:
+        """
+        Verify that the headers meet all requirements.
+
+        Args:
+            headers: The headers to verify
+
+        Returns:
+            True if the headers are valid, False otherwise
+        """
         # Record the call to this verification method
         start_time = time.time()
         result = False
@@ -136,6 +241,15 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
             self._record_call(method_name="verify_headers", args=(headers,), kwargs={}, result=result, exception=exception, duration=duration)
 
     def verify_params(self, params: Dict[str, str]) -> bool:
+        """
+        Verify that the parameters meet all requirements.
+
+        Args:
+            params: The parameters to verify
+
+        Returns:
+            True if the parameters are valid, False otherwise
+        """
         start_time = time.time()
         result = True  # Assume success initially
         exception = None
@@ -181,15 +295,34 @@ class CustomAuthMock(EnhancedSpyBase, AuthMockBase):
             # If no exception, the return value from the try block (or early return) is used.
 
     def get_auth_strategy(self) -> AuthStrategy:
+        """
+        Get the configured auth strategy.
+
+        Returns:
+            The configured CustomAuth strategy
+        """
         return self.auth_strategy
 
-    # --- Added Abstract Method Implementations ---
-
     def get_auth_headers(self) -> Optional[Tuple[str, str]]:
+        """
+        Get the authentication headers for the current token.
+
+        Returns:
+            None for CustomAuthMock as headers are applied via callbacks
+        """
         # Headers are applied via the header_callback in the actual strategy.
         # This method signature in the mock base doesn't perfectly align.
         return None
 
-    def handle_auth_error(self, response: "MockResponse") -> bool:
+    def handle_auth_error(self, response: MockResponse) -> bool:
+        """
+        Handle authentication errors.
+
+        Args:
+            response: The error response that triggered the auth error
+
+        Returns:
+            False as no standard refresh mechanism is defined for custom auth
+        """
         # No standard refresh mechanism defined for generic custom auth mock
         return False

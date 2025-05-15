@@ -68,7 +68,28 @@ class EnhancedSpyBase(SpyAssertionsMixin):
     def __init__(self) -> None:
         """Initializes the spy with empty call lists."""
         ...
-    # _record_call is intentionally omitted as it's protected
+
+    def _record_call(
+        self,
+        method_name: str,
+        args: Tuple[Any, ...],
+        kwargs: Dict[str, Any],
+        result: Any = None,
+        exception: Optional[Exception] = None,
+        duration: Optional[float] = None,
+    ) -> None:
+        """
+        Record a method call with its arguments and result.
+
+        Args:
+            method_name: Name of the method being called
+            args: Positional arguments passed to the method
+            kwargs: Keyword arguments passed to the method
+            result: Result returned by the method
+            exception: Exception raised by the method, if any
+            duration: Time taken to execute the method, if measured
+        """
+        ...
 
     def get_calls(self, method_name: Optional[str] = None) -> List[CallRecord]:
         """
