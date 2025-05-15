@@ -9,12 +9,13 @@ interactions made with the CRUD endpoint component.
 
 from typing import Any, Dict, List, Optional, Type, Union
 
+from typing_extensions import TypeAlias
+
 from crudclient.client import Client
 from crudclient.crud.base import Crud as CrudBase
 from crudclient.crud.base import T
 from crudclient.models import ApiResponse
 from crudclient.types import JSONDict, JSONList
-from typing_extensions import TypeAlias
 
 from ..exceptions import VerificationError
 from .enhanced import EnhancedSpyBase
