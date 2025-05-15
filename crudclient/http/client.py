@@ -1,7 +1,37 @@
+"""
+Module `client.py`
+=================
+
+This module defines the HttpClient class, which is responsible for making HTTP requests.
+It provides a clean interface for making requests while delegating specialized concerns
+to other components.
+
+Class `HttpClient`
+-----------------
+
+The `HttpClient` class provides a centralized way to make HTTP requests for API clients.
+It delegates session management, request preparation, response handling, error handling,
+and retry logic to specialized components.
+
+To use the HttpClient:
+    1. Create a ClientConfig object with the necessary configuration.
+    2. Initialize an HttpClient instance with the config and optional components.
+    3. Use the HttpClient to make HTTP requests.
+
+Example:
+    config = ClientConfig(base_url="https://api.example.com")
+    client = HttpClient(config)
+    response = client.get("users")
+    # Use the response data
+
+Classes:
+    - HttpClient: Main class for making HTTP requests.
+"""
+
 import logging
 import time
 from collections.abc import Callable
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, Literal, Optional, Tuple, Union, cast, overload
 
 import requests
 from requests.exceptions import HTTPError
@@ -23,19 +53,43 @@ from ..exceptions import (
 )
 from ..types import RawResponseSimple
 from .errors import ErrorHandler
-from .logging import HttpLifecycleLogger  # Import the new logger class
+from .logging import HttpLifecycleLogger
 from .request import RequestFormatter
 from .response import ResponseHandler
 from .retry import RetryHandler
 from .session import SessionManager
 
-# from .utils import redact_sensitive_headers # Keep only needed utils - Removed as unused
-
 logger = logging.getLogger(__name__)
-# _BODY_LOG_TRUNCATION_LIMIT is now in logging.py
 
 
 class HttpClient:
+    """
+    Makes HTTP requests and delegates specialized concerns to other components.
+
+    This class is responsible for making HTTP requests while delegating session management,
+    request preparation, response handling, error handling, and retry logic to specialized
+    components.
+
+    Detailed logging of the HTTP request/response lifecycle (including potential
+    redaction of sensitive data) can be configured via the `ClientConfig`.
+    See `docs/logging.md` for more details.
+
+    Attributes:
+        config (ClientConfig): Configuration object for the client.
+        session_manager (SessionManager): Manages the HTTP session.
+        request_formatter (RequestFormatter): Formats request data.
+        response_handler (ResponseHandler): Processes HTTP responses.
+        error_handler (ErrorHandler): Handles error responses.
+        retry_handler (RetryHandler): Manages retry policies.
+    """
+
+    config: ClientConfig
+    session_manager: SessionManager
+    request_formatter: RequestFormatter
+    response_handler: ResponseHandler
+    error_handler: ErrorHandler
+    retry_handler: RetryHandler
+    http_logger: HttpLifecycleLogger
 
     def __init__(
         self,
@@ -46,6 +100,25 @@ class HttpClient:
         error_handler: Optional[ErrorHandler] = None,
         retry_handler: Optional[RetryHandler] = None,
     ) -> None:
+        """
+        Initialize the HttpClient with a configuration and optional components.
+
+        Args:
+            config (ClientConfig): Configuration for the client.
+            session_manager (Optional[SessionManager]): Session manager component.
+                If not provided, a new one will be created.
+            request_formatter (Optional[RequestFormatter]): Request formatter component.
+                If not provided, a new one will be created.
+            response_handler (Optional[ResponseHandler]): Response handler component.
+                If not provided, a new one will be created.
+            error_handler (Optional[ErrorHandler]): Error handler component.
+                If not provided, a new one will be created.
+            retry_handler (Optional[RetryHandler]): Retry handler component.
+                If not provided, a new one will be created.
+
+        Raises:
+            TypeError: If the provided config is not a ClientConfig object.
+        """
         if not isinstance(config, ClientConfig):
             raise TypeError("config must be a ClientConfig object")
 
@@ -55,16 +128,51 @@ class HttpClient:
         self.response_handler = response_handler or ResponseHandler()
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
-        self.http_logger = HttpLifecycleLogger(config=config, logger=logger)  # Instantiate the logger
+        self.http_logger = HttpLifecycleLogger(config=config, logger=logger)
 
     def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
+        """Handle the successful response or error during response processing."""
         response.raise_for_status()
 
         if not handle_response:
             return response
         return self.response_handler.handle_response(response)
 
-    def _request(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any) -> Any:
+    @overload
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
+    ) -> RawResponseSimple:
+        pass
+
+    @overload
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
+    ) -> requests.Response:
+        pass
+
+    def _request(
+        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any
+    ) -> Any:  # noqa: C901
+        """
+        Internal method to make an HTTP request with validation, auth, retry, and error handling.
+
+        Args:
+            method: HTTP method (e.g., 'GET', 'POST').
+            endpoint: API endpoint path (relative to base_url).
+            url: Full URL (overrides endpoint if provided).
+            handle_response: Whether to process the response using ResponseHandler.
+            **kwargs: Additional arguments passed to requests.request.
+
+        Returns:
+            Processed response data (RawResponseSimple) if handle_response is True,
+            otherwise the raw requests.Response object.
+
+        Raises:
+            TypeError: If input parameters have incorrect types.
+            ValueError: If neither endpoint nor url is provided.
+            requests.HTTPError: If the request fails and is not handled by ErrorHandler.
+            Various exceptions from AuthStrategy or ResponseHandler/ErrorHandler.
+        """
         if not isinstance(handle_response, bool):
             raise TypeError(f"handle_response must be a boolean, got {type(handle_response).__name__}")
 
@@ -73,7 +181,7 @@ class HttpClient:
         logger.debug(f"Preparing {method} request to {final_url} with final params: {prepared_kwargs.get('params')}")
 
         def make_request() -> requests.Response:
-            self.http_logger.log_request_details(method, final_url, prepared_kwargs)  # Use new logger
+            self.http_logger.log_request_details(method, final_url, prepared_kwargs)
             return self.session_manager.session.request(method, final_url, timeout=self.session_manager.timeout, **prepared_kwargs)
 
         start_time = time.monotonic()
@@ -81,17 +189,17 @@ class HttpClient:
         final_outcome: Union[requests.Response, Exception, None] = None
 
         try:
-            final_outcome, attempt_count = self._execute_request_with_retry(method, final_url, make_request, handle_response)  # Pass handle_response
+            final_outcome, attempt_count = self._execute_request_with_retry(method, final_url, make_request, handle_response)
             return final_outcome
 
         except HTTPError as e:
             final_outcome = e.response if e.response is not None else e
-            self.http_logger.log_http_error(e, method=method, url=final_url)  # Log error details first
-            self._handle_http_error(e)  # Then raise the appropriate exception
+            self.http_logger.log_http_error(e, method=method, url=final_url)
+            self._handle_http_error(e)
 
         except NetworkError as e:
             final_outcome = e
-            raise e  # Re-raise it to be caught by the caller
+            raise e
 
         except Exception as e:
             final_outcome = e
@@ -101,23 +209,22 @@ class HttpClient:
             else:
                 raise e
         finally:
-            self.http_logger.log_request_completion(start_time, method, final_url, attempt_count, final_outcome)  # Use new logger
+            self.http_logger.log_request_completion(start_time, method, final_url, attempt_count, final_outcome)
 
     def _execute_request_with_retry(
-        self, method: str, url: str, make_request_func: Callable[[], requests.Response], handle_response: bool  # Added handle_response back
-    ) -> Tuple[Any, int]:  # Return type is processed/raw response or Exception
-        result_tuple = cast(
-            Tuple[Union[requests.Response, Exception], int],
-            self.retry_handler.execute_with_retry(method, url, make_request_func, self.session_manager.session, self.session_manager.refresh_auth),
+        self, method: str, url: str, make_request_func: Callable[[], requests.Response], handle_response: bool
+    ) -> Tuple[Any, int]:
+        """Execute the HTTP request using the session manager and retry handler."""
+        result_tuple = self.retry_handler.execute_with_retry(
+            method, url, make_request_func, self.session_manager.session, self.session_manager.refresh_auth
         )
         result, attempt_count = result_tuple
 
         if isinstance(result, requests.Response):
             response = result
-            self.http_logger.log_response_details(method, url, response)  # Use new logger
+            self.http_logger.log_response_details(method, url, response)
 
-            processed_or_raw_response = self._handle_request_response(response, True)  # Assume True for now, need handle_response here
-            processed_or_raw_response = self._handle_request_response(response, handle_response)  # Use passed handle_response
+            processed_or_raw_response = self._handle_request_response(response, handle_response)
             return processed_or_raw_response, attempt_count
 
         elif isinstance(result, Exception):
@@ -125,14 +232,12 @@ class HttpClient:
         else:
             raise CrudClientError(f"Unexpected result type from retry handler: {type(result).__name__}")
 
-    # Logging methods removed, now handled by HttpLifecycleLogger
-
     def _handle_http_error(self, e: HTTPError) -> None:
-        # Logging is now handled by self.http_logger.log_http_error before this method is called
+        """Handle HTTP errors using the error handler."""
         response = e.response
         request = e.request
 
-        if response is not None:  # Request might still be None in rare cases
+        if response is not None:
             STATUS_CODE_TO_EXCEPTION = {
                 400: BadRequestError,
                 401: ClientAuthenticationError,
@@ -148,15 +253,27 @@ class HttpClient:
 
             raise exception_cls(
                 message=f"HTTP error occurred: {response.status_code} {response.reason}",
-                request=request,  # Pass request if available
+                request=request,
                 response=response,
             ) from e
         else:
-            # If response is None, raise a generic APIError
-            # Logging of this case is handled by log_http_error
-            raise APIError(message=f"HTTP error occurred without a response: {e}", request=request, response=None) from e  # Pass request if available
+            raise APIError(message=f"HTTP error occurred without a response: {e}", request=request, response=None) from e
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
+        """
+        Make a GET request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
         return self._request("GET", endpoint=endpoint, params=params)
 
     def post(
@@ -166,8 +283,25 @@ class HttpClient:
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
-        prepared_data = {"data": data, "json": json, "files": files}  # Pass raw data to _request
-        return self._request("POST", endpoint=endpoint, **prepared_data)
+        """
+        Make a POST request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        return self._request("POST", endpoint=endpoint, data=data, json=json, files=files)
 
     def put(
         self,
@@ -176,11 +310,41 @@ class HttpClient:
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
-        prepared_data = {"data": data, "json": json, "files": files}  # Pass raw data to _request
-        return self._request("PUT", endpoint=endpoint, **prepared_data)
+        """
+        Make a PUT request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        return self._request("PUT", endpoint=endpoint, data=data, json=json, files=files)
 
     def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
-        return self._request("DELETE", endpoint=endpoint, **kwargs)
+        """
+        Make a DELETE request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            **kwargs: Additional keyword arguments to pass to the request.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        return cast(RawResponseSimple, self._request("DELETE", endpoint=endpoint, **kwargs))
 
     def patch(
         self,
@@ -189,12 +353,79 @@ class HttpClient:
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
-        prepared_data = {"data": data, "json": json, "files": files}  # Pass raw data to _request
-        return self._request("PATCH", endpoint=endpoint, **prepared_data)
+        """
+        Make a PATCH request to the specified endpoint.
+
+        Args:
+            endpoint (str): The API endpoint to request.
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+                Defaults to None.
+            json (Optional[Any]): JSON data to include in the request.
+                Defaults to None.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+
+        Returns:
+            RawResponseSimple: The processed response data.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        return self._request("PATCH", endpoint=endpoint, data=data, json=json, files=files)
+
+    def _prepare_data(
+        self,
+        data: Optional[Dict[str, Any]] = None,
+        json: Optional[Any] = None,
+        files: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Prepare request data based on the provided parameters.
+
+        This method delegates to the request_formatter to prepare the request data
+        and set the appropriate content-type headers.
+
+        Args:
+            data (Optional[Dict[str, Any]]): Form data to include in the request.
+            json (Optional[Any]): JSON data to include in the request.
+            files (Optional[Dict[str, Any]]): Files to include in the request.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the prepared request data and headers.
+
+        Raises:
+            TypeError: If the parameters are of incorrect types.
+        """
+        return {"data": data, "json": json, "files": files}
 
     def request_raw(self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, **kwargs: Any) -> requests.Response:
+        """
+        Make a raw HTTP request and return the Response object without processing.
+
+        This method is useful when you need access to the raw response object
+        for custom processing.
+
+        Args:
+            method (str): The HTTP method to use (GET, POST, PUT, DELETE, PATCH).
+            endpoint (Optional[str]): The API endpoint to request. Either endpoint or url must be provided.
+            url (Optional[str]): The full URL to request. Either endpoint or url must be provided.
+            **kwargs: Additional keyword arguments to pass to the request.
+
+        Returns:
+            requests.Response: The raw Response object.
+
+        Raises:
+            ValueError: If neither endpoint nor url is provided.
+            TypeError: If the parameters are of incorrect types.
+        """
         return self._request(method, endpoint, url, handle_response=False, **kwargs)
 
     def close(self) -> None:
+        """
+        Close the HTTP session and clean up resources.
+
+        This method should be called when the client is no longer needed
+        to ensure proper cleanup of resources.
+        """
         self.session_manager.close()
         logger.debug("HttpClient closed.")
