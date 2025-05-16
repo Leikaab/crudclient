@@ -282,6 +282,7 @@ class HttpClient:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a POST request to the specified endpoint.
@@ -294,6 +295,8 @@ class HttpClient:
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
                 Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
 
         Returns:
             RawResponseSimple: The processed response data.
@@ -301,7 +304,7 @@ class HttpClient:
         Raises:
             TypeError: If the parameters are of incorrect types.
         """
-        return self._request("POST", endpoint=endpoint, data=data, json=json, files=files)
+        return self._request("POST", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
     def put(
         self,
@@ -309,6 +312,7 @@ class HttpClient:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a PUT request to the specified endpoint.
@@ -321,6 +325,8 @@ class HttpClient:
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
                 Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
 
         Returns:
             RawResponseSimple: The processed response data.
@@ -328,14 +334,16 @@ class HttpClient:
         Raises:
             TypeError: If the parameters are of incorrect types.
         """
-        return self._request("PUT", endpoint=endpoint, data=data, json=json, files=files)
+        return self._request("PUT", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
-    def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
+    def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> RawResponseSimple:
         """
         Make a DELETE request to the specified endpoint.
 
         Args:
             endpoint (str): The API endpoint to request.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
             **kwargs: Additional keyword arguments to pass to the request.
 
         Returns:
@@ -344,7 +352,10 @@ class HttpClient:
         Raises:
             TypeError: If the parameters are of incorrect types.
         """
-        return cast(RawResponseSimple, self._request("DELETE", endpoint=endpoint, **kwargs))
+        request_kwargs = kwargs.copy()
+        if params is not None:
+            request_kwargs["params"] = params
+        return cast(RawResponseSimple, self._request("DELETE", endpoint=endpoint, **request_kwargs))
 
     def patch(
         self,
@@ -352,6 +363,7 @@ class HttpClient:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a PATCH request to the specified endpoint.
@@ -364,6 +376,8 @@ class HttpClient:
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
                 Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
 
         Returns:
             RawResponseSimple: The processed response data.
@@ -371,7 +385,7 @@ class HttpClient:
         Raises:
             TypeError: If the parameters are of incorrect types.
         """
-        return self._request("PATCH", endpoint=endpoint, data=data, json=json, files=files)
+        return self._request("PATCH", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
     def _prepare_data(
         self,

@@ -136,6 +136,7 @@ def update_operation(
     data: Optional[Union[JSONDict, T]] = None,
     parent_id: Optional[str] = None,
     update_mode: Optional[str] = None,
+    params: Optional[JSONDict] = None,
 ) -> Union[T, JSONDict]:
     """
     Update a resource.
@@ -148,6 +149,7 @@ def update_operation(
             Supported modes:
             - "standard": Standard RESTful update (default)
             - "no_resource_id": Update without resource ID in URL (e.g., Tripletex company)
+        params: Optional query parameters.
 
     Returns:
         Union[T, JSONDict]: The updated resource.
@@ -180,13 +182,13 @@ def update_operation(
             else:
                 # If it's not a dict, we still need to convert it
                 json_data = converted_data
-            response = self.client.put(endpoint, json=json_data)
+            response = self.client.put(endpoint, json=json_data, params=params)
         else:
             # Standard RESTful update
             if resource_id is None:
                 raise ValueError("resource_id is required for standard update mode")
             endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
-            response = self.client.put(endpoint, json=converted_data)
+            response = self.client.put(endpoint, json=converted_data, params=params)
 
         # Convert the response to a model instance
         return self._convert_to_model(response)  # type: ignore[no-any-return]
@@ -209,7 +211,9 @@ def update_operation(
         raise
 
 
-def partial_update_operation(self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None) -> Union[T, JSONDict]:
+def partial_update_operation(
+    self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
+) -> Union[T, JSONDict]:
     """
     Partially update a specific resource.
 
@@ -217,6 +221,7 @@ def partial_update_operation(self: "Crud", resource_id: str, data: Union[JSONDic
         resource_id: The ID of the resource to update.
         data: The partial updated data for the resource.
         parent_id: Optional ID of the parent resource for nested resources.
+        params: Optional query parameters.
 
     Returns:
         Union[T, JSONDict]: The updated resource.
@@ -237,7 +242,7 @@ def partial_update_operation(self: "Crud", resource_id: str, data: Union[JSONDic
 
         # Make the API request
         endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
-        response = self.client.patch(endpoint, json=converted_data)
+        response = self.client.patch(endpoint, json=converted_data, params=params)
 
         # Convert the response to a model instance
         return self._convert_to_model(response)  # type: ignore[no-any-return]
@@ -260,13 +265,14 @@ def partial_update_operation(self: "Crud", resource_id: str, data: Union[JSONDic
         raise
 
 
-def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> None:
+def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> None:
     """
     Delete a specific resource.
 
     Args:
         resource_id: The ID of the resource to delete.
         parent_id: Optional ID of the parent resource for nested resources.
+        params: Optional query parameters.
 
     Raises:
         ValueError: If destroy action is not allowed for this resource.
@@ -278,7 +284,7 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
         raise ValueError(f"Destroy action not allowed for {self.__class__.__name__}")
 
     endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
-    self.client.delete(endpoint)
+    self.client.delete(endpoint, params=params)
 
 
 def _prepare_request_body_kwargs(

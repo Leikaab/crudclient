@@ -185,6 +185,7 @@ class Client:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a PUT request to the specified endpoint.
@@ -196,6 +197,8 @@ class Client:
             json (Optional[Any]): JSON data to include in the request.
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
                 Defaults to None.
 
         Returns:
@@ -213,8 +216,11 @@ class Client:
         if files is not None and not isinstance(files, dict):
             raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
 
+        if params is not None and not isinstance(params, dict):
+            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+
         try:
-            raw_response = self.http_client.request_raw("PUT", endpoint, data=data, json=json, files=files)
+            raw_response = self.http_client.request_raw("PUT", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
             kwargs = {}
@@ -224,6 +230,8 @@ class Client:
                 kwargs["json"] = json
             if files:
                 kwargs["files"] = files
+            if params:
+                kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
             raw_response = self._maybe_retry_after_403("PUT", url, kwargs, e.response)
             if raw_response.status_code == 403:
@@ -231,12 +239,14 @@ class Client:
 
         return self._handle_response(raw_response)
 
-    def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
+    def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> RawResponseSimple:
         """
         Make a DELETE request to the specified endpoint.
 
         Args:
             endpoint (str): The API endpoint to request.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
+                Defaults to None.
             **kwargs: Additional keyword arguments to pass to the request.
 
         Returns:
@@ -248,9 +258,14 @@ class Client:
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
 
+        if params is not None and not isinstance(params, dict):
+            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+
         try:
             # Capture original kwargs for potential retry
             request_kwargs = kwargs.copy()
+            if params is not None:
+                request_kwargs["params"] = params
             raw_response = self.http_client.request_raw("DELETE", endpoint, **request_kwargs)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
@@ -268,6 +283,7 @@ class Client:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Make a PATCH request to the specified endpoint.
@@ -279,6 +295,8 @@ class Client:
             json (Optional[Any]): JSON data to include in the request.
                 Defaults to None.
             files (Optional[Dict[str, Any]]): Files to include in the request.
+                Defaults to None.
+            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
                 Defaults to None.
 
         Returns:
@@ -296,8 +314,11 @@ class Client:
         if files is not None and not isinstance(files, dict):
             raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
 
+        if params is not None and not isinstance(params, dict):
+            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+
         try:
-            raw_response = self.http_client.request_raw("PATCH", endpoint, data=data, json=json, files=files)
+            raw_response = self.http_client.request_raw("PATCH", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
             kwargs = {}
@@ -307,6 +328,8 @@ class Client:
                 kwargs["json"] = json
             if files:
                 kwargs["files"] = files
+            if params:
+                kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
             raw_response = self._maybe_retry_after_403("PATCH", url, kwargs, e.response)
             if raw_response.status_code == 403:

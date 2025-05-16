@@ -210,6 +210,7 @@ class StubClient(EnhancedSpyBase, Client):
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         """
         Simulate a PUT request.
@@ -219,18 +220,20 @@ class StubClient(EnhancedSpyBase, Client):
             data: Optional form data.
             json: Optional JSON payload.
             files: Optional files to upload.
+            params: Optional query parameters.
 
         Returns:
             The parsed JSON response or the raw response string if not valid JSON.
         """
         ...
 
-    def delete(self, endpoint: str, **kwargs: Any) -> Any:
+    def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
         """
         Simulate a DELETE request.
 
         Args:
             endpoint: The API endpoint path.
+            params: Optional query parameters.
             **kwargs: Additional request parameters.
 
         Returns:
@@ -244,6 +247,7 @@ class StubClient(EnhancedSpyBase, Client):
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         """
         Simulate a PATCH request.
@@ -253,6 +257,7 @@ class StubClient(EnhancedSpyBase, Client):
             data: Optional form data.
             json: Optional JSON payload.
             files: Optional files to upload.
+            params: Optional query parameters.
 
         Returns:
             The parsed JSON response or the raw response string if not valid JSON.

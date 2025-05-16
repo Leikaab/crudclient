@@ -86,6 +86,7 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Spy on a PUT request.
@@ -95,18 +96,20 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
             data: Form data
             json: JSON data
             files: Files to upload
+            params: Query parameters
 
         Returns:
             API response (typically mocked or from a wrapped client)
         """
         ...
 
-    def delete(self, endpoint: str, **kwargs: Any) -> RawResponseSimple:
+    def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> RawResponseSimple:
         """
         Spy on a DELETE request.
 
         Args:
             endpoint: API endpoint
+            params: Query parameters
             **kwargs: Additional keyword arguments
 
         Returns:
@@ -120,6 +123,7 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         files: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RawResponseSimple:
         """
         Spy on a PATCH request.
@@ -129,6 +133,7 @@ class ClientSpy(EnhancedSpyBase, Client):  # Inherits from EnhancedSpyBase and c
             data: Form data
             json: JSON data
             files: Files to upload
+            params: Query parameters
 
         Returns:
             API response (typically mocked or from a wrapped client)
