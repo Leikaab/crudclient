@@ -66,6 +66,8 @@ class Crud(Generic[T]):
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
     _api_response_model: Optional[Type[ApiResponse]] = None
+    _create_model: Optional[Type[T]] = None
+    _update_model: Optional[Type[T]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
     _update_mode: str = "standard"  # Default update mode: "standard" or "no_resource_id"

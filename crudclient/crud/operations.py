@@ -77,8 +77,11 @@ def create_operation(
         raise ValueError(f"Create action not allowed for {self.__class__.__name__}")
 
     try:
+        # Determine which model to use for create operations
+        model_for_create = getattr(self, "_create_model", None) or self._datamodel
+
         # Validate and convert input data
-        converted_data = self._dump_data(data)
+        converted_data = self._dump_data(data, validation_model=model_for_create)
 
         # Make the API request
         endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
@@ -92,11 +95,11 @@ def create_operation(
         redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'create' for resource '%s'. Errors: %s",
-            getattr(self._datamodel, "__name__", "Unknown"),
+            getattr(model_for_create, "__name__", "Unknown") if model_for_create else "Unknown",
             json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
-            f"Request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
+            f"Request data validation failed for {getattr(model_for_create, '__name__', 'Unknown') if model_for_create else 'Unknown'}",
             data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
@@ -168,8 +171,11 @@ def update_operation(
     effective_mode = update_mode or getattr(self, "_update_mode", "standard")
 
     try:
+        # Determine which model to use for update operations
+        model_for_update = getattr(self, "_update_model", None) or self._datamodel
+
         # Validate and convert input data
-        converted_data = self._dump_data(data)
+        converted_data = self._dump_data(data, validation_model=model_for_update)
 
         # Make the API request based on the update mode
         if effective_mode == "no_resource_id":
@@ -198,11 +204,11 @@ def update_operation(
         redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'update' for resource '%s'. Errors: %s",
-            getattr(self._datamodel, "__name__", "Unknown"),
+            getattr(model_for_update, "__name__", "Unknown") if model_for_update else "Unknown",
             json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
-            f"Request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
+            f"Request data validation failed for {getattr(model_for_update, '__name__', 'Unknown') if model_for_update else 'Unknown'}",
             data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e
@@ -237,8 +243,11 @@ def partial_update_operation(
         raise ValueError(f"Partial update action not allowed for {self.__class__.__name__}")
 
     try:
+        # Determine which model to use for partial update operations
+        model_for_partial_update = getattr(self, "_update_model", None) or self._datamodel
+
         # Validate and convert input data (partial=True)
-        converted_data = self._dump_data(data, partial=True)
+        converted_data = self._dump_data(data, validation_model=model_for_partial_update, partial=True)
 
         # Make the API request
         endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
@@ -252,11 +261,11 @@ def partial_update_operation(
         redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'partial_update' for resource '%s'. Errors: %s",
-            getattr(self._datamodel, "__name__", "Unknown"),
+            getattr(model_for_partial_update, "__name__", "Unknown") if model_for_partial_update else "Unknown",
             json.dumps(e.errors()),  # Keep structured errors, avoid logging raw data here
         )
         raise DataValidationError(
-            f"Partial update request data validation failed for {getattr(self._datamodel, '__name__', 'Unknown')}",
+            f"Partial update request data validation failed for {getattr(model_for_partial_update, '__name__', 'Unknown') if model_for_partial_update else 'Unknown'}",
             data=redacted_data,  # Pass redacted data
             pydantic_error=e,
         ) from e

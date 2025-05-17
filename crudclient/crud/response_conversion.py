@@ -9,7 +9,7 @@ and conversion of response data to model instances.
 
 import json
 import logging
-from typing import TYPE_CHECKING, List, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union, cast
 
 if TYPE_CHECKING:
     from .base import Crud
@@ -324,28 +324,33 @@ def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSON
         raise TypeError(f"Cannot dump model instance of type {type(model_instance)}")
 
 
-def _validate_partial_dict(self: "Crud", data_dict: JSONDict) -> None:
+def _validate_partial_dict(self: "Crud", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> None:
     """
-    Validate provided fields in a dictionary against the datamodel for partial updates.
+    Validate provided fields in a dictionary against the specified validation model for partial updates.
 
     Ignores 'missing' errors.
 
     Args:
         data_dict: The dictionary containing partial data.
+        validation_model: The model to validate against. If None, falls back to self._datamodel.
 
     Raises:
         DataValidationError: If validation fails for non-missing fields.
     """
-    if not self._datamodel:
-        return  # No validation if no datamodel
+    # Use provided validation_model or fall back to self._datamodel
+    model = validation_model or self._datamodel
+
+    if not model:
+        return  # No validation if no model
 
     try:
         # Attempt validation. We only care about non-'missing' errors here.
-        getattr(self._datamodel, "model_validate")(data_dict)
+        getattr(model, "model_validate")(data_dict)
     except PydanticValidationError as e:
         non_missing_errors = [err for err in e.errors() if err.get("type") != "missing"]
         if non_missing_errors:
-            error_msg = f"Partial update data validation failed for provided fields in model {getattr(self._datamodel, '__name__', 'Unknown')}"
+            model_name = getattr(model, "__name__", "Unknown")
+            error_msg = f"Partial update data validation failed for provided fields in model {model_name}"
             # Redact data before logging or raising
             redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
             logger.warning(
@@ -358,12 +363,13 @@ def _validate_partial_dict(self: "Crud", data_dict: JSONDict) -> None:
         # If only 'missing' errors, we ignore them for partial updates.
 
 
-def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict) -> JSONDict:
+def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> JSONDict:
     """
-    Validate a dictionary against the full datamodel and dump the result.
+    Validate a dictionary against the specified validation model and dump the result.
 
     Args:
         data_dict: The dictionary to validate and dump.
+        validation_model: The model to validate against. If None, falls back to self._datamodel.
 
     Returns:
         JSONDict: The dumped dictionary after validation.
@@ -371,17 +377,20 @@ def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict) -> JSONDict:
     Raises:
         DataValidationError: If validation fails.
     """
-    if not self._datamodel:
-        # Return as is if no datamodel
+    # Use provided validation_model or fall back to self._datamodel
+    model = validation_model or self._datamodel
+
+    if not model:
+        # Return as is if no model
         return data_dict
 
     try:
-        validated_model = getattr(self._datamodel, "model_validate")(data_dict)
+        validated_model = getattr(model, "model_validate")(data_dict)
         # Dump the validated model (exclude_unset=False for full dump)
         return self._dump_model_instance(validated_model, partial=False)  # type: ignore[no-any-return]
     except PydanticValidationError as e:
         # Re-raise validation errors for full updates
-        model_name = getattr(self._datamodel, "__name__", "Unknown")
+        model_name = getattr(model, "__name__", "Unknown")
         error_msg = f"Input data validation failed for model {model_name}"
         # Redact data before logging or raising
         redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
@@ -394,9 +403,9 @@ def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict) -> JSONDict:
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
-def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool) -> JSONDict:
+def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool, validation_model: Optional[Type[T]] = None) -> JSONDict:
     """
-    Validate and dump a dictionary based on the datamodel.
+    Validate and dump a dictionary based on the specified validation model.
 
     For partial updates, validates only provided fields.
     For full updates, validates against the full model and dumps the result.
@@ -404,6 +413,7 @@ def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool) -> JSONDi
     Args:
         data_dict: The dictionary to dump.
         partial: Whether this is a partial update.
+        validation_model: The model to validate against. If None, falls back to self._datamodel.
 
     Returns:
         JSONDict: The validated and/or dumped dictionary.
@@ -412,20 +422,21 @@ def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool) -> JSONDi
         DataValidationError: If validation fails.
     """
     if partial:
-        self._validate_partial_dict(data_dict)
+        self._validate_partial_dict(data_dict, validation_model)
         # For partial updates, return the original dict after validation passes
         return data_dict
     else:
         # For full updates, validate and dump
-        return self._validate_and_dump_full_dict(data_dict)  # type: ignore[no-any-return]
+        return self._validate_and_dump_full_dict(data_dict, validation_model)  # type: ignore[no-any-return]
 
 
-def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], partial: bool = False) -> JSONDict:
+def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], validation_model: Optional[Type[T]] = None, partial: bool = False) -> JSONDict:
     """
     Dump the data model to a JSON-serializable dictionary.
 
     Args:
         data: The data to dump.
+        validation_model: Optional model to use for validation. If None, determines model based on operation type.
         partial: Whether this is a partial update (default: False).
 
     Returns:
@@ -438,16 +449,30 @@ def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], partial: bool =
     if data is None:
         return cast(JSONDict, {})
 
+    # Determine which validation model to use
+    if validation_model is None:
+        if partial is False and hasattr(self, "_create_model") and self._create_model is not None:
+            # For create operations
+            validation_model = self._create_model
+        elif partial is True and hasattr(self, "_update_model") and self._update_model is not None:
+            # For update operations
+            validation_model = self._update_model
+        else:
+            # Fall back to datamodel
+            validation_model = self._datamodel
+
     try:
-        if self._datamodel and isinstance(data, self._datamodel):
-            # 1. Handle Model Instances
+        # Convert data to dictionary
+        if validation_model and (isinstance(data, validation_model) or (hasattr(data, "model_dump") or hasattr(data, "dict"))):
+            # Handle model instances
             return cast(JSONDict, self._dump_model_instance(data, partial))
         elif isinstance(data, dict):
-            # 2. Handle Dictionaries
-            return cast(JSONDict, self._dump_dictionary(cast(JSONDict, data), partial))
+            # Handle dictionaries
+            data_dict = cast(JSONDict, data)
+            return cast(JSONDict, self._dump_dictionary(data_dict, partial, validation_model))
         else:
-            # 3. Handle Invalid Types
-            raise TypeError(f"Input data must be a dict or a model instance, got {type(data).__name__}")
+            # Handle invalid types
+            raise TypeError(f"Input data must be a dict or a Pydantic model instance, got {type(data).__name__}")
 
     except DataValidationError:
         # Re-raise DataValidationErrors raised by helpers

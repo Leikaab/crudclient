@@ -14,7 +14,14 @@ Classes:
 
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+)
 
 T = TypeVar("T")
 
@@ -99,6 +106,32 @@ class PaginationLinks(BaseModel):
         return v
 
 
+class IdRef(BaseModel):
+    """
+    A simple model representing a reference to another object by its ID.
+
+    Attributes:
+        id: The unique identifier of the referenced object.
+    """
+
+    id: int
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class IdUrl(BaseModel):
+    """
+    A simple model representing an object with an ID and a URL.
+
+    Attributes:
+        id: The unique identifier of the object.
+        url: The URL pointing to the object resource.
+    """
+
+    id: int
+    url: Optional[HttpUrl] = None
+
+
 class ApiResponse(BaseModel, Generic[T]):
     """
     A generic model for API responses with pagination.
@@ -107,14 +140,14 @@ class ApiResponse(BaseModel, Generic[T]):
     a count of total items, and the actual data.
 
     Attributes:
-        links (PaginationLinks): Pagination links.
+        links (Optional[PaginationLinks]): Pagination links.
         count (int): Total number of items.
-        data (List[T]): The actual data items.
+        data (List[T]): The actual data items (can be populated from 'values' alias).
     """
 
-    links: PaginationLinks = Field(..., alias="_links", description="Pagination links")
+    links: Optional[PaginationLinks] = Field(default=None, alias="_links", description="Pagination links")
     count: int = Field(..., ge=0, description="Total number of items")
-    data: List[T] = Field(..., description="The actual data items")
+    data: List[T] = Field(..., validation_alias=AliasChoices("data", "values"), description="The actual data items")
 
     @field_validator("count")
     @classmethod
