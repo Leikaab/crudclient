@@ -36,7 +36,7 @@ def ensure_date_params(params: Optional[JSONDict] = None) -> JSONDict:
         params = {}
 
     # If dateFrom or dateTo are not provided, use defaults
-    if "dateFrom" not in params or "dateTo" not in params:
+    if "dateFrom" not in params.keys() or "dateTo" not in params.keys():
         # Default to last 30 days
         date_to = datetime.now().strftime("%Y-%m-%d")
         date_from = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
