@@ -25,8 +25,8 @@
 				"GitHub.copilot",
 				"GitHub.copilot-chat",
 				"tamasfe.even-better-toml",
-				"ms-azuretools.vscode-docker",
-				"RooVeterinaryInc.roo-cline"
+				"RooVeterinaryInc.roo-cline",
+				"ms-azuretools.vscode-containers"
 			]
 		}
 	},
