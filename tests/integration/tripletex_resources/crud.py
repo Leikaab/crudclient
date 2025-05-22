@@ -47,8 +47,7 @@ class TripletexCrud(Crud[T], Generic[T]):
         -----
         This method overrides the default _convert_to_model method to handle
         Tripletex's nested response structure. Tripletex API returns single items
-        in the 'value' field of the response. This method extracts the 'value' field
-        before passing it to the parent class's conversion logic.
+        in the 'value' field and lists in the 'values' field of the response.
         """
         # First validate the response data using the parent class's method
         validated_data = self._validate_response(data)
@@ -63,9 +62,20 @@ class TripletexCrud(Crud[T], Generic[T]):
         if not isinstance(validated_data, dict):
             raise ValueError("Response data is not a dictionary.")
 
-        cleaned_data = validated_data.get("value", None)
-        if isinstance(cleaned_data, (list, dict)):
-            # If the subdata is a list or dict, convert it to the model
-            return super()._convert_to_model(cleaned_data)
+        # For single item responses (value field)
+        if "value" in validated_data and validated_data["value"] is not None and self._datamodel is not None:
+            value_data = validated_data["value"]
+            if isinstance(value_data, dict):
+                return self._datamodel(**value_data)
+            return value_data
 
+        # For list responses (values field)
+        if self._api_response_model is not None:
+            try:
+                # Try direct instantiation with the response model
+                return self._api_response_model(**validated_data)
+            except Exception:
+                pass
+
+        # Fall back to parent class behavior
         return super()._convert_to_model(validated_data)

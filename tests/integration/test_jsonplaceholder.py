@@ -1,6 +1,6 @@
 import pytest
 
-from .jsonplaceholder_resources.models import Comment, Post
+from .jsonplaceholder_resources.models import Album, Comment, Post, Todo, User
 from .jsonplaceholder_resources.setup import JsonplaceholderAPI, PlaceholderConfig
 
 
@@ -135,3 +135,95 @@ def test_custom_action(api):
         assert comment.name is not None
         assert comment.email is not None
         assert comment.body is not None
+
+
+# ResourceGroup Tests
+
+
+def test_list_users(api):
+    """
+    Test listing users from the JSONPlaceholder API using ResourceGroup.
+
+    This test verifies that we can retrieve a list of users through the UserGroup
+    and that each user is properly converted to a User model instance.
+    """
+    users = api.users.list()
+    assert isinstance(users, list)
+    assert len(users) > 0
+    assert isinstance(users[0], User)
+    assert users[0].id is not None
+    assert users[0].name is not None
+    assert users[0].email is not None
+
+
+def test_read_user(api):
+    """
+    Test reading a user from the JSONPlaceholder API using ResourceGroup.
+
+    This test verifies that we can retrieve a specific user by ID through the UserGroup
+    and that the response is properly converted to a User model instance.
+    """
+    user = api.users.read("1")
+    assert isinstance(user, User)
+    assert user.id == 1
+    assert user.name is not None
+    assert user.email is not None
+
+
+def test_user_posts(api):
+    """
+    Test listing posts for a specific user using nested ResourceGroup structure.
+
+    This test verifies that we can retrieve posts for a specific user through
+    the nested UserPostsCrud under UserGroup.
+    """
+    user_id = "1"
+    posts = api.users.posts.list(parent_id=user_id)
+
+    assert isinstance(posts, list)
+    assert len(posts) > 0
+    for post in posts:
+        assert isinstance(post, Post)
+        assert post.id is not None
+        assert post.userId == int(user_id)
+        assert post.title is not None
+        assert post.body is not None
+
+
+def test_user_albums(api):
+    """
+    Test listing albums for a specific user using nested ResourceGroup structure.
+
+    This test verifies that we can retrieve albums for a specific user through
+    the nested UserAlbumsCrud under UserGroup.
+    """
+    user_id = "1"
+    albums = api.users.albums.list(parent_id=user_id)
+
+    assert isinstance(albums, list)
+    assert len(albums) > 0
+    for album in albums:
+        assert isinstance(album, Album)
+        assert album.id is not None
+        assert album.userId == int(user_id)
+        assert album.title is not None
+
+
+def test_user_todos(api):
+    """
+    Test listing todos for a specific user using nested ResourceGroup structure.
+
+    This test verifies that we can retrieve todos for a specific user through
+    the nested UserTodosCrud under UserGroup.
+    """
+    user_id = "1"
+    todos = api.users.todos.list(parent_id=user_id)
+
+    assert isinstance(todos, list)
+    assert len(todos) > 0
+    for todo in todos:
+        assert isinstance(todo, Todo)
+        assert todo.id is not None
+        assert todo.userId == int(user_id)
+        assert todo.title is not None
+        assert isinstance(todo.completed, bool)

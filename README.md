@@ -31,6 +31,8 @@
 
   - **CRUD Class Mixins**: The project includes reusable class mixins for building CRUD operations. These mixins promote code reusability and consistency across multiple projects, ensuring that common functionality is implemented efficiently and with minimal duplication.
 
+  - **ResourceGroup Feature**: The framework provides a `ResourceGroup` class for organizing related API resources under a common path segment, enabling typed, hierarchical nesting of resources. This improves type hinting, code organization, and maintainability for complex APIs. See [docs/resource_groups.md](docs/resource_groups.md) for details.
+
   This framework is designed to help developers focus on implementing the specific logic required for their APIs while relying on a solid, reusable foundation for the underlying infrastructure. It supports a modular approach, making it easier to manage and scale API client development across various projects.
 
 </details>
@@ -142,6 +144,64 @@ def main()
 if __name__ == '__main__':
     main()
 
+```
+
+</details>
+
+<details>
+  <summary>Using ResourceGroups for nested resources</summary>
+
+```python
+from crudclient.api import API
+from crudclient.client import Client
+from crudclient.crud import Crud
+from crudclient.groups import ResourceGroup
+from pydantic import BaseModel
+
+# Define models
+class User(BaseModel):
+    id: int
+    name: str
+    email: str
+
+class Post(BaseModel):
+    id: int
+    userId: int
+    title: str
+    body: str
+
+# Define CRUD resources
+class UserPostsCrud(Crud):
+    _resource_path = "posts"
+    _datamodel = Post
+    allowed_actions = ["list", "read"]
+
+# Define resource groups
+class UserGroup(ResourceGroup):
+    _resource_path = "users"
+    _datamodel = User
+    allowed_actions = ["list", "read"]
+
+    def _register_child_endpoints(self) -> None:
+        self.posts = UserPostsCrud(self.client, parent=self)
+
+# Define API
+class MyAPI(API):
+    client_class = Client
+
+    def _register_endpoints(self) -> None:
+        # Register top-level CRUD resources
+        pass
+
+    def _register_groups(self) -> None:
+        # Register top-level resource groups
+        self.users = UserGroup(self.client, parent=None)
+
+# Usage
+api = MyAPI(client_config=config)
+users = api.users.list()  # GET /users
+user = api.users.read(resource_id=1)  # GET /users/1
+user_posts = api.users.posts.list(parent_id=1)  # GET /users/1/posts
 ```
 
 </details>

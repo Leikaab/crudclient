@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -17,15 +17,24 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
         from_index: The starting index of the items included in this response page.
         count: The number of items included in this response page.
         version_digest: A digest representing the version of the data.
-        data: A list containing the actual data objects for this page (alias for values).
+        values: A list containing the actual data objects for this page.
     """
 
     full_result_size: Optional[int] = Field(None, alias="fullResultSize")
     from_index: Optional[int] = Field(None, alias="from")
     version_digest: Optional[str] = Field(None, alias="versionDigest")
 
+    # Override the data field to use 'values' instead
+    values: List[T] = Field(default_factory=list)
+
+    # Make data an alias for values to maintain compatibility with ApiResponse
+    @property
+    def data(self) -> List[T]:
+        """Alias for values to maintain compatibility with ApiResponse."""
+        return self.values
+
     # Override model_config to handle both Tripletex and ApiResponse field names
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
 
 class IdUrl(BaseModel):

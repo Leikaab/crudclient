@@ -120,6 +120,9 @@ class API(ABC):
         # Register CRUD resources
         self._register_endpoints()
 
+        # Register ResourceGroup instances
+        self._register_groups()
+
     @abstractmethod
     def _register_endpoints(self) -> None:
         """
@@ -128,6 +131,15 @@ class API(ABC):
 
         Example:
             self.contacts = Contacts(self.client)
+        """
+
+    def _register_groups(self) -> None:
+        """
+        Method for subclasses to register top-level ResourceGroup instances.
+        These groups will become direct attributes of the API instance.
+
+        Example:
+            self.ledger = LedgerGroup(self.client, parent=None)
         """
 
     def _initialize_client(self) -> None:

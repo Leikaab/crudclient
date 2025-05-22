@@ -29,14 +29,15 @@ def test_list_suppliers(api):
     """
 
     # List all suppliers (consider filtering if possible and necessary)
-    suppliers = api.suppliers.list()
+    # Limit to just 2 items to reduce output
+    suppliers = api.suppliers.list(params={"count": 2})
 
     # Check that we got a list of suppliers
     # The API returns a SupplierResponse object
     assert isinstance(suppliers, SupplierResponse)
-    assert isinstance(suppliers.data, list)
-    assert all(isinstance(supplier, Supplier) for supplier in suppliers.data)
-    assert len(suppliers.data) > 0
+    assert isinstance(suppliers.values, list)
+    assert all(isinstance(supplier, Supplier) for supplier in suppliers.values)
+    assert len(suppliers.values) > 0
 
 
 @pytest.mark.no_parallel

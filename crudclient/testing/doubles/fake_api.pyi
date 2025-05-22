@@ -600,3 +600,9 @@ class FakeAPI(API):
         Register default endpoints. This is a no-op in FakeAPI.
         """
         ...
+
+    def _register_groups(self) -> None:
+        """
+        Register default ResourceGroups. This is a no-op in FakeAPI.
+        """
+        ...

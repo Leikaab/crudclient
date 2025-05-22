@@ -77,6 +77,9 @@ class TestAPI:
             def _register_endpoints(self):
                 pass
 
+            def _register_groups(self):
+                pass
+
         client_config = ClientConfig(hostname=standard_data.get("hostname"))
 
         # Act & Assert
@@ -148,6 +151,9 @@ class TestAPI:
             client_class = ErrorClient
 
             def _register_endpoints(self):
+                pass
+
+            def _register_groups(self):
                 pass
 
         client_config = ClientConfig(hostname="https://api.example.com")

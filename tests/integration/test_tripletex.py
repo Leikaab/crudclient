@@ -75,14 +75,15 @@ def test_list_countries(api):
     Test that we can list countries from the Tripletex API.
     """
     # Get the list of countries
-    countries = api.countries.list()
+    # Limit to just 2 items to reduce output
+    countries = api.countries.list(params={"count": 2})
 
     # Check that we got a list of countries
     assert isinstance(countries, CountryResponse)
-    assert len(countries.data) > 0
+    assert len(countries.values) > 0
 
     # Check that each country has the expected structure
-    for country in countries.data:
+    for country in countries.values:
         # The API returns Country objects, not dictionaries
         assert isinstance(country, Country)
         assert hasattr(country, "id")
@@ -98,10 +99,11 @@ def test_read_country(api):
     Test that we can read a specific country from the Tripletex API.
     """
     # Get the list of countries
-    countries = api.countries.list()
+    # Limit to just 2 items to reduce output
+    countries = api.countries.list(params={"count": 2})
 
     # Get the first country's ID
-    first_country_id = countries.data[0].id
+    first_country_id = countries.values[0].id
 
     # Read the country by ID
     country = api.countries.read(first_country_id)
