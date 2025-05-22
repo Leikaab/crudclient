@@ -1,9 +1,26 @@
+"""
+OAuth token management utilities for testing.
+
+This module provides a class for managing OAuth tokens, including creation,
+validation, and refreshing of tokens.
+"""
+
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 
 class OAuthTokenManager:
-    def __init__(self):
+    """
+    OAuth token manager for handling token lifecycle.
+
+    This class provides methods for creating, validating, and refreshing OAuth tokens,
+    as well as managing users for password grant type.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initialize an OAuth token manager.
+        """
         # Token management
         self.access_tokens: Dict[str, Dict] = {}
         self.refresh_tokens: Dict[str, str] = {}  # refresh_token -> access_token
@@ -16,6 +33,13 @@ class OAuthTokenManager:
         self.user_credentials: Dict[str, Dict] = {"user": {"password": "pass", "scopes": ["read", "write"]}}  # Renamed from self.users
 
     def initialize_default_token(self, client_id: str, scope: Optional[str]) -> None:
+        """
+        Initialize a default token for the OAuth server.
+
+        Args:
+            client_id: The client ID
+            scope: The scope for the token
+        """
         now = datetime.now()
         self.access_tokens[self.current_access_token] = {
             "client_id": client_id,
@@ -36,6 +60,20 @@ class OAuthTokenManager:
         grant_type: str = "client_credentials",
         user: Optional[str] = None,
     ) -> Dict[str, Any]:
+        """
+        Create a new access token and refresh token pair.
+
+        Args:
+            client_id: The client ID
+            scope: The scope for the token
+            expires_in: The number of seconds until the token expires
+            token_type: The token type (e.g., "Bearer")
+            grant_type: The grant type used to obtain the token
+            user: The username for password grant type
+
+        Returns:
+            A dictionary with the token response
+        """
         now = datetime.now()
         self._token_counter += 1
         access_token = f"access_token_{now.timestamp()}_{self._token_counter}"
@@ -63,6 +101,18 @@ class OAuthTokenManager:
         }
 
     def create_authorization_code(self, client_id: str, redirect_uri: str, scope: Optional[str] = None, state: Optional[str] = None) -> str:
+        """
+        Create a new authorization code.
+
+        Args:
+            client_id: The client ID
+            redirect_uri: The redirect URI
+            scope: The scope for the token
+            state: The state parameter
+
+        Returns:
+            The authorization code
+        """
         now = datetime.now()
         code = f"auth_code_{now.timestamp()}"
 
@@ -77,6 +127,15 @@ class OAuthTokenManager:
         return code
 
     def validate_token(self, token: str) -> bool:
+        """
+        Check if a token is valid.
+
+        Args:
+            token: The token to validate
+
+        Returns:
+            True if the token is valid, False otherwise
+        """
         if token not in self.access_tokens:
             return False
 
@@ -87,6 +146,15 @@ class OAuthTokenManager:
         return True
 
     def refresh_token(self, refresh_token: str) -> Optional[Dict[str, Any]]:
+        """
+        Refresh an access token using a refresh token.
+
+        Args:
+            refresh_token: The refresh token
+
+        Returns:
+            A dictionary with the new token response, or None if the refresh token is invalid
+        """
         if refresh_token not in self.refresh_tokens:
             return None
 
@@ -105,24 +173,33 @@ class OAuthTokenManager:
             user=old_token_data.get("user"),
         )
 
-    def revoke_token(self, access_token: str) -> bool:
-        if access_token not in self.access_tokens:
+    def revoke_token(self, token: str) -> bool:
+        """
+        Revoke an access token.
+
+        Args:
+            token: The token to revoke
+
+        Returns:
+            True if the token was revoked, False if it was not found
+        """
+        if token not in self.access_tokens:
             return False
 
         # Find and remove the refresh token associated with this access token
         refresh_token_to_remove = None
         for rt, at in self.refresh_tokens.items():
-            if at == access_token:
+            if at == token:
                 refresh_token_to_remove = rt
                 break
         if refresh_token_to_remove:
             del self.refresh_tokens[refresh_token_to_remove]
 
         # Remove the access token itself
-        del self.access_tokens[access_token]
+        del self.access_tokens[token]
 
         # If the revoked token was the current one, find a new current token
-        if self.current_access_token == access_token:
+        if self.current_access_token == token:
             # Check if there are any tokens left after deletion
             if self.access_tokens:
                 # Find the oldest token based on the timestamp in the token string
@@ -158,12 +235,28 @@ class OAuthTokenManager:
 
         return True
 
-    def add_user(self, username: str, password: str, scopes: Optional[List[str]] = None) -> None:
-        if scopes is None:  # Ensure scopes is a list
-            scopes = []
+    def add_user(self, username: str, password: str, scopes: List[str]) -> None:
+        """
+        Add a user for password grant type.
+
+        Args:
+            username: The username
+            password: The password
+            scopes: The scopes for the user
+        """
         self.user_credentials[username] = {"password": password, "scopes": scopes}  # Store in user_credentials dict
 
     def validate_user(self, username: str, password: str) -> bool:
+        """
+        Validate user credentials.
+
+        Args:
+            username: The username
+            password: The password
+
+        Returns:
+            True if the credentials are valid, False otherwise
+        """
         user_data = self.user_credentials.get(username)  # Get from user_credentials dict
         if not user_data or user_data["password"] != password:
             return False

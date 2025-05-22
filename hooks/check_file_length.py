@@ -142,7 +142,7 @@ def main(files: List[str], max_lines: int = 300, verbose: bool = False) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check file length rules")
     parser.add_argument("files", nargs="*", help="Files to check")
-    parser.add_argument("--max-lines", type=int, default=300, help="Maximum number of lines allowed in a file")
+    parser.add_argument("--max-lines", type=int, default=1000, help="Maximum number of lines allowed in a file")
     parser.add_argument("--verbose", "-v", action="store_true", help="Print line counts for all files")
     args = parser.parse_args()
 

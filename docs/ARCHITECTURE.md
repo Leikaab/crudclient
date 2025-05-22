@@ -15,15 +15,16 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
         *   `client.py` (`Client`): The high-level client orchestrator, applying configuration (auth, retries) and delegating actual HTTP communication to the `http/` layer.
         *   `http/` (HTTP Layer): Contains components (`client.py`, `request.py`, `response.py`, `errors.py`, `retry.py`, `session.py`, `retry_strategies.py`, `retry_conditions.py`) responsible for raw HTTP communication, request/response object handling, HTTP-specific error management, sophisticated retry logic, and session management (e.g., using `requests`).
         *   `crud/` (CRUD Abstraction): Contains components (`base.py`, `endpoint.py`, `operations.py`, `response_conversion.py`) providing abstractions for defining and executing CRUD operations on API endpoints, including URL construction and Pydantic model conversion.
+        *   `groups.py` (`ResourceGroup`): Defines the `ResourceGroup` class which inherits from `Crud` and enables typed, hierarchical nesting of API resources. It allows for organizing related resources under a common path segment while also supporting its own CRUD operations.
         *   `response_strategies/`: Provides different strategies (e.g., `DefaultResponseStrategy`, `PathBasedResponseStrategy`) for parsing and extracting relevant data from diverse API response structures.
-        *   `api.py` (`API`): Acts as an entry point, composing the `Client` and registering `Crud` resource endpoints.
+        *   `api.py` (`API`): Acts as an entry point, composing the `Client` and registering both `Crud` resource endpoints and `ResourceGroup` instances.
         *   `models.py`: Defines base Pydantic models for common API patterns (like `ApiResponse`).
         *   `exceptions.py`: Defines custom exceptions specific to the `crudclient` library's logic.
         *   `testing/`: Contains a comprehensive testing framework with factories and various test doubles (mocks, stubs, spies) to facilitate testing applications built with `crudclient`. (See dedicated section below).
     *   This separation makes the library easier to understand, test, and maintain.
 
 2.  **Extensibility:**
-    *   The core classes (`ClientConfig`, `Crud`, `API`) are designed to be subclassed by users to adapt the client to specific API requirements (e.g., custom authentication flows, unique endpoint structures, specific response models).
+    *   The core classes (`ClientConfig`, `Crud`, `ResourceGroup`, `API`) are designed to be subclassed by users to adapt the client to specific API requirements (e.g., custom authentication flows, unique endpoint structures, specific response models, hierarchical resource organization).
 
 3.  **Convention over Configuration (where sensible):**
     *   The library provides sensible defaults (e.g., for retries, timeouts, common CRUD method names) but allows easy overrides through configuration or subclassing.
@@ -32,8 +33,8 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
 
 1.  **Type Hinting Strategy:**
     *   **Emphasis on Static Typing:** We strive for comprehensive type hinting to improve code correctness and maintainability, leveraging Python's typing features.
-    *   **`.pyi` Stub Files:** Type hints for the public API and detailed docstrings are primarily located in `.pyi` stub files (`client.pyi`, `config.pyi`, etc.).
-        *   **Rationale:** This provides excellent type information and documentation for library *consumers* (e.g., via IDE autocompletion and type checkers) without cluttering the implementation (`.py`) files, keeping the core logic cleaner for *maintainers*. Custom hooks enforce stub file presence and consistency.
+    *   **Inline Type Annotations:** Type hints and detailed docstrings are included directly in the `.py` files.
+        *   **Rationale:** This provides excellent type information and documentation for both library *consumers* (e.g., via IDE autocompletion and type checkers) and *maintainers* in a single location, making the codebase more maintainable and easier to understand.
     *   **Mypy:** Static type checking is enforced using `mypy`. Configuration is in `mypy.ini`.
 
 2.  **Code Style, Formatting, and Linting:**

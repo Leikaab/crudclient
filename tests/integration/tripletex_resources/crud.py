@@ -1,7 +1,8 @@
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Generic, Optional, Type, TypeVar, Union
 
 from crudclient.crud import Crud
 from crudclient.response_strategies import ModelDumpable
+from crudclient.types import JSONDict, RawResponse
 
 T = TypeVar("T", bound=ModelDumpable)
 
@@ -10,74 +11,71 @@ class TripletexCrud(Crud[T], Generic[T]):
     """
     Base class for Tripletex CRUD operations.
 
-    This class extends the generic Crud class with Tripletex-specific functionality.
+    This class extends the generic Crud class with Tripletex-specific functionality
+    to handle the Tripletex API response format, which returns single items in a
+    'value' field and lists in a 'values' field.
     """
 
-    def _validate_response(self, response_data: Any) -> Dict[str, Any]:
+    # Override these attributes to allow for different model types
+    _create_model: Optional[Type[Any]] = None
+    _update_model: Optional[Type[Any]] = None
+    _api_response_model: Optional[Type[Any]] = None
+
+    def _convert_to_model(self, data: RawResponse) -> Union[T, JSONDict]:
         """
-        Override the default _validate_response method to handle the nested response structure.
+        Convert Tripletex API response to data model.
 
-        Tripletex API returns data in the 'value' field of the response.
+        Parameters
+        ----------
+        data : RawResponse
+            The raw response data from the Tripletex API.
+
+        Returns
+        -------
+        Union[T, JSONDict]
+            An instance of the datamodel or a dictionary.
+
+        Raises
+        ------
+        DataValidationError
+            If the response data fails validation.
+        ValueError
+            If the response data is None, invalid, or not a dictionary.
+            If the response data is missing the expected structure.
+
+        Notes
+        -----
+        This method overrides the default _convert_to_model method to handle
+        Tripletex's nested response structure. Tripletex API returns single items
+        in the 'value' field and lists in the 'values' field of the response.
         """
-        if isinstance(response_data, dict) and "value" in response_data:
-            return response_data["value"]
-        return response_data
+        # First validate the response data using the parent class's method
+        validated_data = self._validate_response(data)
 
-    def _validate_list_return(self, response_data: dict) -> List[T]:
-        """
-        Validate and extract the list of items from the response data.
+        if validated_data is None:
+            raise ValueError("Response data is None or invalid.")
 
-        Tripletex API returns items in the 'values' field of the response.
-        """
-        if not isinstance(response_data, dict):
-            raise ValueError(f"Expected dict response, got {type(response_data)}")
+        # If the data is already a model instance, return it
+        if self._datamodel is not None and isinstance(validated_data, self._datamodel):
+            return validated_data
 
-        if "values" not in response_data:
-            raise ValueError(f"Expected 'values' in response, got keys: {list(response_data.keys())}")
+        if not isinstance(validated_data, dict):
+            raise ValueError("Response data is not a dictionary.")
 
-        values = response_data["values"]
-        if not isinstance(values, list):
-            raise ValueError(f"Expected list in 'values', got {type(values)}")
+        # For single item responses (value field)
+        if "value" in validated_data and validated_data["value"] is not None and self._datamodel is not None:
+            value_data = validated_data["value"]
+            if isinstance(value_data, dict):
+                return self._datamodel(**value_data)
+            return value_data
 
-        # For simplicity in this example, we'll just return the raw values
-        # In a real implementation, you would convert these to model objects
-        return values
+        # For list responses (values field)
+        if self._api_response_model is not None:
+            try:
+                # Try direct instantiation with the response model
+                return self._api_response_model(**validated_data)
+            except Exception:
+                pass
 
-    def listcreate(self, data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Create multiple resources in a single request.
-
-        Args:
-            data_list: A list of dictionaries containing the data for each resource to create.
-
-        Returns:
-            A list of the created resources.
-        """
-        endpoint = self._get_endpoint()
-        payload = {"values": data_list}
-        response = self.client.post(endpoint + "/list", json=payload)
-
-        if isinstance(response, dict) and "values" in response:
-            return response["values"]
-
-        return []
-
-    def listupdate(self, data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Update multiple resources in a single request.
-
-        Args:
-            data_list: A list of dictionaries containing the data for each resource to update.
-                       Each dictionary must include an 'id' field.
-
-        Returns:
-            A list of the updated resources.
-        """
-        endpoint = self._get_endpoint()
-        payload = {"values": data_list}
-        response = self.client.put(endpoint + "/list", json=payload)
-
-        if isinstance(response, dict) and "values" in response:
-            return response["values"]
-
-        return []
+        # Fall back to parent class behavior
+        return super()._convert_to_model(validated_data)

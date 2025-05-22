@@ -52,6 +52,10 @@ class ApiSpy(EnhancedSpyBase, API):  # Inherits from EnhancedSpyBase and conform
         """Abstract method from API base class."""
         ...
 
+    def _register_groups(self) -> None:
+        """Abstract method from API base class."""
+        ...
+
     def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> Crud:
         """
         Spy on an endpoint registration call.

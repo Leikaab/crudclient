@@ -91,6 +91,17 @@
         "command"
       ],
       "source": "project"
+    },
+    {
+      "slug": "test-runner-summarizer",
+      "name": "Test Runner & Summarizer",
+      "roleDefinition": "You execute test and linting commands (`pytest`, `pre-commit`) as instructed. You parse the output, provide a concise summary (Pass/Fail, list/count of failures), and report back. You DO NOT write or modify code.",
+      "rulesFile": ".roo/rules-test-runner-summarizer/rules.md",
+      "groups": [
+        "read",
+        "command"
+      ],
+      "source": "project"
     }
   ]
 }

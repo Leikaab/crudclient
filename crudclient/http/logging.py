@@ -13,12 +13,17 @@ _BODY_LOG_TRUNCATION_LIMIT = 1024
 
 
 class HttpLifecycleLogger:
+    """Handles logging for the HTTP request/response lifecycle."""
+
+    config: ClientConfig
+    logger: logging.Logger
 
     def __init__(self, config: ClientConfig, logger: logging.Logger) -> None:
         self.config = config
         self.logger = logger
 
     def log_request_body_content(self, kwargs: Dict[str, Any]) -> None:
+        """Logs the content of the request body, redacting if necessary."""
         body_to_log: Optional[str] = None
         content_type = kwargs.get("headers", {}).get("Content-Type", "").lower()
         content_type_display = content_type or "unknown"
@@ -59,6 +64,7 @@ class HttpLifecycleLogger:
             self.logger.debug("Request body logging enabled but body is empty or not logged (no 'json' or 'data').")
 
     def log_response_body_content(self, response: requests.Response) -> None:
+        """Logs the content of the response body, redacting if necessary."""
         try:
             body_text = response.text
             if not body_text:
@@ -99,6 +105,7 @@ class HttpLifecycleLogger:
             self.logger.warning(f"Could not access or log response body due to error: {e}", exc_info=True)
 
     def log_response_details(self, method: str, url: str, response: requests.Response) -> None:
+        """Logs details about the received HTTP response."""
         self.logger.debug("Received response for %s %s: Status %d", method, url, response.status_code)
         if response.status_code in (401, 403):
             self.logger.warning("Authentication failed for %s %s: Status %d", method, url, response.status_code)
@@ -121,6 +128,7 @@ class HttpLifecycleLogger:
             self.logger.debug("Response body logging is disabled.")
 
     def log_request_details(self, method: str, url: str, kwargs: Dict[str, Any]) -> None:
+        """Logs details about the outgoing HTTP request."""
         params = kwargs.get("params")
         if params:
             self.logger.debug("Sending request: %s %s Params: %s", method, url, params)
@@ -147,6 +155,7 @@ class HttpLifecycleLogger:
         attempt_count: int,
         final_outcome: Union[requests.Response, Exception, None],
     ) -> None:
+        """Logs the final outcome and duration of an HTTP request."""
         end_time = time.monotonic()
         duration_ms = int((end_time - start_time) * 1000)
         if isinstance(final_outcome, requests.Response):
@@ -178,6 +187,7 @@ class HttpLifecycleLogger:
         method: Optional[str] = None,  # Method might not be available if request is None
         url: Optional[str] = None,  # URL might not be available if request is None
     ) -> None:
+        """Logs details about an HTTPError."""
         response = e.response
         request = e.request
 

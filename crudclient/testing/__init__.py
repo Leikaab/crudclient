@@ -1,3 +1,10 @@
+"""
+Testing utilities for the crudclient library.
+
+This module provides a framework for creating test doubles (mocks, stubs, fakes, spies)
+for the crudclient library components (Client, API, CRUD, Auth, HTTPClient).
+"""
+
 from .auth import (
     ApiKeyAuthMock,
     AuthMockBase,
@@ -18,7 +25,7 @@ from .doubles import DataStore, FakeAPI
 
 # Import directly from the module file
 from .exceptions import FakeAPIError  # Import separately
-from .exceptions import (  # FakeAPIError, # Removed from group
+from .exceptions import (
     AuthStrategyError,
     CRUDOperationError,
     DataStoreError,
@@ -44,11 +51,11 @@ from .verification import Verifier
 
 
 class RequestVerifier:
-    pass
+    """Placeholder for RequestVerifier class referenced in tests."""
 
 
 class ResponseVerifier:
-    pass
+    """Placeholder for ResponseVerifier class referenced in tests."""
 
 
 __all__ = [

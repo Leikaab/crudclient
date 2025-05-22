@@ -43,7 +43,7 @@ class TestCreateAuthStrategy:
         # GIVEN - parameters from pytest.mark.parametrize
 
         # WHEN
-        auth = create_auth_strategy(auth_type, token)  # type: ignore[arg-type]
+        auth = create_auth_strategy(auth_type, token)
 
         # THEN
         if expected_class is type(None):

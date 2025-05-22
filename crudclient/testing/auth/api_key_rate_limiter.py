@@ -1,24 +1,68 @@
+"""
+API Key rate limiting utilities for testing.
+
+This module provides a class for rate limiting API key usage with configurable
+limits and periods.
+"""
+
 from datetime import datetime, timedelta
 from typing import Dict, List
 
 
 class ApiKeyRateLimiter:
-    def __init__(self):
+    """
+    API Key rate limiter with configurable limits and periods.
+
+    This class provides methods for tracking API key usage and enforcing
+    rate limits with configurable requests per period.
+    """
+
+    rate_limit_enabled: bool
+    rate_limit_requests: int
+    rate_limit_period: int
+    request_history: Dict[str, List[datetime]]
+
+    def __init__(self) -> None:
+        """
+        Initialize an API Key rate limiter.
+        """
         self.rate_limit_enabled = False
         self.rate_limit_requests = 100
         self.rate_limit_period = 3600  # seconds (1 hour)
         self.request_history: Dict[str, List[datetime]] = {}
 
     def enable_rate_limiting(self, requests_per_period: int = 100, period_seconds: int = 3600) -> None:
+        """
+        Enable rate limiting for API keys.
+
+        Args:
+            requests_per_period: Number of requests allowed per period
+            period_seconds: Period length in seconds
+        """
         self.rate_limit_enabled = True
         self.rate_limit_requests = requests_per_period
         self.rate_limit_period = period_seconds
 
     def initialize_key(self, api_key: str) -> None:
+        """
+        Initialize rate limiting for a specific API key.
+
+        Args:
+            api_key: The API key to initialize
+        """
         if api_key not in self.request_history:
             self.request_history[api_key] = []
 
     def track_request(self, api_key: str) -> bool:
+        """
+        Track a request for rate limiting purposes.
+
+        Args:
+            api_key: The API key used for the request
+
+        Returns:
+            True if the request is within rate limits, False otherwise
+        """
         # Record request time for rate limiting
         now = datetime.now()
         if api_key not in self.request_history:
@@ -37,6 +81,15 @@ class ApiKeyRateLimiter:
         return True  # No rate limiting or limit not exceeded
 
     def get_rate_limit_status(self, api_key: str) -> Dict:
+        """
+        Get rate limit status for a specific API key.
+
+        Args:
+            api_key: The API key to get status for
+
+        Returns:
+            Dictionary with rate limit status
+        """
         if not self.rate_limit_enabled:
             return {"enabled": False}
 

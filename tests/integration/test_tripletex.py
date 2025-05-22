@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from .tripletex_resources.models import Country, CountryResponse
 from .tripletex_resources.setup import TripletexAPI, TripletexTestConfig
 
 
@@ -74,22 +75,23 @@ def test_list_countries(api):
     Test that we can list countries from the Tripletex API.
     """
     # Get the list of countries
-    countries = api.countries.list()
+    # Limit to just 2 items to reduce output
+    countries = api.countries.list(params={"count": 2})
 
     # Check that we got a list of countries
-    assert isinstance(countries, list)
-    assert len(countries) > 0
+    assert isinstance(countries, CountryResponse)
+    assert len(countries.values) > 0
 
     # Check that each country has the expected structure
-    for country in countries:
-        # The API returns dictionaries, not model objects
-        assert isinstance(country, dict)
-        assert "id" in country
-        assert "isoAlpha2Code" in country
-        assert "isoAlpha3Code" in country
-        assert "isoNumericCode" in country
+    for country in countries.values:
+        # The API returns Country objects, not dictionaries
+        assert isinstance(country, Country)
+        assert hasattr(country, "id")
+        assert hasattr(country, "isoAlpha2Code")
+        assert hasattr(country, "isoAlpha3Code")
+        assert hasattr(country, "isoNumericCode")
         # The API might use 'displayName' instead of 'name'
-        assert "displayName" in country
+        assert hasattr(country, "displayName")
 
 
 def test_read_country(api):
@@ -97,18 +99,19 @@ def test_read_country(api):
     Test that we can read a specific country from the Tripletex API.
     """
     # Get the list of countries
-    countries = api.countries.list()
+    # Limit to just 2 items to reduce output
+    countries = api.countries.list(params={"count": 2})
 
     # Get the first country's ID
-    first_country_id = countries[0]["id"]
+    first_country_id = countries.values[0].id
 
     # Read the country by ID
     country = api.countries.read(first_country_id)
 
     # Check that we got the expected country
-    assert isinstance(country, dict)
-    assert country["id"] == first_country_id
-    assert "displayName" in country
-    assert "isoAlpha2Code" in country
-    assert "isoAlpha3Code" in country
-    assert "isoNumericCode" in country
+    assert isinstance(country, Country)
+    assert country.id == first_country_id
+    assert hasattr(country, "displayName")
+    assert hasattr(country, "isoAlpha2Code")
+    assert hasattr(country, "isoAlpha3Code")
+    assert hasattr(country, "isoNumericCode")

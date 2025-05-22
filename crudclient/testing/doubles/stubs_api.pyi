@@ -64,6 +64,10 @@ class StubAPI(API):
         """Internal method override; endpoints are registered via `register_endpoint`."""
         ...
 
+    def _register_groups(self) -> None:
+        """Internal method override; ResourceGroups are not used in StubAPI."""
+        ...
+
     def __getattr__(self, name: str) -> StubCrud:
         """
         Provide attribute-style access to registered `StubCrud` endpoints.

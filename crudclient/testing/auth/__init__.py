@@ -1,3 +1,11 @@
+"""
+Mock authentication implementations for the crudclient testing framework.
+
+This module provides mock implementations of the authentication strategies,
+including Basic, Bearer, API Key, and Custom auth, along with factory functions
+and verification helpers.
+"""
+
 from .api_key import ApiKeyAuthMock
 from .base import AuthMockBase
 from .basic import BasicAuthMock

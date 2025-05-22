@@ -77,6 +77,12 @@ class MockAPI(API):
             raise ValueError("Client is required!")
         self.test_resource: Crud = MockCrud(self.client)
 
+    def _register_groups(self):
+        """
+        Implementation of the abstract method to register ResourceGroup instances.
+        This mock implementation doesn't register any groups.
+        """
+
 
 @pytest.fixture
 def standard_data():

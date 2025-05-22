@@ -1,6 +1,16 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
 from .response import MockResponse
+
+
+class PatternDict(TypedDict, total=False):
+    """TypedDict for response pattern dictionaries."""
+
+    method: str
+    url_pattern: str
+    response: Union[Dict[str, Any], List[Dict[str, Any]], Callable[..., MockResponse]]
+    params_matcher: Callable[[Optional[Dict[str, str]]], bool]
+    json_matcher: Callable[[Optional[Dict[str, Any]]], bool]
 
 
 class APIPatternBuilder:
@@ -17,7 +27,7 @@ class APIPatternBuilder:
         search_response: Optional[Union[List[Dict[str, Any]], Callable[..., MockResponse]]] = None,
         filter_response: Optional[Union[List[Dict[str, Any]], Callable[..., MockResponse]]] = None,
         patch_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[PatternDict]:
         patterns = []
 
         # Ensure base_path starts with / and doesn't end with /
@@ -25,48 +35,56 @@ class APIPatternBuilder:
 
         # GET collection (list)
         if list_response is not None:
-            patterns.append({"method": "GET", "url_pattern": f"{base_path}$", "response": list_response})
+            patterns.append(PatternDict(method="GET", url_pattern=f"{base_path}$", response=list_response))
 
         # GET resource (read)
         if get_response is not None:
-            patterns.append({"method": "GET", "url_pattern": f"{base_path}/{resource_id_pattern}$", "response": get_response})
+            patterns.append(PatternDict(method="GET", url_pattern=f"{base_path}/{resource_id_pattern}$", response=get_response))
 
         # POST collection (create)
         if create_response is not None:
-            patterns.append({"method": "POST", "url_pattern": f"{base_path}$", "response": create_response})
+            patterns.append(PatternDict(method="POST", url_pattern=f"{base_path}$", response=create_response))
 
         # PUT resource (update)
         if update_response is not None:
-            patterns.append({"method": "PUT", "url_pattern": f"{base_path}/{resource_id_pattern}$", "response": update_response})
+            patterns.append(PatternDict(method="PUT", url_pattern=f"{base_path}/{resource_id_pattern}$", response=update_response))
 
         # PATCH resource (partial update)
         if patch_response is not None:
-            patterns.append({"method": "PATCH", "url_pattern": f"{base_path}/{resource_id_pattern}$", "response": patch_response})
+            patterns.append(PatternDict(method="PATCH", url_pattern=f"{base_path}/{resource_id_pattern}$", response=patch_response))
 
         # DELETE resource (delete)
         if delete_response is not None:
-            patterns.append({"method": "DELETE", "url_pattern": f"{base_path}/{resource_id_pattern}$", "response": delete_response})
+            patterns.append(PatternDict(method="DELETE", url_pattern=f"{base_path}/{resource_id_pattern}$", response=delete_response))
 
         # GET collection with search (search)
         if search_response is not None:
+            # Define a properly typed matcher function for search params
+            def search_params_matcher(params: Optional[Dict[str, str]]) -> bool:
+                return bool(params and "search" in params)
+
             patterns.append(
-                {
-                    "method": "GET",
-                    "url_pattern": f"{base_path}$",
-                    "params_matcher": lambda params: params and "search" in params,
-                    "response": search_response,
-                }
+                PatternDict(
+                    method="GET",
+                    url_pattern=f"{base_path}$",
+                    params_matcher=search_params_matcher,
+                    response=search_response,
+                )
             )
 
         # GET collection with filters (filter)
         if filter_response is not None:
+            # Define a properly typed matcher function for filter params
+            def filter_params_matcher(params: Optional[Dict[str, str]]) -> bool:
+                return bool(params and any(key != "search" and key != "page" and key != "limit" for key in params.keys()))
+
             patterns.append(
-                {
-                    "method": "GET",
-                    "url_pattern": f"{base_path}$",
-                    "params_matcher": lambda params: params and any(key != "search" and key != "page" and key != "limit" for key in params.keys()),
-                    "response": filter_response,
-                }
+                PatternDict(
+                    method="GET",
+                    url_pattern=f"{base_path}$",
+                    params_matcher=filter_params_matcher,
+                    response=filter_response,
+                )
             )
 
         return patterns
@@ -82,7 +100,7 @@ class APIPatternBuilder:
         create_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         update_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         delete_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[PatternDict]:
         patterns = []
 
         # Ensure paths are properly formatted
@@ -92,23 +110,23 @@ class APIPatternBuilder:
 
         # GET child collection (list)
         if list_response is not None:
-            patterns.append({"method": "GET", "url_pattern": f"{base_path}$", "response": list_response})
+            patterns.append(PatternDict(method="GET", url_pattern=f"{base_path}$", response=list_response))
 
         # GET child resource (read)
         if get_response is not None:
-            patterns.append({"method": "GET", "url_pattern": f"{base_path}/{child_id_pattern}$", "response": get_response})
+            patterns.append(PatternDict(method="GET", url_pattern=f"{base_path}/{child_id_pattern}$", response=get_response))
 
         # POST child collection (create)
         if create_response is not None:
-            patterns.append({"method": "POST", "url_pattern": f"{base_path}$", "response": create_response})
+            patterns.append(PatternDict(method="POST", url_pattern=f"{base_path}$", response=create_response))
 
         # PUT child resource (update)
         if update_response is not None:
-            patterns.append({"method": "PUT", "url_pattern": f"{base_path}/{child_id_pattern}$", "response": update_response})
+            patterns.append(PatternDict(method="PUT", url_pattern=f"{base_path}/{child_id_pattern}$", response=update_response))
 
         # DELETE child resource (delete)
         if delete_response is not None:
-            patterns.append({"method": "DELETE", "url_pattern": f"{base_path}/{child_id_pattern}$", "response": delete_response})
+            patterns.append(PatternDict(method="DELETE", url_pattern=f"{base_path}/{child_id_pattern}$", response=delete_response))
 
         return patterns
 
@@ -118,7 +136,7 @@ class APIPatternBuilder:
         batch_create_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         batch_update_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
         batch_delete_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[PatternDict]:
         patterns = []
 
         # Ensure base_path starts with / and doesn't end with /
@@ -127,21 +145,21 @@ class APIPatternBuilder:
 
         # POST batch create
         if batch_create_response is not None:
-            patterns.append({"method": "POST", "url_pattern": f"{batch_path}/create$", "response": batch_create_response})
+            patterns.append(PatternDict(method="POST", url_pattern=f"{batch_path}/create$", response=batch_create_response))
 
         # PUT/PATCH batch update
         if batch_update_response is not None:
-            patterns.append({"method": "PUT", "url_pattern": f"{batch_path}/update$", "response": batch_update_response})
-            patterns.append({"method": "PATCH", "url_pattern": f"{batch_path}/update$", "response": batch_update_response})
+            patterns.append(PatternDict(method="PUT", url_pattern=f"{batch_path}/update$", response=batch_update_response))
+            patterns.append(PatternDict(method="PATCH", url_pattern=f"{batch_path}/update$", response=batch_update_response))
 
         # DELETE batch delete
         if batch_delete_response is not None:
             patterns.append(
-                {
-                    "method": "POST",  # Often POST with IDs in body for batch delete
-                    "url_pattern": f"{batch_path}/delete$",
-                    "response": batch_delete_response,
-                }
+                PatternDict(
+                    method="POST",  # Often POST with IDs in body for batch delete
+                    url_pattern=f"{batch_path}/delete$",
+                    response=batch_delete_response,
+                )
             )
 
         return patterns
@@ -151,26 +169,31 @@ class APIPatternBuilder:
         url_pattern: str = r"/graphql$",
         query_matchers: Optional[Dict[str, Union[Dict[str, Any], Callable[..., MockResponse]]]] = None,
         default_response: Optional[Union[Dict[str, Any], Callable[..., MockResponse]]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[PatternDict]:
         patterns = []
 
         # Add patterns for specific queries
         if query_matchers:
             for query_pattern, response in query_matchers.items():
+                # Define a properly typed matcher function
+                def create_matcher(pattern: str) -> Callable[[Optional[Dict[str, Any]]], bool]:
+                    def matcher(json_data: Optional[Dict[str, Any]]) -> bool:
+                        return bool(isinstance(json_data, dict) and "query" in json_data and pattern in json_data.get("query", ""))
+
+                    return matcher
+
                 patterns.append(
-                    {
-                        "method": "POST",
-                        "url_pattern": url_pattern,
-                        "json_matcher": lambda json_data, pattern=query_pattern: (
-                            isinstance(json_data, dict) and "query" in json_data and pattern in json_data["query"]
-                        ),
-                        "response": response,
-                    }
+                    PatternDict(
+                        method="POST",
+                        url_pattern=url_pattern,
+                        json_matcher=create_matcher(query_pattern),
+                        response=response,
+                    )
                 )
 
         # Add default response for unmatched queries
         if default_response is not None:
-            patterns.append({"method": "POST", "url_pattern": url_pattern, "response": default_response})
+            patterns.append(PatternDict(method="POST", url_pattern=url_pattern, response=default_response))
 
         return patterns
 
@@ -180,7 +203,7 @@ class APIPatternBuilder:
         success_response: Optional[Dict[str, Any]] = None,
         error_response: Optional[Dict[str, Any]] = None,
         valid_credentials: Optional[Dict[str, str]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> List[PatternDict]:
         if success_response is None:
             success_response = {
                 "access_token": "mock-access-token",
@@ -196,8 +219,8 @@ class APIPatternBuilder:
         if valid_credentials is None:
             valid_credentials = {"client_id": "valid-client-id", "client_secret": "valid-client-secret"}
 
-        def token_response_factory(**kwargs):
-            data = kwargs.get("data", {})
+        def token_response_factory(**kwargs: Any) -> MockResponse:
+            data: Dict[str, Any] = kwargs.get("data", {})
 
             # Check if credentials match
             for key, value in valid_credentials.items():
@@ -206,6 +229,6 @@ class APIPatternBuilder:
 
             return MockResponse(status_code=200, json_data=success_response)
 
-        patterns = [{"method": "POST", "url_pattern": token_url_pattern, "response": token_response_factory}]
+        patterns = [PatternDict(method="POST", url_pattern=token_url_pattern, response=token_response_factory)]
 
         return patterns

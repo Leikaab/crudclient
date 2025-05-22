@@ -1,5 +1,20 @@
+"""
+Retry Module for CrudClient
+===========================
+
+This module provides retry functionality for the CrudClient library.
+It contains classes and functions for managing retry policies and backoff strategies.
+
+Classes:
+    - RetryHandler: Manages retry policies and backoff strategies.
+    - RetryStrategy: Base class for retry strategies.
+    - FixedRetryStrategy: Implements a fixed delay retry strategy.
+    - ExponentialBackoffStrategy: Implements an exponential backoff retry strategy.
+"""
+
 import logging
 import time
+from enum import Enum
 from typing import Callable, List, Optional, Tuple, Union
 
 import requests
@@ -12,7 +27,24 @@ from .retry_strategies import ExponentialBackoffStrategy, RetryStrategy
 logger = logging.getLogger(__name__)
 
 
+class RetryEvent(Enum):
+    """Enum representing different retry events."""
+
+    FORBIDDEN = 403
+    UNAUTHORIZED = 401
+    SERVER_ERROR = 500
+    TIMEOUT = "timeout"
+    CONNECTION_ERROR = "connection_error"
+    CUSTOM = "custom"
+
+
 class RetryHandler:
+    """Handles the logic for retrying HTTP requests based on configured conditions."""
+
+    max_retries: int
+    retry_strategy: RetryStrategy
+    retry_conditions: List[RetryCondition]
+    on_retry_callback: Optional[Callable[[int, float, Optional[requests.Response], Optional[Exception]], None]]
 
     def __init__(
         self,
@@ -21,6 +53,22 @@ class RetryHandler:
         retry_conditions: Optional[List[RetryCondition]] = None,
         on_retry_callback: Optional[Callable[[int, float, Optional[requests.Response], Optional[Exception]], None]] = None,
     ) -> None:
+        """Initializes the RetryHandler.
+
+        Args:
+            max_retries: Maximum number of retry attempts (0 means no retries).
+            retry_strategy: The strategy for calculating delays between retries.
+                            Defaults to ExponentialBackoffStrategy.
+            retry_conditions: A list of conditions that trigger a retry.
+                              Defaults to retrying on common server errors (500, 502, 503, 504)
+                              and network errors (Timeout, ConnectionError).
+            on_retry_callback: An optional function called before each retry attempt.
+                               It receives (attempt, delay, last_response, last_exception).
+
+        Raises:
+            ValueError: If max_retries is negative.
+            TypeError: If retry_strategy, retry_conditions, or on_retry_callback have incorrect types.
+        """
         if not isinstance(max_retries, int) or max_retries < 0:
             raise ValueError("max_retries must be a non-negative integer")
         if retry_strategy is not None and not isinstance(retry_strategy, RetryStrategy):
@@ -47,6 +95,17 @@ class RetryHandler:
             self.retry_conditions = retry_conditions if isinstance(retry_conditions, list) else [retry_conditions]
 
     def should_retry(self, attempt: int, response: Optional[requests.Response] = None, exception: Optional[Exception] = None) -> bool:
+        """
+        Determine whether a request should be retried.
+
+        Args:
+            attempt (int): The current retry attempt number (0-based).
+            response (Optional[requests.Response]): The response from the request, if any.
+            exception (Optional[Exception]): The exception raised by the request, if any.
+
+        Returns:
+            bool: True if the request should be retried, False otherwise.
+        """
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
@@ -66,6 +125,15 @@ class RetryHandler:
         return False
 
     def get_delay(self, attempt: int) -> float:
+        """
+        Calculate the delay before the next retry attempt.
+
+        Args:
+            attempt (int): The current retry attempt number (1-based).
+
+        Returns:
+            float: The delay in seconds before the next retry.
+        """
         if not isinstance(attempt, int):
             raise TypeError(f"attempt must be an integer, got {type(attempt).__name__}")
 
@@ -80,6 +148,7 @@ class RetryHandler:
         url: str,
         attempt: int,
     ) -> Tuple[Optional[requests.Response], Optional[Exception]]:
+        """Executes the request function and handles exceptions."""
         # Implementation moved from docstring
         try:
             response = request_func()
@@ -104,6 +173,7 @@ class RetryHandler:
         method: str,
         url: str,
     ) -> Tuple[Optional[requests.Response], bool]:
+        """Processes the response or exception, determining if retry is needed."""
         # Implementation moved from docstring
         if exception:
             # Handle RequestException
@@ -154,6 +224,7 @@ class RetryHandler:
         method: str,
         url: str,
     ) -> None:
+        """Calculates delay, sleeps, and calls callbacks before the next retry."""
         # Implementation moved from docstring
         delay = self.get_delay(attempt)
 
@@ -193,6 +264,32 @@ class RetryHandler:
         session: Optional[requests.Session] = None,  # session is passed to request_func closure, not directly used here
         setup_auth_func: Optional[Callable[[], None]] = None,
     ) -> Tuple[Union[requests.Response, Exception], int]:
+        """Executes a request function with retry logic.
+
+        Handles retries based on configured conditions and strategy. Logs errors
+        and raises NetworkError if retries are exhausted due to network issues.
+        Returns the final response or caught exception along with the attempt count.
+
+        Args:
+            method: The HTTP method (for logging).
+            url: The request URL (for logging).
+            request_func: The function that executes the actual HTTP request.
+            session: The requests.Session object (optional, for context).
+            setup_auth_func: An optional function to refresh authentication,
+                             typically called on 401 errors before retrying.
+
+        Returns:
+            A tuple containing:
+            - The final `requests.Response` on success or retryable non-OK status.
+            - The caught `Exception` if the request function failed unexpectedly
+              (and was not retryable or retries exhausted).
+            - The total number of attempts made (including the final one).
+
+        Raises:
+            NetworkError: If a `requests.RequestException` occurs and retries are
+                          exhausted or the exception is not configured for retry.
+            TypeError: If `request_func` or `setup_auth_func` are not callable.
+        """
         if not callable(request_func):
             raise TypeError(f"request_func must be callable, got {type(request_func).__name__}")
         if setup_auth_func is not None and not callable(setup_auth_func):

@@ -6,6 +6,7 @@ from crudclient.config import ClientConfig
 from crudclient.crud import Crud
 from crudclient.response_strategies import ModelDumpable
 
+from .groups import UserGroup
 from .models import Comment, CommentResponse, Post, PostResponse
 
 T = TypeVar("T", bound=ModelDumpable)
@@ -72,14 +73,27 @@ class CommentsCrud(Crud[Comment]):
 class JsonplaceholderAPI(API):
     """
     API client for JSONPlaceholder.
+
+    This implementation demonstrates the use of ResourceGroups for organizing
+    related endpoints under a common path segment.
     """
 
     client_class = Client
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         """
-        Register API endpoints.
+        Register top-level API endpoints that are not part of any resource group.
         """
         assert self.client is not None, "Client is required!"
         self.posts = PostsCrud(self.client)
         self.comments = CommentsCrud(self.client)
+
+    def _register_groups(self) -> None:
+        """
+        Register top-level ResourceGroup instances.
+
+        This method instantiates the UserGroup which handles operations on /users
+        and contains nested resources for user-specific posts, albums, and todos.
+        """
+        assert self.client is not None, "Client is required!"
+        self.users = UserGroup(self.client, parent=None)

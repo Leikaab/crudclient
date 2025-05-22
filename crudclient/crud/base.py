@@ -1,3 +1,13 @@
+"""
+Module `base.py`
+===============
+
+This module defines the Crud class, which is the base class for all CRUD operations.
+It provides a generic implementation of CRUD (Create, Read, Update, Delete) operations
+for API resources. It supports both top-level and nested resources, and can be easily
+extended for specific API endpoints.
+"""
+
 import logging
 from typing import (
     Any,
@@ -6,37 +16,76 @@ from typing import (
     Literal,
     Optional,
     Type,
-    TypeAlias,
     TypeVar,
     Union,
 )
 
+from typing_extensions import TypeAlias
+
 from ..client import Client
+
+# DataValidationError is used in imported methods
+from ..exceptions import DataValidationError  # noqa: F401
 from ..models import ApiResponse
-from ..response_strategies import ModelDumpable, ResponseModelStrategy
+from ..response_strategies import (
+    DefaultResponseModelStrategy,
+    ModelDumpable,
+    PathBasedResponseModelStrategy,
+    ResponseModelStrategy,
+)
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
 
 
+# Type alias for path arguments used in endpoint methods
+PathArgs = Optional[Union[str, int]]
+
 T = TypeVar("T", bound=ModelDumpable)
 HttpMethodString: TypeAlias = Literal["get", "post", "put", "patch", "delete", "head", "options", "trace"]
 CrudInstance: TypeAlias = "Crud[Any]"
 CrudType: TypeAlias = Type[CrudInstance]
-PathArgs = Optional[Union[str, int]]
 
 
 class Crud(Generic[T]):
+    """
+    Base class for CRUD operations on API resources, supporting both top-level and nested resources.
+
+    This class provides a generic implementation of common CRUD operations and can be
+    easily extended for specific API endpoints.
+
+    Attributes:
+        _resource_path: The base path for the resource in the API.
+        _datamodel: The data model class for the resource.
+        _api_response_model: Custom API response model, if any.
+        _response_strategy: The strategy to use for converting responses.
+        _list_return_keys: Possible keys for list data in API responses.
+        allowed_actions: List of allowed methods for this resource.
+    """
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
     _api_response_model: Optional[Type[ApiResponse]] = None
+    _create_model: Optional[Type[T]] = None
+    _update_model: Optional[Type[T]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
     _update_mode: str = "standard"  # Default update mode: "standard" or "no_resource_id"
     allowed_actions: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
+    client: Client
+    parent: Optional["Crud"]
 
-    def __init__(self, client: Client, parent: Optional["Crud"] = None):
+    def __init__(self, client: Client, parent: Optional["Crud"] = None) -> None:
+        """
+        Initialize the CRUD resource.
+
+        Args:
+            client: An instance of the API client.
+            parent: Optional parent Crud instance for nested resources.
+
+        Raises:
+            ValueError: If the resource path is not set.
+        """
         if not self._resource_path:
             raise ValueError("Resource path must be set")
 
@@ -46,39 +95,68 @@ class Crud(Generic[T]):
         # Initialize the response strategy
         self._init_response_strategy()
 
+    def _init_response_strategy(self: "Crud") -> None:
+        """
+        Initialize the response model strategy.
+
+        This method creates an instance of the appropriate response model strategy
+        based on the class configuration. It uses PathBasedResponseModelStrategy if
+        _single_item_path or _list_item_path are defined, otherwise it uses
+        DefaultResponseModelStrategy.
+        """
+        if self._response_strategy is not None:
+            logger.debug(f"Using provided response strategy: {self._response_strategy.__class__.__name__}")
+            return
+
+        # If a path-based strategy is needed, use PathBasedResponseModelStrategy
+        if hasattr(self, "_single_item_path") or hasattr(self, "_list_item_path"):
+            logger.debug("Using PathBasedResponseModelStrategy")
+            self._response_strategy = PathBasedResponseModelStrategy(
+                datamodel=self._datamodel,
+                api_response_model=self._api_response_model,
+                single_item_path=getattr(self, "_single_item_path", None),
+                list_item_path=getattr(self, "_list_item_path", None),
+            )
+        else:
+            # Otherwise, use the default strategy
+            logger.debug("Using DefaultResponseModelStrategy")
+            self._response_strategy = DefaultResponseModelStrategy(
+                datamodel=self._datamodel,
+                api_response_model=self._api_response_model,
+                list_return_keys=self._list_return_keys,
+            )
+
     # Import methods from other modules
-    from .endpoint import (
-        _build_resource_path,
-        _endpoint_prefix,
-        _get_endpoint,
-        _get_parent_path,
-        _get_prefix_segments,
-        _join_path_segments,
-        _validate_path_segments,
-    )
-    from .operations import (
-        _prepare_request_body_kwargs,
-        create,
-        custom_action,
-        destroy,
-        list,
-        partial_update,
-        read,
-        update,
-    )
-    from .response_conversion import (
-        _convert_to_list_model,
-        _convert_to_model,
-        _dump_data,
-        _dump_dictionary,
-        _dump_model_instance,
-        _fallback_list_conversion,
-        _init_response_strategy,
-        _validate_and_dump_full_dict,
-        _validate_list_return,
-        _validate_partial_dict,
-        _validate_response,
-    )
+    # --- Endpoint Methods ---
+    from .endpoint import _build_resource_path  # type: ignore
+    from .endpoint import _endpoint_prefix  # type: ignore
+    from .endpoint import _get_endpoint  # type: ignore
+    from .endpoint import _get_parent_path  # type: ignore
+    from .endpoint import _get_prefix_segments  # type: ignore
+    from .endpoint import _join_path_segments  # type: ignore
+    from .endpoint import _validate_path_segments  # type: ignore
+
+    # --- Operations Methods ---
+    from .operations import _prepare_request_body_kwargs  # type: ignore
+    from .operations import create  # type: ignore
+    from .operations import custom_action  # type: ignore
+    from .operations import destroy  # type: ignore
+    from .operations import list  # type: ignore
+    from .operations import partial_update  # type: ignore
+    from .operations import read  # type: ignore
+    from .operations import update  # type: ignore
+
+    # --- Response Conversion Methods ---
+    from .response_conversion import _convert_to_list_model  # type: ignore
+    from .response_conversion import _convert_to_model  # type: ignore
+    from .response_conversion import _dump_data  # type: ignore
+    from .response_conversion import _dump_dictionary  # type: ignore
+    from .response_conversion import _dump_model_instance  # type: ignore
+    from .response_conversion import _fallback_list_conversion  # type: ignore
+    from .response_conversion import _validate_and_dump_full_dict  # type: ignore
+    from .response_conversion import _validate_list_return  # type: ignore
+    from .response_conversion import _validate_partial_dict  # type: ignore
+    from .response_conversion import _validate_response  # type: ignore
 
 
 # Alias for backward compatibility
