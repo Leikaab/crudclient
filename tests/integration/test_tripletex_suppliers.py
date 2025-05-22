@@ -47,9 +47,29 @@ def test_create_update_destroy_supplier(api):
     """
 
     supplier_name = generate_unique_name()
+
+    # Find a unique supplier number that doesn't conflict with existing ones
+    base_supplier_number = 100000  # Start with a 6-digit number
+    max_attempts = 10
+
+    for attempt in range(max_attempts):
+        # Try a supplier number based on the attempt
+        supplier_number = str(base_supplier_number + attempt)
+
+        # Check if this supplier number exists by listing suppliers with this number
+        existing_suppliers = api.suppliers.list(params={"supplierNumber": supplier_number})
+
+        # If no suppliers with this number exist, we can use it
+        if len(existing_suppliers.values) == 0:
+            break
+    else:
+        # If we exhausted all attempts, raise an error
+        pytest.fail(f"Could not find an unused supplier number after {max_attempts} attempts")
+
     supplier_data = {
         "name": supplier_name,
         "email": "test@example.com",
+        "supplierNumber": supplier_number,
     }
 
     # Create the supplier

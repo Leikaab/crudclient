@@ -29,7 +29,7 @@ def test_update_company_minimal(api):
     Test updating a company with minimal data.
 
     This test updates only the company name without including ID or version.
-    This tests the non-standard API behavior where the update works with just the name.
+    This tests the non-standard api_client behavior where the update works with just the name.
 
     NB! this test is passing in a consumer library that users our crudclient as a depenency.
     this test should never be changed in any way, as it would break the consumer library, and our intentions!
