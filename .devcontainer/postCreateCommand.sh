@@ -3,6 +3,9 @@
 # Reload the shell environment
 . ~/.bashrc
 
+# Ensure the vscode user's local bin is in PATH
+export PATH="/home/vscode/.local/bin:/root/.local/bin:$PATH"
+
 # Check if the .env file exists
 if [ -f .env ]; then
     # Export the variables from .env
@@ -18,7 +21,7 @@ else
     echo "GITHUB_TOKEN not set, skipping GitHub CLI authentication."
 fi
 
-# set up pre-commit hooks, commented out for now
+# Set up pre-commit hooks
 poetry run pre-commit install -t pre-commit
 poetry run pre-commit install -t pre-push
 
@@ -38,7 +41,7 @@ echo "Checking poetry by direct invocation:"
 if /usr/local/py-utils/bin/poetry --version &> /dev/null
 then
     echo "Poetry is available and working"
-    poetry config virtualenvs.create false --local
+    #poetry config virtualenvs.create false --local
 else
     echo "Poetry could not be found"
 fi

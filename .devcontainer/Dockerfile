@@ -1,20 +1,17 @@
-ARG VARIANT=1-3.12-bullseye
+ARG VARIANT=1-3.13-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/python:${VARIANT}
 
 ENV PYTHONUNBUFFERED 1
 
-# Install pipx
-RUN pip install --user pipx
+# Install pipx and Poetry globally
 RUN pip install --upgrade pip
+RUN pip install poetry
 
-# Install Poetry using pipx
-RUN pipx install poetry
-
-# Set the PATH environment variable
-ENV PATH="/root/.local/bin:$PATH"
+# Set the PATH environment variable for both root and vscode users
+ENV PATH="/root/.local/bin:/home/vscode/.local/bin:$PATH"
 
 # Disable poetry from creating virtual environments globally
-RUN poetry config virtualenvs.create false
+#RUN poetry config virtualenvs.create false
 
 # Verify the poetry configuration
 #RUN poetry config --list | grep virtualenvs.create
