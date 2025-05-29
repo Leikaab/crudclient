@@ -10,13 +10,33 @@ services:
 
     volumes:
       - ..:/workspace:cached
+      - vscode_extensions_data:/home/vscode/.vscode-server/data/User/globalStorage:cached
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
 
     # Uncomment the next line to use a non-root user for all processes.
-    # user: vscode
+    user: vscode
 
     # Commented out the env file so it does not crash the container build, if not present
     #env_file:
     #  - ../.env
+
+    depends_on:
+      - qdrant
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ../data/qdrant:/qdrant/storage:cached
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+  vscode_extensions_data:
