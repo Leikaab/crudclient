@@ -26,7 +26,8 @@
 				"GitHub.copilot-chat",
 				"tamasfe.even-better-toml",
 				"RooVeterinaryInc.roo-cline",
-				"ms-azuretools.vscode-containers"
+				"ms-azuretools.vscode-containers",
+				"bierner.markdown-mermaid"
 			]
 		}
 	},
