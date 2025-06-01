@@ -277,7 +277,7 @@ def create_error_api_response(create_api_response: Callable[..., Dict[str, Any]]
 @pytest.fixture
 def mock_api_error() -> Type[APIError]:
     """Provides the APIError exception class for testing."""
-    return APIError
+    return APIError  # type: ignore[no-any-return]  # TODO: Remove once apiconfig includes py.typed
 
 
 # --- Enhanced Mock Client Fixtures ---
