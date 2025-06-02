@@ -1,23 +1,17 @@
-ARG VARIANT=1-3.12-bullseye
+ARG VARIANT=1-3.13-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/python:${VARIANT}
 
 ENV PYTHONUNBUFFERED 1
 
-# Install pipx
-RUN pip install --user pipx
+# Install pipx and Poetry globally
 RUN pip install --upgrade pip
+RUN pip install poetry
 
-# Install Poetry using pipx
-RUN pipx install poetry
+# Set the PATH environment variable for both root and vscode users
+ENV PATH="/root/.local/bin:/home/vscode/.local/bin:$PATH"
 
-# Set the PATH environment variable
-ENV PATH="/root/.local/bin:$PATH"
-
-# Disable poetry from creating virtual environments globally
-RUN poetry config virtualenvs.create false
-
-# Verify the poetry configuration
-#RUN poetry config --list | grep virtualenvs.create
+# Copy poetry configuration first to respect in-project venv settings
+COPY poetry.toml ./
 
 # First, copy only the pyproject.toml file
 COPY pyproject.toml ./
@@ -28,5 +22,13 @@ RUN poetry lock
 # Now copy the lock file and other files
 COPY poetry.lock README.md ./
 
-# Install dependencies using Poetry
+# Install dependencies using Poetry (this will create .venv in project)
 RUN poetry install --no-interaction --no-ansi --with dev --no-root
+
+# Add the project's .venv to PATH for all users
+ENV PATH="/workspace/.venv/bin:$PATH"
+
+# Create .vscode-server directory structure and set proper ownership
+# This prevents permission issues when VS Code tries to create these directories
+RUN mkdir -p /home/vscode/.vscode-server/data/User/globalStorage && \
+    chown -R vscode:vscode /home/vscode/.vscode-server

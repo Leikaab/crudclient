@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 import requests
 
-from crudclient.auth.base import AuthStrategy
+from crudclient.auth import AuthStrategy
 
 from .models import TokenSessionResponse
 

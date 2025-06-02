@@ -252,12 +252,12 @@ class HttpClient:
             exception_cls = STATUS_CODE_TO_EXCEPTION.get(response.status_code, APIError)
 
             raise exception_cls(
-                message=f"HTTP error occurred: {response.status_code} {response.reason}",
-                request=request,
-                response=response,
+                f"HTTP error occurred: {response.status_code} {response.reason}",
+                request=cast(Any, request),
+                response=cast(Any, response),
             ) from e
         else:
-            raise APIError(message=f"HTTP error occurred without a response: {e}", request=request, response=None) from e
+            raise APIError(f"HTTP error occurred without a response: {e}", request=cast(Any, request), response=None) from e
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> RawResponseSimple:
         """

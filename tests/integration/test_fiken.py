@@ -20,13 +20,13 @@ def test_api_configuration(api):
         # Check that we have an auth strategy set up
         assert api.client.config.auth_strategy is not None
         # Check that the auth strategy is a BearerAuth
-        from crudclient.auth.bearer import BearerAuth
+        from crudclient.auth import BearerAuth
 
         assert isinstance(api.client.config.auth_strategy, BearerAuth)
         # Check that the token is set correctly
-        assert api.client.config.auth_strategy.token == token
-        assert len(api.client.config.auth_strategy.token) == 43
-        assert api.client.config.auth_strategy.token != ""
+        assert api.client.config.auth_strategy.access_token == token
+        assert len(api.client.config.auth_strategy.access_token) == 43
+        assert api.client.config.auth_strategy.access_token != ""
 
 
 def test_retrive_user(api):

@@ -68,7 +68,9 @@ class TestCustomAuthExamples:
         client.with_response_pattern(method="GET", path_pattern=r"/api/custom", data={"data": [{"id": 1, "name": "Custom Data"}]})
 
         # Make a request and expect it to fail
-        with pytest.raises(ValueError) as excinfo:
+        from apiconfig.exceptions.auth import AuthStrategyError
+
+        with pytest.raises(AuthStrategyError) as excinfo:
             client.get("/api/custom")
 
         # Verify the error

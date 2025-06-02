@@ -7,7 +7,6 @@ in real-world testing scenarios.
 
 import pytest
 
-from crudclient.auth.bearer import BearerAuth  # Added import
 from crudclient.exceptions import AuthenticationError
 
 from .common import create_mock_client
@@ -92,14 +91,12 @@ class TestBearerAuthExamples:
         # In a real implementation, this would be handled by the client
         refresh_response = client.post("/oauth/token", json={"grant_type": "refresh_token", "refresh_token": "valid_refresh_token"})
 
-        # Update the token within the client's BearerAuth strategy instance
-        auth_strategy = client.get_auth_strategy()
-        assert auth_strategy is not None, "Auth strategy should be set"
-        # Ensure it's a BearerAuth instance before accessing .token
-        if isinstance(auth_strategy, BearerAuth):
-            auth_strategy.token = refresh_response["access_token"]
-        else:
-            pytest.fail(f"Expected BearerAuth strategy, but got {type(auth_strategy)}")
+        # Update the auth strategy with a new BearerAuth instance
+        # (apiconfig's BearerAuth is immutable, so we need to create a new one)
+        from crudclient.testing.auth import create_bearer_auth_mock
+
+        new_bearer_mock = create_bearer_auth_mock(token=refresh_response["access_token"])
+        client.set_auth_strategy(new_bearer_mock.get_auth_strategy())
 
         # Now configure the successful response for the resource endpoint *after* the failed attempt
         client.with_response_pattern(

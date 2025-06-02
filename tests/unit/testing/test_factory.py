@@ -6,7 +6,7 @@ This module tests the functionality of the MockClientFactory class in crudclient
 
 from unittest.mock import MagicMock
 
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.testing.core.client import MockClient
@@ -68,7 +68,7 @@ class TestMockClientFactory:
         # Arrange
         config = ClientConfig()
         config.hostname = "https://test.example.com"
-        auth_strategy = BearerAuth(token="test-token")
+        auth_strategy = BearerAuth(access_token="test-token")
         config.auth_strategy = auth_strategy
 
         # Act
@@ -102,7 +102,7 @@ class TestMockClientFactory:
         # Arrange
         config = ClientConfig()
         config.hostname = "https://test.example.com"
-        auth_strategy = BearerAuth(token="test-token")
+        auth_strategy = BearerAuth(access_token="test-token")
         config.auth_strategy = auth_strategy
 
         client = MagicMock(spec=Client)

@@ -2,7 +2,10 @@
 Tests for API Key Authentication failure handling in the crudclient library.
 """
 
+from typing import cast
+
 import pytest
+import requests
 
 from crudclient.exceptions import AuthenticationError
 
@@ -20,7 +23,9 @@ def test_apikey_header_auth_failure(apikey_header_client, mock_request):
     # Assert
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid API Key"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid API Key"
     request = mock_request.request_history[0]
     assert "X-API-Key" in request.headers
     assert request.headers["X-API-Key"] == "valid_api_key"
@@ -42,7 +47,9 @@ def test_apikey_param_auth_failure(apikey_param_client, mock_request):
     # Assert
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid API Key Param"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid API Key Param"
 
     assert len(mock_request.request_history) == 1
     request = mock_request.request_history[0]

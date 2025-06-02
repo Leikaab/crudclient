@@ -1,4 +1,4 @@
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
@@ -49,7 +49,7 @@ class TestClientAuth:
         """Test Client initialization with BearerTokenAuth sets the correct header."""
         # Arrange
         token = "my-secret-token"
-        auth_strategy = BearerAuth(token=token)
+        auth_strategy = BearerAuth(access_token=token)
         config = ClientConfig(hostname="https://bearer-test.com", auth_strategy=auth_strategy)
 
         # Act

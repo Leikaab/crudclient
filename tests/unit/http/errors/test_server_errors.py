@@ -5,7 +5,10 @@ This module contains tests for how the HTTP client handles various server error 
 including 5xx status codes.
 """
 
+from typing import cast
+
 import pytest
+import requests
 
 from crudclient.exceptions import APIError
 
@@ -28,7 +31,9 @@ class TestHttpClientServerErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 500
-        assert excinfo.value.response.json()["message"] == "Something went wrong"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Something went wrong"
 
     def test_502_error(self, http_client, mock_request):
         """
@@ -45,7 +50,9 @@ class TestHttpClientServerErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 502
-        assert excinfo.value.response.json()["message"] == "Invalid response from upstream server"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Invalid response from upstream server"
 
     def test_503_error(self, http_client, mock_request):
         """
@@ -62,7 +69,9 @@ class TestHttpClientServerErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 503
-        assert excinfo.value.response.json()["message"] == "Server is overloaded"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Server is overloaded"
 
     def test_504_error(self, http_client, mock_request):
         """
@@ -79,4 +88,6 @@ class TestHttpClientServerErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 504
-        assert excinfo.value.response.json()["message"] == "Upstream server timed out"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Upstream server timed out"

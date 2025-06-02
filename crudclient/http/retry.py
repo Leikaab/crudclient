@@ -186,7 +186,6 @@ class RetryHandler:
                     )
                     raise NetworkError(
                         message=f"Request failed after {attempt} attempts due to network error: {exception}",
-                        request=getattr(exception, "request", None),
                         original_exception=exception,
                     )
                 return None, True  # Retry needed

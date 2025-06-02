@@ -10,36 +10,35 @@ This module contains tests for the ResourceGroup class, focusing on:
 from unittest.mock import MagicMock, patch
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from crudclient.client import Client
 from crudclient.crud.base import Crud
 from crudclient.groups import ResourceGroup
 
 
-class TestModel(BaseModel):
+class ResourceTestModel(BaseModel):
     """Test model for ResourceGroup tests."""
 
     id: int
     name: str
 
-    class Config:
-        # Allow extra attributes for validation flexibility in tests
-        extra = "allow"
+    # Allow extra attributes for validation flexibility in tests
+    model_config = ConfigDict(extra="allow")
 
 
-class ConcreteChildCrud(Crud[TestModel]):
+class ConcreteChildCrud(Crud[ResourceTestModel]):
     """Concrete Crud class for testing as a child endpoint."""
 
     _resource_path = "child-resources"
-    _datamodel = TestModel
+    _datamodel = ResourceTestModel
 
 
 class ConcreteChildGroup(ResourceGroup):
     """Concrete ResourceGroup class for testing as a child group."""
 
     _resource_path = "child-group"
-    _datamodel = TestModel
+    _datamodel = ResourceTestModel
 
     def _register_child_endpoints(self) -> None:
         """Register a test endpoint."""
@@ -50,14 +49,14 @@ class ConcreteResourceGroup(ResourceGroup):
     """Concrete ResourceGroup class for testing basic functionality."""
 
     _resource_path = "test-group"
-    _datamodel = TestModel
+    _datamodel = ResourceTestModel
 
 
 class ConcreteParentGroup(ResourceGroup):
     """Concrete ResourceGroup class for testing parent-child relationships."""
 
     _resource_path = "parent-group"
-    _datamodel = TestModel
+    _datamodel = ResourceTestModel
 
     def _register_child_endpoints(self) -> None:
         """Register a test endpoint."""
@@ -153,7 +152,7 @@ class TestResourceGroupAsCrud:
         mock_client.get.assert_called_once()
         args, kwargs = mock_client.get.call_args
         assert args[0] == "test-group/123"
-        assert isinstance(result, TestModel)
+        assert isinstance(result, ResourceTestModel)
         assert result.id == 123
         assert result.name == "Test Resource"
 
@@ -173,7 +172,7 @@ class TestResourceGroupAsCrud:
         mock_client.post.assert_called_once()
         args, kwargs = mock_client.post.call_args
         assert args[0] == "test-group"
-        assert isinstance(result, TestModel)
+        assert isinstance(result, ResourceTestModel)
         assert result.id == 1
         assert result.name == "New Resource"
 
@@ -194,7 +193,7 @@ class TestResourceGroupAsCrud:
         mock_client.put.assert_called_once()
         args, kwargs = mock_client.put.call_args
         assert args[0] == "test-group/123"
-        assert isinstance(result, TestModel)
+        assert isinstance(result, ResourceTestModel)
         assert result.id == 123
         assert result.name == "Updated Resource"
 
@@ -279,7 +278,7 @@ class TestResourceGroupChildRegistration:
         result = top_group.child_group.nested_resource.read(resource_id="456")
 
         # Assert - Check the result and that the client was called with the correct path
-        assert isinstance(result, TestModel)
+        assert isinstance(result, ResourceTestModel)
         assert result.id == 456
         assert result.name == "Nested Resource Item"
 

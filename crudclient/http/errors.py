@@ -11,7 +11,7 @@ Classes:
 """
 
 import logging
-from typing import Dict, Type
+from typing import Any, Dict, Type, cast
 
 import requests
 
@@ -112,13 +112,14 @@ class ErrorHandler:
 
             # No specific elif needed for UnprocessableEntityError, handled by issubclass(APIError)
             if issubclass(exception_class, APIError):  # Handles ClientAuthenticationError, UnprocessableEntityError, etc.
-                raise exception_class(message=error_message, request=response.request, response=response) from e
+                # Cast to Any to handle protocol mismatch - apiconfig will extract what it needs
+                raise exception_class(error_message, request=cast(Any, response.request), response=cast(Any, response)) from e
             else:  # Handle non-APIError custom exceptions if registered
                 logger.warning("Status code %s mapped to non-APIError subclass %s.", status_code, exception_class.__name__)
                 # Attempt to raise with standard APIError args, might fail if signature differs
                 try:
                     # Base CrudClientError only takes message
-                    raise exception_class(message=error_message) from e
+                    raise exception_class(error_message) from e
                 except TypeError:
                     logger.error(
                         "Failed to instantiate custom non-APIError %s with standard args. Falling back to APIError.",
@@ -126,13 +127,15 @@ class ErrorHandler:
                         exc_info=True,
                     )
                     # Fallback to generic APIError
-                    raise APIError(message=error_message, request=response.request, response=response) from e
+                    # Cast to Any to handle protocol mismatch - apiconfig will extract what it needs
+                    raise APIError(error_message, request=cast(Any, response.request), response=cast(Any, response)) from e
 
         logger.warning("Error handler reached end without raising specific exception for status %s.", status_code)
+        # Cast to Any to handle protocol mismatch - apiconfig will extract what it needs
         raise APIError(
             f"Request failed with status code {status_code}: {error_data}",
-            request=response.request,
-            response=response,
+            request=cast(Any, response.request),
+            response=cast(Any, response),
         )
 
     def register_status_code_handler(self, status_code: int, exception_class: Type[CrudClientError]) -> None:

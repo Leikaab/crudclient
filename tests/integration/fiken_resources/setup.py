@@ -4,7 +4,7 @@ from typing import TypeVar, cast
 from dotenv import load_dotenv
 
 from crudclient.api import API
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud import Crud
@@ -27,7 +27,7 @@ class FikenConfig(ClientConfig):
     def __init__(self):
         super().__init__()
         if self.api_key:
-            self.auth_strategy = BearerAuth(token=self.api_key)
+            self.auth_strategy = BearerAuth(access_token=self.api_key)
 
 
 class FikenCrud(Crud[T]):

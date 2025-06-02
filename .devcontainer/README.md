@@ -31,6 +31,7 @@ The DevContainer setup is now tested using a github actions workflow on latest u
     - GitHub integration (`vscode-github-actions`, `vscode-pull-request-github`, `GitHub.copilot`, `GitHub.copilot-chat`)
 - **Port Forwarding**:
   - **Port 5051**: Forwarded for live server coverage with a label `"Coverage - Live Server"`.
+  - **Port 6333**: Forwarded for Qdrant HTTP API with a label `"Qdrant HTTP API"`.
 - **Post Create Command**:
   - Executes `postCreateCommand.sh` to set up the environment further.
 - **Remote User**: The container runs as the `"vscode"` user by default.
@@ -47,6 +48,15 @@ The DevContainer setup is now tested using a github actions workflow on latest u
   - **Volumes**: Mounts the project directory into the container as `/workspace`.
   - **Command**: Runs the container indefinitely using `sleep infinity` to keep it alive.
   - **Optional User Configuration**: Optionally, the container can be run as a non-root user by uncommenting the `user: vscode` line.
+
+- **Service `qdrant`**:
+  - **Image**: Uses the latest Qdrant vector database image (`qdrant/qdrant:latest`).
+  - **Ports**:
+    - **6333**: HTTP API port for Qdrant
+    - **6334**: gRPC API port for Qdrant
+  - **Volumes**: Mounts `../data/qdrant` to `/qdrant/storage` for persistent data storage between container rebuilds.
+  - **Environment Variables**: Configures HTTP and gRPC ports.
+  - **Restart Policy**: `unless-stopped` ensures the service restarts automatically.
 
 ### 3. `settings.json`
 
@@ -76,13 +86,45 @@ This script is executed after the container is created. It currently includes co
 
 ### 3. Port Forwarding
 
-- By default, port 5051 is forwarded for the live server coverage. You can modify or add more ports in `devcontainer.json` under `"forwardPorts"`.
+- By default, the following ports are forwarded:
+  - **Port 5051**: Live server coverage
+  - **Port 6333**: Qdrant HTTP API (accessible at http://localhost:6333)
+- You can modify or add more ports in `devcontainer.json` under `"forwardPorts"`.
 
-### 4. Customization
+### 4. Qdrant Vector Database
+
+The setup includes a Qdrant vector database service that provides:
+- **HTTP API**: Available at http://localhost:6333 (from host) or http://qdrant:6333 (from inside devcontainer)
+- **gRPC API**: Available at localhost:6334 (from host) or qdrant:6334 (from inside devcontainer)
+- **Persistent Storage**: Data is stored in `./data/qdrant/` directory for persistence between container rebuilds
+- **Web UI**: Qdrant provides a web interface accessible through the HTTP API endpoint
+
+To interact with Qdrant:
+- **From your host machine**: Use http://localhost:6333 for HTTP API and http://localhost:6333/dashboard for web UI
+- **From inside the devcontainer**: Use http://qdrant:6333 for HTTP API (e.g., `curl http://qdrant:6333`)
+- **Client libraries**:
+  - From host: Point to `localhost:6333`
+  - From devcontainer: Point to `qdrant:6333`
+
+### 5. Extension Data Persistence
+
+The devcontainer is configured to persist VS Code extension data between container rebuilds:
+
+- **Volume**: `vscode_extensions_data` mounted to `/home/vscode/.vscode-server/data/User/globalStorage`
+- **Purpose**: Preserves chat logs, settings, and other data for VS Code extensions (like Roo-Cline)
+- **Permissions**: Set to 777 for maximum compatibility with different extension user contexts
+- **Benefits**:
+  - Chat history and extension settings survive container rebuilds
+  - No need to reconfigure extensions after rebuilding
+  - Seamless development experience across container lifecycle
+
+The setup uses broad permissions (777) for the globalStorage directory to ensure VS Code extensions can write data regardless of user context, preventing permission conflicts when mounting Docker volumes.
+
+### 6. Customization
 
 - **VSCode Extensions**: You can add more extensions in `devcontainer.json` under `"customizations" > "vscode" > "extensions"`.
 - **User Configuration**: Adjust the user settings by modifying the `"remoteUser"` property in `devcontainer.json`.
 
-### 5. Post Create Commands
+### 7. Post Create Commands
 
 - Modify the `postCreateCommand.sh` script to perform additional setup tasks after the container is built. Uncomment the existing commands if needed or add your own.

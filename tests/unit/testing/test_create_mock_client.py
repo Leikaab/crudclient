@@ -4,9 +4,7 @@ Tests for the MockClientFactory.create_mock_client method.
 
 from unittest.mock import ANY, MagicMock, patch
 
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
-from crudclient.auth.custom import ApiKeyAuth, CustomAuth
+from crudclient.auth import ApiKeyAuth, BasicAuth, BearerAuth, CustomAuth
 
 # Removed incorrect OAuth2Auth import
 from crudclient.config import ClientConfig
@@ -209,7 +207,7 @@ class TestCreateMockClient:
     def test_create_mock_client_with_direct_auth_strategy(self):
         """Test create_mock_client with a direct auth_strategy instance."""
         # Arrange
-        auth_strategy = BearerAuth(token="direct_token")
+        auth_strategy = BearerAuth(access_token="direct_token")
 
         # Act
         mock_client = MockClientFactory.create_mock_client(auth_strategy=auth_strategy)

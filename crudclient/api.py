@@ -81,7 +81,7 @@ class API(ABC):
             expected_classes = Class.__name__
             message = f"Invalid {varname} provided: expected {expected_classes} or None, got {type(Instance).__name__}."
             logger.error(message)
-            raise ConfigurationError(message=message)
+            raise ConfigurationError(message)
 
     def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any) -> None:
         """

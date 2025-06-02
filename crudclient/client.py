@@ -6,7 +6,7 @@ It handles request preparation, authentication, response handling, and error han
 """
 
 import logging
-from typing import Any, Dict, Literal, Optional, Tuple, Union, overload
+from typing import Any, Dict, Literal, Optional, Tuple, Union, cast, overload
 
 import requests
 
@@ -111,7 +111,7 @@ class Client:
             kwargs = {"params": params} if params else {}
             assert e.response is not None  # Ensure response exists for retry logic
             # Attempt retry. If it doesn't happen or fails, _maybe_retry_after_403 returns the original response.
-            raw_response = self._maybe_retry_after_403("GET", url, kwargs, e.response)
+            raw_response = self._maybe_retry_after_403("GET", url, kwargs, cast(requests.Response, e.response))
             # If the status code is still 403 after attempting retry, re-raise the original error.
             if raw_response.status_code == 403:
                 raise e
@@ -173,7 +173,7 @@ class Client:
             if params:
                 kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
-            raw_response = self._maybe_retry_after_403("POST", url, kwargs, e.response)
+            raw_response = self._maybe_retry_after_403("POST", url, kwargs, cast(requests.Response, e.response))
             if raw_response.status_code == 403:
                 raise e
 
@@ -233,7 +233,7 @@ class Client:
             if params:
                 kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
-            raw_response = self._maybe_retry_after_403("PUT", url, kwargs, e.response)
+            raw_response = self._maybe_retry_after_403("PUT", url, kwargs, cast(requests.Response, e.response))
             if raw_response.status_code == 403:
                 raise e
 
@@ -271,7 +271,7 @@ class Client:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
             # Use the captured kwargs for the retry call
             assert e.response is not None  # Ensure response exists for retry logic
-            raw_response = self._maybe_retry_after_403("DELETE", url, request_kwargs, e.response)
+            raw_response = self._maybe_retry_after_403("DELETE", url, request_kwargs, cast(requests.Response, e.response))
             if raw_response.status_code == 403:
                 raise e
 
@@ -331,7 +331,7 @@ class Client:
             if params:
                 kwargs["params"] = params
             assert e.response is not None  # Ensure response exists for retry logic
-            raw_response = self._maybe_retry_after_403("PATCH", url, kwargs, e.response)
+            raw_response = self._maybe_retry_after_403("PATCH", url, kwargs, cast(requests.Response, e.response))
             if raw_response.status_code == 403:
                 raise e
 

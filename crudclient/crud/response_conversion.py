@@ -108,7 +108,7 @@ def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONL
     if not isinstance(data, (dict, list)):
         raise ValueError(f"Expected dict or list response, got {type(data)}")
 
-    return cast(Union[JSONDict, JSONList], data)
+    return data
 
 
 def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
@@ -259,7 +259,7 @@ def _fallback_list_conversion(self: "Crud", data: RawResponse) -> Union[JSONList
     """
     # If the data is already a list, convert it directly
     if isinstance(data, list):
-        return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(cast(JSONList, data)))
+        return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(data))
 
     # If the data is a dict, try to extract the list data
     if isinstance(data, dict):
@@ -319,7 +319,7 @@ def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSON
         return cast(JSONDict, getattr(model_instance, "dict")(exclude_unset=partial))
     elif hasattr(model_instance, "__dict__"):  # Generic fallback
         logger.warning(f"Using __dict__ for dumping model instance {type(model_instance)}.")
-        return cast(JSONDict, model_instance.__dict__)
+        return model_instance.__dict__
     else:
         raise TypeError(f"Cannot dump model instance of type {type(model_instance)}")
 

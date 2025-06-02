@@ -16,8 +16,7 @@ from typing import (
     TypeVar,
 )
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.custom import ApiKeyAuth
+from crudclient.auth import ApiKeyAuth, AuthStrategy
 
 from .api_key_rate_limiter import ApiKeyRateLimiter
 from .api_key_usage_tracker import ApiKeyUsageTracker

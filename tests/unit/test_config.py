@@ -2,7 +2,7 @@ import warnings
 
 import pytest  # noqa F401
 
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.config import ClientConfig
 
 
@@ -18,7 +18,7 @@ class MockClientConfig(ClientConfig):
         super().__init__()
         # Set up a BearerAuth strategy with the API key
         if self.api_key:  # Check if api_key is not None
-            self.auth_strategy = BearerAuth(token=self.api_key)
+            self.auth_strategy = BearerAuth(access_token=self.api_key)
 
 
 class TestClientConfig:

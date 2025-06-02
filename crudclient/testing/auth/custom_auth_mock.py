@@ -8,8 +8,7 @@ validation capabilities for headers and parameters.
 import time
 from typing import Callable, Dict, List, Optional, Tuple
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import AuthStrategy, CustomAuth
 
 from ..response_builder.response import MockResponse
 from ..spy.enhanced import EnhancedSpyBase, FunctionSpy

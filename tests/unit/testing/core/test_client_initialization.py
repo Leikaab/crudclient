@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.testing.core.client import MockClient
 from crudclient.testing.verification import Verifier
 from tests.unit.helpers import translate_mock_calls_for_verifier
@@ -58,7 +58,7 @@ class TestMockClientInitialization:
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
-        auth_strategy = BearerAuth(token="test-token")
+        auth_strategy = BearerAuth(access_token="test-token")
 
         # Act
         client.set_auth_strategy(auth_strategy)
@@ -72,7 +72,7 @@ class TestMockClientInitialization:
         # Arrange
         http_client = MagicMock()
         client = MockClient(http_client)
-        auth_strategy = BearerAuth(token="test-token")
+        auth_strategy = BearerAuth(access_token="test-token")
         client.set_auth_strategy(auth_strategy)
 
         # Act

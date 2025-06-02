@@ -16,8 +16,7 @@ from typing import (
     Tuple,
 )
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import AuthStrategy, BearerAuth
 
 from .base import AuthMockBase
 
@@ -43,7 +42,7 @@ class BearerAuthMock(AuthMockBase):
         """
         super().__init__()
         self.token = token
-        self.auth_strategy = BearerAuth(token=token)
+        self.auth_strategy = BearerAuth(access_token=token)
         self.issued_tokens = [token]
         self.revoked_tokens: Set[str] = set()
         self.token_metadata: Dict[str, Dict] = {
@@ -72,7 +71,7 @@ class BearerAuthMock(AuthMockBase):
             Self for method chaining
         """
         self.token = token
-        self.auth_strategy = BearerAuth(token=token)
+        self.auth_strategy = BearerAuth(access_token=token)
         self.issued_tokens = [token]
         self.token_metadata = {
             token: {
@@ -256,7 +255,7 @@ class BearerAuthMock(AuthMockBase):
 
         # Update token
         self.token = new_token
-        self.auth_strategy = BearerAuth(token=new_token)
+        self.auth_strategy = BearerAuth(access_token=new_token)
         self.issued_tokens.append(new_token)
         return True
 

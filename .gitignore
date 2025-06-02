@@ -5,6 +5,9 @@ logs/
 
 private_*.*
 
+# Qdrant data directory
+data/qdrant/
+
 /node_modules
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,flask,python,visualstudiocode

@@ -8,7 +8,6 @@ focusing on deeply nested resources like ledger and its sub-resources.
 import pytest
 
 from .tripletex_resources.models import (
-    HistoricalVoucher,
     Ledger,
     LedgerResponse,
     Voucher,
@@ -156,51 +155,3 @@ def test_read_voucher(api):
         assert hasattr(voucher, "description")
     else:
         pytest.skip("No vouchers available for testing")
-
-
-@pytest.mark.skip(reason="The historical voucher endpoint is not available in the test API")
-def test_list_historical_vouchers(api):
-    """
-    Test listing historical vouchers from the Tripletex API using deeply nested ResourceGroup.
-
-    This test is skipped because the historical voucher endpoint is not available in the test API.
-    """
-    # This test is skipped because the endpoint returns a 404 error
-
-
-@pytest.mark.skip(reason="Creating historical vouchers requires specific data and may modify the test account")
-def test_create_historical_voucher(api):
-    """
-    Test creating a historical voucher using deeply nested ResourceGroup.
-
-    This test is skipped by default as it would modify the test account.
-    """
-    # Example data for a historical voucher
-    voucher_data = {
-        "date": "2025-01-01",
-        "description": "Test historical voucher",
-        "voucherType": {"id": 1},  # This ID would need to be valid in the test account
-        "postings": [
-            {
-                "account": {"id": 1000},  # This ID would need to be valid in the test account
-                "amount": 100.0,
-                "amountCurrency": 100.0,
-                "currency": {"id": 1},  # This ID would need to be valid in the test account
-                "customer": None,
-                "supplier": None,
-                "employee": None,
-                "project": None,
-                "product": None,
-                "department": None,
-            }
-        ],
-    }
-
-    # Create the historical voucher
-    historical_voucher = api.ledger.voucher.historical.create(voucher_data)
-
-    # Check that we got a historical voucher
-    assert isinstance(historical_voucher, HistoricalVoucher)
-    assert historical_voucher.id is not None
-    assert historical_voucher.date is not None
-    assert historical_voucher.description == "Test historical voucher"

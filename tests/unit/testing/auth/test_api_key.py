@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytest
 from freezegun import freeze_time
 
-from crudclient.auth.custom import ApiKeyAuth
+from crudclient.auth import ApiKeyAuth
 from crudclient.testing.auth.api_key import ApiKeyAuthMock
 
 
