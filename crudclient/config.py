@@ -4,59 +4,43 @@ Module `config.py`
 
 Defines the `ClientConfig` base class used for configuring API clients.
 
-This module provides a reusable configuration system for HTTP API clients,
-including support for base URLs, authentication strategies, headers, timeouts,
-and retry logic. Designed for subclassing and reuse across multiple APIs.
-
-Features:
-    - Support for Bearer, Basic, or no authentication
-    - Automatic generation of authentication headers
-    - Pre-request initialization and hook support
-    - Extensible retry logic, including 403-retry fallback for session-based APIs
+This module provides a configuration system for HTTP API clients built on top
+of apiconfig's ClientConfig, adding crudclient-specific functionality while
+preserving the declarative Django REST Framework feel.
 
 Classes:
-    - ClientConfig: Base configuration class for API clients.
+    - ClientConfig: Configuration class for crudclient API clients.
 """
 
 import logging
 from typing import Any, Dict, Optional
-from urllib.parse import urljoin
 
+from apiconfig.config.base import ClientConfig as _ApiConfigClientConfig
+from apiconfig.exceptions.config import MissingConfigError
+
+# Import AuthStrategy from crudclient for type hints
 from crudclient.auth import AuthStrategy
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 
-class ClientConfig:
+class ClientConfig(_ApiConfigClientConfig):
     """
-    Generic configuration class for API clients.
+    Configuration class for crudclient API clients.
 
-    Provides common settings for hostname, versioning, authentication,
-    retry behavior, and request timeouts. Designed to be subclassed
-    for specific APIs that require token refresh, session handling, or
-    additional logic.
+    Extends apiconfig's ClientConfig with crudclient-specific functionality
+    including 403 retry hooks and legacy authentication support.
 
     Attributes:
-        hostname (Optional[str]): Base hostname of the API (e.g., "https://api.example.com").
-        version (Optional[str]): API version to be appended to the base URL (e.g., "v1").
-        api_key (Optional[str]): Credential or token used for authentication.
-        headers (Dict[str, str]): Optional default headers for every request.
-        timeout (float): Timeout for each request in seconds (default: 10.0).
-        retries (int): Number of retry attempts for failed requests (default: 3).
-        auth (Optional[AuthStrategy]): Authentication strategy to use.
+        All attributes from apiconfig.config.base.ClientConfig plus:
+        api_key (Optional[str]): Legacy credential for authentication.
+        auth_type (str): Legacy auth type ("bearer", "basic", etc).
     """
 
-    hostname: Optional[str] = None
-    version: Optional[str] = None
+    # Legacy attributes for backward compatibility
     api_key: Optional[str] = None
-    headers: Optional[Dict[str, str]] = None
-    timeout: float = 10.0
-    retries: int = 3
-    auth_strategy: Optional[AuthStrategy] = None
-    auth_type: str = "bearer"  # For backward compatibility
-    log_request_body: bool = False
-    log_response_body: bool = False
+    auth_type: str = "bearer"
 
     def __init__(
         self,
@@ -72,40 +56,53 @@ class ClientConfig:
         log_response_body: Optional[bool] = None,
     ) -> None:
         """
-        Initializes a configuration object with specified parameters.
+        Initialize configuration with crudclient-specific extensions.
+
+        Args:
+            hostname: Base hostname of the API
+            version: API version string
+            api_key: Legacy authentication credential
+            headers: Default headers for requests
+            timeout: Request timeout in seconds
+            retries: Number of retry attempts
+            auth_strategy: Authentication strategy instance
+            auth_type: Legacy auth type (default: "bearer")
+            log_request_body: Flag to enable request body logging
+            log_response_body: Flag to enable response body logging
         """
-        self.hostname = hostname or self.__class__.hostname
-        self.version = version or self.__class__.version
+        # Call parent constructor
+        super().__init__(
+            hostname=hostname,
+            version=version,
+            headers=headers,
+            timeout=timeout,
+            retries=retries,
+            auth_strategy=auth_strategy,
+            log_request_body=log_request_body,
+            log_response_body=log_response_body,
+        )
+
+        # Set legacy attributes
         self.api_key = api_key or self.__class__.api_key
-        self.headers = headers or self.__class__.headers or {}
-        self.timeout = timeout if timeout is not None else self.__class__.timeout
-        self.retries = retries if retries is not None else self.__class__.retries
-        self.auth_strategy = auth_strategy or self.__class__.auth_strategy
         self.auth_type = auth_type or self.__class__.auth_type
-        self.log_request_body = log_request_body if log_request_body is not None else self.__class__.log_request_body
-        self.log_response_body = log_response_body if log_response_body is not None else self.__class__.log_response_body
 
     @property
     def base_url(self) -> str:
         """
-        Returns the full base URL by joining hostname and version.
+        Override to maintain crudclient's ValueError for backward compatibility.
 
-        Raises:
-            ValueError: If hostname is not set.
-
-        Returns:
-            str: Complete base URL to use in requests.
+        This is a trivial change to keep the same exception type.
         """
-        if not self.hostname:
+        try:
+            return super().base_url
+        except MissingConfigError as e:
+            # Convert to ValueError for backward compatibility
             logger.error("Hostname is required")
-            raise ValueError("hostname is required")
-        return urljoin(self.hostname, self.version or "")
+            raise ValueError("hostname is required") from e
 
     def get_auth_token(self) -> Optional[str]:
         """
         Returns the raw authentication token or credential.
-
-        Override this in subclasses to implement dynamic or refreshable tokens.
 
         Returns:
             Optional[str]: Token or credential used for authentication.
@@ -115,8 +112,6 @@ class ClientConfig:
     def get_auth_header_name(self) -> str:
         """
         Returns the name of the HTTP header used for authentication.
-
-        Override if the API uses non-standard auth headers.
 
         Returns:
             str: Name of the header (default: "Authorization").
@@ -165,12 +160,9 @@ class ClientConfig:
 
         header_name = self.get_auth_header_name()
 
-        # Determine auth type from class attributes if available
-        auth_type = getattr(self, "auth_type", "bearer") if hasattr(self, "auth_type") else "bearer"
-
-        if auth_type == "basic":
+        if self.auth_type == "basic":
             return {header_name: f"Basic {token}"}
-        elif auth_type == "bearer":
+        elif self.auth_type == "bearer":
             return {header_name: f"Bearer {token}"}
         else:
             return {header_name: token}
@@ -196,109 +188,4 @@ class ClientConfig:
 
         Args:
             client: Reference to the API client instance making the request.
-
-        Returns:
-            None: This method doesn't return any value.
         """
-        return None
-
-    def merge(self, other: "ClientConfig") -> "ClientConfig":
-        """
-        Merges two configuration objects, creating a new instance.
-
-        Creates a deep copy of 'other' and selectively updates it with attributes
-        from 'self' that don't exist in 'other'. Headers are specially handled
-        by merging the two dictionaries, with 'other' values taking precedence.
-
-        This method allows for configuration composition without modifying
-        the original instances.
-
-        Args:
-            other (ClientConfig): The configuration to combine with.
-                Attributes from 'other' take precedence over 'self'.
-
-        Returns:
-            ClientConfig: A new configuration instance with combined attributes.
-
-        Example:
-            base_config = ClientConfig(hostname="https://api.example.com")
-            custom_config = ClientConfig(timeout=30.0)
-            combined = base_config.merge(custom_config)  # hostname from base, timeout from custom
-        """
-        if not isinstance(other, self.__class__):
-            return NotImplemented  # type: ignore
-
-        import copy
-
-        # Create a deep copy of self as the base for the new instance
-        new_instance = copy.deepcopy(self)
-
-        # Special handling for headers - merge them with other's headers taking precedence
-        if hasattr(other, "headers") and other.headers:
-            new_headers = copy.deepcopy(new_instance.headers or {})
-            new_headers.update(other.headers)
-            new_instance.headers = new_headers
-
-        # Copy all other attributes from other, overriding self's values
-        for key, value in other.__dict__.items():
-            if key != "headers" and value is not None:
-                setattr(new_instance, key, copy.deepcopy(value))
-
-        return new_instance
-
-    def __add__(self, other: "ClientConfig") -> "ClientConfig":
-        """
-        Combines two configuration objects, creating a new instance.
-
-        This method is deprecated. Use `merge()` instead.
-
-        Creates a deep copy of 'other' and selectively updates it with attributes
-        from 'self' that don't exist in 'other'. Headers are specially handled
-        by merging the two dictionaries, with 'other' values taking precedence.
-
-        This method allows for configuration composition without modifying
-        the original instances.
-
-        Args:
-            other (ClientConfig): The configuration to combine with.
-                Attributes from 'other' take precedence over 'self'.
-
-        Returns:
-            ClientConfig: A new configuration instance with combined attributes.
-
-        Example:
-            base_config = ClientConfig(hostname="https://api.example.com")
-            custom_config = ClientConfig(timeout=30.0)
-            combined = base_config + custom_config  # hostname from base, timeout from custom
-        """
-        import warnings
-
-        warnings.warn("The __add__ method is deprecated. Use merge() instead.", DeprecationWarning, stacklevel=2)
-        return self.merge(other)
-
-    @staticmethod
-    def merge_configs(base_config: "ClientConfig", other_config: "ClientConfig") -> "ClientConfig":
-        """
-        Static method to merge two configuration objects without requiring an instance.
-
-        Creates a new instance by merging attributes from both configurations.
-        Attributes from 'other_config' take precedence over 'base_config'.
-        Headers are specially handled by merging the two dictionaries.
-
-        Args:
-            base_config (ClientConfig): The base configuration.
-            other_config (ClientConfig): The configuration to merge with base.
-                Attributes from 'other_config' take precedence.
-
-        Returns:
-            ClientConfig: A new configuration instance with combined attributes.
-
-        Example:
-            base_config = ClientConfig(hostname="https://api.example.com")
-            custom_config = ClientConfig(timeout=30.0)
-            combined = ClientConfig.merge_configs(base_config, custom_config)
-        """
-        if not isinstance(base_config, ClientConfig) or not isinstance(other_config, ClientConfig):
-            raise TypeError("Both arguments must be instances of ClientConfig")
-
-        return base_config.merge(other_config)
