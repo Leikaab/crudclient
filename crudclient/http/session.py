@@ -36,7 +36,6 @@ from typing import Dict
 import requests
 from requests.adapters import HTTPAdapter
 
-from ..auth.base import AuthStrategy
 from ..config import ClientConfig
 
 # Set up logging
@@ -100,12 +99,14 @@ class SessionManager:
         self.config.prepare()
 
         # Try the new auth strategy first
-        if hasattr(self.config, "auth_strategy") and isinstance(self.config.auth_strategy, AuthStrategy):
-            logger.debug("Applying authentication using %s", type(self.config.auth_strategy).__name__)
-            auth_headers = self.config.get_auth_headers()
-            if auth_headers:
-                self.session.headers.update(auth_headers)
-            return
+        if hasattr(self.config, "auth_strategy") and self.config.auth_strategy is not None:
+            # Use duck typing instead of isinstance to support both crudclient and apiconfig auth strategies
+            if hasattr(self.config.auth_strategy, "prepare_request_headers"):
+                logger.debug("Applying authentication using %s", type(self.config.auth_strategy).__name__)
+                auth_headers = self.config.get_auth_headers()
+                if auth_headers:
+                    self.session.headers.update(auth_headers)
+                return
 
         # Fall back to the old auth method for backward compatibility
         # This handles the case where auth() is overridden in a subclass

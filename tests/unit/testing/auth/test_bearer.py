@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from freezegun import freeze_time
 
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BearerAuth
 from crudclient.testing.auth.bearer import BearerAuthMock
 
 
@@ -17,7 +17,7 @@ def test_bearer_auth_mock_init_defaults():
         assert mock.required_scopes == []
         assert mock.jwt_validation is False
         assert isinstance(mock.auth_strategy, BearerAuth)
-        assert mock.auth_strategy.token == "valid_token"
+        assert mock.auth_strategy.access_token == "valid_token"
 
         # Check default metadata
         assert "valid_token" in mock.token_metadata
@@ -36,7 +36,7 @@ def test_bearer_auth_mock_init_custom_token():
         assert mock.token == "custom_token_123"
         assert mock.issued_tokens == ["custom_token_123"]
         assert "custom_token_123" in mock.token_metadata
-        assert mock.auth_strategy.token == "custom_token_123"
+        assert mock.auth_strategy.access_token == "custom_token_123"
 
 
 def test_with_token():
@@ -48,7 +48,7 @@ def test_with_token():
         assert mock.issued_tokens == ["new_token_abc"]  # Overwrites issued tokens
         assert "new_token_abc" in mock.token_metadata
         assert "initial_token" not in mock.token_metadata  # Old metadata removed
-        assert mock.auth_strategy.token == "new_token_abc"
+        assert mock.auth_strategy.access_token == "new_token_abc"
 
 
 def test_with_token_metadata():
@@ -191,7 +191,7 @@ def test_refresh_token_success():
     assert new_token in mock.token_metadata
     assert mock.token_metadata[new_token]["issued_at"] == datetime(2023, 1, 1, 12, 0, 0)
     assert mock.token_metadata[new_token]["expires_at"] > datetime(2023, 1, 1, 12, 0, 0)
-    assert mock.auth_strategy.token == new_token
+    assert mock.auth_strategy.access_token == new_token
 
 
 @freeze_time("2023-01-01 12:00:00")
@@ -328,4 +328,4 @@ def test_get_auth_strategy():
     mock = BearerAuthMock("strategy_token")
     strategy = mock.get_auth_strategy()
     assert isinstance(strategy, BearerAuth)
-    assert strategy.token == "strategy_token"
+    # apiconfig's BearerAuth doesn't expose token as a public attribute

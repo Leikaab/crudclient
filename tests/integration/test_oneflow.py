@@ -25,7 +25,7 @@ def test_api_configuration(api):
     # Check that we have an auth strategy set up
     assert api.client.config.auth_strategy is not None
     # Check that the auth strategy is an ApiKeyAuth
-    from crudclient.auth.custom import ApiKeyAuth
+    from crudclient.auth import ApiKeyAuth
 
     assert isinstance(api.client.config.auth_strategy, ApiKeyAuth)
     # Check that the API key is set correctly

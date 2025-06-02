@@ -5,7 +5,10 @@ This module contains tests for how the HTTP client handles various client error 
 including 4xx status codes.
 """
 
+from typing import cast
+
 import pytest
+import requests
 
 from crudclient.exceptions import (
     APIError,
@@ -34,7 +37,9 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 400
-        assert excinfo.value.response.json()["message"] == "Invalid parameters"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Invalid parameters"
 
     def test_401_error(self, http_client, mock_request):
         """
@@ -51,7 +56,9 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 401
-        assert excinfo.value.response.json()["message"] == "Authentication required"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Authentication required"
 
     def test_403_error(self, http_client, mock_request):
         """
@@ -68,7 +75,9 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 403
-        assert excinfo.value.response.json()["message"] == "Insufficient permissions"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Insufficient permissions"
 
     def test_404_error(self, http_client, mock_request):
         """
@@ -85,7 +94,9 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 404
-        assert excinfo.value.response.json()["message"] == "Resource not found"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Resource not found"
 
     def test_422_error(self, http_client, mock_request):
         """
@@ -102,7 +113,9 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 422
-        assert excinfo.value.response.json()["message"] == "Validation failed"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Validation failed"
 
     def test_429_error(self, http_client, mock_request):
         """
@@ -119,4 +132,6 @@ class TestHttpClientClientErrors:
 
         assert excinfo.value.response is not None
         assert excinfo.value.response.status_code == 429
-        assert excinfo.value.response.json()["message"] == "Rate limit exceeded"
+        # Cast to requests.Response to access json() method
+        response = cast(requests.Response, excinfo.value.response)
+        assert response.json()["message"] == "Rate limit exceeded"

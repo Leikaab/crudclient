@@ -10,7 +10,7 @@ and verify interactions without making actual network calls.
 import re
 from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 
-from crudclient.auth.base import AuthStrategy
+from crudclient.auth import AuthStrategy
 from crudclient.config import ClientConfig
 from crudclient.testing.spy.enhanced import EnhancedSpyBase
 

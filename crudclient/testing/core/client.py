@@ -2,7 +2,7 @@ import json
 import time
 from typing import Any, Dict, List, Optional, Pattern, Union
 
-from crudclient.auth.base import AuthStrategy
+from crudclient.auth import AuthStrategy
 from crudclient.config import ClientConfig
 from crudclient.exceptions import AuthenticationError
 from crudclient.testing.spy.enhanced import EnhancedSpyBase

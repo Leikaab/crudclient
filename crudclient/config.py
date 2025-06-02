@@ -22,7 +22,7 @@ import logging
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
-from crudclient.auth.base import AuthStrategy
+from crudclient.auth import AuthStrategy
 
 # Set up logging
 logger = logging.getLogger(__name__)

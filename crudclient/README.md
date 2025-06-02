@@ -21,7 +21,7 @@ The primary files in this directory define foundational elements of the client:
 
 The `crudclient` package is organized into several submodules, each handling a specific aspect of the library's functionality:
 
-*   **[auth](./auth/README.md)**: Handles different authentication strategies (e.g., Basic, Bearer, Custom).
+*   **[auth.py](./auth.py)**: Re-exports authentication strategies from apiconfig library (Basic, Bearer, ApiKey, Custom auth).
 *   **[crud](./crud/README.md)**: Defines the structure and implementation for CRUD (Create, Read, Update, Delete) operations against API endpoints.
 *   **[http](./http/README.md)**: Contains lower-level HTTP handling logic, including the `HttpClient`, request/response objects, error handling, retry strategies, and session management.
 *   **[response_strategies](./response_strategies/README.md)**: Provides different strategies for processing and interpreting API responses.

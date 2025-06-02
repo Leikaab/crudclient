@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
 from crudclient.api import API
-from crudclient.auth.custom import ApiKeyAuth
+from crudclient.auth import ApiKeyAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud import Crud

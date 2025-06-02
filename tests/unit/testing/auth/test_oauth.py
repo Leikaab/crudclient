@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from freezegun import freeze_time
 
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import CustomAuth
 from crudclient.testing.auth.oauth_mock import OAuthMock
 
 # --- Test Initialization ---

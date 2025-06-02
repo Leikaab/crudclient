@@ -35,7 +35,7 @@ from .utils import redact_sensitive_headers  # Correct: utils is sibling # noqa:
 
 # Set up logging
 if TYPE_CHECKING:
-    from ..auth.base import AuthStrategy  # Use the correct class name
+    from ..auth import AuthStrategy  # Use the correct class name
     from ..config import ClientConfig  # Type hint for config
 logger = logging.getLogger(__name__)
 
@@ -139,7 +139,7 @@ class RequestFormatter:
         if not hasattr(auth_strategy, "prepare_request_params"):
             return  # Strategy doesn't support param preparation
 
-        auth_params: Dict[str, Any] = auth_strategy.prepare_request_params()
+        auth_params = auth_strategy.prepare_request_params()
         if not isinstance(auth_params, dict):
             raise TypeError(f"Auth strategy's prepare_request_params must return a dictionary, " f"got {type(auth_params).__name__}")
 

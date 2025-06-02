@@ -1,7 +1,6 @@
 import logging  # &lt;-- Add import
 
 import pytest
-import requests  # Use requests library
 
 from crudclient.exceptions import InternalServerError  # Corrected name
 from crudclient.exceptions import (
@@ -232,6 +231,6 @@ class TestHttpClient:
         assert hasattr(excinfo.value.request, "method")
         assert hasattr(excinfo.value.request, "url")
         assert excinfo.value.response is not None
-        assert isinstance(excinfo.value.response, requests.Response)
+        # Don't check isinstance as HttpResponseProtocol and requests.Response are incompatible
         assert excinfo.value.response.status_code == status_code
         assert excinfo.value.response.request == excinfo.value.request

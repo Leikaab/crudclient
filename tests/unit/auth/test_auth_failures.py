@@ -3,8 +3,9 @@ Tests for general authentication setup failure handling in the crudclient librar
 """
 
 import pytest
+from apiconfig.exceptions.auth import AuthStrategyError
 
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import CustomAuth
 from crudclient.client import Client
 
 # Import fixtures from conftest.py - Fixtures are typically auto-discovered by pytest
@@ -20,7 +21,7 @@ class TestAuthFailures:
         # Create a bearer auth mock with a failing callback
 
         # Configure the auth setup to fail
-        mock_prepare_headers = mocker.patch("crudclient.auth.bearer.BearerAuth.prepare_request_headers")
+        mock_prepare_headers = mocker.patch("apiconfig.auth.strategies.bearer.BearerAuth.prepare_request_headers")
         mock_prepare_headers.side_effect = Exception("Auth setup failed")
 
         # Create a client with the failing auth
@@ -67,11 +68,11 @@ class TestAuthFailures:
         client = Client(config)
 
         # Act & Assert
-        # Expect the ValueError from failing_param_callback to be raised
-        with pytest.raises(ValueError, match=exception_message) as excinfo:
+        # Expect the AuthStrategyError wrapping the ValueError from failing_param_callback
+        with pytest.raises(AuthStrategyError, match="CustomAuth parameter callback failed") as excinfo:
             client.get("/some/path")  # Attempting a request should trigger param setup
 
-        # Ensure the correct exception was raised (redundant with match, but good practice)
-        assert exception_message in str(excinfo.value)
+        # Verify the original exception is in the cause chain
+        assert exception_message in str(excinfo.value.__cause__)
         # Ensure no request was actually sent (error happens before request)
         assert not mock_request.called

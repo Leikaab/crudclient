@@ -3,7 +3,10 @@ Tests for Bearer Authentication and token refresh failure handling
 in the crudclient library.
 """
 
+from typing import cast
+
 import pytest
+import requests
 
 from crudclient.exceptions import AuthenticationError, ForbiddenError
 
@@ -18,7 +21,9 @@ def test_bearer_auth_failure(bearer_auth_client, mock_request):
 
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid token"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid token"
 
     request = mock_request.request_history[0]
     assert "Authorization" in request.headers
@@ -41,7 +46,9 @@ def test_token_refresh_on_401(refreshable_token_client, mock_request):
     # Assert
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Token expired"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Token expired"
 
 
 def test_token_refresh_on_403(refreshable_token_client, mock_request):
@@ -54,7 +61,9 @@ def test_token_refresh_on_403(refreshable_token_client, mock_request):
 
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 403
-    assert excinfo.value.response.json()["message"] == "Insufficient permissions"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Insufficient permissions"
 
 
 def test_token_refresh_failure(refreshable_token_client, mock_request):
@@ -71,7 +80,9 @@ def test_token_refresh_failure(refreshable_token_client, mock_request):
     # Assert
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Token expired"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Token expired"
 
 
 def test_retry_after_auth_failure(bearer_auth_client, mock_request):
@@ -84,7 +95,9 @@ def test_retry_after_auth_failure(bearer_auth_client, mock_request):
 
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid token"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid token"
 
 
 def test_auth_failure_with_retry_disabled(bearer_auth_client, mock_request):
@@ -97,7 +110,9 @@ def test_auth_failure_with_retry_disabled(bearer_auth_client, mock_request):
 
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid token"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid token"
 
 
 def test_auth_header_overriding(bearer_auth_client, mock_request):
@@ -143,4 +158,6 @@ def test_multiple_auth_failures(bearer_auth_client, mock_request):
 
     assert excinfo.value.response is not None
     assert excinfo.value.response.status_code == 401
-    assert excinfo.value.response.json()["message"] == "Invalid token"
+    # Cast to requests.Response to access json() method
+    response = cast(requests.Response, excinfo.value.response)
+    assert response.json()["message"] == "Invalid token"

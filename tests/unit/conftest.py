@@ -9,10 +9,7 @@ from unittest.mock import MagicMock  # Add MagicMock import
 import pytest
 import requests_mock
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import AuthStrategy, BasicAuth, BearerAuth, CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
 from crudclient.testing.response_builder import ResponseBuilder
@@ -30,7 +27,7 @@ from crudclient.testing.verification import Verifier
 @pytest.fixture
 def bearer_auth_strategy() -> BearerAuth:
     """Provides a BearerAuth strategy instance."""
-    return BearerAuth(token="test-bearer-token")
+    return BearerAuth(access_token="test-bearer-token")
 
 
 @pytest.fixture
@@ -277,7 +274,7 @@ def create_error_api_response(create_api_response: Callable[..., Dict[str, Any]]
 @pytest.fixture
 def mock_api_error() -> Type[APIError]:
     """Provides the APIError exception class for testing."""
-    return APIError  # type: ignore[no-any-return]  # TODO: Remove once apiconfig includes py.typed
+    return APIError
 
 
 # --- Enhanced Mock Client Fixtures ---

@@ -5,7 +5,10 @@ This module demonstrates how to use the Multi-Factor Authentication mocking util
 in real-world testing scenarios.
 """
 
+from typing import cast
+
 import pytest
+import requests
 
 from crudclient.exceptions import AuthenticationError
 from crudclient.http.errors import ErrorHandler
@@ -71,7 +74,9 @@ class TestMultiFactorAuthExamples:
         except AuthenticationError as e:
             assert e.response is not None
             assert e.response.status_code == 401
-            assert e.response.json()["detail"] == "MFA required"
+            # Cast to requests.Response to access json() method
+            response = cast(requests.Response, e.response)
+            assert response.json()["detail"] == "MFA required"
 
             assert client.get_call_count() == 1
             first_call = client.get_calls()[0]

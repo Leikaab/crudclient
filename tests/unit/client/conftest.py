@@ -5,9 +5,7 @@ Fixtures specific to client tests.
 import pytest
 import requests_mock
 
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import BasicAuth, BearerAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
@@ -20,7 +18,7 @@ class MockBearerAuthConfig(ClientConfig):
 
     def __init__(self):
         super().__init__(hostname="https://api.example.com", version="v1")
-        self.auth_strategy = BearerAuth(token="supersecret")
+        self.auth_strategy = BearerAuth(access_token="supersecret")
         self.retries = 0
 
 

@@ -3,4 +3,4 @@ ignore = E203,E266,E501,W503
 max-line-length = 150
 max-complexity = 18
 select = B,C,E,F,W,T4
-exclude = .coveragerc,.flake8,.github,.gitignore,.mypy.ini,.pre-commit-config.yaml,.pylintrc,.pytest_cache,.venv,.vscode,__pycache__,crudclient.egg-info,dist,docs,htmlcov
+exclude = .coveragerc,.flake8,.github,.gitignore,.mypy.ini,.pre-commit-config.yaml,.pylintrc,.pytest_cache,.venv,.vscode,__pycache__,crudclient.egg-info,dist,docs,htmlcov,artifacts

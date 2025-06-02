@@ -9,8 +9,7 @@ import base64
 import re
 from typing import TYPE_CHECKING, List, Optional, Pattern, Tuple
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.basic import BasicAuth
+from crudclient.auth import AuthStrategy, BasicAuth
 
 from .base import AuthMockBase
 

@@ -23,7 +23,7 @@ classifiers = [
 python = "^3.11"
 requests = "^2.32.3"
 pydantic = {version = "^2.8.2", extras = ["email"]}
-apiconfig = {version = ">=0.3.2.dev12", allow-prereleases = true}
+apiconfig = {version = "^0.3.2.dev0", allow-prereleases = true}
 
 [tool.poetry.extras]
 testing = []
@@ -72,7 +72,7 @@ exclude = ["artifacts/"]
 [tool.isort]
 profile = "black"
 skip = ["tests/debug.py", "crudclient/config.pyi", "crudclient/client.pyi"]
-extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*"]
+extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*", "**/artifacts/*"]
 
 
 
@@ -91,5 +91,6 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | artifacts
 )/
 '''

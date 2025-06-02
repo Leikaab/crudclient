@@ -8,8 +8,7 @@ for different grant types, scopes, and advanced authentication scenarios.
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from crudclient.auth.base import AuthStrategy
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import AuthStrategy, CustomAuth
 
 from .base import AuthMockBase
 from .oauth_grant_handler import OAuthGrantHandler

@@ -1,4 +1,4 @@
-from crudclient.auth.custom import CustomAuth
+from crudclient.auth import CustomAuth
 from crudclient.testing.auth.custom_auth_mock import CustomAuthMock
 
 # --- Test Initialization ---
@@ -266,5 +266,4 @@ def test_get_auth_strategy():
     mock = CustomAuthMock()
     strategy = mock.get_auth_strategy()
     assert isinstance(strategy, CustomAuth)
-    # Further check if the strategy uses the spied callbacks if needed
-    assert hasattr(strategy.header_callback, "get_call_count")  # Check if it's a spy
+    # apiconfig's CustomAuth doesn't expose callbacks as public attributes

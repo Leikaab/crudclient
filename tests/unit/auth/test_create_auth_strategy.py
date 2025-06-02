@@ -6,17 +6,16 @@ from typing import Dict, Optional, Tuple, Union
 
 import pytest
 
-from crudclient.auth import create_auth_strategy
-from crudclient.auth.basic import BasicAuth
-from crudclient.auth.bearer import BearerAuth
+from crudclient.auth import BasicAuth, BearerAuth, create_auth_strategy
 
 
 class TestCreateAuthStrategy:
     @pytest.mark.parametrize(
         "auth_type, token, expected_class, expected_attrs",
         [
-            ("bearer", "test_token", BearerAuth, {"token": "test_token"}),
-            ("basic", "user", BasicAuth, {"username": "user", "password": ""}),
+            ("bearer", "test_token", BearerAuth, {"access_token": "test_token"}),
+            # Basic auth with string now raises error due to empty password
+            # ("basic", "user", BasicAuth, {"username": "user", "password": ""}),  # This is no longer valid
             ("basic", ("user", "pass"), BasicAuth, {"username": "user", "password": "pass"}),
             ("none", "any_token", type(None), {}),
             ("bearer", None, type(None), {}),
@@ -24,8 +23,8 @@ class TestCreateAuthStrategy:
             # Assuming default/unknown falls back to None if token is None
             ("unknown", None, type(None), {}),
             # Assuming default/unknown falls back to Bearer if token is provided
-            ("custom", "fallback_token", BearerAuth, {"token": "fallback_token"}),
-            ("unknown", "fallback_token", BearerAuth, {"token": "fallback_token"}),
+            ("custom", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
+            ("unknown", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
         ],
     )
     def test_create_auth_strategy(
@@ -63,6 +62,18 @@ class TestCreateAuthStrategy:
         with pytest.raises(TypeError, match="Basic auth token must be a string or tuple"):
             create_auth_strategy("basic", 123)  # type: ignore
 
+    def test_create_basic_auth_string_token_raises_error(self):
+        """
+        GIVEN the auth type 'basic' and a string token (username only)
+        WHEN create_auth_strategy is called
+        THEN an AuthStrategyError is raised because password cannot be empty.
+        """
+        from apiconfig.exceptions.auth import AuthStrategyError
+
+        # GIVEN / WHEN / THEN
+        with pytest.raises(AuthStrategyError, match="Password cannot be empty"):
+            create_auth_strategy("basic", "username_only")
+
     # Note: ApiKeyAuth and CustomAuth cannot be created via create_auth_strategy
     # as they require more complex configuration (header/param names or callbacks).
     # This is expected behavior. We test that they fall back to BearerAuth if a token is given.
@@ -82,7 +93,7 @@ class TestCreateAuthStrategy:
 
         # THEN
         assert isinstance(auth, BearerAuth)
-        assert auth.token == token
+        assert auth.access_token == token
 
     def test_create_custom_falls_back_to_bearer(self):
         """
@@ -100,4 +111,4 @@ class TestCreateAuthStrategy:
 
         # THEN
         assert isinstance(auth, BearerAuth)
-        assert auth.token == token
+        assert auth.access_token == token

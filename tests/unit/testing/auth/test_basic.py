@@ -1,6 +1,6 @@
 import base64
 
-from crudclient.auth.basic import BasicAuth
+from crudclient.auth import BasicAuth
 from crudclient.testing.auth.basic import BasicAuthMock
 
 
