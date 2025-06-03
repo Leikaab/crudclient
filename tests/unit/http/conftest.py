@@ -46,24 +46,42 @@ def patch_time(mocker):
 @pytest.fixture
 def retry_handler() -> RetryHandler:
     """Fixture for a real RetryHandler instance."""
-    return RetryHandler()
+    # Use a fast retry strategy for tests
+    from crudclient.http.retry_strategies import FixedRetryStrategy
+
+    return RetryHandler(retry_strategy=FixedRetryStrategy(delay=0.001))  # 1ms delay for fast tests
 
 
 # Removed mock_session_manager fixture
 
 
 @pytest.fixture
+def fast_retry_handler() -> RetryHandler:
+    """Fixture for a RetryHandler with fast retries for testing.
+
+    This keeps the default retry behavior (including server errors) but uses
+    minimal delays to speed up tests.
+    """
+    from crudclient.http.retry_strategies import FixedRetryStrategy
+
+    # Use default retry conditions (which includes 500, 502, 503, 504)
+    # but with a very fast retry strategy
+    return RetryHandler(
+        retry_strategy=FixedRetryStrategy(delay=0.001),  # 1ms delay instead of exponential backoff
+        # Use default retry_conditions which includes server errors
+    )
+
+
+@pytest.fixture
 def http_client(
     mock_client_config: MagicMock,
-    # mock_logger: MagicMock, # Removed, HttpClient creates its own logger instance
-    retry_handler: MagicMock,  # Keep mocked retry_handler
+    fast_retry_handler: RetryHandler,  # Use fast_retry_handler
 ) -> Iterator[HttpClient]:
     """Fixture for a real HttpClient with some mocked dependencies."""
     # Instantiate real components with mocks where appropriate
     request_formatter = RequestFormatter(config=mock_client_config)
     response_handler = ResponseHandler()
     error_handler = ErrorHandler()
-    # retry_handler is mocked via fixture
 
     # Let HttpClient create its own SessionManager using the mock_client_config
     client = HttpClient(
@@ -72,7 +90,7 @@ def http_client(
         request_formatter=request_formatter,
         response_handler=response_handler,
         error_handler=error_handler,
-        retry_handler=retry_handler,
+        retry_handler=fast_retry_handler,  # Use fast retry handler that still retries server errors
     )
     # Ensure the client is closed after the test to clean up the session
     yield client

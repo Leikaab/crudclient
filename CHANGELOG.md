@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced error messages with detailed validation feedback
 - Support for immutable auth strategy instances
 - Improved type hints and documentation
+- **EXPERIMENTAL**: Rate limiting module for cross-process coordination to prevent HTTP 429 errors
+  - ⚠️ **WARNING**: This feature is experimental and subject to change
+  - Currently only supports Tripletex API headers (`X-Rate-Limit-Remaining`, `X-Rate-Limit-Reset`)
+  - File-based state storage with cross-process locking using portalocker
+  - Configurable via `config.enable_rate_limiter()` method
+  - Dynamic threshold calculation based on detected worker count
+  - See [crudclient/ratelimit/README.md](crudclient/ratelimit/README.md) for details
 
 ### Removed
 - Redundant auth strategy implementations (now delegated to apiconfig)

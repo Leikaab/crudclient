@@ -86,6 +86,44 @@ class ClientConfig(_ApiConfigClientConfig):
         self.api_key = api_key or self.__class__.api_key
         self.auth_type = auth_type or self.__class__.auth_type
 
+    def enable_rate_limiter(
+        self,
+        state_path: Optional[str] = None,
+        buffer: int = 10,
+        track_delays: bool = False,
+        buffer_time: float = 1.0,
+    ) -> "ClientConfig":
+        """
+        Enable rate limiting for this configuration.
+
+        .. warning::
+            **EXPERIMENTAL FEATURE**: The rate limiting functionality is experimental
+            and may change in future releases. Use with caution in production environments.
+
+            Known limitations:
+            - Only supports Tripletex API headers currently
+            - Cross-process coordination via file locks may have edge cases
+            - State persistence format may change between versions
+
+        Args:
+            state_path: Directory to store rate limiter state files.
+                        If None, uses system cache directory.
+            buffer: Buffer size for rate limit threshold calculation.
+                    Added to detected worker count.
+            track_delays: Whether to track rate limiting delays for testing.
+            buffer_time: Time buffer in seconds to add when waiting (default: 1.0).
+                         Can be reduced for faster tests.
+
+        Returns:
+            Self for method chaining
+        """
+        self._rate_limiter_enabled = True
+        self._rate_limiter_state_path = state_path
+        self._rate_limiter_buffer = buffer
+        self._rate_limiter_track_delays = track_delays
+        self._rate_limiter_buffer_time = buffer_time
+        return self
+
     @property
     def base_url(self) -> str:
         """
@@ -189,3 +227,43 @@ class ClientConfig(_ApiConfigClientConfig):
         Args:
             client: Reference to the API client instance making the request.
         """
+
+    def create_auth_strategy(self) -> Optional[AuthStrategy]:
+        """
+        Create the authentication strategy.
+
+        Overrides the parent method to ensure proper auth strategy creation
+        with legacy support.
+
+        Returns:
+            AuthStrategy instance if authentication is configured, None otherwise
+        """
+        # If auth_strategy already set, use it
+        if self.auth_strategy:
+            return self.auth_strategy
+
+        # Legacy authentication handling
+        if self.api_key:
+            from crudclient.auth import create_auth_strategy
+
+            return create_auth_strategy(
+                auth_type=self.auth_type,
+                token=self.api_key,
+            )
+
+        return None
+
+    def get_config_errors(self) -> Dict[str, str]:
+        """
+        Get configuration validation errors.
+
+        Returns:
+            Dict of field names to error messages
+        """
+        errors: Dict[str, str] = {}
+
+        # Validation checks
+        if not self.hostname:
+            errors["hostname"] = "hostname is required"
+
+        return errors
