@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 
 from crudclient.config import ClientConfig
 
@@ -60,4 +61,12 @@ class TripletexTestConfig(TripletexConfig):
 
         self.auth_strategy = TripletexAuthStrategy(
             company_id=self.company_id, consumer_token=consumer_token, employee_token=employee_token, base_url=self.base_url
+        )
+
+        # Always enable rate limiting for test environment to prevent 429 errors
+        # Use a shared temporary directory for all Tripletex tests in the same process
+        rate_limit_dir = os.path.join(tempfile.gettempdir(), "tripletex_rate_limit")
+        os.makedirs(rate_limit_dir, exist_ok=True)
+        self.enable_rate_limiter(
+            state_path=rate_limit_dir, buffer=5, buffer_time=1.0  # Conservative buffer for shared test environment  # 1 second buffer time
         )
