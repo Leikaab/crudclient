@@ -1,6 +1,5 @@
 """
-Module `base.py`
-===============
+Module `base.py`.
 
 This module defines the Crud class, which is the base class for all CRUD operations.
 It provides a generic implementation of CRUD (Create, Read, Update, Delete) operations
@@ -54,13 +53,30 @@ class Crud(Generic[T]):
     This class provides a generic implementation of common CRUD operations and can be
     easily extended for specific API endpoints.
 
-    Attributes:
-        _resource_path: The base path for the resource in the API.
-        _datamodel: The data model class for the resource.
-        _api_response_model: Custom API response model, if any.
-        _response_strategy: The strategy to use for converting responses.
-        _list_return_keys: Possible keys for list data in API responses.
-        allowed_actions: List of allowed methods for this resource.
+    Attributes
+    ----------
+    _resource_path : str
+        The base path for the resource in the API.
+    _datamodel : Optional[Type[T]]
+        The data model class for the resource.
+    _api_response_model : Optional[Type[ApiResponse]]
+        Custom API response model, if any.
+    _create_model : Optional[Type[T]]
+        The data model class for creating resources.
+    _update_model : Optional[Type[T]]
+        The data model class for updating resources.
+    _response_strategy : Optional[ResponseModelStrategy[T]]
+        The strategy to use for converting responses.
+    _list_return_keys : List[str]
+        Possible keys for list data in API responses.
+    _update_mode : str
+        Default update mode: "standard" or "no_resource_id".
+    allowed_actions : List[str]
+        List of allowed methods for this resource.
+    client : Client
+        An instance of the API client.
+    parent : Optional[Crud]
+        Optional parent Crud instance for nested resources.
     """
 
     _resource_path: str = ""
@@ -70,7 +86,7 @@ class Crud(Generic[T]):
     _update_model: Optional[Type[T]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
-    _update_mode: str = "standard"  # Default update mode: "standard" or "no_resource_id"
+    _update_mode: str = "standard"
     allowed_actions: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
     client: Client
     parent: Optional["Crud"]
@@ -79,12 +95,17 @@ class Crud(Generic[T]):
         """
         Initialize the CRUD resource.
 
-        Args:
-            client: An instance of the API client.
-            parent: Optional parent Crud instance for nested resources.
+        Parameters
+        ----------
+        client : Client
+            An instance of the API client.
+        parent : Optional[Crud], optional
+            Optional parent Crud instance for nested resources.
 
-        Raises:
-            ValueError: If the resource path is not set.
+        Raises
+        ------
+        ValueError
+            If the resource path is not set.
         """
         if not self._resource_path:
             raise ValueError("Resource path must be set")
@@ -92,7 +113,6 @@ class Crud(Generic[T]):
         self.client = client
         self.parent = parent
 
-        # Initialize the response strategy
         self._init_response_strategy()
 
     def _init_response_strategy(self: "Crud") -> None:
@@ -108,7 +128,6 @@ class Crud(Generic[T]):
             logger.debug(f"Using provided response strategy: {self._response_strategy.__class__.__name__}")
             return
 
-        # If a path-based strategy is needed, use PathBasedResponseModelStrategy
         if hasattr(self, "_single_item_path") or hasattr(self, "_list_item_path"):
             logger.debug("Using PathBasedResponseModelStrategy")
             self._response_strategy = PathBasedResponseModelStrategy(
@@ -118,7 +137,6 @@ class Crud(Generic[T]):
                 list_item_path=getattr(self, "_list_item_path", None),
             )
         else:
-            # Otherwise, use the default strategy
             logger.debug("Using DefaultResponseModelStrategy")
             self._response_strategy = DefaultResponseModelStrategy(
                 datamodel=self._datamodel,

@@ -26,7 +26,8 @@ class AuthMockBase(ABC):
     to construct the desired configuration and state of the authentication mock
     before it's used in a test.
 
-    Example Usage (Builder pattern):
+    Example Usage (Builder pattern)
+    -------------------------------
     ```python
     mock_auth = ConcreteAuthMock() \\
         .with_failure(status_code=403, message="Forbidden") \\
@@ -36,6 +37,41 @@ class AuthMockBase(ABC):
     Specialized authentication mocks (e.g., `BasicAuthMock`, `OAuthMock`) inherit
     from this base, potentially adding their own specific configuration methods
     while leveraging the common builder infrastructure.
+
+    Attributes
+    ----------
+    should_fail : bool
+        If True, authentication will fail.
+    failure_type : str
+        Type of authentication failure (e.g., "invalid_token", "expired_token").
+    failure_status_code : int
+        HTTP status code to return for the failure.
+    failure_message : str
+        Error message to include in the response.
+    token_expired : bool
+        If True, the token is considered expired.
+    token_expiry_time : Optional[datetime]
+        The datetime when the token expires.
+    refresh_token : Optional[str]
+        The refresh token value.
+    refresh_token_expired : bool
+        If True, the refresh token is considered expired.
+    refresh_attempts : int
+        Current number of refresh attempts.
+    max_refresh_attempts : int
+        Maximum allowed refresh attempts.
+    mfa_required : bool
+        If True, multi-factor authentication is required.
+    mfa_verified : bool
+        If True, MFA has been verified.
+    request_count : int
+        Number of requests made.
+    fail_after_requests : Optional[int]
+        Number of successful requests after which authentication should fail.
+    custom_headers : Dict[str, str]
+        Custom headers to include in authentication responses.
+    custom_params : Dict[str, str]
+        Custom parameters to include in authentication responses.
     """
 
     should_fail: bool
@@ -78,13 +114,20 @@ class AuthMockBase(ABC):
         """
         Configure the mock to simulate authentication failure.
 
-        Args:
-            failure_type: Type of authentication failure (e.g., "invalid_token", "expired_token")
-            status_code: HTTP status code to return for the failure
-            message: Error message to include in the response
+        Parameters
+        ----------
+        failure_type : str, optional
+            Type of authentication failure (e.g., "invalid_token", "expired_token").
+            Defaults to "invalid_token".
+        status_code : int, optional
+            HTTP status code to return for the failure. Defaults to 401.
+        message : str, optional
+            Error message to include in the response. Defaults to "Authentication failed".
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.should_fail = True
         self.failure_type = failure_type
@@ -96,8 +139,10 @@ class AuthMockBase(ABC):
         """
         Configure the mock to simulate authentication success.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.should_fail = False
         return self
@@ -106,11 +151,15 @@ class AuthMockBase(ABC):
         """
         Configure the mock to simulate token expiration.
 
-        Args:
-            expires_in_seconds: Number of seconds until the token expires
+        Parameters
+        ----------
+        expires_in_seconds : int, optional
+            Number of seconds until the token expires. Defaults to 3600.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.token_expired = False
         self.token_expiry_time = datetime.now() + timedelta(seconds=expires_in_seconds)
@@ -120,8 +169,10 @@ class AuthMockBase(ABC):
         """
         Configure the mock to simulate an already expired token.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.token_expired = True
         self.token_expiry_time = datetime.now() - timedelta(seconds=60)
@@ -131,12 +182,17 @@ class AuthMockBase(ABC):
         """
         Configure the mock with a refresh token.
 
-        Args:
-            refresh_token: The refresh token value
-            max_refresh_attempts: Maximum number of times the token can be refreshed
+        Parameters
+        ----------
+        refresh_token : str, optional
+            The refresh token value. Defaults to "refresh_token".
+        max_refresh_attempts : int, optional
+            Maximum number of times the token can be refreshed. Defaults to 3.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.refresh_token = refresh_token
         self.refresh_token_expired = False
@@ -148,8 +204,10 @@ class AuthMockBase(ABC):
         """
         Configure the mock with an expired refresh token.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.refresh_token = "expired_refresh_token"
         self.refresh_token_expired = True
@@ -159,11 +217,15 @@ class AuthMockBase(ABC):
         """
         Configure the mock to require multi-factor authentication.
 
-        Args:
-            verified: Whether MFA has been verified
+        Parameters
+        ----------
+        verified : bool, optional
+            Whether MFA has been verified. Defaults to False.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.mfa_required = True
         self.mfa_verified = verified
@@ -173,11 +235,15 @@ class AuthMockBase(ABC):
         """
         Configure the mock to fail after a specific number of requests.
 
-        Args:
-            request_count: Number of successful requests before failing
+        Parameters
+        ----------
+        request_count : int
+            Number of successful requests before failing.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.fail_after_requests = request_count
         return self
@@ -186,12 +252,17 @@ class AuthMockBase(ABC):
         """
         Add a custom header to the auth strategy.
 
-        Args:
-            name: Header name
-            value: Header value
+        Parameters
+        ----------
+        name : str
+            Header name.
+        value : str
+            Header value.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.custom_headers[name] = value
         return self
@@ -200,12 +271,17 @@ class AuthMockBase(ABC):
         """
         Add a custom parameter to the auth strategy.
 
-        Args:
-            name: Parameter name
-            value: Parameter value
+        Parameters
+        ----------
+        name : str
+            Parameter name.
+        value : str
+            Parameter value.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        AuthMockBase
+            Self for method chaining.
         """
         self.custom_params[name] = value
         return self
@@ -214,8 +290,11 @@ class AuthMockBase(ABC):
         """
         Check if the token is expired.
 
-        Returns:
-            True if the token is expired, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the token is expired, False otherwise.
         """
         if self.token_expired:
             return True
@@ -228,8 +307,11 @@ class AuthMockBase(ABC):
         """
         Check if the token can be refreshed.
 
-        Returns:
-            True if the token can be refreshed, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the token can be refreshed, False otherwise.
         """
         if not self.refresh_token:
             return False
@@ -243,8 +325,11 @@ class AuthMockBase(ABC):
         """
         Attempt to refresh the token.
 
-        Returns:
-            True if the token was refreshed successfully, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the token was refreshed successfully, False otherwise.
         """
         if not self.can_refresh_token():
             return False
@@ -258,8 +343,11 @@ class AuthMockBase(ABC):
         """
         Determine if authentication should fail.
 
-        Returns:
-            True if authentication should fail, False otherwise
+        Returns
+        -------
+
+        bool
+            True if authentication should fail, False otherwise.
         """
         self.request_count += 1
 
@@ -281,8 +369,11 @@ class AuthMockBase(ABC):
         """
         Get the appropriate authentication error response.
 
-        Returns:
-            A mock response object with appropriate error details
+        Returns
+        -------
+
+        Any
+            A mock response object with appropriate error details.
         """
         error_type = self.failure_type
         status_code = self.failure_status_code
@@ -303,8 +394,11 @@ class AuthMockBase(ABC):
         """
         Get the authentication headers for the current token.
 
-        Returns:
-            A tuple of (header_name, header_value) or None if no valid token
+        Returns
+        -------
+
+        Optional[Tuple[str, str]]
+            A tuple of (header_name, header_value) or None if no valid token.
         """
 
     @abstractmethod
@@ -312,22 +406,32 @@ class AuthMockBase(ABC):
         """
         Handle authentication errors by attempting to refresh tokens or other recovery.
 
-        Args:
-            response: The error response that triggered the auth error
+        Parameters
+        ----------
+        response : MockResponse
+            The error response that triggered the auth error.
 
-        Returns:
-            True if the error was handled and the request should be retried, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the error was handled and the request should be retried, False otherwise.
         """
 
     def verify_auth_header(self, header_value: str) -> bool:
         """
         Verify that the authentication header has the correct format.
 
-        Args:
-            header_value: The value of the authentication header
+        Parameters
+        ----------
+        header_value : str
+            The value of the authentication header.
 
-        Returns:
-            True if the header is valid, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the header is valid, False otherwise.
         """
         return True
 
@@ -335,11 +439,16 @@ class AuthMockBase(ABC):
         """
         Verify that the token is being used correctly.
 
-        Args:
-            token: The token to verify
+        Parameters
+        ----------
+        token : str
+            The token to verify.
 
-        Returns:
-            True if the token is being used correctly, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the token is being used correctly, False otherwise.
         """
         return True
 
@@ -347,11 +456,17 @@ class AuthMockBase(ABC):
         """
         Verify that token refresh behavior is correct.
 
-        Args:
-            old_token: The token before refresh
-            new_token: The token after refresh
+        Parameters
+        ----------
+        old_token : str
+            The token before refresh.
+        new_token : str
+            The token after refresh.
 
-        Returns:
-            True if the refresh behavior is correct, False otherwise
+        Returns
+        -------
+
+        bool
+            True if the refresh behavior is correct, False otherwise.
         """
         return old_token != new_token

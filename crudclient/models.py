@@ -1,15 +1,14 @@
-"""
-Module `models.py`
-=================
+"""Module `models.py`.
 
 This module defines various models used throughout the crudclient library.
 These models provide structured data representations for API responses and other data.
 
-Classes:
-    - RoleBasedModel: A model that validates fields based on the current role.
-    - Link: A model representing a hyperlink.
-    - PaginationLinks: A model representing pagination links.
-    - ApiResponse: A generic model for API responses with pagination.
+Classes
+-------
+- RoleBasedModel: A model that validates fields based on the current role.
+- Link: A model representing a hyperlink.
+- PaginationLinks: A model representing pagination links.
+- ApiResponse: A generic model for API responses with pagination.
 """
 
 from typing import Any, Dict, Generic, List, Optional, TypeVar
@@ -39,8 +38,10 @@ class RoleBasedModel(BaseModel):
     validation capabilities. Future plans include expanding this to support more
     complex validation scenarios and integrating it with the CRUD operations.
 
-    Attributes:
-        _current_role (Optional[str]): The current role for validation.
+    Attributes
+    ----------
+    _current_role : Optional[str]
+        The current role for validation.
     """
 
     _current_role: Optional[str]
@@ -50,14 +51,20 @@ class RoleBasedModel(BaseModel):
         """
         Validate fields based on the current role.
 
-        Args:
-            values (Dict[str, Any]): The input values to validate.
+        Parameters
+        ----------
+        values : Dict[str, Any]
+            The input values to validate.
 
-        Returns:
-            Dict[str, Any]: The validated values.
+        Returns
+        -------
+        Dict[str, Any]
+            The validated values.
 
-        Raises:
-            ValueError: If a required field is missing or a disallowed field is present.
+        Raises
+        ------
+        ValueError
+            If a required field is missing or a disallowed field is present.
         """
         # Implementation placeholder - this is a stub in the .pyi file
         return values
@@ -67,8 +74,10 @@ class Link(BaseModel):
     """
     A model representing a hyperlink.
 
-    Attributes:
-        href (Optional[HttpUrl]): The URL of the link.
+    Attributes
+    ----------
+    href : Optional[HttpUrl]
+        The URL of the link.
     """
 
     href: Optional[HttpUrl] = None
@@ -87,10 +96,14 @@ class PaginationLinks(BaseModel):
     """
     A model representing pagination links.
 
-    Attributes:
-        next (Optional[Link]): Link to the next page, if available.
-        previous (Optional[Link]): Link to the previous page, if available.
-        self (Link): Link to the current page.
+    Attributes
+    ----------
+    next : Optional[Link]
+        Link to the next page, if available.
+    previous : Optional[Link]
+        Link to the previous page, if available.
+    self : Link
+        Link to the current page.
     """
 
     next: Optional[Link] = None
@@ -110,8 +123,10 @@ class IdRef(BaseModel):
     """
     A simple model representing a reference to another object by its ID.
 
-    Attributes:
-        id: The unique identifier of the referenced object.
+    Attributes
+    ----------
+    id : int
+        The unique identifier of the referenced object.
     """
 
     id: int
@@ -123,9 +138,12 @@ class IdUrl(BaseModel):
     """
     A simple model representing an object with an ID and a URL.
 
-    Attributes:
-        id: The unique identifier of the object.
-        url: The URL pointing to the object resource.
+    Attributes
+    ----------
+    id : int
+        The unique identifier of the object.
+    url : Optional[HttpUrl]
+        The URL pointing to the object resource.
     """
 
     id: int
@@ -139,10 +157,14 @@ class ApiResponse(BaseModel, Generic[T]):
     This model represents a standard API response format with pagination links,
     a count of total items, and the actual data.
 
-    Attributes:
-        links (Optional[PaginationLinks]): Pagination links.
-        count (int): Total number of items.
-        data (List[T]): The actual data items (can be populated from 'values' alias).
+    Attributes
+    ----------
+    links : Optional[PaginationLinks]
+        Pagination links.
+    count : int
+        Total number of items.
+    data : List[T]
+        The actual data items (can be populated from 'values' alias).
     """
 
     links: Optional[PaginationLinks] = Field(default=None, alias="_links", description="Pagination links")

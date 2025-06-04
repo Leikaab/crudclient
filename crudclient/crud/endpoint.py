@@ -1,6 +1,5 @@
 """
-Module `endpoint.py`
-===================
+Module `endpoint.py`.
 
 This module provides functions for building and manipulating API endpoints.
 It handles the construction of resource paths, including nested resources,
@@ -26,11 +25,12 @@ def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]],
 
     This method can be overridden in subclasses to provide a custom endpoint prefix.
 
-    Returns:
-        Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]: The endpoint prefix segments.
+    Returns
+    -------
+    Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]
+        The endpoint prefix segments.
     """
     if self.parent:
-        # For nested resources, include the parent resource path and ID
         return (self.parent._resource_path, None)
     return []
 
@@ -39,11 +39,15 @@ def _validate_path_segments(self: "Crud", *args: PathArgs) -> None:
     """
     Validate the types of path segments.
 
-    Args:
-        *args: Variable number of path segments (e.g., resource IDs, actions).
+    Parameters
+    ----------
+    *args : PathArgs
+        Variable number of path segments (e.g., resource IDs, actions).
 
-    Raises:
-        TypeError: If any arg is not None, str, or int.
+    Raises
+    ------
+    TypeError
+        If any arg is not None, str, or int.
     """
     for arg in args:
         if arg is not None and not isinstance(arg, (str, int)):
@@ -54,11 +58,15 @@ def _get_parent_path(self: "Crud", parent_args: Optional[tuple] = None) -> str:
     """
     Get the parent path if a parent exists.
 
-    Args:
-        parent_args: Optional tuple containing path segments for the parent resource.
+    Parameters
+    ----------
+    parent_args : Optional[tuple], optional
+        Optional tuple containing path segments for the parent resource.
 
-    Returns:
-        str: The parent path or empty string if no parent exists.
+    Returns
+    -------
+    str
+        The parent path or empty string if no parent exists.
     """
     if not self.parent:
         return ""
@@ -72,11 +80,15 @@ def _build_resource_path(self: "Crud", *args: PathArgs) -> List[str]:
     """
     Build the current resource path segments.
 
-    Args:
-        *args: Variable number of path segments (e.g., resource IDs, actions).
+    Parameters
+    ----------
+    *args : PathArgs
+        Variable number of path segments (e.g., resource IDs, actions).
 
-    Returns:
-        List[str]: The resource path segments.
+    Returns
+    -------
+    List[str]
+        The resource path segments.
     """
     segments = []
     for arg in args:
@@ -89,8 +101,10 @@ def _get_prefix_segments(self: "Crud") -> List[str]:
     """
     Get the prefix segments for the endpoint.
 
-    Returns:
-        List[str]: The prefix segments.
+    Returns
+    -------
+    List[str]
+        The prefix segments.
     """
     prefix = self._endpoint_prefix()
     if isinstance(prefix, tuple):
@@ -102,16 +116,19 @@ def _join_path_segments(self: "Crud", segments: List[str]) -> str:
     """
     Join path segments into a URL.
 
-    Args:
-        segments: List of path segments.
+    Parameters
+    ----------
+    segments : List[str]
+        List of path segments.
 
-    Returns:
-        str: The joined URL path.
+    Returns
+    -------
+    str
+        The joined URL path.
     """
     if not segments:
         return ""
 
-    # Join segments with slashes and ensure no double slashes
     path = "/".join(segment.strip("/") for segment in segments if segment)
     return path
 
@@ -120,43 +137,41 @@ def _get_endpoint(self: "Crud", *args: Optional[Union[str, int]], parent_args: O
     """
     Construct the endpoint path.
 
-    Args:
-        *args: Variable number of path segments (e.g., resource IDs, actions).
-        parent_args: Optional tuple containing path segments for the parent resource.
+    Parameters
+    ----------
+    *args : Optional[Union[str, int]]
+        Variable number of path segments (e.g., resource IDs, actions).
+    parent_args : Optional[tuple], optional
+        Optional tuple containing path segments for the parent resource.
 
-    Returns:
-        str: The constructed endpoint path.
+    Returns
+    -------
+    str
+        The constructed endpoint path.
 
-    Raises:
-        TypeError: If arg in args or parent_args is not None, str, or int.
+    Raises
+    ------
+    TypeError
+        If arg in args or parent_args is not None, str, or int.
     """
-    # Validate path segments
     self._validate_path_segments(*args)
 
-    # Get parent path for nested resources
     parent_path = self._get_parent_path(parent_args)
 
-    # Get prefix segments
     prefix_segments = self._get_prefix_segments()
 
-    # Build resource path
     resource_segments = [self._resource_path]
     resource_segments.extend(self._build_resource_path(*args))
 
-    # Join all segments
     all_segments = []
     if parent_path:
         all_segments.append(parent_path)
 
-    # Only add prefix segments if there's no parent path being used
-    # (Prefix is usually for static parts like /api/v1, not dynamic parent types)
     elif prefix_segments:
         all_segments.append(self._join_path_segments(prefix_segments))
 
-    # Add the main resource segments
     all_segments.append(self._join_path_segments(resource_segments))
 
-    # Join with slashes and ensure no double slashes
     endpoint = "/".join(segment.strip("/") for segment in all_segments if segment)
 
     logger.debug(f"Built endpoint: {endpoint}")
