@@ -44,10 +44,15 @@ jobs:
       - name: Check if version bump is required
         id: check_version
         run: |
-          if [ "$(echo ${{ env.CURRENT_VERSION }} ${{ env.LATEST_TAG }} | awk '{print ($1 > $2)}')" = "1" ]; then
+          CURRENT_VERSION=${{ env.CURRENT_VERSION }}
+          LATEST_TAG=${{ env.LATEST_TAG }}
+
+          # Use Python for robust version comparison
+          if python -c "from packaging.version import Version; exit(0) if Version('$CURRENT_VERSION') > Version('$LATEST_TAG') else exit(1)"; then
+            echo "Version $CURRENT_VERSION > $LATEST_TAG. Proceeding with publish."
             echo "should_publish=true" >> $GITHUB_OUTPUT
           else
-            echo "Version has not been bumped. Skipping publish."
+            echo "Version $CURRENT_VERSION <= $LATEST_TAG. Skipping publish."
             echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
