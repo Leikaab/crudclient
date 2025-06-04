@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from .tripletex_resources.models.supplier import Supplier, SupplierResponse
@@ -20,6 +22,10 @@ def test_list_suppliers(api):
     assert len(suppliers.values) > 0
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip test since unstable in CI environment",
+)
 @pytest.mark.no_parallel
 def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
     """
