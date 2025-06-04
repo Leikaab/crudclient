@@ -10,6 +10,8 @@ jobs:
   publish:
     if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC authentication with PyPI
 
     steps:
       - name: Checkout code
@@ -56,12 +58,15 @@ jobs:
             echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Build package
+        if: steps.check_version.outputs.should_publish == 'true'
+        run: poetry build
+
       - name: Publish to PyPI
         if: steps.check_version.outputs.should_publish == 'true'
-        run: |
-          poetry publish --build --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
-        env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
 
       - name: Create new tag
         if: steps.check_version.outputs.should_publish == 'true'
