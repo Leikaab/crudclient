@@ -54,6 +54,7 @@ types-requests = "*"
 # autopep8 = "*"
 # yapf = "*"
 freezegun = "^1.5.1"
+flake8-docstrings = "^1.7.0"
 
 
 [build-system]

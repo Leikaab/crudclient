@@ -1,31 +1,9 @@
 """
-Module `client.py`
-=================
+Module `client.py`.
 
 This module defines the HttpClient class, which is responsible for making HTTP requests.
 It provides a clean interface for making requests while delegating specialized concerns
 to other components.
-
-Class `HttpClient`
------------------
-
-The `HttpClient` class provides a centralized way to make HTTP requests for API clients.
-It delegates session management, request preparation, response handling, error handling,
-and retry logic to specialized components.
-
-To use the HttpClient:
-    1. Create a ClientConfig object with the necessary configuration.
-    2. Initialize an HttpClient instance with the config and optional components.
-    3. Use the HttpClient to make HTTP requests.
-
-Example:
-    config = ClientConfig(base_url="https://api.example.com")
-    client = HttpClient(config)
-    response = client.get("users")
-    # Use the response data
-
-Classes:
-    - HttpClient: Main class for making HTTP requests.
 """
 
 import logging
@@ -75,13 +53,24 @@ class HttpClient:
     redaction of sensitive data) can be configured via the `ClientConfig`.
     See `docs/logging.md` for more details.
 
-    Attributes:
-        config (ClientConfig): Configuration object for the client.
-        session_manager (SessionManager): Manages the HTTP session.
-        request_formatter (RequestFormatter): Formats request data.
-        response_handler (ResponseHandler): Processes HTTP responses.
-        error_handler (ErrorHandler): Handles error responses.
-        retry_handler (RetryHandler): Manages retry policies.
+    Attributes
+    ----------
+    config : ClientConfig
+        Configuration object for the client.
+    session_manager : SessionManager
+        Manages the HTTP session.
+    request_formatter : RequestFormatter
+        Formats request data.
+    response_handler : ResponseHandler
+        Processes HTTP responses.
+    error_handler : ErrorHandler
+        Handles error responses.
+    retry_handler : RetryHandler
+        Manages retry policies.
+    http_logger : HttpLifecycleLogger
+        Logger for HTTP request/response lifecycle.
+    rate_limiter : Optional[Any]
+        RateLimiter instance if enabled.
     """
 
     config: ClientConfig
@@ -91,7 +80,7 @@ class HttpClient:
     error_handler: ErrorHandler
     retry_handler: RetryHandler
     http_logger: HttpLifecycleLogger
-    rate_limiter: Optional[Any]  # RateLimiter instance if enabled
+    rate_limiter: Optional[Any]
 
     def __init__(
         self,
@@ -105,21 +94,25 @@ class HttpClient:
         """
         Initialize the HttpClient with a configuration and optional components.
 
-        Args:
-            config (ClientConfig): Configuration for the client.
-            session_manager (Optional[SessionManager]): Session manager component.
-                If not provided, a new one will be created.
-            request_formatter (Optional[RequestFormatter]): Request formatter component.
-                If not provided, a new one will be created.
-            response_handler (Optional[ResponseHandler]): Response handler component.
-                If not provided, a new one will be created.
-            error_handler (Optional[ErrorHandler]): Error handler component.
-                If not provided, a new one will be created.
-            retry_handler (Optional[RetryHandler]): Retry handler component.
-                If not provided, a new one will be created.
+        Parameters
+        ----------
+        config : ClientConfig
+            Configuration for the client.
+        session_manager : Optional[SessionManager], optional
+            Session manager component. If not provided, a new one will be created.
+        request_formatter : Optional[RequestFormatter], optional
+            Request formatter component. If not provided, a new one will be created.
+        response_handler : Optional[ResponseHandler], optional
+            Response handler component. If not provided, a new one will be created.
+        error_handler : Optional[ErrorHandler], optional
+            Error handler component. If not provided, a new one will be created.
+        retry_handler : Optional[RetryHandler], optional
+            Retry handler component. If not provided, a new one will be created.
 
-        Raises:
-            TypeError: If the provided config is not a ClientConfig object.
+        Raises
+        ------
+        TypeError
+            If the provided config is not a ClientConfig object.
         """
         if not isinstance(config, ClientConfig):
             raise TypeError("config must be a ClientConfig object")
@@ -132,11 +125,24 @@ class HttpClient:
         self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
         self.http_logger = HttpLifecycleLogger(config=config, logger=logger)
 
-        # Initialize rate limiter if enabled
         self.rate_limiter = get_rate_limiter(config)
 
     def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
-        """Handle the successful response or error during response processing."""
+        """
+        Handle the successful response or error during response processing.
+
+        Parameters
+        ----------
+        response : requests.Response
+            The raw HTTP response.
+        handle_response : bool
+            Whether to process the response using ResponseHandler.
+
+        Returns
+        -------
+        Any
+            The processed response data or the raw response object.
+        """
         response.raise_for_status()
 
         if not handle_response:
@@ -161,22 +167,34 @@ class HttpClient:
         """
         Internal method to make an HTTP request with validation, auth, retry, and error handling.
 
-        Args:
-            method: HTTP method (e.g., 'GET', 'POST').
-            endpoint: API endpoint path (relative to base_url).
-            url: Full URL (overrides endpoint if provided).
-            handle_response: Whether to process the response using ResponseHandler.
-            **kwargs: Additional arguments passed to requests.request.
+        Parameters
+        ----------
+        method : str
+            HTTP method (e.g., 'GET', 'POST').
+        endpoint : Optional[str], optional
+            API endpoint path (relative to base_url).
+        url : Optional[str], optional
+            Full URL (overrides endpoint if provided).
+        handle_response : bool, optional
+            Whether to process the response using ResponseHandler. Defaults to True.
+        **kwargs : Any
+            Additional arguments passed to requests.request.
 
-        Returns:
+        Returns
+        -------
+        Any
             Processed response data (RawResponseSimple) if handle_response is True,
             otherwise the raw requests.Response object.
 
-        Raises:
-            TypeError: If input parameters have incorrect types.
-            ValueError: If neither endpoint nor url is provided.
-            requests.HTTPError: If the request fails and is not handled by ErrorHandler.
-            Various exceptions from AuthStrategy or ResponseHandler/ErrorHandler.
+        Raises
+        ------
+        TypeError
+            If input parameters have incorrect types.
+        ValueError
+            If neither endpoint nor url is provided.
+        requests.HTTPError
+            If the request fails and is not handled by ErrorHandler.
+        Various exceptions from AuthStrategy or ResponseHandler/ErrorHandler.
         """
         if not isinstance(handle_response, bool):
             raise TypeError(f"handle_response must be a boolean, got {type(handle_response).__name__}")
@@ -186,14 +204,12 @@ class HttpClient:
         logger.debug(f"Preparing {method} request to {final_url} with final params: {prepared_kwargs.get('params')}")
 
         def make_request() -> requests.Response:
-            # Check rate limit before making the request
             if self.rate_limiter:
                 self.rate_limiter.check_and_wait()
 
             self.http_logger.log_request_details(method, final_url, prepared_kwargs)
             response = self.session_manager.session.request(method, final_url, timeout=self.session_manager.timeout, **prepared_kwargs)
 
-            # Update rate limiter with response headers
             if self.rate_limiter and response.headers:
                 self.rate_limiter.update_from_headers(response.headers)
 
@@ -229,7 +245,32 @@ class HttpClient:
     def _execute_request_with_retry(
         self, method: str, url: str, make_request_func: Callable[[], requests.Response], handle_response: bool
     ) -> Tuple[Any, int]:
-        """Execute the HTTP request using the session manager and retry handler."""
+        """
+        Execute the HTTP request using the session manager and retry handler.
+
+        Parameters
+        ----------
+        method : str
+            The HTTP method.
+        url : str
+            The URL for the request.
+        make_request_func : Callable[[], requests.Response]
+            A callable that performs the actual HTTP request.
+        handle_response : bool
+            Whether to process the response using ResponseHandler.
+
+        Returns
+        -------
+        Tuple[Any, int]
+            A tuple containing the processed response data or raw response, and the attempt count.
+
+        Raises
+        ------
+        CrudClientError
+            If an unexpected result type is returned from the retry handler.
+        Exception
+            If an exception occurred during the request.
+        """
         result_tuple = self.retry_handler.execute_with_retry(
             method, url, make_request_func, self.session_manager.session, self.session_manager.refresh_auth
         )
@@ -248,7 +289,19 @@ class HttpClient:
             raise CrudClientError(f"Unexpected result type from retry handler: {type(result).__name__}")
 
     def _handle_http_error(self, e: HTTPError) -> None:
-        """Handle HTTP errors using the error handler."""
+        """
+        Handle HTTP errors using the error handler.
+
+        Parameters
+        ----------
+        e : HTTPError
+            The HTTPError exception.
+
+        Raises
+        ------
+        APIError
+            A more specific API error based on the HTTP status code.
+        """
         response = e.response
         request = e.request
 
@@ -278,16 +331,22 @@ class HttpClient:
         """
         Make a GET request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         return self._request("GET", endpoint=endpoint, params=params)
 
@@ -302,22 +361,28 @@ class HttpClient:
         """
         Make a POST request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         return self._request("POST", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
@@ -332,22 +397,28 @@ class HttpClient:
         """
         Make a PUT request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         return self._request("PUT", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
@@ -355,17 +426,24 @@ class HttpClient:
         """
         Make a DELETE request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
-            **kwargs: Additional keyword arguments to pass to the request.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
+        **kwargs : Any
+            Additional keyword arguments to pass to the request.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         request_kwargs = kwargs.copy()
         if params is not None:
@@ -383,22 +461,28 @@ class HttpClient:
         """
         Make a PATCH request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         return self._request("PATCH", endpoint=endpoint, data=data, json=json, files=files, params=params)
 
@@ -414,16 +498,24 @@ class HttpClient:
         This method delegates to the request_formatter to prepare the request data
         and set the appropriate content-type headers.
 
-        Args:
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-            json (Optional[Any]): JSON data to include in the request.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
+        Parameters
+        ----------
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request.
+        json : Optional[Any], optional
+            JSON data to include in the request.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request.
 
-        Returns:
-            Dict[str, Any]: A dictionary containing the prepared request data and headers.
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary containing the prepared request data and headers.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         return {"data": data, "json": json, "files": files}
 
@@ -434,18 +526,28 @@ class HttpClient:
         This method is useful when you need access to the raw response object
         for custom processing.
 
-        Args:
-            method (str): The HTTP method to use (GET, POST, PUT, DELETE, PATCH).
-            endpoint (Optional[str]): The API endpoint to request. Either endpoint or url must be provided.
-            url (Optional[str]): The full URL to request. Either endpoint or url must be provided.
-            **kwargs: Additional keyword arguments to pass to the request.
+        Parameters
+        ----------
+        method : str
+            The HTTP method to use (GET, POST, PUT, DELETE, PATCH).
+        endpoint : Optional[str], optional
+            The API endpoint to request. Either endpoint or url must be provided.
+        url : Optional[str], optional
+            The full URL to request. Either endpoint or url must be provided.
+        **kwargs : Any
+            Additional keyword arguments to pass to the request.
 
-        Returns:
-            requests.Response: The raw Response object.
+        Returns
+        -------
+        requests.Response
+            The raw Response object.
 
-        Raises:
-            ValueError: If neither endpoint nor url is provided.
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        ValueError
+            If neither endpoint nor url is provided.
+        TypeError
+            If the parameters are of incorrect types.
         """
         return self._request(method, endpoint, url, handle_response=False, **kwargs)
 

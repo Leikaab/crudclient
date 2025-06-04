@@ -35,6 +35,23 @@ class ApiKeyAuthMock(AuthMockBase):
 
     This class provides a configurable mock implementation of the API Key Authentication
     strategy, with support for key validation, rate limiting, and usage tracking.
+
+    Attributes
+    ----------
+    api_key : str
+        The API key used by this mock.
+    header_name : Optional[str]
+        The name of the header used for API key authentication.
+    param_name : Optional[str]
+        The name of the query parameter used for API key authentication.
+    validator : ApiKeyValidator
+        Validator component for API keys.
+    rate_limiter : ApiKeyRateLimiter
+        Rate limiter component for API keys.
+    usage_tracker : ApiKeyUsageTracker
+        Usage tracker component for API keys.
+    auth_strategy : ApiKeyAuth
+        The underlying ApiKeyAuth strategy instance.
     """
 
     api_key: str
@@ -49,28 +66,34 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Initialize an API Key Authentication mock.
 
-        Args:
-            api_key: The default API key
-            header_name: Name of the header for API key (None if using param)
-            param_name: Name of the query parameter for API key (None if using header)
+        Parameters
+        ----------
+        api_key : str, optional
+            The default API key. Defaults to "valid_api_key".
+        header_name : Optional[str], optional
+            Name of the header for API key (None if using param). Defaults to "X-API-Key".
+        param_name : Optional[str], optional
+            Name of the query parameter for API key (None if using header). Defaults to None.
+
+        Raises
+        ------
+        ValueError
+            If neither header_name nor param_name is provided.
         """
         super().__init__()
         self.api_key = api_key
         self.header_name = header_name
         self.param_name = param_name
 
-        # Initialize components
         self.validator = ApiKeyValidator()
         self.rate_limiter = ApiKeyRateLimiter()
         self.usage_tracker = ApiKeyUsageTracker()
 
-        # Add initial key
         self.validator.add_valid_key(api_key)
         self.validator.set_key_metadata(api_key=api_key, owner="default_user", permissions=["read", "write"], tier="standard")
         self.rate_limiter.initialize_key(api_key)
         self.usage_tracker.initialize_key(api_key)
 
-        # Initialize auth strategy
         if header_name:
             self.auth_strategy = ApiKeyAuth(api_key=api_key, header_name=header_name)
         elif param_name:
@@ -82,11 +105,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Set the API key for the API Key Auth mock.
 
-        Args:
-            api_key: The API key to use
+        Parameters
+        ----------
+        api_key : str
+            The API key to use.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.api_key = api_key
         self.validator.add_valid_key(api_key)
@@ -94,7 +121,6 @@ class ApiKeyAuthMock(AuthMockBase):
         self.rate_limiter.initialize_key(api_key)
         self.usage_tracker.initialize_key(api_key)
 
-        # Update auth strategy
         if self.header_name:
             self.auth_strategy = ApiKeyAuth(api_key=api_key, header_name=self.header_name)
         elif self.param_name:
@@ -106,11 +132,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Add an additional valid API key.
 
-        Args:
-            api_key: An additional valid API key
+        Parameters
+        ----------
+        api_key : str
+            An additional valid API key.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.validator.add_valid_key(api_key)
         self.validator.set_key_metadata(api_key=api_key, owner="default_user", permissions=["read", "write"], tier="standard")
@@ -129,15 +159,23 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Set metadata for a specific API key or the current key.
 
-        Args:
-            api_key: The API key to set metadata for (defaults to the current key)
-            owner: Owner of the API key
-            permissions: List of permissions associated with the key
-            tier: Service tier associated with the key
-            expires_in_seconds: Number of seconds until the key expires
+        Parameters
+        ----------
+        api_key : Optional[str], optional
+            The API key to set metadata for (defaults to the current key).
+        owner : Optional[str], optional
+            Owner of the API key.
+        permissions : Optional[List[str]], optional
+            List of permissions associated with the key.
+        tier : Optional[str], optional
+            Service tier associated with the key.
+        expires_in_seconds : Optional[int], optional
+            Number of seconds until the key expires.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         target_key = api_key or self.api_key
         expires_at = None
@@ -151,11 +189,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Set a regex pattern that valid API keys must match.
 
-        Args:
-            pattern: Regular expression pattern for API key validation
+        Parameters
+        ----------
+        pattern : str
+            Regular expression pattern for API key validation.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.validator.set_key_format_pattern(re.compile(pattern))
         return self
@@ -164,11 +206,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Revoke a specific API key or the current key.
 
-        Args:
-            api_key: The API key to revoke (defaults to the current key)
+        Parameters
+        ----------
+        api_key : Optional[str], optional
+            The API key to revoke (defaults to the current key).
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         target_key = api_key or self.api_key
         self.validator.revoke_key(target_key)
@@ -178,12 +224,17 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Enable rate limiting for API keys.
 
-        Args:
-            requests_per_period: Number of requests allowed per period
-            period_seconds: Period length in seconds
+        Parameters
+        ----------
+        requests_per_period : int, optional
+            Number of requests allowed per period. Defaults to 100.
+        period_seconds : int, optional
+            Period length in seconds. Defaults to 3600.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.rate_limiter.enable_rate_limiting(requests_per_period=requests_per_period, period_seconds=period_seconds)
         return self
@@ -192,8 +243,10 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Enable usage tracking for API keys.
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.usage_tracker.enable_usage_tracking()
         return self
@@ -202,11 +255,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Configure the API Key Auth to use a header.
 
-        Args:
-            header_name: Name of the header for the API key
+        Parameters
+        ----------
+        header_name : str, optional
+            Name of the header for the API key. Defaults to "X-API-Key".
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.header_name = header_name
         self.param_name = None
@@ -217,11 +274,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Configure the API Key Auth to use a query parameter.
 
-        Args:
-            param_name: Name of the query parameter for the API key
+        Parameters
+        ----------
+        param_name : str, optional
+            Name of the query parameter for the API key. Defaults to "api_key".
 
-        Returns:
-            Self for method chaining
+        Returns
+        -------
+        ApiKeyAuthMock
+            Self for method chaining.
         """
         self.header_name = None
         self.param_name = param_name
@@ -232,39 +293,43 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Track a request for rate limiting and usage tracking purposes.
 
-        Args:
-            api_key: The API key used for the request
-            endpoint: The endpoint being accessed (for usage tracking)
+        Parameters
+        ----------
+        api_key : str
+            The API key used for the request.
+        endpoint : Optional[str], optional
+            The endpoint being accessed (for usage tracking).
 
-        Returns:
-            True if the request is within rate limits, False otherwise
+        Returns
+        -------
+        bool
+            True if the request is within rate limits, False otherwise.
         """
-        # Track usage
         self.usage_tracker.track_request(api_key, endpoint)
 
-        # Check rate limit
         return self.rate_limiter.track_request(api_key)
 
     def validate_key(self, api_key: str) -> bool:
         """
         Validate an API key against all configured rules.
 
-        Args:
-            api_key: The API key to validate
+        Parameters
+        ----------
+        api_key : str
+            The API key to validate.
 
-        Returns:
-            True if the key is valid, False otherwise
+        Returns
+        -------
+        bool
+            True if the key is valid, False otherwise.
         """
-        # Validate the key
         if not self.validator.validate_key(api_key):
             return False
 
-        # Check rate limit if enabled
         if self.rate_limiter.rate_limit_enabled:
             if not self.track_request(api_key):
                 return False
         elif self.usage_tracker.usage_tracking_enabled:
-            # Just track the request without rate limiting
             self.usage_tracker.track_request(api_key)
 
         return True
@@ -273,27 +338,34 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Verify that the API Key header has the correct format and key is valid.
 
-        Args:
-            header_value: The value of the API key header
+        Parameters
+        ----------
+        header_value : str
+            The value of the API key header.
 
-        Returns:
-            True if the header is valid, False otherwise
+        Returns
+        -------
+        bool
+            True if the header is valid, False otherwise.
         """
         if not self.header_name:
-            return False  # Not using header auth
+            return False
 
-        # For API Key, we check it's not empty and it's valid
         return bool(header_value) and self.validate_key(header_value)
 
     def verify_token_usage(self, token: str) -> bool:
         """
         Verify that the API key is being used correctly.
 
-        Args:
-            token: The API key to verify
+        Parameters
+        ----------
+        token : str
+            The API key to verify.
 
-        Returns:
-            True if the key is being used correctly, False otherwise
+        Returns
+        -------
+        bool
+            True if the key is being used correctly, False otherwise.
         """
         return self.validate_key(token)
 
@@ -301,8 +373,10 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Get usage statistics for API keys and endpoints.
 
-        Returns:
-            Dictionary with usage statistics
+        Returns
+        -------
+        Dict
+            Dictionary with usage statistics.
         """
         return self.usage_tracker.get_usage_stats()
 
@@ -310,11 +384,15 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Get rate limit status for a specific API key or the current key.
 
-        Args:
-            api_key: The API key to get status for (defaults to the current key)
+        Parameters
+        ----------
+        api_key : Optional[str], optional
+            The API key to get status for (defaults to the current key).
 
-        Returns:
-            Dictionary with rate limit status
+        Returns
+        -------
+        Dict
+            Dictionary with rate limit status.
         """
         target_key = api_key or self.api_key
         return self.rate_limiter.get_rate_limit_status(target_key)
@@ -323,8 +401,10 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Get the configured auth strategy.
 
-        Returns:
-            The configured ApiKeyAuth strategy
+        Returns
+        -------
+        AuthStrategy
+            The configured ApiKeyAuth strategy.
         """
         return self.auth_strategy
 
@@ -332,23 +412,27 @@ class ApiKeyAuthMock(AuthMockBase):
         """
         Get the authentication headers for the current API key.
 
-        Returns:
-            A tuple of (header_name, api_key) or None if using param auth
+        Returns
+        -------
+        Optional[Tuple[str, str]]
+            A tuple of (header_name, api_key) or None if using param auth.
         """
         if self.header_name and self.api_key:
             return (self.header_name, self.api_key)
-        # If using param_name, no standard header tuple is returned here.
         return None
 
     def handle_auth_error(self, response: "MockResponse") -> bool:
         """
         Handle authentication errors (API keys don't have a refresh mechanism).
 
-        Args:
-            response: The error response that triggered the auth error
+        Parameters
+        ----------
+        response : MockResponse
+            The error response that triggered the auth error.
 
-        Returns:
-            Always False for API keys as they don't have a refresh mechanism
+        Returns
+        -------
+        bool
+            Always False for API keys as they don't have a refresh mechanism.
         """
-        # API keys generally don't have a refresh mechanism
         return False
