@@ -28,6 +28,11 @@ RUN poetry install --no-interaction --no-ansi --with dev --no-root
 # Add the project's .venv to PATH for all users
 ENV PATH="/workspace/.venv/bin:$PATH"
 
+# Install act for local GitHub Actions testing
+RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash && \
+    mv bin/act /usr/local/bin/act && \
+    rm -rf bin
+
 # Create .vscode-server directory structure and set proper ownership
 # This prevents permission issues when VS Code tries to create these directories
 RUN mkdir -p /home/vscode/.vscode-server/data/User/globalStorage && \

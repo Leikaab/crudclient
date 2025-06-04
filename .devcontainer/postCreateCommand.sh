@@ -59,4 +59,13 @@ else
     echo "Poetry could not be found"
 fi
 
+# Verify act installation
+if command -v act &> /dev/null; then
+    echo "✓ act is installed (version: $(act --version))"
+    echo "  You can now test GitHub Actions locally with: act"
+    echo "  Example: act -j test"
+else
+    echo "✗ act installation failed"
+fi
+
 echo "Development environment setup complete!"
