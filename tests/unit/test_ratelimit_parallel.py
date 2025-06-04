@@ -142,7 +142,7 @@ class TestRateLimiterParallel:
             # All requests should eventually succeed
             assert total_calls == num_workers * requests_per_worker, f"Not all calls completed: {total_calls} != {num_workers * requests_per_worker}"
 
-            if os.environ.get("CI") != "true":
+            if os.environ.get("GITHUB_ACTIONS") != "true":
                 assert total_blocked > 0, f"No blocking occurred: {total_blocked} == 0"
                 blocked_workers = sum(1 for w in worker_results.values() if w["blocked"] > 0)
                 assert blocked_workers >= 2, f"Too few workers were blocked: {blocked_workers}/{num_workers}"

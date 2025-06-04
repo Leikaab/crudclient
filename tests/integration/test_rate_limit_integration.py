@@ -114,7 +114,7 @@ class TestRateLimitIntegration:
                 processes.append(p)
 
             # Wait for completion with generous timeout for CI
-            timeout = 10 if os.environ.get("CI") == "true" else 5
+            timeout = 10 if os.environ.get("GITHUB_ACTIONS") == "true" else 5
             for p in processes:
                 p.join(timeout=timeout)
                 if p.is_alive():
@@ -157,7 +157,7 @@ class TestRateLimitIntegration:
             # At least some requests should succeed
             assert total_successful > 0, "No successful requests"
 
-            if os.environ.get("CI") != "true":
+            if os.environ.get("GITHUB_ACTIONS") != "true":
                 # In local testing only, expect more strict results
                 # Total requests should be reasonable (at least 75% of expected)
                 expected_min = (num_workers - 1) * requests_per_worker * 0.75

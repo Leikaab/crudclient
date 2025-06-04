@@ -27,6 +27,10 @@ logging.getLogger("crudclient.ratelimit").setLevel(logging.DEBUG)
     not os.getenv("TRIPLETEX_TEST_CONSUMER_TOKEN") or not os.getenv("TRIPLETEX_TEST_EMPLOYEE_TOKEN"),
     reason="Tripletex test credentials not configured",
 )
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
+)
 @pytest.mark.no_parallel
 def test_tripletex_rate_limiting_prevents_429():
     """
@@ -39,11 +43,14 @@ def test_tripletex_rate_limiting_prevents_429():
     print("\n=== Simultaneous test with protected and unprotected clients ===")
 
     # Create both clients
+    # For the unprotected client, we need to disable the automatic rate limiting
     config_unprotected = TripletexTestConfig()
+    config_unprotected._rate_limiter_enabled = False  # Disable automatic rate limiting for comparison
     api_unprotected = TripletexAPI(client_config=config_unprotected)
 
     config_protected = TripletexTestConfig()
-    config_protected.enable_rate_limiter(track_delays=True)
+    # TripletexTestConfig already enables rate limiting, just enable tracking
+    config_protected._rate_limiter_track_delays = True
     api_protected = TripletexAPI(client_config=config_protected)
 
     # Get rate limiter for monitoring
@@ -154,6 +161,10 @@ def test_tripletex_rate_limiting_prevents_429():
 @pytest.mark.skipif(
     not os.getenv("TRIPLETEX_TEST_CONSUMER_TOKEN") or not os.getenv("TRIPLETEX_TEST_EMPLOYEE_TOKEN"),
     reason="Tripletex test credentials not configured",
+)
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
 )
 @pytest.mark.no_parallel
 def test_rate_limiter_delay_tracking():
