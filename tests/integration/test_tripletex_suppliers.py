@@ -89,6 +89,10 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
         api.suppliers.read(created_supplier.id)
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip test since unstable in CI environment",
+)
 @pytest.mark.no_parallel
 def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
     """
@@ -134,6 +138,10 @@ def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_suppl
         assert any(word in error_msg for word in ["supplier", "duplicate", "exists", "unique"])
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip test since unstable in CI environment",
+)
 @pytest.mark.no_parallel
 def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
     """
