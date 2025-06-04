@@ -98,18 +98,20 @@ class TestHttpClientNetworkErrorRetries:
 
         mock_request.get(url, json=side_effect)
 
-        # Make a request that will retry after timeout errors
-        response = retry_client.get("/users")
+        # Patch time.sleep to speed up test
+        with patch("time.sleep"):
+            # Make a request that will retry after timeout errors
+            response = retry_client.get("/users")
 
-        # Check that the request was retried and eventually succeeded
-        assert request_count[0] == 3
-        # The response might be a string or a dict depending on how the mock is handled
-        if isinstance(response, dict):
-            assert response.get("id") == 1
-            assert response.get("name") == "Test User"
-        else:
-            assert '"id": 1' in response
-            assert '"name": "Test User"' in response
+            # Check that the request was retried and eventually succeeded
+            assert request_count[0] == 3
+            # The response might be a string or a dict depending on how the mock is handled
+            if isinstance(response, dict):
+                assert response.get("id") == 1
+                assert response.get("name") == "Test User"
+            else:
+                assert '"id": 1' in response
+                assert '"name": "Test User"' in response
 
     def test_ssl_error_retry(self, retry_client, mock_request):
         """
@@ -158,13 +160,15 @@ class TestHttpClientNetworkErrorRetries:
         url = f"{retry_client.config.base_url}/users"
         mock_request.get(url, exc=requests.exceptions.ConnectionError("Connection refused"))
 
-        # Make a request that will fail all retry attempts
-        with pytest.raises(CrudClientError) as excinfo:
-            retry_client.get("/users")
+        # Patch time.sleep to speed up test
+        with patch("time.sleep"):
+            # Make a request that will fail all retry attempts
+            with pytest.raises(CrudClientError) as excinfo:
+                retry_client.get("/users")
 
-        # Check that the exception contains the error details
-        assert "Connection refused" in str(excinfo.value)
-        assert "Request failed" in str(excinfo.value)
+            # Check that the exception contains the error details
+            assert "Connection refused" in str(excinfo.value)
+            assert "Request failed" in str(excinfo.value)
 
     def test_mixed_error_retry(self, retry_client, mock_request):
         """
@@ -192,18 +196,20 @@ class TestHttpClientNetworkErrorRetries:
 
         mock_request.get(url, json=side_effect)
 
-        # Make a request that will retry after different errors
-        response = retry_client.get("/users")
+        # Patch time.sleep to speed up test
+        with patch("time.sleep"):
+            # Make a request that will retry after different errors
+            response = retry_client.get("/users")
 
-        # Check that the request was retried for each type of error
-        assert request_count[0] == 3
-        # The response might be a string or a dict depending on how the mock is handled
-        if isinstance(response, dict):
-            assert response.get("id") == 1
-            assert response.get("name") == "Test User"
-        else:
-            assert '"id": 1' in response
-            assert '"name": "Test User"' in response
+            # Check that the request was retried for each type of error
+            assert request_count[0] == 3
+            # The response might be a string or a dict depending on how the mock is handled
+            if isinstance(response, dict):
+                assert response.get("id") == 1
+                assert response.get("name") == "Test User"
+            else:
+                assert '"id": 1' in response
+                assert '"name": "Test User"' in response
 
     def test_retry_with_backoff(self, retry_client, mock_request):
         """

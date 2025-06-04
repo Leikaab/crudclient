@@ -33,6 +33,8 @@
 
   - **ResourceGroup Feature**: The framework provides a `ResourceGroup` class for organizing related API resources under a common path segment, enabling typed, hierarchical nesting of resources. This improves type hinting, code organization, and maintainability for complex APIs. See [docs/resource_groups.md](docs/resource_groups.md) for details.
 
+  - **Rate Limiting (EXPERIMENTAL)**: The framework includes an experimental rate limiting module that provides cross-process coordination to prevent HTTP 429 errors. Currently supports Tripletex API headers only. ⚠️ **WARNING: This feature is experimental and may change in future releases.** See [crudclient/ratelimit/README.md](crudclient/ratelimit/README.md) for details.
+
   This framework is designed to help developers focus on implementing the specific logic required for their APIs while relying on a solid, reusable foundation for the underlying infrastructure. It supports a modular approach, making it easier to manage and scale API client development across various projects.
 
 </details>

@@ -51,6 +51,7 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnprocessableEntityError,
 )
+from ..ratelimit import get_rate_limiter
 from ..types import RawResponseSimple
 from .errors import ErrorHandler
 from .logging import HttpLifecycleLogger
@@ -90,6 +91,7 @@ class HttpClient:
     error_handler: ErrorHandler
     retry_handler: RetryHandler
     http_logger: HttpLifecycleLogger
+    rate_limiter: Optional[Any]  # RateLimiter instance if enabled
 
     def __init__(
         self,
@@ -129,6 +131,9 @@ class HttpClient:
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
         self.http_logger = HttpLifecycleLogger(config=config, logger=logger)
+
+        # Initialize rate limiter if enabled
+        self.rate_limiter = get_rate_limiter(config)
 
     def _handle_request_response(self, response: requests.Response, handle_response: bool) -> Any:
         """Handle the successful response or error during response processing."""
@@ -181,8 +186,18 @@ class HttpClient:
         logger.debug(f"Preparing {method} request to {final_url} with final params: {prepared_kwargs.get('params')}")
 
         def make_request() -> requests.Response:
+            # Check rate limit before making the request
+            if self.rate_limiter:
+                self.rate_limiter.check_and_wait()
+
             self.http_logger.log_request_details(method, final_url, prepared_kwargs)
-            return self.session_manager.session.request(method, final_url, timeout=self.session_manager.timeout, **prepared_kwargs)
+            response = self.session_manager.session.request(method, final_url, timeout=self.session_manager.timeout, **prepared_kwargs)
+
+            # Update rate limiter with response headers
+            if self.rate_limiter and response.headers:
+                self.rate_limiter.update_from_headers(response.headers)
+
+            return response
 
         start_time = time.monotonic()
         attempt_count: int = 0

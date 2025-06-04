@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 
 from crudclient.config import ClientConfig
 
@@ -61,3 +62,10 @@ class TripletexTestConfig(TripletexConfig):
         self.auth_strategy = TripletexAuthStrategy(
             company_id=self.company_id, consumer_token=consumer_token, employee_token=employee_token, base_url=self.base_url
         )
+
+        # Enable rate limiting for test environment
+        # Note: This provides protection within a single process/job but won't coordinate
+        # across GitHub Actions matrix jobs since they don't share filesystems
+        rate_limit_dir = os.path.join(tempfile.gettempdir(), "tripletex_rate_limit")
+        os.makedirs(rate_limit_dir, exist_ok=True)
+        self.enable_rate_limiter(state_path=rate_limit_dir, buffer=5, buffer_time=1.0)
