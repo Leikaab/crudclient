@@ -7,17 +7,98 @@ on:
       - completed
 
 jobs:
-  publish:
-    if: github.event.workflow_run.conclusion == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+  publish-prerelease:
+    name: Publish Pre-release to PyPI
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for OIDC authentication with PyPI
+      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --no-root --without dev --no-interaction --no-ansi
+
+      - name: Get base version and calculate pre-release version
+        id: versioning
+        run: |
+          BASE_VERSION=$(poetry version -s)
+
+          # Get commit count since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+          else
+            COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
+          fi
+
+          # Parse version and increment patch level for pre-releases
+          IFS='.' read -ra VERSION_PARTS <<< "$BASE_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+
+          # Increment patch version
+          NEXT_PATCH=$((PATCH + 1))
+
+          # Create pre-release version with incremented patch
+          PRE_RELEASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.dev${COMMIT_COUNT}"
+
+          echo "Base version: $BASE_VERSION"
+          echo "Commit count since last tag ($LAST_TAG): $COMMIT_COUNT"
+          echo "Calculated pre-release version: $PRE_RELEASE_VERSION"
+          echo "version=${PRE_RELEASE_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set version in pyproject.toml
+        run: poetry version ${{ steps.versioning.outputs.version }}
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to TestPyPI (pre-release)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+          skip-existing: true
+
+      - name: Create new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          TAG_VERSION="${{ steps.versioning.outputs.version }}"
+          echo "Creating tag: $TAG_VERSION"
+          git tag "$TAG_VERSION"
+          git push origin --tags
+
+  publish-stable:
+    name: Publish Stable Release to PyPI
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC authentication with PyPI
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -43,43 +124,6 @@ jobs:
           echo "LATEST_TAG=${TAG}" >> $GITHUB_ENV
           echo "Latest tag is $LATEST_TAG"
 
-      - name: Calculate pre-release version for develop branch
-        id: calc_version
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          BASE_VERSION=$(poetry version -s)
-
-          # Get commit count since last tag
-          LAST_TAG="${{ env.LATEST_TAG }}"
-          if [ -z "$LAST_TAG" ]; then
-            COMMIT_COUNT=$(git rev-list --count HEAD)
-          else
-            COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
-          fi
-
-          # Parse version and increment patch level for pre-releases
-          IFS='.' read -ra VERSION_PARTS <<< "$BASE_VERSION"
-          MAJOR="${VERSION_PARTS[0]}"
-          MINOR="${VERSION_PARTS[1]}"
-          PATCH="${VERSION_PARTS[2]}"
-
-          # Increment patch version
-          NEXT_PATCH=$((PATCH + 1))
-
-          # Create pre-release version with incremented patch
-          PRE_RELEASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.dev${COMMIT_COUNT}"
-
-          echo "Base version: $BASE_VERSION"
-          echo "Commit count since last tag ($LAST_TAG): $COMMIT_COUNT"
-          echo "Calculated pre-release version: $PRE_RELEASE_VERSION"
-          echo "PRE_RELEASE_VERSION=${PRE_RELEASE_VERSION}" >> $GITHUB_ENV
-
-      - name: Set version in pyproject.toml for develop
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          poetry version ${{ env.PRE_RELEASE_VERSION }}
-          echo "CURRENT_VERSION=${{ env.PRE_RELEASE_VERSION }}" >> $GITHUB_ENV
-
       - name: Check if version bump is required
         id: check_version
         run: |
@@ -90,15 +134,6 @@ jobs:
           if python -c "from packaging.version import Version; exit(0) if Version('$CURRENT_VERSION') > Version('$LATEST_TAG') else exit(1)"; then
             echo "Version $CURRENT_VERSION > $LATEST_TAG. Proceeding with publish."
             echo "should_publish=true" >> $GITHUB_OUTPUT
-
-            # Check if this is a pre-release version
-            if python -c "from packaging.version import Version; exit(0) if Version('$CURRENT_VERSION').is_prerelease else exit(1)"; then
-              echo "Detected pre-release version: $CURRENT_VERSION"
-              echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            else
-              echo "Detected stable version: $CURRENT_VERSION"
-              echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            fi
           else
             echo "Version $CURRENT_VERSION <= $LATEST_TAG. Skipping publish."
             echo "should_publish=false" >> $GITHUB_OUTPUT
@@ -109,22 +144,16 @@ jobs:
         run: poetry build
 
       - name: Publish to PyPI (stable)
-        if: steps.check_version.outputs.should_publish == 'true' && steps.check_version.outputs.is_prerelease == 'false'
+        if: steps.check_version.outputs.should_publish == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-
-      - name: Publish to TestPyPI (pre-release)
-        if: steps.check_version.outputs.should_publish == 'true' && steps.check_version.outputs.is_prerelease == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          verbose: true
+          skip-existing: true
 
       - name: Create new tag
         if: steps.check_version.outputs.should_publish == 'true'
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
