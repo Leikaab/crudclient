@@ -42,4 +42,8 @@ jobs:
 
       - name: Validate DevContainer
         run: |
-          devcontainer exec --workspace-folder . /usr/local/py-utils/bin/poetry --version
+          # Test that Poetry is installed (installed via pip in Dockerfile)
+          devcontainer exec --workspace-folder . poetry --version
+
+          # Test that act is installed (our new addition)
+          devcontainer exec --workspace-folder . act --version

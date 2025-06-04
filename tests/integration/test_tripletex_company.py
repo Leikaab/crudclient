@@ -1,3 +1,4 @@
+import os
 import uuid
 
 import pytest
@@ -23,6 +24,10 @@ def generate_unique_name():
     return f"Test Company {uuid.uuid4()}"
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
+)
 @pytest.mark.no_parallel
 def test_update_company_minimal(api):
     """

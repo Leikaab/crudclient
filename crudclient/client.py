@@ -22,13 +22,17 @@ class Client:
     """
     Client class for making API requests.
 
+    Attributes
+    ----------
+    config : ClientConfig
+        Configuration object for the client.
+    http_client : HttpClient
+        The HTTP client used for making requests.
+    base_url : str
+        The base URL for the API.
+
     This class delegates HTTP operations to the HttpClient class, which handles
     request preparation, authentication, response handling, and error handling.
-
-    Attributes:
-        config (ClientConfig): Configuration object for the client.
-        http_client (HttpClient): The HTTP client used for making requests.
-        base_url (str): The base URL for the API.
     """
 
     config: ClientConfig
@@ -39,18 +43,21 @@ class Client:
         """
         Initialize the Client.
 
+        Parameters
+        ----------
+        config : Union[ClientConfig, Dict[str, Any]]
+            Configuration for the client. Can be a ClientConfig object or a dictionary
+            containing parameters like `base_url`, `auth`, `timeout`, and logging settings
+            (`log_request_body`, `log_response_body`).
+
+        Raises
+        ------
+        ConfigurationError
+            If the provided config is invalid (wrong type, missing fields, invalid values).
+
         Logging behavior (e.g., request/response body logging) can be controlled
         via the `logging` section of the configuration. By default, logging is
         disabled using a `NullHandler`. See `docs/logging.md` for details.
-
-        Args:
-            config (Union[ClientConfig, Dict[str, Any]]): Configuration for the client.
-                Can be a ClientConfig object or a dictionary containing parameters
-                like `base_url`, `auth`, `timeout`, and logging settings
-                (`log_request_body`, `log_response_body`).
-
-        Raises:
-            ConfigurationError: If the provided config is invalid (wrong type, missing fields, invalid values).
         """
         log.info("Initializing Client and processing configuration...")
 
@@ -87,16 +94,22 @@ class Client:
         """
         Make a GET request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -130,22 +143,28 @@ class Client:
         """
         Make a POST request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -190,22 +209,28 @@ class Client:
         """
         Make a PUT request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -243,17 +268,24 @@ class Client:
         """
         Make a DELETE request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
-            **kwargs: Additional keyword arguments to pass to the request.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
+        **kwargs : Any
+            Additional keyword arguments to pass to the request.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -288,22 +320,28 @@ class Client:
         """
         Make a PATCH request to the specified endpoint.
 
-        Args:
-            endpoint (str): The API endpoint to request.
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-                Defaults to None.
-            json (Optional[Any]): JSON data to include in the request.
-                Defaults to None.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-                Defaults to None.
-            params (Optional[Dict[str, Any]]): Query parameters to include in the request.
-                Defaults to None.
+        Parameters
+        ----------
+        endpoint : str
+            The API endpoint to request.
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request. Defaults to None.
+        json : Optional[Any], optional
+            JSON data to include in the request. Defaults to None.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request. Defaults to None.
+        params : Optional[Dict[str, Any]], optional
+            Query parameters to include in the request. Defaults to None.
 
-        Returns:
-            RawResponseSimple: The processed response data.
+        Returns
+        -------
+        RawResponseSimple
+            The processed response data.
 
-        Raises:
-            TypeError: If the parameters are of incorrect types.
+        Raises
+        ------
+        TypeError
+            If the parameters are of incorrect types.
         """
         if not isinstance(endpoint, str):
             raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
@@ -384,11 +422,10 @@ class Client:
         """
         Get the HTTP session.
 
-        This property is provided for backward compatibility with existing tests.
-        It returns the session from the HTTP client's session manager.
-
-        Returns:
-            requests.Session: The HTTP session.
+        Returns
+        -------
+        requests.Session
+            The HTTP session.
         """
         if not hasattr(self._session, "is_closed"):
             setattr(self._session.__class__, "is_closed", property(lambda s: getattr(self.http_client.session_manager, "is_closed", False)))
@@ -400,16 +437,19 @@ class Client:
         """
         Prepare request data based on the provided parameters.
 
-        This method is provided for backward compatibility with existing tests.
-        It returns headers and request kwargs instead of modifying session state directly.
+        Parameters
+        ----------
+        data : Optional[Dict[str, Any]], optional
+            Form data to include in the request.
+        json : Optional[Any], optional
+            JSON data to include in the request.
+        files : Optional[Dict[str, Any]], optional
+            Files to include in the request.
 
-        Args:
-            data (Optional[Dict[str, Any]]): Form data to include in the request.
-            json (Optional[Any]): JSON data to include in the request.
-            files (Optional[Dict[str, Any]]): Files to include in the request.
-
-        Returns:
-            Tuple[Dict[str, str], Dict[str, Any]]: A tuple containing:
+        Returns
+        -------
+        Tuple[Dict[str, str], Dict[str, Any]]
+            A tuple containing:
                 - Headers dictionary with the appropriate content-type.
                 - A dictionary containing the prepared request data.
         """
@@ -439,17 +479,21 @@ class Client:
         """
         Retry a request after receiving a 403 Forbidden response.
 
-        This method is provided for backward compatibility with existing tests.
-        It delegates to the HttpClient's retry_handler.
+        Parameters
+        ----------
+        method : str
+            The HTTP method for the request.
+        url : str
+            The URL for the request.
+        kwargs : Dict[str, Any]
+            Additional keyword arguments for the request.
+        response : requests.Response
+            The response from the original request.
 
-        Args:
-            method (str): The HTTP method for the request.
-            url (str): The URL for the request.
-            kwargs (dict): Additional keyword arguments for the request.
-            response (requests.Response): The response from the original request.
-
-        Returns:
-            requests.Response: The response from the retry or the original response if no retry.
+        Returns
+        -------
+        requests.Response
+            The response from the retry or the original response if no retry.
         """
         if not isinstance(method, str):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
@@ -482,14 +526,15 @@ class Client:
         """
         Handle the response from the API based on the content type.
 
-        This method is provided for backward compatibility with existing tests.
-        It delegates to the HttpClient's response_handler.
+        Parameters
+        ----------
+        response : requests.Response
+            The response object from the API.
 
-        Args:
-            response (requests.Response): The response object from the API.
-
-        Returns:
-            RawResponseSimple: The parsed response content.
+        Returns
+        -------
+        RawResponseSimple
+            The parsed response content.
         """
         # Simplified type checking for response
         is_response = isinstance(response, requests.Response)
@@ -508,16 +553,19 @@ class Client:
         """
         Handle error responses from the API.
 
-        This method is provided for backward compatibility with existing tests.
-        It delegates to the HttpClient's error_handler.
+        Parameters
+        ----------
+        response : requests.Response
+            The response object from the API.
 
-        Args:
-            response (requests.Response): The response object from the API.
-
-        Raises:
-            AuthenticationError: If the status code is 401 (Unauthorized).
-            NotFoundError: If the status code is 404 (Not Found).
-            CrudClientError: For other error status codes.
+        Raises
+        ------
+        AuthenticationError
+            If the status code is 401 (Unauthorized).
+        NotFoundError
+            If the status code is 404 (Not Found).
+        CrudClientError
+            For other error status codes.
         """
         # Simplified type checking for response
         is_response = isinstance(response, requests.Response)
@@ -531,14 +579,20 @@ class Client:
         """
         Process and validate the configuration.
 
-        Args:
-            config: The configuration object or dictionary.
+        Parameters
+        ----------
+        config : Union[ClientConfig, Dict[str, Any]]
+            The configuration object or dictionary.
 
-        Returns:
-            ClientConfig: The processed configuration object.
+        Returns
+        -------
+        ClientConfig
+            The processed configuration object.
 
-        Raises:
-            ConfigurationError: If the configuration is invalid.
+        Raises
+        ------
+        ConfigurationError
+            If the configuration is invalid.
         """
         # Simple implementation that handles all cases
         if isinstance(config, ClientConfig):

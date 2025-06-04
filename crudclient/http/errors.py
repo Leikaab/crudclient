@@ -1,13 +1,12 @@
-"""
-Error Handling Module for CrudClient
-===================================
+"""Error Handling Module for CrudClient.
 
 This module provides centralized error handling functionality for the CrudClient library.
 It contains classes and functions for processing HTTP error responses and mapping them
 to appropriate exceptions.
 
-Classes:
-    - ErrorHandler: Centralizes error processing logic for HTTP responses.
+Classes
+-------
+- ErrorHandler: Centralizes error processing logic for HTTP responses.
 """
 
 import logging
@@ -34,22 +33,20 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorHandler:
-    """
-    Centralizes error processing logic for HTTP responses.
+    """Centralizes error processing logic for HTTP responses.
 
     This class provides methods for handling error responses from API calls,
     extracting error information, and raising appropriate exceptions based on
     status codes.
 
-    Attributes:
-        status_code_to_exception (Dict[int, Type[CrudClientError]]): Mapping of HTTP status
-            codes to exception types.
+    Attributes
+    ----------
+    status_code_to_exception (Dict[int, Type[CrudClientError]]): Mapping of HTTP status
+        codes to exception types.
     """
 
     def __init__(self) -> None:
-        """
-        Initialize the ErrorHandler with default status code to exception mappings.
-        """
+        """Initialize the ErrorHandler with default status code to exception mappings."""
         self.status_code_to_exception: Dict[int, Type[CrudClientError]] = {
             400: BadRequestError,
             401: ClientAuthenticationError,  # Changed
@@ -64,21 +61,28 @@ class ErrorHandler:
         }
 
     def handle_error_response(self, response: requests.Response) -> None:
-        """
-        Handle error responses from the API.
+        """Handle error responses from the API.
 
         This method attempts to extract error information from the response and raises
         appropriate exceptions based on the status code.
 
-        Args:
-            response: The response object from the API.
+        Parameters
+        ----------
+        response : requests.Response
+            The response object from the API.
 
-        Raises:
-            AuthenticationError: If the status code is 401 (Unauthorized) or 403 (Forbidden).
-            NotFoundError: If the status code is 404 (Not Found).
-            DataValidationError: If the status code is 422 (Unprocessable Entity).
-            CrudClientError: For other error status codes.
-            TypeError: If response is not a requests.Response object.
+        Raises
+        ------
+        AuthenticationError
+            If the status code is 401 (Unauthorized) or 403 (Forbidden).
+        NotFoundError
+            If the status code is 404 (Not Found).
+        DataValidationError
+            If the status code is 422 (Unprocessable Entity).
+        CrudClientError
+            For other error status codes.
+        TypeError
+            If response is not a requests.Response object.
         """
         # Check if response is a valid Response object or a mock of one
         is_response = isinstance(response, requests.Response)
@@ -139,26 +143,31 @@ class ErrorHandler:
         )
 
     def register_status_code_handler(self, status_code: int, exception_class: Type[CrudClientError]) -> None:
-        """Registers a custom exception handler for a specific HTTP status code.
+        """Register a custom exception handler for a specific HTTP status code.
 
         This allows users to override or extend the default behavior for handling
         specific HTTP error codes by providing their own CrudClientError subclass.
 
-        Args:
-            status_code: The integer HTTP status code (e.g., 409).
-            exception_class: The subclass of CrudClientError to be raised when
-                this status code is encountered.
+        Parameters
+        ----------
+        status_code : int
+            The integer HTTP status code (e.g., 409).
+        exception_class : Type[CrudClientError]
+            The subclass of CrudClientError to be raised when this status code is encountered.
 
-        Raises:
-            TypeError: If `status_code` is not an integer or if `exception_class`
-                is not a type or not a subclass of `CrudClientError`.
+        Raises
+        ------
+        TypeError
+            If `status_code` is not an integer or if `exception_class`
+            is not a type or not a subclass of `CrudClientError`.
 
-        Example:
-            >>> class ConflictError(APIError):
-            ...     pass
-            ...
-            >>> error_handler = ErrorHandler()
-            >>> error_handler.register_status_code_handler(409, ConflictError)
+        Example
+        -------
+        >>> class ConflictError(APIError):
+        ...     pass
+        ...
+        >>> error_handler = ErrorHandler()
+        >>> error_handler.register_status_code_handler(409, ConflictError)
         """
         if not isinstance(status_code, int):
             raise TypeError(f"status_code must be an integer, got {type(status_code).__name__}")

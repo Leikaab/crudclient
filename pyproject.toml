@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.8.0"
+version = "0.8.1"
 description = "A flexible CRUD client for RESTful APIs"
 authors = ["leikaab <nordavindltd@gmail.com>"]
 license = "LGPL-3.0-or-later"
@@ -54,6 +54,7 @@ types-requests = "*"
 # autopep8 = "*"
 # yapf = "*"
 freezegun = "^1.5.1"
+flake8-docstrings = "^1.7.0"
 
 
 [build-system]
