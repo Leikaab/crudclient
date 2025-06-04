@@ -55,10 +55,18 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
     assert read_supplier.email == created_supplier.email
     assert read_supplier.id == created_supplier.id
 
-    # Update the supplier
+    # Update the supplier - need to include all required fields
     updated_name = f"{unique_supplier_name}_UPDATED"
-    updated_data = {"id": created_supplier.id, "name": updated_name}
-    updated_supplier = api.suppliers.update(created_supplier.id, updated_data)
+    # Get the full supplier data first
+    supplier_dict = created_supplier.model_dump(by_alias=True)
+    # Update only the name
+    supplier_dict["name"] = updated_name
+    # Remove read-only fields that shouldn't be in the update
+    read_only_fields = ["url", "changes", "displayName"]
+    for field in read_only_fields:
+        supplier_dict.pop(field, None)
+
+    updated_supplier = api.suppliers.update(created_supplier.id, supplier_dict)
 
     # Check that the supplier was updated correctly
     assert updated_supplier.id == created_supplier.id
