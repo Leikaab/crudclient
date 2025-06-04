@@ -43,6 +43,43 @@ jobs:
           echo "LATEST_TAG=${TAG}" >> $GITHUB_ENV
           echo "Latest tag is $LATEST_TAG"
 
+      - name: Calculate pre-release version for develop branch
+        id: calc_version
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          BASE_VERSION=$(poetry version -s)
+
+          # Get commit count since last tag
+          LAST_TAG="${{ env.LATEST_TAG }}"
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+          else
+            COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
+          fi
+
+          # Parse version and increment patch level for pre-releases
+          IFS='.' read -ra VERSION_PARTS <<< "$BASE_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+
+          # Increment patch version
+          NEXT_PATCH=$((PATCH + 1))
+
+          # Create pre-release version with incremented patch
+          PRE_RELEASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.dev${COMMIT_COUNT}"
+
+          echo "Base version: $BASE_VERSION"
+          echo "Commit count since last tag ($LAST_TAG): $COMMIT_COUNT"
+          echo "Calculated pre-release version: $PRE_RELEASE_VERSION"
+          echo "PRE_RELEASE_VERSION=${PRE_RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: Set version in pyproject.toml for develop
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          poetry version ${{ env.PRE_RELEASE_VERSION }}
+          echo "CURRENT_VERSION=${{ env.PRE_RELEASE_VERSION }}" >> $GITHUB_ENV
+
       - name: Check if version bump is required
         id: check_version
         run: |
@@ -91,5 +128,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ env.CURRENT_VERSION }}
+          # Use the version that was actually published
+          TAG_VERSION="${{ env.CURRENT_VERSION }}"
+          echo "Creating tag: $TAG_VERSION"
+          git tag "$TAG_VERSION"
           git push origin --tags
