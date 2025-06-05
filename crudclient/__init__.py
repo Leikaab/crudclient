@@ -40,8 +40,17 @@ users = api.users.list()
 """
 
 import logging
+from importlib.metadata import version
 
 from .api import API
+from .auth import (
+    ApiKeyAuth,
+    AuthStrategy,
+    AuthStrategyError,
+    BasicAuth,
+    BearerAuth,
+    CustomAuth,
+)
 from .client import Client
 from .config import ClientConfig
 from .crud import Crud
@@ -79,6 +88,14 @@ __all__ = [  # Updated __all__
     "Client",
     "ClientConfig",
     "Crud",
+    # Authentication classes
+    "AuthStrategy",
+    "AuthStrategyError",
+    "BearerAuth",
+    "BasicAuth",
+    "ApiKeyAuth",
+    "CustomAuth",
+    # Exception classes
     "APIError",
     "ConfigurationError",  # Replaced InvalidClientError, ClientInitializationError
     "CrudClientError",
@@ -96,10 +113,11 @@ __all__ = [  # Updated __all__
     "RateLimitError",
     "InternalServerError",
     "ServiceUnavailableError",
+    # Models and types
     "ApiResponse",
     "JSONDict",
     "JSONList",
     "RawResponse",
 ]
 
-__version__: str = "0.7.0"
+__version__ = version("crudclient")
