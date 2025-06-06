@@ -146,3 +146,11 @@ class TestClientConfig:
 
         with pytest.raises(TypeError):
             ClientConfig.merge_configs("not a config", base_config)  # type: ignore
+
+    def test_get_config_errors(self) -> None:
+        """Validate get_config_errors reports missing hostname."""
+        cfg = ClientConfig()
+        assert cfg.get_config_errors() == {"hostname": "hostname is required"}
+
+        cfg = ClientConfig(hostname="https://example.com")
+        assert cfg.get_config_errors() == {}
