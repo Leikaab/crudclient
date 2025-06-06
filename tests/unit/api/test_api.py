@@ -98,15 +98,29 @@ class TestAPI:
         # Assert
         assert response == [1, 2, 3]
 
-    def test_close(self, default_mock_client_config):
+    def test_close(self, default_mock_client_config, mocker):
+        """Ensure API.close closes the underlying client and resets attributes."""
+
         # Arrange
         api = MockAPI(client_config=default_mock_client_config)
+        assert api.client is not None  # mypy/pylint guard
+        client = api.client
+        close_mock = mocker.patch.object(client, "close", wraps=client.close)
+        log_mock = mocker.patch("crudclient.api.logger")
 
         # Act
         api.close()
 
         # Assert
+        close_mock.assert_called_once_with()
+        log_mock.info.assert_has_calls(
+            [
+                mocker.call("Closing client session."),
+                mocker.call("Client session fully closed and client set to None."),
+            ]
+        )
         assert api.client is None
+        assert client.http_client.session_manager.is_closed
 
     def test_use_custom_resource(self, default_mock_client_config, requests_mocker, standard_data):
         # Arrange
