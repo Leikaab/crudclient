@@ -125,15 +125,11 @@ class TestRateLimiterSimple:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             config = ClientConfig(hostname="test.api")
-            config.enable_rate_limiter(
-                state_path=temp_dir, buffer=1, track_delays=True
-            )
+            config.enable_rate_limiter(state_path=temp_dir, buffer=1, track_delays=True)
             limiter = get_rate_limiter(config)
             assert limiter is not None, "Rate limiter should be created"
 
-            limiter.update_from_headers(
-                {"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"}
-            )
+            limiter.update_from_headers({"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"})
 
             start = time.time()
             limiter.check_and_wait()
