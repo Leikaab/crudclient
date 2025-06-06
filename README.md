@@ -317,7 +317,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   The pre-push hook is executed before any changes are pushed to the remote repository. This hook includes an additional layer of testing to ensure that the code meets the required coverage standards:
 
-  - **pytest with coverage**: Runs the full test suite with coverage analysis, ensuring that the codebase meets the required coverage threshold (configured to fail if coverage is below 100%).
+  - **pytest with coverage**: Runs the full test suite with coverage analysis, ensuring that the codebase meets the required coverage threshold (currently configured to fail if coverage is below 40%).
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
@@ -376,7 +376,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   - **Set up Python**: Configures the appropriate Python environment.
   - **Install Dependencies**: Installs the project's dependencies using Poetry.
   - **Run Linting and Formatting Checks**: Uses `isort`, `black`, `flake8`, and `mypy` to enforce code quality.
-  - **Run Tests**: Executes the test suite with `pytest` and checks for 100% code coverage.
+  - **Run Tests**: Executes the test suite with `pytest` and checks that overall coverage meets the configured threshold (40%).
 
   This workflow is triggered on every push to the repository, ensuring continuous verification of the code's integrity.
 
