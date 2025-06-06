@@ -188,4 +188,4 @@ class TestClient:
     def test_maybe_retry_after_403_type_errors(self, client, method, url, kwargs, response, expected) -> None:
         """_maybe_retry_after_403 should validate argument types."""
         with pytest.raises(TypeError, match=expected):
-            client._maybe_retry_after_403(method, url, kwargs, response)  # type: ignore[arg-type]
+            client._maybe_retry_after_403(method, url, kwargs, response)
