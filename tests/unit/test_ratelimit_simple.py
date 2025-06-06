@@ -35,22 +35,34 @@ class TestRateLimiterSimple:
             # So we should be able to make 2 requests (5 remaining > 3 threshold)
             # Then wait when remaining = 3
 
-            # First request should succeed immediately
+            # Track calls to time.sleep to ensure no waiting occurs
+            sleep_calls = []
+            original_sleep = time.sleep
+
+            def tracking_sleep(seconds: float) -> None:
+                sleep_calls.append(seconds)
+                original_sleep(seconds)
+
+            monkeypatch.setattr(time, "sleep", tracking_sleep)
+
+            # First request should succeed immediately without sleeping
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            assert elapsed < 0.1, f"First request should be immediate, took {elapsed}s"
+            assert not sleep_calls, "Rate limiter unexpectedly slept on first request"
+            assert elapsed < 0.5, f"First request should be immediate, took {elapsed}s"
 
             # Check state after first request
             with limiter.backend:
                 state = limiter.backend.read()
                 assert state["remaining"] == 4, f"Expected remaining=4, got {state['remaining']}"
 
-            # Second request should also succeed immediately
+            # Second request should also succeed immediately without sleeping
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            assert elapsed < 0.1, f"Second request should be immediate, took {elapsed}s"
+            assert not sleep_calls, "Rate limiter unexpectedly slept on second request"
+            assert elapsed < 0.5, f"Second request should be immediate, took {elapsed}s"
 
             # Check state after second request
             with limiter.backend:
@@ -64,7 +76,8 @@ class TestRateLimiterSimple:
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            # Should wait approximately 1 second + 1 second buffer = 2 seconds
+            # Should have slept approximately 1 second + buffer and recorded the sleep call
+            assert sleep_calls, "Rate limiter did not sleep when expected"
             assert 1.5 < elapsed < 2.5, f"Expected to wait ~2s, but waited {elapsed}s"
 
     def test_unknown_state_proceeds(self, monkeypatch):
