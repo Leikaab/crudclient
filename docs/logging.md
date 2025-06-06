@@ -107,7 +107,7 @@ client = Client(config=config)
 *   `crudclient.client`: Logs from the main `Client` class.
 *   `crudclient.config`: Configuration-related logs.
 *   `crudclient.http`: General HTTP operations.
-    *   `crudclient.http.client`: Specific HTTP client interactions (e.g., using `httpx`).
+    *   `crudclient.http.client`: Specific HTTP client interactions (currently implemented with `requests`).
     *   `crudclient.http.retry`: Request retry logic.
     *   `crudclient.http.request`: Request preparation details.
     *   `crudclient.http.response`: Response processing details.
@@ -142,7 +142,7 @@ Configuring a parent logger (e.g., setting the level on `crudclient.http`) affec
     *   `ConfigurationError`: Invalid client configuration.
     *   `NetworkError`: Network connectivity issues (e.g., timeouts, DNS errors). Often wraps underlying HTTP library exceptions. Logged at `ERROR`.
     *   `APIError`: Errors indicated by the API response (HTTP status >= 400). Logged at `WARNING` (4xx) or `ERROR` (5xx).
-        *   Contains `request` and `response` attributes from the underlying HTTP library (e.g., `httpx`).
+        *   Contains `request` and `response` attributes from the underlying HTTP library (currently `requests`).
         *   `AuthenticationError`: Specific subclass for 401/403 errors. Logged at `WARNING`.
         *   `ClientError`: Other 4xx errors (e.g., 400 Bad Request, 404 Not Found). Logged at `WARNING`.
         *   `ServerError`: 5xx errors. Logged at `ERROR`.
