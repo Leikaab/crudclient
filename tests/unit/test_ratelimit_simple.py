@@ -4,6 +4,7 @@ Simple unit tests for rate limiter to verify basic functionality.
 
 import tempfile
 import time
+import warnings
 
 import pytest
 
@@ -142,3 +143,31 @@ class TestRateLimiterSimple:
 
             limiter.clear_delay_history()
             assert limiter.get_delay_history() == []
+
+    def test_get_rate_limiter_disabled(self, monkeypatch):
+        """get_rate_limiter returns None when rate limiting is disabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+        config = ClientConfig(hostname="test.api")
+
+        with warnings.catch_warnings(record=True) as captured:
+            warnings.simplefilter("always")
+            limiter = get_rate_limiter(config)
+
+        assert limiter is None
+        assert captured == []
+
+    def test_get_rate_limiter_enabled_warning(self, monkeypatch):
+        """get_rate_limiter emits FutureWarning when enabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = ClientConfig(hostname="test.api")
+            config.enable_rate_limiter(state_path=temp_dir)
+
+            with warnings.catch_warnings(record=True) as captured:
+                warnings.simplefilter("always")
+                limiter = get_rate_limiter(config)
+
+            assert limiter is not None
+            assert len(captured) == 1
+            assert issubclass(captured[0].category, FutureWarning)
