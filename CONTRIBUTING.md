@@ -102,7 +102,7 @@ To run all unit tests and generate a coverage report:
 pytest tests/unit --cov=crudclient --cov-report=term-missing --cov-report=html
 ```
 
-This will print a summary to the terminal and create an HTML report in the `coverage_html_report/` directory. The pre-push hook (see below) enforces 100% unit test coverage.
+This will print a summary to the terminal and create an HTML report in the `coverage_html_report/` directory. The pre-push hook (see below) enforces that overall test coverage does not fall below 40%.
 
 ## Code Style and Quality
 
@@ -156,7 +156,7 @@ pre-commit install --hook-type pre-push  # Installs pre-push hooks
     -   Custom Project Checks (`check-docstrings`, `check-file-length`).
     -   Unit tests (`pytest`) are run *only on changed files* relevant to the commit for faster feedback.
 -   **On `git push`:**
-    -   Full unit test suite (`pytest tests/unit`) with 100% code coverage enforcement (`--cov`).
+    -   Full unit test suite (`pytest tests/unit`) with coverage enforcement (`--cov`) ensuring at least 40% total coverage.
 
 If any hook fails, the commit or push will be aborted. Address the reported issues and try committing/pushing again. You can also run all pre-commit hooks manually: `pre-commit run --all-files`.
 
