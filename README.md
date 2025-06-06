@@ -133,7 +133,7 @@ class OneflowAPI(API):
 ```python
 from api_example import CustomConfig, OneflowAPI
 
-def main()
+def main():
     config = CustomConfig()
     api = OneflowAPI(client_config=config)
     users = api.users.list()
