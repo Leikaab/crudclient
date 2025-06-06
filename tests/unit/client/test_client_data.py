@@ -189,3 +189,31 @@ class TestClient:
         """_maybe_retry_after_403 should validate argument types."""
         with pytest.raises(TypeError, match=expected):
             client._maybe_retry_after_403(method, url, kwargs, response)
+
+    def test_maybe_retry_after_403_calls_setup_auth(self, client, mocker) -> None:
+        """_maybe_retry_after_403 should refresh auth before retrying."""
+        client.config.should_retry_on_403 = lambda: True
+        mocker.patch.object(client.config, "handle_403_retry")
+        setup_auth = mocker.patch.object(client, "_setup_auth")
+
+        retried_response = requests.Response()
+        retried_response.status_code = 200
+        mocker.patch.object(client._session, "request", return_value=retried_response)
+
+        original_response = requests.Response()
+        original_response.status_code = 403
+
+        result = client._maybe_retry_after_403(
+            "GET",
+            "https://example.com",
+            {"p": "v"},
+            original_response,
+        )
+
+        setup_auth.assert_called_once_with()
+        client._session.request.assert_called_once_with(
+            "GET",
+            "https://example.com",
+            p="v",
+        )
+        assert result is retried_response
