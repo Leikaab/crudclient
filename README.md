@@ -106,7 +106,7 @@ class CustomConfig(ClientConfig):
             timeout=timeout,
             retries=retries,
             # Create a custom API key authentication strategy
-            auth=ApiKeyAuth(api_key=api_key, header_name="x-myapi-api-token")
+            auth_strategy=ApiKeyAuth(api_key=api_key, header_name="x-myapi-api-token")
         )
 
 
@@ -133,7 +133,7 @@ class OneflowAPI(API):
 ```python
 from api_example import CustomConfig, OneflowAPI
 
-def main()
+def main():
     config = CustomConfig()
     api = OneflowAPI(client_config=config)
     users = api.users.list()
@@ -211,7 +211,7 @@ user_posts = api.users.posts.list(parent_id=1)  # GET /users/1/posts
 
 ## Logging
 
-The library has standard logging that can be hooked into using get.logger
+The library has standard logging that can be hooked into using `logging.getLogger`
 
 <details>
   <summary>Code example</summary>
@@ -287,7 +287,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   To run the tests and generate a coverage report, simply use the following commands within the container:
 
   ```bash
-  pytest --cov=your_package_name --cov-report=html
+  pytest --cov=crudclient --cov-report=html
   ```
 
   This command will execute all tests and generate an HTML report that you can view in your browser, providing a visual representation of the code coverage.

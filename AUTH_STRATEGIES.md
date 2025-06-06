@@ -39,7 +39,7 @@ auth_strategy = BearerAuth(access_token="your_access_token")
 # Use it in your client configuration
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 client = Client(config)
 ```
@@ -58,7 +58,7 @@ auth_strategy = BasicAuth(username="your_username", password="your_password")
 # Use it in your client configuration
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 client = Client(config)
 ```
@@ -86,7 +86,7 @@ auth_strategy = ApiKeyAuth(
 # Use it in your client configuration
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 client = Client(config)
 ```
@@ -111,7 +111,7 @@ auth_strategy = CustomAuth(apply_auth=apply_custom_auth)
 # Use it in your client configuration
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 client = Client(config)
 ```
@@ -135,7 +135,7 @@ config = ClientConfig(
 auth_strategy = create_auth_strategy("bearer", "your_token")  # Uses access_token internally
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 ```
 

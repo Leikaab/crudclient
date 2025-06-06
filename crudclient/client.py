@@ -47,7 +47,7 @@ class Client:
         ----------
         config : Union[ClientConfig, Dict[str, Any]]
             Configuration for the client. Can be a ClientConfig object or a dictionary
-            containing parameters like `base_url`, `auth`, `timeout`, and logging settings
+            containing parameters like `base_url`, `auth_strategy`, `timeout`, and logging settings
             (`log_request_body`, `log_response_body`).
 
         Raises
