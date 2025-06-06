@@ -103,8 +103,8 @@ class TestAPI:
 
         # Arrange
         api = MockAPI(client_config=default_mock_client_config)
-        assert api.client is not None  # mypy/pylint guard
         client = api.client
+        assert client is not None  # mypy/pylint guard
         close_mock = mocker.patch.object(client, "close", wraps=client.close)
         log_mock = mocker.patch("crudclient.api.logger")
 
