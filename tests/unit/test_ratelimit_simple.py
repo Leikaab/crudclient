@@ -130,6 +130,7 @@ class TestRateLimiterSimple:
             assert limiter is not None, "Rate limiter should be created"
 
             limiter.update_from_headers({"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"})
+            # Delay should be approximately the reset interval
 
             start = time.time()
             limiter.check_and_wait()
