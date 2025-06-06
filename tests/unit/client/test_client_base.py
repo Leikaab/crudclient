@@ -272,7 +272,7 @@ class TestClient:
         with pytest.raises(TypeError, match="files must be a dictionary or None"):
             client.patch("/users/1", files=invalid_files)  # type: ignore # pylance-only
 
-    def test_close(self, client):
+    def test_close(self, client, mocker):
         """
         GIVEN an initialized client with an active session
         WHEN the client's close method is called
@@ -280,9 +280,14 @@ class TestClient:
         """
         # GIVEN - client fixture provides this
 
+        # GIVEN
+        session = client.session  # ensure property is attached
+        close_mock = mocker.patch.object(session, "close")
+
         # WHEN
         client.close()
 
         # THEN
-        # We assert that the session manager's is_closed attribute is set to True
+        close_mock.assert_called_once()
         assert client.http_client.session_manager.is_closed
+        assert session.is_closed
