@@ -5,6 +5,8 @@ Simple unit tests for rate limiter to verify basic functionality.
 import tempfile
 import time
 
+import pytest
+
 from crudclient.config import ClientConfig
 from crudclient.ratelimit import get_rate_limiter
 
@@ -116,3 +118,30 @@ class TestRateLimiterSimple:
             with limiter.backend:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should be unknown after reset"
+
+    def test_delay_history_tracking(self, monkeypatch):
+        """Ensure delay history is recorded when track_delays is enabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = ClientConfig(hostname="test.api")
+            config.enable_rate_limiter(
+                state_path=temp_dir, buffer=1, track_delays=True
+            )
+            limiter = get_rate_limiter(config)
+            assert limiter is not None, "Rate limiter should be created"
+
+            limiter.update_from_headers(
+                {"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"}
+            )
+
+            start = time.time()
+            limiter.check_and_wait()
+            elapsed = time.time() - start
+
+            delays = limiter.get_delay_history()
+            assert len(delays) == 1, "Expected a single recorded delay"
+            assert delays[0] == pytest.approx(elapsed, rel=0.2, abs=0.1)
+
+            limiter.clear_delay_history()
+            assert limiter.get_delay_history() == []
