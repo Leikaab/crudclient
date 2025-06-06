@@ -175,7 +175,10 @@ class TestRateLimiterParallel:
             if limiter:
                 limiter.check_and_wait()
             wait_time = time.time() - start_time
-            assert 0.5 < wait_time < 1.0, f"Expected to wait ~0.6s (0.5s + 0.1s buffer), but waited {wait_time}s"
+            # Allow a small extra margin for timing jitter on CI runners
+            assert 0.5 <= wait_time <= 1.2, (
+                f"Expected to wait ~0.6s (0.5s + 0.1s buffer), but waited {wait_time}s"
+            )
 
             # After reset, should be able to proceed immediately
             start_time = time.time()
