@@ -10,6 +10,8 @@ import tempfile
 import time
 from pathlib import Path
 
+import pytest
+
 
 def worker_process(
     worker_id: int, state_dir: str, results_queue: multiprocessing.Queue, limit: int = 10, requests_per_worker: int = 5, num_workers: int = 8
@@ -153,7 +155,7 @@ class TestRateLimiterParallel:
             state_files = list(Path(temp_dir).glob("*.json"))
             assert len(state_files) > 0, "No state files created"
 
-    def test_rate_limit_reset_after_window(self):
+    def test_rate_limit_reset_after_window(self, monkeypatch):
         """Test that rate limit resets after the time window expires."""
         with tempfile.TemporaryDirectory() as temp_dir:
             from crudclient.config import ClientConfig
@@ -162,6 +164,18 @@ class TestRateLimiterParallel:
             config = ClientConfig(hostname="test.api")
             config.enable_rate_limiter(state_path=temp_dir, buffer_time=0.1)
             limiter = get_rate_limiter(config)
+
+            current_time = 0.0
+
+            def fake_time() -> float:
+                return current_time
+
+            def fake_sleep(seconds: float) -> None:
+                nonlocal current_time
+                current_time += seconds
+
+            monkeypatch.setattr(time, "time", fake_time)
+            monkeypatch.setattr(time, "sleep", fake_sleep)
 
             # First, exhaust the rate limit
             for i in range(5):
@@ -175,14 +189,11 @@ class TestRateLimiterParallel:
             if limiter:
                 limiter.check_and_wait()
             wait_time = time.time() - start_time
-            # Allow a small extra margin for timing jitter on CI runners
-            assert 0.5 <= wait_time <= 1.2, (
-                f"Expected to wait ~0.6s (0.5s + 0.1s buffer), but waited {wait_time}s"
-            )
+            assert wait_time == pytest.approx(0.6, rel=0.05)
 
             # After reset, should be able to proceed immediately
             start_time = time.time()
             if limiter:
                 limiter.check_and_wait()
             wait_time = time.time() - start_time
-            assert wait_time < 0.2, f"Should not wait after reset, but waited {wait_time}s"
+            assert wait_time < 0.01, f"Should not wait after reset, but waited {wait_time}s"
