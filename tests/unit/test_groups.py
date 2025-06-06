@@ -168,10 +168,8 @@ class TestResourceGroupAsCrud:
         result = group.create(data=data)
 
         # Assert
-        # Check that the client was called with the correct path
-        mock_client.post.assert_called_once()
-        args, kwargs = mock_client.post.call_args
-        assert args[0] == "test-group"
+        # Check that the client was called with the correct path and payload
+        mock_client.post.assert_called_once_with("test-group", json=data, params=None)
         assert isinstance(result, ResourceTestModel)
         assert result.id == 1
         assert result.name == "New Resource"
