@@ -28,7 +28,7 @@ class MyAPI(API):
 # Create a configuration with bearer token authentication
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth_strategy=BearerAuth(token="your_token")
+    auth_strategy=BearerAuth(access_token="your_token")
 )
 
 # Initialize the API client

@@ -306,7 +306,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   Pre-commit hooks are executed before each commit is finalized. These hooks ensure that the code adheres to the project's style guidelines and passes initial validation checks. The following tools are configured to run as part of the pre-commit hooks:
 
   - **isort**: Ensures that imports are properly sorted according to the project's style.
-  - **black**: Formats the code to comply with the `black` code style, with a line length of 120 characters.
+  - **black**: Formats the code to comply with the `black` code style, with a line length of 150 characters (see `pyproject.toml`).
   - **flake8**: Runs linting checks to identify any potential issues in the code, excluding `setup.py`.
   - **mypy**: Performs static type checking to ensure type safety in the codebase.
   - **pytest**: Runs the unit tests to verify that the code changes do not break existing functionality.
