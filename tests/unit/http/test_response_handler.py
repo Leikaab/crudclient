@@ -43,12 +43,15 @@ def test_response_parsing_error(mocker, caplog):
     assert excinfo.value.response is mock_response  # Check it's the same object
     assert excinfo.value.response.status_code == 200
     assert excinfo.value.response.text == invalid_json_text
+    # The original exception should also be stored as __cause__
+    assert excinfo.value.__cause__ is excinfo.value.original_exception
 
     # Assert that an error log was emitted with details about the failure
     error_logs = [rec for rec in caplog.records if rec.levelno == logging.ERROR and rec.name == "crudclient.http.response"]
     assert len(error_logs) == 1
     assert "Failed to parse JSON response" in error_logs[0].getMessage()
     assert error_logs[0].exc_info
+    assert error_logs[0].exc_info[0] is requests_exceptions.JSONDecodeError
 
     # Ensure the exception message includes the target URL
     assert str(excinfo.value) == f"Failed to decode JSON response from {mock_response.url}"
