@@ -24,7 +24,8 @@ def test_response_parsing_error(mocker, caplog):
     mock_response.headers = {"Content-Type": "application/json"}
     mock_response.url = "http://mock-test.com/api"
     # Mock the .json() method on the instance to raise the correct exception
-    mock_response.json.side_effect = requests_exceptions.JSONDecodeError("Expecting value", invalid_json_text, 0)
+    expected_error = requests_exceptions.JSONDecodeError("Expecting value", invalid_json_text, 0)
+    mock_response.json.side_effect = expected_error
     mock_response.status_code = 200  # Assume a successful status code
 
     # Act & Assert
@@ -39,6 +40,7 @@ def test_response_parsing_error(mocker, caplog):
     # Assert exception attributes
     # Check the original exception type (requests wraps the standard json.JSONDecodeError)
     assert isinstance(excinfo.value.original_exception, requests_exceptions.JSONDecodeError)
+    assert excinfo.value.original_exception is expected_error
     assert excinfo.value.response is not None  # Check response is not None
     assert excinfo.value.response is mock_response  # Check it's the same object
     assert excinfo.value.response.status_code == 200
@@ -49,9 +51,14 @@ def test_response_parsing_error(mocker, caplog):
     # Assert that an error log was emitted with details about the failure
     error_logs = [rec for rec in caplog.records if rec.levelno == logging.ERROR and rec.name == "crudclient.http.response"]
     assert len(error_logs) == 1
-    assert "Failed to parse JSON response" in error_logs[0].getMessage()
+    # The message should include status, URL and the original exception details
+    assert error_logs[0].getMessage() == (
+        "Failed to parse JSON response despite 'application/json' Content-Type. "
+        f"Status: {mock_response.status_code}, URL: {mock_response.url}, Error: {expected_error}"
+    )
     assert error_logs[0].exc_info
     assert error_logs[0].exc_info[0] is requests_exceptions.JSONDecodeError
+    assert error_logs[0].exc_info[1] is expected_error
 
     # Ensure the exception message includes the target URL
     assert str(excinfo.value) == f"Failed to decode JSON response from {mock_response.url}"
