@@ -176,9 +176,7 @@ class ReadMock(BaseCrudMock):
         record.response = self.default_response
         return self.default_response.json() if self.default_response.json_data is not None else self.default_response.text
 
-    def _process_pattern_response(
-        self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any], record: RequestRecord
-    ) -> MockResponse:
+    def _process_pattern_response(self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any], record: RequestRecord) -> MockResponse:
         response_obj = pattern["response"]
 
         # Handle callable responses
