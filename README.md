@@ -106,7 +106,7 @@ class CustomConfig(ClientConfig):
             timeout=timeout,
             retries=retries,
             # Create a custom API key authentication strategy
-            auth=ApiKeyAuth(api_key=api_key, header_name="x-myapi-api-token")
+            auth_strategy=ApiKeyAuth(api_key=api_key, header_name="x-myapi-api-token")
         )
 
 
@@ -133,7 +133,7 @@ class OneflowAPI(API):
 ```python
 from api_example import CustomConfig, OneflowAPI
 
-def main()
+def main():
     config = CustomConfig()
     api = OneflowAPI(client_config=config)
     users = api.users.list()
@@ -211,7 +211,7 @@ user_posts = api.users.posts.list(parent_id=1)  # GET /users/1/posts
 
 ## Logging
 
-The library has standard logging that can be hooked into using get.logger
+The library has standard logging that can be hooked into using `logging.getLogger`
 
 <details>
   <summary>Code example</summary>
@@ -287,7 +287,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   To run the tests and generate a coverage report, simply use the following commands within the container:
 
   ```bash
-  pytest --cov=your_package_name --cov-report=html
+  pytest --cov=crudclient --cov-report=html
   ```
 
   This command will execute all tests and generate an HTML report that you can view in your browser, providing a visual representation of the code coverage.
@@ -306,7 +306,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   Pre-commit hooks are executed before each commit is finalized. These hooks ensure that the code adheres to the project's style guidelines and passes initial validation checks. The following tools are configured to run as part of the pre-commit hooks:
 
   - **isort**: Ensures that imports are properly sorted according to the project's style.
-  - **black**: Formats the code to comply with the `black` code style, with a line length of 120 characters.
+  - **black**: Formats the code to comply with the `black` code style, with a line length of 150 characters (see `pyproject.toml`).
   - **flake8**: Runs linting checks to identify any potential issues in the code, excluding `setup.py`.
   - **mypy**: Performs static type checking to ensure type safety in the codebase.
   - **pytest**: Runs the unit tests to verify that the code changes do not break existing functionality.
@@ -317,7 +317,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   The pre-push hook is executed before any changes are pushed to the remote repository. This hook includes an additional layer of testing to ensure that the code meets the required coverage standards:
 
-  - **pytest with coverage**: Runs the full test suite with coverage analysis, ensuring that the codebase meets the required coverage threshold (configured to fail if coverage is below 100%).
+  - **pytest with coverage**: Runs the full test suite with coverage analysis, ensuring that the codebase meets the required coverage threshold (currently configured to fail if coverage is below 40%).
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
@@ -376,7 +376,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   - **Set up Python**: Configures the appropriate Python environment.
   - **Install Dependencies**: Installs the project's dependencies using Poetry.
   - **Run Linting and Formatting Checks**: Uses `isort`, `black`, `flake8`, and `mypy` to enforce code quality.
-  - **Run Tests**: Executes the test suite with `pytest` and checks for 100% code coverage.
+  - **Run Tests**: Executes the test suite with `pytest` and checks that overall coverage meets the configured threshold (40%).
 
   This workflow is triggered on every push to the repository, ensuring continuous verification of the code's integrity.
 

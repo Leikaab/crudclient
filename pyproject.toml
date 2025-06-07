@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "crudclient"
-version = "0.8.1"
+version = "0.8.2"
 description = "A flexible CRUD client for RESTful APIs"
 authors = ["leikaab <nordavindltd@gmail.com>"]
 license = "LGPL-3.0-or-later"
@@ -15,6 +15,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+include = [
+    "crudclient/**/*.pyi",
+    "crudclient/py.typed"
 ]
 
 

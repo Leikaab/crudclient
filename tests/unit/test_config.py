@@ -77,11 +77,18 @@ class TestClientConfig:
         base_config = ClientConfig(headers={"Accept": "application/json"})
         custom_config = ClientConfig(headers={"Content-Type": "application/json"})
 
+        # Make copies to ensure originals are not mutated
+        base_original = base_config.headers.copy() if base_config.headers is not None else None
+        custom_original = custom_config.headers.copy() if custom_config.headers is not None else None
+
         # Merge the configurations
         merged = base_config.merge(custom_config)
 
         # Verify headers are merged correctly
         assert merged.headers == {"Accept": "application/json", "Content-Type": "application/json"}
+        # Originals should remain unchanged
+        assert base_config.headers == base_original
+        assert custom_config.headers == custom_original
 
         # Test header override
         base_config = ClientConfig(headers={"Accept": "application/xml"})
@@ -114,6 +121,9 @@ class TestClientConfig:
         base_config = ClientConfig(hostname="https://api.example.com", version="v1")
         custom_config = ClientConfig(timeout=30.0, retries=5)
 
+        base_original = base_config.headers.copy() if base_config.headers is not None else None
+        custom_original = custom_config.headers.copy() if custom_config.headers is not None else None
+
         # Use the static method to merge configs
         merged = ClientConfig.merge_configs(base_config, custom_config)
 
@@ -122,6 +132,9 @@ class TestClientConfig:
         assert merged.version == "v1"
         assert merged.timeout == 30.0
         assert merged.retries == 5
+
+        assert base_config.headers == base_original
+        assert custom_config.headers == custom_original
 
     def test_static_merge_configs_type_error(self):
         """Test that merge_configs raises TypeError for invalid arguments."""
@@ -133,3 +146,11 @@ class TestClientConfig:
 
         with pytest.raises(TypeError):
             ClientConfig.merge_configs("not a config", base_config)  # type: ignore
+
+    def test_get_config_errors(self) -> None:
+        """Validate get_config_errors reports missing hostname."""
+        cfg = ClientConfig()
+        assert cfg.get_config_errors() == {"hostname": "hostname is required"}
+
+        cfg = ClientConfig(hostname="https://example.com")
+        assert cfg.get_config_errors() == {}

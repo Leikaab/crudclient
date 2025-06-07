@@ -42,7 +42,7 @@ api_auth = ApiKeyAuth(
 # Use it in your client configuration
 config = ClientConfig(
     hostname="https://api.example.com",
-    auth=auth_strategy
+    auth_strategy=auth_strategy
 )
 client = Client(config)
 

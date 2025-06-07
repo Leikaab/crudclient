@@ -4,6 +4,9 @@ Simple unit tests for rate limiter to verify basic functionality.
 
 import tempfile
 import time
+import warnings
+
+import pytest
 
 from crudclient.config import ClientConfig
 from crudclient.ratelimit import get_rate_limiter
@@ -32,22 +35,34 @@ class TestRateLimiterSimple:
             # So we should be able to make 2 requests (5 remaining > 3 threshold)
             # Then wait when remaining = 3
 
-            # First request should succeed immediately
+            # Track calls to time.sleep to ensure no waiting occurs
+            sleep_calls = []
+            original_sleep = time.sleep
+
+            def tracking_sleep(seconds: float) -> None:
+                sleep_calls.append(seconds)
+                original_sleep(seconds)
+
+            monkeypatch.setattr(time, "sleep", tracking_sleep)
+
+            # First request should succeed immediately without sleeping
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            assert elapsed < 0.1, f"First request should be immediate, took {elapsed}s"
+            assert not sleep_calls, "Rate limiter unexpectedly slept on first request"
+            assert elapsed < 0.5, f"First request should be immediate, took {elapsed}s"
 
             # Check state after first request
             with limiter.backend:
                 state = limiter.backend.read()
                 assert state["remaining"] == 4, f"Expected remaining=4, got {state['remaining']}"
 
-            # Second request should also succeed immediately
+            # Second request should also succeed immediately without sleeping
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            assert elapsed < 0.1, f"Second request should be immediate, took {elapsed}s"
+            assert not sleep_calls, "Rate limiter unexpectedly slept on second request"
+            assert elapsed < 0.5, f"Second request should be immediate, took {elapsed}s"
 
             # Check state after second request
             with limiter.backend:
@@ -61,7 +76,8 @@ class TestRateLimiterSimple:
             start = time.time()
             limiter.check_and_wait()
             elapsed = time.time() - start
-            # Should wait approximately 1 second + 1 second buffer = 2 seconds
+            # Should have slept approximately 1 second + buffer and recorded the sleep call
+            assert sleep_calls, "Rate limiter did not sleep when expected"
             assert 1.5 < elapsed < 2.5, f"Expected to wait ~2s, but waited {elapsed}s"
 
     def test_unknown_state_proceeds(self, monkeypatch):
@@ -116,3 +132,55 @@ class TestRateLimiterSimple:
             with limiter.backend:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should be unknown after reset"
+
+    def test_delay_history_tracking(self, monkeypatch):
+        """Ensure delay history is recorded when track_delays is enabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = ClientConfig(hostname="test.api")
+            config.enable_rate_limiter(state_path=temp_dir, buffer=1, track_delays=True)
+            limiter = get_rate_limiter(config)
+            assert limiter is not None, "Rate limiter should be created"
+
+            limiter.update_from_headers({"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"})
+            # Delay should be approximately the reset interval
+
+            start = time.time()
+            limiter.check_and_wait()
+            elapsed = time.time() - start
+
+            delays = limiter.get_delay_history()
+            assert len(delays) == 1, "Expected a single recorded delay"
+            assert delays[0] == pytest.approx(elapsed, rel=0.2, abs=0.1)
+
+            limiter.clear_delay_history()
+            assert limiter.get_delay_history() == []
+
+    def test_get_rate_limiter_disabled(self, monkeypatch):
+        """get_rate_limiter returns None when rate limiting is disabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+        config = ClientConfig(hostname="test.api")
+
+        with warnings.catch_warnings(record=True) as captured:
+            warnings.simplefilter("always")
+            limiter = get_rate_limiter(config)
+
+        assert limiter is None
+        assert captured == []
+
+    def test_get_rate_limiter_enabled_warning(self, monkeypatch):
+        """get_rate_limiter emits FutureWarning when enabled."""
+        monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = ClientConfig(hostname="test.api")
+            config.enable_rate_limiter(state_path=temp_dir)
+
+            with warnings.catch_warnings(record=True) as captured:
+                warnings.simplefilter("always")
+                limiter = get_rate_limiter(config)
+
+            assert limiter is not None
+            assert len(captured) == 1
+            assert issubclass(captured[0].category, FutureWarning)

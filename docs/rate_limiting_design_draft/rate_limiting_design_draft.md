@@ -24,7 +24,7 @@
 | P0 | Sync **and** Async client support | Async = thin wrapper |
 | P0 | Atomic cross-process coordination | File-lock JSON backend for MVP |
 | P1 | Pluggable header-parsers | Tripletex default; others later |
-| P1 | Config-flag gated | `config.enable_rate_limiter()` or env `CRUDCLIENT_RATE_LIMITER=on` |
+| P1 | Config-flag gated | `config.enable_rate_limiter()` |
 | P2 | Storage abstraction layer | Future Redis / shared-mem backends |
 
 ---
@@ -283,7 +283,7 @@ if not workers:
     workers = os.cpu_count() or 1
 ```
 
-Buffer defaults to `max(4, workers // 2)`; configurable via `CRUDCLIENT_RL_BUFFER`.
+Buffer defaults to `max(4, workers // 2)`; a separate environment variable is not currently supported.
 
 ### 10.6  Live-Test Design Details
 
