@@ -168,7 +168,7 @@ class ReadMock(BaseCrudMock):
     def _handle_pattern_matching(self, url: str, kwargs: Dict[str, Any], record: RequestRecord) -> Any:
         pattern = self._find_matching_pattern("GET", url, **kwargs)
         if pattern:
-            response_obj = self._process_pattern_response(pattern, url, kwargs)
+            response_obj = self._process_pattern_response(pattern, url, kwargs, record)
             record.response = response_obj
             return response_obj.json() if response_obj.json_data is not None else response_obj.text
 
@@ -176,7 +176,7 @@ class ReadMock(BaseCrudMock):
         record.response = self.default_response
         return self.default_response.json() if self.default_response.json_data is not None else self.default_response.text
 
-    def _process_pattern_response(self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any]) -> MockResponse:
+    def _process_pattern_response(self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any], record: RequestRecord) -> MockResponse:
         response_obj = pattern["response"]
 
         # Handle callable responses
@@ -185,8 +185,12 @@ class ReadMock(BaseCrudMock):
 
         # Handle errors defined in the pattern
         if "error" in pattern and pattern["error"]:
-            # TODO: Consider how to record the error response before raising
-            raise pattern["error"]
+            error = pattern["error"]
+            record.response = MockResponse(
+                status_code=pattern.get("status_code", 500),
+                json_data={"error": str(error)},
+            )
+            raise error
 
         # Ensure response_obj is a MockResponse
         if not isinstance(response_obj, MockResponse):
