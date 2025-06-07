@@ -131,9 +131,7 @@ class RequestFormatter:
             return url
         # Endpoint is guaranteed non-None by validate_request_params if url is None
         if self._config is None or self._config.base_url is None:
-            raise CrudClientError(
-                "Cannot build URL: RequestFormatter requires ClientConfig with base_url."
-            )
+            raise CrudClientError("Cannot build URL: RequestFormatter requires ClientConfig with base_url.")
 
         # Normalize base_url to avoid duplicate slashes when concatenating
         base_url = self._config.base_url.rstrip("/")
