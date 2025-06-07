@@ -7,7 +7,7 @@
 
 ### Status of project
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/crudclient)
-![PyPI - Version](https://img.shields.io/pypi/v/crudclient)
+[![PyPI - Version](https://img.shields.io/pypi/v/crudclient)](https://pypi.org/project/crudclient/)
 
 ### Status of testing
 [![Test DevContainer Build](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml)
