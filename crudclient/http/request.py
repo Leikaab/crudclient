@@ -131,10 +131,16 @@ class RequestFormatter:
             return url
         # Endpoint is guaranteed non-None by validate_request_params if url is None
         if self._config is None or self._config.base_url is None:
-            raise CrudClientError("Cannot build URL: RequestFormatter requires ClientConfig with base_url.")
+            raise CrudClientError(
+                "Cannot build URL: RequestFormatter requires ClientConfig with base_url."
+            )
+
+        # Normalize base_url to avoid duplicate slashes when concatenating
+        base_url = self._config.base_url.rstrip("/")
+
         # Ensure endpoint is treated as str after validation
         endpoint_str = endpoint if endpoint is not None else ""
-        return f"{self._config.base_url}/{endpoint_str.lstrip('/')}"
+        return f"{base_url}/{endpoint_str.lstrip('/')}"
 
     def prepare_auth_params(self, kwargs: Dict[str, Any]) -> None:
         """Inject authentication parameters into the request kwargs if applicable.
