@@ -212,3 +212,4 @@ Configuring a parent logger (e.g., setting the level on `crudclient.http`) affec
 *   **Performance:** High-volume logging, especially at `DEBUG` level with large bodies, can impact performance. Set appropriate logging levels for your environment (e.g., `INFO` or `WARNING` in production).
 
 By configuring logging appropriately and handling the structured exceptions provided by `crudclient`, you can build more observable and resilient applications.
+For a quick example, [see README](../README.md#logging).
