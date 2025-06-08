@@ -78,7 +78,12 @@ user_crud = UserCrud(client=client)
 # --- Perform Operations ---
 
 # List users
-all_users: list[User] = user_crud.list()
+user_response: ApiResponse[User] = user_crud.list()
+all_users: list[User] = user_response.data
+
+# ``list`` may return an ``ApiResponse`` wrapper when a response model is
+# configured. Access the ``data``/``values`` attribute to get the list of
+# ``User`` instances instead of overriding the method to return a raw list.
 
 # Create a new user
 new_user_data = {"name": "Jane Doe", "email": "jane.doe@example.com"}
