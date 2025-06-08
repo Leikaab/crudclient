@@ -7,10 +7,15 @@ while also serving as a container for child resources and nested groups.
 """
 
 from abc import ABC
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, TypeVar
 
 from .client import Client
 from .crud.base import Crud
+
+if TYPE_CHECKING:
+    pass
+
+T = TypeVar("T")
 
 
 class ResourceGroup(Crud, ABC):
