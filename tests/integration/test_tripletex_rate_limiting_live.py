@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 
 from crudclient.exceptions import RateLimitError
-from tests.integration.tripletex_resources.setup import (
+from tests.integration.tripletex_resources import (
     TripletexAPI,
     TripletexTestConfig,
 )

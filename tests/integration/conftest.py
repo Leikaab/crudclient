@@ -8,8 +8,12 @@ import uuid
 from typing import List, Optional
 
 import pytest
+from dotenv import load_dotenv
 
-from .tripletex_resources.setup import TripletexAPI, TripletexTestConfig
+from .tripletex_resources import TripletexAPI, TripletexTestConfig
+
+# Load environment variables from .env file
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
