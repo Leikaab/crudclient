@@ -165,7 +165,10 @@ With this configuration, you can perform operations directly on the group:
 
 ```python
 # Get a list of ledgers
-ledgers = api.ledger.list()
+ledger_response = api.ledger.list()
+ledgers = ledger_response.values
+# ``list`` returns the full API response when a response model is defined.
+# Use the ``values`` or ``data`` attribute to access the list itself.
 
 # Get a specific ledger
 ledger = api.ledger.read(resource_id=123)
@@ -268,7 +271,10 @@ class MyAPI(API):
 
 # Usage
 api = MyAPI(client_config=config)
-users = api.users.list()  # GET /users
+user_response = api.users.list()  # GET /users
+users = user_response.values
+# The ``ApiResponse`` wrapper includes additional metadata; access ``values`` or
+# ``data`` for the actual items.
 user = api.users.read(resource_id=1)  # GET /users/1
 user_posts = api.users.posts.list(parent_id=1)  # GET /users/1/posts
 ```
@@ -297,3 +303,7 @@ The path for a nested resource is constructed by combining the paths of all its 
 2. For a nested `ResourceGroup` or `Crud` with a parent, the path is the parent's path plus its own `_resource_path`.
 
 This hierarchical path construction is handled automatically by the `Crud._get_endpoint()` method.
+## Further Reading
+
+- [Design Proposal](design_proposal_resource_groups.md)
+- [Implementation Plan](implementation_plan_resource_groups.md)

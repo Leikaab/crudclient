@@ -39,6 +39,18 @@
 
 </details>
 
+## Quickstart
+
+1. Install dependencies with Poetry:
+```bash
+poetry install
+```
+
+2. Copy the basic example from the Usage section into a file named `example.py` and run it:
+```bash
+poetry run python example.py
+```
+
 ## Usage
 
 
@@ -237,7 +249,7 @@ logging.getLogger('crudclient.api').setLevel(logging.WARNING)
 
 
 ## Project uses devcontainers
-This project is set up using devcontainers for easy developement across enviroments and hardware.
+This project is set up using devcontainers for easy development across environments and hardware.
 
 ### How to run project locally via dev-containers
 <details>
@@ -258,7 +270,7 @@ If this is your first time using a development container, please ensure your sys
   <summary>Details after setup</summary>
 Once you have this project opened, you'll be able to work with it like you would locally.
 
-Note that ha bounch of key extentions are allready installed + there is local project settings set up in the background, even though there is no settings.json file. These settings are made to match with developmental team standards.
+Note that a bunch of key extensions are already installed, and project settings are configured in the background even though there is no `settings.json` file. These settings are made to match the development team's standards.
 
 > **Note:** This container runs as a non-root user with sudo access by default.
 
@@ -321,7 +333,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
-</details
+</details>
 
 ## Poetry
 
@@ -354,9 +366,12 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   - **Development Dependencies**: Poetry distinguishes between production and development dependencies, ensuring that only the necessary packages are included in the final distribution, keeping it lightweight and efficient.
 
-  - **Environment Configuration**: Although Poetry typically creates a virtual environment (`venv`) for each project, in this setup, we have configured Poetry to avoid creating virtual environments due to our use of development containers. This ensures that dependencies are installed directly into the container environment, simplifying the setup and avoiding potential conflicts.
-
-  This configuration is particularly beneficial in a devcontainer environment, where the container itself acts as the isolated development environment, eliminating the need for a separate virtual environment.
+  - **Environment Configuration**: Poetry is configured to create an in-project virtual environment (`.venv`).
+    The `poetry.toml` file sets `create = true` and `in-project = true`, so the virtual
+    environment resides inside the repository. When using a development container,
+    this environment is created within the container itself, keeping dependencies
+    isolated from the host system while still leveraging Poetry's environment
+    management.
 
 </details>
 
@@ -407,7 +422,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   - **Build and Test DevContainer**: Builds the development container and runs basic tests to verify the setup.
   - **Validate DevContainer**: Ensures that critical tools like Poetry are correctly installed and configured within the container.
 
-  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions enviroments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be rapported in the issues section on github.
+  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions environments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be reported in the issues section on github.
 
 </details>
 

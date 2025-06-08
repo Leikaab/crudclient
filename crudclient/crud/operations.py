@@ -27,8 +27,14 @@ logger = logging.getLogger(__name__)
 
 
 def list_operation(self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, TypingList[T], ApiResponse]:
-    """
-    Retrieve a list of resources.
+    """Retrieve a list of resources.
+
+    The returned value depends on the configured response strategy. When an
+    ``_api_response_model`` is set (or the active strategy produces one), the
+    method returns an :class:`ApiResponse` instance containing the list in its
+    ``data``/``values`` attribute along with any metadata. Callers expecting only
+    the raw list should access ``.data`` on the returned object instead of
+    overriding this method.
 
     Parameters
     ----------
@@ -40,7 +46,7 @@ def list_operation(self: "Crud", parent_id: Optional[str] = None, params: Option
     Returns
     -------
     Union[JSONList, List[T], ApiResponse]
-        List of resources.
+        Validated list data or the full ``ApiResponse`` wrapper.
 
     Raises
     ------
