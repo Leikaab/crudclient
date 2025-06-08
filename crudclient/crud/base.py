@@ -24,7 +24,6 @@ from typing_extensions import TypeAlias
 from ..client import Client
 
 # DataValidationError is used in imported methods
-from ..exceptions import DataValidationError  # noqa: F401
 from ..models import ApiResponse
 from ..response_strategies import (
     DefaultResponseModelStrategy,

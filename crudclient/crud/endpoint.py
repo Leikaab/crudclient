@@ -18,6 +18,16 @@ logger = logging.getLogger(__name__)
 # Type alias for path arguments
 PathArgs = Optional[Union[str, int]]
 
+__all__ = [
+    "_endpoint_prefix",
+    "_validate_path_segments",
+    "_get_parent_path",
+    "_build_resource_path",
+    "_get_prefix_segments",
+    "_join_path_segments",
+    "_get_endpoint",
+]
+
 
 def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
     """
