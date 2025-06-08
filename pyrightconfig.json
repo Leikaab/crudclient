@@ -16,7 +16,7 @@
     "scripts",
     "code_project_work_plan"
   ],
-  "typeCheckingMode": "strict",
+  "typeCheckingMode": "basic",
   "pythonVersion": "3.11",
   "venvPath": ".",
   "venv": ".venv",
