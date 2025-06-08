@@ -1,5 +1,6 @@
+from .api import TripletexAPI
 from .auth import TripletexAuthStrategy
-from .client import TripletexAPI, TripletexClient
+from .client import TripletexClient
 from .config import TripletexConfig, TripletexTestConfig
 from .crud import TripletexCrud
 from .resources import TripletexCountries, TripletexSuppliers

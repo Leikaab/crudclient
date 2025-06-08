@@ -5,7 +5,10 @@ This module defines ResourceGroup classes for organizing related Tripletex API
 resources under common path segments, enabling a hierarchical API structure.
 """
 
+from typing import Optional, cast
+
 from crudclient.groups import ResourceGroup
+from crudclient.types import JSONDict
 
 from .models import (
     Ledger,
@@ -16,9 +19,10 @@ from .models import (
 from .resources_ledger import (
     TripletexHistoricalVoucherCrud,
 )
+from .utils import ensure_date_params
 
 
-class LedgerGroup(ResourceGroup):
+class LedgerGroup(ResourceGroup[Ledger]):
     """
     ResourceGroup for Tripletex ledger operations.
 
@@ -46,8 +50,27 @@ class LedgerGroup(ResourceGroup):
         """
         self.voucher = VoucherGroup(self.client, parent=self)
 
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs) -> LedgerResponse:
+        """
+        List ledgers.
 
-class VoucherGroup(ResourceGroup):
+        Args:
+            parent_id: Optional parent ID if this is a nested resource.
+            params: Optional query parameters. Must include 'dateFrom' and 'dateTo'.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            LedgerResponse object containing a list of Ledger objects.
+        """
+        # Ensure required date parameters are present
+        params = ensure_date_params(params)
+
+        # Call the parent list method with the updated params
+        result = super().list(parent_id=parent_id, params=params, **kwargs)
+        return cast(LedgerResponse, result)
+
+
+class VoucherGroup(ResourceGroup[Voucher]):
     """
     ResourceGroup for Tripletex voucher operations.
 
@@ -74,3 +97,22 @@ class VoucherGroup(ResourceGroup):
         enabling access to voucher-specific operations like historical vouchers.
         """
         self.historical = TripletexHistoricalVoucherCrud(self.client, parent=self)
+
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs) -> VoucherResponse:
+        """
+        List vouchers.
+
+        Args:
+            parent_id: Optional parent ID if this is a nested resource.
+            params: Optional query parameters. Must include 'dateFrom' and 'dateTo'.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            VoucherResponse object containing a list of Voucher objects.
+        """
+        # Ensure required date parameters are present
+        params = ensure_date_params(params)
+
+        # Call the parent list method with the updated params
+        result = super().list(parent_id=parent_id, params=params, **kwargs)
+        return cast(VoucherResponse, result)

@@ -29,7 +29,7 @@ class PostsCrud(Crud):
     _resource_path = "posts"
     _datamodel = Post
 
-class UserGroup(ResourceGroup):
+class UserGroup(ResourceGroup[User]):
     _resource_path = "users"
     _datamodel = User
 
