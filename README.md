@@ -258,7 +258,7 @@ If this is your first time using a development container, please ensure your sys
   <summary>Details after setup</summary>
 Once you have this project opened, you'll be able to work with it like you would locally.
 
-Note that ha bounch of key extentions are allready installed + there is local project settings set up in the background, even though there is no settings.json file. These settings are made to match with developmental team standards.
+Note that a bunch of key extensions are already installed, and project settings are configured in the background even though there is no `settings.json` file. These settings are made to match the development team's standards.
 
 > **Note:** This container runs as a non-root user with sudo access by default.
 
@@ -321,7 +321,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
-</details
+</details>
 
 ## Poetry
 
