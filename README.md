@@ -354,9 +354,12 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   - **Development Dependencies**: Poetry distinguishes between production and development dependencies, ensuring that only the necessary packages are included in the final distribution, keeping it lightweight and efficient.
 
-  - **Environment Configuration**: Although Poetry typically creates a virtual environment (`venv`) for each project, in this setup, we have configured Poetry to avoid creating virtual environments due to our use of development containers. This ensures that dependencies are installed directly into the container environment, simplifying the setup and avoiding potential conflicts.
-
-  This configuration is particularly beneficial in a devcontainer environment, where the container itself acts as the isolated development environment, eliminating the need for a separate virtual environment.
+  - **Environment Configuration**: Poetry is configured to create an in-project virtual environment (`.venv`).
+    The `poetry.toml` file sets `create = true` and `in-project = true`, so the virtual
+    environment resides inside the repository. When using a development container,
+    this environment is created within the container itself, keeping dependencies
+    isolated from the host system while still leveraging Poetry's environment
+    management.
 
 </details>
 
