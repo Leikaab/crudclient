@@ -303,3 +303,7 @@ The path for a nested resource is constructed by combining the paths of all its 
 2. For a nested `ResourceGroup` or `Crud` with a parent, the path is the parent's path plus its own `_resource_path`.
 
 This hierarchical path construction is handled automatically by the `Crud._get_endpoint()` method.
+## Further Reading
+
+- [Design Proposal](design_proposal_resource_groups.md)
+- [Implementation Plan](implementation_plan_resource_groups.md)
