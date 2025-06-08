@@ -39,6 +39,18 @@
 
 </details>
 
+## Quickstart
+
+1. Install dependencies with Poetry:
+```bash
+poetry install
+```
+
+2. Copy the basic example from the Usage section into a file named `example.py` and run it:
+```bash
+poetry run python example.py
+```
+
 ## Usage
 
 
@@ -237,7 +249,7 @@ logging.getLogger('crudclient.api').setLevel(logging.WARNING)
 
 
 ## Project uses devcontainers
-This project is set up using devcontainers for easy developement across enviroments and hardware.
+This project is set up using devcontainers for easy development across environments and hardware.
 
 ### How to run project locally via dev-containers
 <details>
@@ -410,7 +422,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   - **Build and Test DevContainer**: Builds the development container and runs basic tests to verify the setup.
   - **Validate DevContainer**: Ensures that critical tools like Poetry are correctly installed and configured within the container.
 
-  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions enviroments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be rapported in the issues section on github.
+  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions environments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be reported in the issues section on github.
 
 </details>
 
