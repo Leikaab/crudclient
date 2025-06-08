@@ -10,6 +10,7 @@ from .auth import TripletexAuthStrategy
 from .client import TripletexClient
 from .config import TripletexConfig, TripletexTestConfig
 from .crud import TripletexCrud
+from .endpoints import TripletexCompany, TripletexCountries, TripletexSuppliers
 from .models import (
     Company,
     CompanyResponse,
@@ -19,7 +20,6 @@ from .models import (
     SupplierResponse,
     TokenSessionResponse,
 )
-from .resources import TripletexCompany, TripletexCountries, TripletexSuppliers
 
 T = TypeVar("T", bound=ModelDumpable)
 

@@ -3,7 +3,7 @@ from .auth import TripletexAuthStrategy
 from .client import TripletexClient
 from .config import TripletexConfig, TripletexTestConfig
 from .crud import TripletexCrud
-from .resources import TripletexCountries, TripletexSuppliers
+from .endpoints import TripletexCountries, TripletexSuppliers
 
 __all__ = [
     "TripletexAuthStrategy",

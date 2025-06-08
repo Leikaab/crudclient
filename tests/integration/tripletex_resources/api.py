@@ -1,8 +1,12 @@
 from crudclient.api import API
 
 from .client import TripletexClient
-from .groups import LedgerGroup
-from .resources import TripletexCompany, TripletexCountries, TripletexSuppliers
+from .endpoints import (
+    LedgerGroup,
+    TripletexCompany,
+    TripletexCountries,
+    TripletexSuppliers,
+)
 
 
 class TripletexAPI(API):
