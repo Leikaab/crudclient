@@ -1,5 +1,14 @@
 # Testing Guidelines for CRUDClient
 
+## Table of Contents
+- [Test Structure and Documentation](#test-structure-and-documentation)
+- [Test Organization](#test-organization)
+- [Best Practices for Writing Effective Tests](#best-practices-for-writing-effective-tests)
+- [Using Fixtures](#using-fixtures)
+- [Mocking and Test Isolation](#mocking-and-test-isolation)
+- [Running Tests](#running-tests)
+- [Coverage](#coverage)
+
 This document provides comprehensive guidelines for creating, organizing, and documenting tests for the CRUDClient library.
 
 ## Test Structure and Documentation
