@@ -30,6 +30,7 @@ class ValidationErrorBuilder:
         Returns:
             A MockResponse object representing the validation error.
         """
+        response_data: Dict[str, Any]
         if error_format == "standard":
             response_data = {
                 "error": error_code,
@@ -50,13 +51,19 @@ class ValidationErrorBuilder:
                 ]
             }
         elif error_format == "detailed":
+            details = [
+                {
+                    "field": field,
+                    "message": error_msg,
+                    "code": f"{error_code}_{field.upper()}",
+                }
+                for field, error_msg in invalid_fields.items()
+            ]
             response_data = {
                 "error": {
                     "code": error_code,
                     "message": message,
-                    "details": [
-                        {"field": field, "message": error_msg, "code": f"{error_code}_{field.upper()}"} for field, error_msg in invalid_fields.items()
-                    ],
+                    "details": details,
                 }
             }
         else:
@@ -87,15 +94,21 @@ class ValidationErrorBuilder:
             A function that takes request data and returns a MockResponse if validation fails, else None.
         """
 
-        def validator_function(data: Dict[str, Any]) -> Optional[MockResponse]:
+        def validator_function(data: Any) -> Optional[MockResponse]:
             if not isinstance(data, dict):
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {field_name: "Invalid data format"}, status_code=status_code, error_code=error_code, error_format=error_format
+                    {field_name: "Invalid data format"},
+                    status_code=status_code,
+                    error_code=error_code,
+                    error_format=error_format,
                 )
 
             if field_name not in data:
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {field_name: "Field is required"}, status_code=status_code, error_code=error_code, error_format=error_format
+                    {field_name: "Field is required"},
+                    status_code=status_code,
+                    error_code=error_code,
+                    error_format=error_format,
                 )
 
             field_value = data[field_name]
@@ -135,10 +148,14 @@ class ValidationErrorBuilder:
             A function that takes request data and returns a MockResponse if validation fails, else None.
         """
 
-        def validator_function(data: Dict[str, Any]) -> Optional[MockResponse]:
+        def validator_function(data: Any) -> Optional[MockResponse]:
             if not isinstance(data, dict):
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    {"_general": "Invalid data format"}, status_code=status_code, error_code=error_code, message=message, error_format=error_format
+                    {"_general": "Invalid data format"},
+                    status_code=status_code,
+                    error_code=error_code,
+                    message=message,
+                    error_format=error_format,
                 )
 
             invalid_fields = {}
@@ -159,7 +176,11 @@ class ValidationErrorBuilder:
 
             if invalid_fields:
                 return ValidationErrorBuilder.create_schema_validation_error(
-                    invalid_fields, status_code=status_code, error_code=error_code, message=message, error_format=error_format
+                    invalid_fields,
+                    status_code=status_code,
+                    error_code=error_code,
+                    message=message,
+                    error_format=error_format,
                 )
 
             return None  # No validation errors

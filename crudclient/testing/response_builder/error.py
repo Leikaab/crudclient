@@ -56,7 +56,7 @@ class ErrorResponseBuilder:
         }
 
         if details:
-            error["details"] = details  # type: ignore
+            error["details"] = details
 
         if request_id:
             error["request_id"] = request_id

@@ -158,3 +158,32 @@ class BasicResponseBuilder:
         if headers:
             final_headers.update(headers)
         return MockResponse(status_code=status_code, json_data=structure, headers=final_headers)
+
+    @staticmethod
+    def create_graphql_response(
+        data: Optional[Dict[str, Any]] = None,
+        errors: Optional[List[Dict[str, Any]]] = None,
+        extensions: Optional[Dict[str, Any]] = None,
+    ) -> MockResponse:
+        """Create a GraphQL response.
+
+        This helper builds a response body that follows the GraphQL
+        specification with ``data``, ``errors`` and ``extensions`` fields.
+
+        Args:
+            data: GraphQL data returned for the query.
+            errors: Optional list of error objects.
+            extensions: Optional extensions providing additional metadata.
+
+        Returns:
+            A ``MockResponse`` formatted according to the GraphQL spec.
+        """
+        body: Dict[str, Any] = {}
+        if data is not None:
+            body["data"] = data
+        if errors is not None:
+            body["errors"] = errors
+        if extensions is not None:
+            body["extensions"] = extensions
+
+        return MockResponse(status_code=200, json_data=body, headers={"Content-Type": "application/json"})

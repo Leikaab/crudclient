@@ -82,7 +82,7 @@ class MockClientFactory:
             mock_client.configure_response(method=method, path=path, status_code=status_code, data=data, headers=headers)
 
     @classmethod
-    def create_mock_client(cls, config: Optional[Union[ClientConfig, Dict[str, Any]]] = None, **kwargs: Any) -> MockClient:
+    def create_mock_client(cls, config: Optional[Union[ClientConfig, Dict[str, Any]]] = None, **kwargs: Any) -> MockClient:  # noqa: C901
         # Ensure we have a valid config
         if config is None:
             config = ClientConfig(hostname="https://api.example.com", version="v1")
@@ -166,7 +166,10 @@ class MockClientFactory:
             helper_kwargs.pop("api_type", None)  # Remove api_type if it exists
             patterns = _create_api_patterns(api_type, **helper_kwargs)  # Use helper from factory_helpers
             for pattern in patterns:
-                mock_client.configure_response(**pattern)
+                pattern_args: Dict[str, Any] = dict(pattern)
+                if "url_pattern" in pattern_args:
+                    pattern_args["path"] = pattern_args.pop("url_pattern")
+                mock_client.configure_response(**pattern_args)
 
         # Add common error responses if specified
         if "error_responses" in kwargs:
