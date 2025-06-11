@@ -66,7 +66,7 @@ class RoleBasedModel(BaseModel):
         ValueError
             If a required field is missing or a disallowed field is present.
         """
-        # Implementation placeholder - this is a stub in the .pyi file
+        # Implementation placeholder - real validation logic should be implemented here
         return values
 
 
