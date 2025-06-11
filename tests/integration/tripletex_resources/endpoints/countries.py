@@ -1,8 +1,5 @@
 from ..crud import TripletexCrud
-from ..models import (
-    Country,
-    CountryResponse,
-)
+from ..models import Country
 
 
 class TripletexCountries(TripletexCrud[Country]):
@@ -12,5 +9,4 @@ class TripletexCountries(TripletexCrud[Country]):
 
     _resource_path = "country"
     _datamodel = Country
-    _api_response_model = CountryResponse
     allowed_actions = ["list", "read"]

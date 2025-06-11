@@ -137,8 +137,19 @@ class DefaultResponseModelStrategy(ResponseModelStrategy[T]):
         # Implementation moved from docstring
         # Check for custom API response model first
         if self.api_response_model:
+            # For API response models, we need to convert the list items first
+            modified_data = data.copy()
+
+            # Look for list data in known keys and convert items
+            for key in self.list_return_keys:
+                if key in modified_data and isinstance(modified_data[key], list):
+                    # Convert the items to datamodel if available
+                    if self.datamodel:
+                        modified_data[key] = self._convert_items_to_datamodel(modified_data[key])
+                    break
+
             try:
-                return self.api_response_model(**data)
+                return self.api_response_model(**modified_data)
             except PydanticValidationError as e:
                 model_name = self.api_response_model.__name__ if self.api_response_model else "Unknown"
                 error_msg = f"Response data validation failed for API response model {model_name}"

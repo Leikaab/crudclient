@@ -1,8 +1,7 @@
 from typing import Any, Optional
 
+from models import IdUrl
 from pydantic import BaseModel, ConfigDict, Field
-
-from .api_response_model import IdUrl, TripletexResponse
 
 
 class BankAccountPresentation(BaseModel):
@@ -62,7 +61,3 @@ class SupplierCreate(BaseModel):
 class SupplierUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
-
-
-class SupplierResponse(TripletexResponse[Supplier]):
-    pass

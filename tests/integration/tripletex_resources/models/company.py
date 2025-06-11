@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .api_response_model import TripletexResponse
 from .country import Country
 
 
@@ -43,9 +42,3 @@ class Company(BaseModel):
     phoneNumberMobile: Optional[str] = None
     faxNumber: Optional[str] = None
     address: Optional[Address] = None
-
-
-class CompanyResponse(TripletexResponse[Company]):
-    """
-    Represents the response from the Tripletex API company endpoint.
-    """
