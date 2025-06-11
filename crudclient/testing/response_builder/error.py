@@ -1,3 +1,11 @@
+"""
+Error response builder utilities for mock client.
+
+This module provides utilities for creating various types of error responses
+commonly encountered in API interactions, such as validation errors,
+rate limit errors, and authentication errors.
+"""
+
 import random
 import uuid
 from datetime import datetime, timedelta
@@ -8,6 +16,13 @@ from .response import MockResponse
 
 
 class ErrorResponseBuilder:
+    """
+    Builder for creating standardized API error responses.
+
+    This class provides static methods for generating various types of error responses
+    that follow common API error patterns, including validation errors, rate limiting,
+    and authentication errors.
+    """
 
     @staticmethod
     def create_error_response(
@@ -18,6 +33,23 @@ class ErrorResponseBuilder:
         request_id: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> MockResponse:
+        """
+        Create a standardized error response.
+
+        Generates an error response with a consistent structure including message,
+        error code, optional details, and a request ID for tracking.
+
+        Args:
+            status_code: HTTP status code for the error response
+            message: Human-readable error message
+            error_code: Machine-readable error code identifier
+            details: Additional error details, typically for field-level errors
+            request_id: Unique identifier for the request (generated if not provided)
+            headers: HTTP headers to include in the response
+
+        Returns:
+            A MockResponse instance representing an error response
+        """
         error: Dict[str, Any] = {
             "message": message,
             "code": error_code,
@@ -56,6 +88,21 @@ class ErrorResponseBuilder:
         error_code: str = "VALIDATION_ERROR",
         message: str = "Validation failed",
     ) -> MockResponse:
+        """
+        Create a validation error response with field-specific error messages.
+
+        Generates a structured validation error response that includes specific
+        error messages for each invalid field.
+
+        Args:
+            fields: Dictionary mapping field names to error messages
+            status_code: HTTP status code (defaults to 422 Unprocessable Entity)
+            error_code: Machine-readable error code identifier
+            message: Human-readable error message
+
+        Returns:
+            A MockResponse instance representing a validation error
+        """
         details = []
         for field, error_msg in fields.items():
             details.append({"field": field, "message": error_msg, "code": "INVALID_FIELD"})
@@ -68,6 +115,21 @@ class ErrorResponseBuilder:
         remaining: int = 0,
         reset_seconds: int = 60,
     ) -> MockResponse:
+        """
+        Create a rate limit exceeded error response.
+
+        Generates a rate limiting error response with appropriate headers
+        indicating limits, remaining requests, and reset time.
+
+        Args:
+            limit: Maximum number of requests allowed in the time window
+            remaining: Number of requests remaining in the current window
+            reset_seconds: Seconds until the rate limit resets
+
+        Returns:
+            A MockResponse instance representing a rate limit error with
+            appropriate rate limiting headers
+        """
         reset_time = int((datetime.now() + timedelta(seconds=reset_seconds)).timestamp())
 
         headers = {
@@ -92,6 +154,21 @@ class ErrorResponseBuilder:
         error_type: str = "invalid_token",
         status_code: int = 401,
     ) -> MockResponse:
+        """
+        Create an authentication error response.
+
+        Generates an authentication error response with appropriate WWW-Authenticate
+        headers based on the specified error type.
+
+        Args:
+            error_type: Type of authentication error (e.g., "invalid_token",
+                           "expired_token", "insufficient_scope")
+            status_code: HTTP status code (defaults to 401 Unauthorized)
+
+        Returns:
+            A MockResponse instance representing an authentication error with
+            appropriate WWW-Authenticate headers
+        """
         error_messages = {
             "invalid_token": "The access token is invalid",
             "expired_token": "The access token has expired",
