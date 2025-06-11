@@ -1,32 +1,59 @@
-from typing import Any, Callable, Dict, List
+"""Assertion mixin for enhanced spy objects."""
 
-# Type hint for EnhancedSpyBase to avoid circular import
-# In a real scenario, consider using typing.TYPE_CHECKING or protocols
-EnhancedSpyBase = Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
+
+if TYPE_CHECKING:
+    from .enhanced import CallRecord
+
+
+class SpyProtocol(Protocol):
+    """Defines the protocol required by :class:`SpyAssertionsMixin`."""
+
+    _calls: List["CallRecord"]
+    _method_calls: Dict[str, List["CallRecord"]]
+
+    def was_called(self, method_name: str) -> bool:
+        """Check if the specified method was called at least once."""
+
+    def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
+        """Check if the specified method was called with the exact arguments."""
+
+    def get_call_count(self, method_name: Optional[str] = None) -> int:
+        """Get the number of times a method (or any method) was called."""
+
+    def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]:
+        """Retrieve recorded calls for a specific method or all methods."""
 
 
 class SpyAssertionsMixin:
+    """A mixin class providing assertion methods for spy objects."""
 
-    def assert_called(self: Any, method_name: str) -> None:
+    def assert_called(self: SpyProtocol, method_name: str) -> None:
+        """Asserts that the specified method was called at least once."""
         assert self.was_called(method_name), f"Expected method '{method_name}' to have been called, but it was not."
 
-    def assert_not_called(self: Any, method_name: str) -> None:
+    def assert_not_called(self: SpyProtocol, method_name: str) -> None:
+        """Asserts that the specified method was never called."""
         assert not self.was_called(method_name), f"Expected method '{method_name}' not to have been called, but it was."
 
-    def assert_called_with(self: Any, method_name: str, *args: Any, **kwargs: Any) -> None:
+    def assert_called_with(self: SpyProtocol, method_name: str, *args: Any, **kwargs: Any) -> None:
+        """Asserts that the specified method was called with the exact arguments."""
         assert self.was_called_with(method_name, *args, **kwargs), (
             f"Expected method '{method_name}' to have been called with args={args}, kwargs={kwargs}. " f"Actual calls: {self.get_calls(method_name)}"
         )  # Include actual calls for better debugging
 
-    def assert_called_once(self: Any, method_name: str) -> None:
+    def assert_called_once(self: SpyProtocol, method_name: str) -> None:
+        """Asserts that the specified method was called exactly once."""
         call_count = self.get_call_count(method_name)
         assert call_count == 1, f"Expected method '{method_name}' to be called once, but was called {call_count} times."
 
-    def assert_called_times(self: Any, method_name: str, count: int) -> None:
+    def assert_called_times(self: SpyProtocol, method_name: str, count: int) -> None:
+        """Asserts that the specified method was called exactly ``count`` times."""
         call_count = self.get_call_count(method_name)
         assert call_count == count, f"Expected method '{method_name}' to be called {count} times, but was called {call_count} times."
 
-    def assert_called_with_params_matching(self: Any, method_name: str, param_matcher: Callable[[Dict[str, Any]], bool]) -> None:
+    def assert_called_with_params_matching(self: SpyProtocol, method_name: str, param_matcher: Callable[[Dict[str, Any]], bool]) -> None:
+        """Asserts that the specified method was called with parameters matching a predicate."""
         if not self.was_called(method_name):
             raise AssertionError(f"Method {method_name} was not called")
 
@@ -52,7 +79,8 @@ class SpyAssertionsMixin:
 
         raise AssertionError(f"Method {method_name} was not called with matching parameters")
 
-    def assert_call_order(self: Any, *method_names: str) -> None:
+    def assert_call_order(self: SpyProtocol, *method_names: str) -> None:
+        """Asserts that the specified methods were called in the given order."""
         # Check that all methods were called
         for method_name in method_names:
             if not self.was_called(method_name):
@@ -81,7 +109,8 @@ class SpyAssertionsMixin:
                 )
             current_order_index = found_index
 
-    def assert_no_errors(self: Any) -> None:
+    def assert_no_errors(self: SpyProtocol) -> None:
+        """Asserts that no exceptions were recorded during any call."""
         # Use the public get_calls()
         for call in self.get_calls():
             if call.exception is not None:
@@ -89,7 +118,8 @@ class SpyAssertionsMixin:
 
     # --- Assertions moved from verification_helpers ---
 
-    def assert_no_unexpected_calls(self: EnhancedSpyBase, expected_methods: List[str]) -> None:
+    def assert_no_unexpected_calls(self: SpyProtocol, expected_methods: List[str]) -> None:
+        """Asserts that only the provided methods were called."""
         unexpected_calls = []
         for call in self.get_calls():
             if call.method_name not in expected_methods:
@@ -99,8 +129,10 @@ class SpyAssertionsMixin:
             unique_unexpected = sorted(list(set(unexpected_calls)))
             raise AssertionError(f"Unexpected method calls detected: {', '.join(unique_unexpected)}")
 
-    def assert_call_max_duration(self: EnhancedSpyBase, method_name: str, max_duration: float) -> None:
-        self.assert_called(method_name)  # Ensure the method was called at least once
+    def assert_call_max_duration(self: SpyProtocol, method_name: str, max_duration: float) -> None:
+        """Asserts that all calls to a method completed within ``max_duration`` seconds."""
+        if not self.was_called(method_name):
+            raise AssertionError(f"Method {method_name} was not called")
 
         slow_calls = []
         for call in self.get_calls(method_name):
