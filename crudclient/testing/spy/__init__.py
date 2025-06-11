@@ -1,3 +1,5 @@
+"""Spy components for the crudclient testing framework."""
+
 from .api_spy import ApiSpy
 from .base import SpyBase
 from .client_spy import ClientSpy
@@ -11,8 +13,12 @@ from .enhanced import (
     MethodSpy,
 )
 from .method_call import MethodCall
-
-# Verification helpers are now part of SpyAssertionsMixin, mixed into EnhancedSpyBase
+from .verification_helpers import (
+    verify_call_arguments,
+    verify_call_sequence,
+    verify_call_timing,
+    verify_no_unexpected_calls,
+)
 
 __all__ = [
     # Basic spy components
@@ -28,4 +34,9 @@ __all__ = [
     "ClassSpy",
     "FunctionSpy",
     "EnhancedSpyFactory",
+    # Verification helpers
+    "verify_call_sequence",
+    "verify_no_unexpected_calls",
+    "verify_call_timing",
+    "verify_call_arguments",
 ]

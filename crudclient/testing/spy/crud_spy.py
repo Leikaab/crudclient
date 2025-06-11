@@ -1,3 +1,5 @@
+"""Concrete Test Spy for the ``CrudBase`` Interface using Enhanced Spying."""
+
 from typing import Any, Optional
 
 # Assuming Client or a suitable mock/spy is available for injection
@@ -11,10 +13,12 @@ from .enhanced import ClassSpy, EnhancedSpyBase, MethodSpy
 # Note: This class now primarily acts as a wrapper and provider of specific assertions.
 # The core spying mechanism (call recording, basic assertions) is handled by ClassSpy/EnhancedSpyBase.
 class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions and call storage
+    """A Test Spy specifically for the :class:`crudclient.crud.base.Crud` interface."""
 
     # _resource_path is part of the target CrudBase instance, not the spy itself.
 
     def __init__(self, client: Client, resource_path: str = "/test", datamodel: Optional[type] = None, **kwargs: Any):
+        """Initialize a :class:`CrudSpy` instance."""
         # 1. Create the actual CrudBase instance that will be spied upon
         # CrudBase requires a client.
         if client is None:
@@ -54,6 +58,7 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
 
     # Delegate method calls and attribute access
     def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the spy wrapper, base class, or target CrudBase."""
         # Priority 1: Is it a method being spied on by the wrapper?
         if hasattr(self._spy_wrapper, name) and callable(getattr(self._spy_wrapper, name)):
             spy_method = getattr(self._spy_wrapper, name)
@@ -81,6 +86,7 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
     # The ClassSpy mechanism handles intercepting these calls on the target_crud.
 
     def verify_resource_created(self, data: Any) -> None:
+        """Verify that a resource was created with specific data."""
         for call in self.get_calls("create"):  # Filter by method name
             # Data is typically the first positional argument for create
             if call.args and call.args[0] == data:
@@ -88,6 +94,7 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
         raise VerificationError(f"Resource with data {data} was not created")
 
     def verify_resource_updated(self, id: Any, data: Any) -> None:
+        """Verify that a resource was updated with a specific ID and data."""
         for call in self.get_calls("update"):
             # ID and data are typically the first two positional arguments for update
             if call.args and len(call.args) >= 2 and call.args[0] == id and call.args[1] == data:
@@ -95,6 +102,7 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
         raise VerificationError(f"Resource with ID {id} was not updated with data {data}")
 
     def verify_resource_deleted(self, id: Any) -> None:
+        """Verify that a resource was deleted with the given ID."""
         for call in self.get_calls("delete"):
             # ID is typically the first positional argument for delete
             if call.args and call.args[0] == id:
