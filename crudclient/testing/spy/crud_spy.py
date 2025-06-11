@@ -23,7 +23,7 @@ class CrudSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions a
         # CrudBase requires a client.
         if client is None:
             raise ValueError("A client instance (real, spy, or mock) must be provided to CrudSpy")
-        target_crud = CrudBase(client)
+        target_crud: CrudBase = CrudBase(client)
         # Set resource path and datamodel on the target instance
         target_crud._resource_path = resource_path
         target_crud._datamodel = datamodel

@@ -131,7 +131,8 @@ class SpyAssertionsMixin:
 
     def assert_call_max_duration(self: SpyProtocol, method_name: str, max_duration: float) -> None:
         """Asserts that all calls to a method completed within ``max_duration`` seconds."""
-        self.assert_called(method_name)  # Ensure the method was called at least once
+        if not self.was_called(method_name):
+            raise AssertionError(f"Method {method_name} was not called")
 
         slow_calls = []
         for call in self.get_calls(method_name):
