@@ -1,7 +1,8 @@
 from typing import Any, Optional
 
-from models import IdUrl
 from pydantic import BaseModel, ConfigDict, Field
+
+from .api_response_model import IdUrl
 
 
 class BankAccountPresentation(BaseModel):
