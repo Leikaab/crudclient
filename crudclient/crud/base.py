@@ -24,7 +24,7 @@ from typing_extensions import TypeAlias
 from ..client import Client
 
 # DataValidationError is used in imported methods
-from ..models import ApiResponse
+from ..models import ListResponseWrapper
 from ..response_strategies import (
     DefaultResponseModelStrategy,
     ModelDumpable,
@@ -80,7 +80,7 @@ class Crud(Generic[T]):
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
-    _api_response_model: Optional[Type[ApiResponse]] = None
+    _api_response_model: Optional[Type[ListResponseWrapper]] = None
     _create_model: Optional[Type[T]] = None
     _update_model: Optional[Type[T]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None

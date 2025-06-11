@@ -1,10 +1,7 @@
 from typing import List
 
 from ..crud import TripletexCrud
-from ..models import (
-    Company,
-    CompanyResponse,
-)
+from ..models import Company
 
 
 class TripletexCompany(TripletexCrud[Company]):
@@ -23,7 +20,6 @@ class TripletexCompany(TripletexCrud[Company]):
 
     _resource_path = "company"
     _datamodel = Company  # Use Company model for type hints
-    _api_response_model = CompanyResponse
     allowed_actions: List[str] = ["read", "update"]
 
     # Use the new update_mode feature for non-standard REST endpoints

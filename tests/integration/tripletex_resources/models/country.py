@@ -2,8 +2,6 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .api_response_model import TripletexResponse
-
 
 class Country(BaseModel):
     """
@@ -18,9 +16,3 @@ class Country(BaseModel):
     isoAlpha2Code: str
     isoAlpha3Code: str
     isoNumericCode: str
-
-
-class CountryResponse(TripletexResponse[Country]):
-    """
-    Represents the response from the Tripletex API country endpoint.
-    """

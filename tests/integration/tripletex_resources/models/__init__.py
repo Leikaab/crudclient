@@ -14,8 +14,8 @@ from .api_response_model import (
     IdUrl,
     TripletexResponse,
 )
-from .company import Company, CompanyResponse
-from .country import Country, CountryResponse
+from .company import Company
+from .country import Country
 from .ledger import (
     HistoricalVoucher,
     HistoricalVoucherResponse,
@@ -28,7 +28,6 @@ from .supplier import (
     BankAccountPresentation,
     Supplier,
     SupplierCreate,
-    SupplierResponse,
     SupplierUpdate,
 )
 
@@ -67,9 +66,7 @@ __all__ = [
     "IdUrl",
     "TripletexResponse",
     "Company",
-    "CompanyResponse",
     "Country",
-    "CountryResponse",
     "Ledger",
     "LedgerResponse",
     "Voucher",
@@ -79,7 +76,6 @@ __all__ = [
     "BankAccountPresentation",
     "Supplier",
     "SupplierCreate",
-    "SupplierResponse",
     "SupplierUpdate",
     "TokenSession",
     "TokenSessionResponse",

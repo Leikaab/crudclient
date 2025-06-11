@@ -27,6 +27,9 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
     # Override the data field to use 'values' instead
     values: List[T] = Field(default_factory=list)
 
+    # Override count to use the values length when not explicitly provided
+    count: int = Field(default=0, ge=0, description="Total number of items")
+
     # Make data an alias for values to maintain compatibility with ApiResponse
     @property
     def data(self) -> List[T]:
@@ -35,6 +38,12 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
 
     # Override model_config to handle both Tripletex and ApiResponse field names
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    def __init__(self, **data):
+        # If count is not provided, use the length of values
+        if "count" not in data and "values" in data:
+            data["count"] = len(data["values"])
+        super().__init__(**data)
 
 
 class IdUrl(BaseModel):

@@ -4,10 +4,10 @@ import pytest
 
 from .tripletex_resources import (
     Country,
-    CountryResponse,
     TripletexAPI,
     TripletexTestConfig,
 )
+from .tripletex_resources.models.api_response_model import TripletexResponse
 
 
 @pytest.fixture
@@ -83,7 +83,7 @@ def test_list_countries(api):
     countries = api.countries.list(params={"count": 2})
 
     # Check that we got a list of countries
-    assert isinstance(countries, CountryResponse)
+    assert isinstance(countries, TripletexResponse)
     assert len(countries.values) > 0
 
     # Check that each country has the expected structure

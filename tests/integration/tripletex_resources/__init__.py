@@ -6,11 +6,8 @@ from .crud import TripletexCrud
 from .endpoints import TripletexCompany, TripletexCountries, TripletexSuppliers
 from .models import (
     Company,
-    CompanyResponse,
     Country,
-    CountryResponse,
     Supplier,
-    SupplierResponse,
     TokenSessionResponse,
 )
 
@@ -28,10 +25,7 @@ __all__ = [
     "TripletexSuppliers",
     # Models
     "Company",
-    "CompanyResponse",
     "Country",
-    "CountryResponse",
     "Supplier",
-    "SupplierResponse",
     "TokenSessionResponse",
 ]
