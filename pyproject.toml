@@ -18,7 +18,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 include = [
-    "crudclient/**/*.pyi",
     "crudclient/py.typed"
 ]
 
