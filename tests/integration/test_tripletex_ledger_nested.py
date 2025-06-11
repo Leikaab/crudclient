@@ -7,13 +7,13 @@ focusing on deeply nested resources like ledger and its sub-resources.
 
 import pytest
 
+from .tripletex_resources import TripletexAPI, TripletexTestConfig
 from .tripletex_resources.models import (
     Ledger,
     LedgerResponse,
     Voucher,
     VoucherResponse,
 )
-from .tripletex_resources.setup import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture

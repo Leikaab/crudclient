@@ -25,8 +25,28 @@ from .base import T
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "list_operation",
+    "create_operation",
+    "read_operation",
+    "update_operation",
+    "partial_update_operation",
+    "destroy_operation",
+    "custom_action_operation",
+    "_prepare_request_body_kwargs",
+    "list",
+    "create",
+    "read",
+    "update",
+    "partial_update",
+    "destroy",
+    "custom_action",
+]
 
-def list_operation(self: "Crud", parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> Union[JSONList, TypingList[T], ApiResponse]:
+
+def list_operation(
+    self: "Crud[T]", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
+) -> Union[JSONList, TypingList[T], ApiResponse]:
     """Retrieve a list of resources.
 
     The returned value depends on the configured response strategy. When an
@@ -68,7 +88,7 @@ def list_operation(self: "Crud", parent_id: Optional[str] = None, params: Option
 
 
 def create_operation(
-    self: "Crud", data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
+    self: "Crud[T]", data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[T, JSONDict]:
     """
     Create a new resource.
@@ -130,7 +150,7 @@ def create_operation(
         raise
 
 
-def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:
+def read_operation(self: "Crud[T]", resource_id: str, parent_id: Optional[str] = None) -> Union[T, JSONDict]:
     """
     Retrieve a specific resource.
 
@@ -166,7 +186,7 @@ def read_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = No
 
 
 def update_operation(
-    self: "Crud",
+    self: "Crud[T]",
     resource_id: Optional[str] = None,
     data: Optional[Union[JSONDict, T]] = None,
     parent_id: Optional[str] = None,
@@ -253,7 +273,7 @@ def update_operation(
 
 
 def partial_update_operation(
-    self: "Crud", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
+    self: "Crud[T]", resource_id: str, data: Union[JSONDict, T], parent_id: Optional[str] = None, params: Optional[JSONDict] = None
 ) -> Union[T, JSONDict]:
     """
     Partially update a specific resource.
@@ -317,7 +337,7 @@ def partial_update_operation(
         raise
 
 
-def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> None:
+def destroy_operation(self: "Crud[T]", resource_id: str, parent_id: Optional[str] = None, params: Optional[JSONDict] = None) -> None:
     """
     Delete a specific resource.
 
@@ -349,7 +369,7 @@ def destroy_operation(self: "Crud", resource_id: str, parent_id: Optional[str] =
 
 
 def _prepare_request_body_kwargs(
-    self: "Crud",
+    self: "Crud[T]",
     data: Optional[Union[JSONDict, T]],
     files: Optional[JSONDict],
     content_type: Optional[str],
@@ -418,7 +438,7 @@ def _prepare_request_body_kwargs(
 
 
 def custom_action_operation(
-    self: "Crud",
+    self: "Crud[T]",
     action: str,
     method: str = "post",
     resource_id: Optional[str] = None,
