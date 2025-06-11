@@ -50,8 +50,8 @@ def create_simple_mock_client(**kwargs: Any) -> SimpleMockClient:
             response_dict = {k: v for k, v in response_dict.items() if v is not None}
 
             # Ensure method and url_pattern are strings, providing defaults if None
-            method = pattern.get("method", "GET") or "GET"
-            url_pattern = pattern.get("path", r".*") or r".*"
+            method = str(pattern.get("method", "GET") or "GET")
+            url_pattern = str(pattern.get("path", r".*") or r".*")
             client.with_response_pattern(
                 method=method,
                 url_pattern=url_pattern,  # Use 'path' from MockClient pattern as 'url_pattern'

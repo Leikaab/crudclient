@@ -10,11 +10,14 @@ from crudclient.testing.auth import (
     OAuthMock,
 )
 from crudclient.testing.core.client import MockClient
-from crudclient.testing.response_builder.api_patterns import APIPatternBuilder
+from crudclient.testing.response_builder.api_patterns import (
+    APIPatternBuilder,
+    PatternDict,
+)
 from crudclient.testing.simple_mock import SimpleMockClient
 
 
-def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
+def _create_api_patterns(api_type: str, **kwargs: Any) -> List[PatternDict]:
     """
     Create API response patterns based on the specified API type and configuration.
 
@@ -27,7 +30,7 @@ def _create_api_patterns(api_type: str, **kwargs: Any) -> List[Dict[str, Any]]:
     Returns:
         A list of API pattern dictionaries that can be used to configure mock responses.
     """
-    patterns = []
+    patterns: List[PatternDict] = []
 
     if api_type.lower() == "rest":
         # Create patterns for REST resources
