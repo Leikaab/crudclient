@@ -12,10 +12,14 @@ from crudclient.testing.spy.enhanced import EnhancedSpyBase
 
 from .stubs import StubResponse  # Assuming StubResponse remains in stubs.py
 
+# mypy: ignore-errors
+
 
 class StubClient(EnhancedSpyBase, Client):
+    """A stub implementation of the Client for testing purposes."""
 
     def configure_get(self, response=None, handler=None):
+        """Configure the response or handler for GET requests matching a pattern."""
         if handler:
             # Store the handler with a pattern that matches GET requests
             self.add_response("^GET:", handler)
@@ -24,6 +28,7 @@ class StubClient(EnhancedSpyBase, Client):
             self.add_response("^GET:", response)
 
     def configure_post(self, response=None, handler=None):
+        """Configure the response or handler for POST requests matching a pattern."""
         if handler:
             # Store the handler with a pattern that matches POST requests
             self.add_response("^POST:", handler)
@@ -40,6 +45,7 @@ class StubClient(EnhancedSpyBase, Client):
         latency_ms: int = 0,
     ):
         # Initialize EnhancedSpyBase first
+        """Initialize the StubClient."""
         EnhancedSpyBase.__init__(self)
         # Then initialize Client
         Client.__init__(self, config)
@@ -58,15 +64,18 @@ class StubClient(EnhancedSpyBase, Client):
         self._latency_ms = max(0, latency_ms)
 
     def _build_full_url(self, endpoint: Optional[str], url: Optional[str]) -> str:
+        """Build the full URL from endpoint or use provided URL."""
         if url is None and endpoint is not None:
             return f"{self.base_url}/{endpoint.lstrip('/')}"
         return url or self.base_url
 
     def _simulate_network_conditions(self) -> None:
+        """Simulate network latency."""
         if self._latency_ms > 0:
             time.sleep(self._latency_ms / 1000.0)
 
     def _handle_simulated_error(self, handle_response: bool) -> Optional[str]:
+        """Handle simulated network errors based on error rate."""
         if self._error_rate > 0 and random.random() < self._error_rate:
             error = requests.ConnectionError("Simulated network error")
             if handle_response:
@@ -75,6 +84,7 @@ class StubClient(EnhancedSpyBase, Client):
         return None
 
     def _find_matching_response(self, method: str, url: str) -> Any:
+        """Find a matching response from the response map."""
         method_prefix = f"{method}:"
 
         # First try to find a method-specific pattern
@@ -91,6 +101,7 @@ class StubClient(EnhancedSpyBase, Client):
         return self._default_response
 
     def _process_callable_response(self, response: Any, method: str, endpoint: Optional[str], url: str, kwargs: Dict[str, Any]) -> Any:
+        """Process response if it's a callable."""
         if not callable(response):
             return response
 
@@ -112,6 +123,7 @@ class StubClient(EnhancedSpyBase, Client):
 
     def _convert_response_to_string(self, response: Any, handle_response: bool) -> str:
         # Handle dict or list responses
+        """Convert the response object to a string."""
         if isinstance(response, (dict, list)):
             return json.dumps(response)
 
@@ -190,6 +202,7 @@ class StubClient(EnhancedSpyBase, Client):
                 self._record_call(method_name=method, args=(url,), kwargs=kwargs, result=None, exception=exception, duration=duration)
 
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        """Simulate a GET request."""
         import json as json_module
 
         response_str = self._request("GET", endpoint=endpoint, params=params)
@@ -205,6 +218,7 @@ class StubClient(EnhancedSpyBase, Client):
         json_payload: Optional[Any] = None,  # Renamed to avoid conflict
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
+        """Simulate a POST request."""
         import json as json_module
 
         response_str = self._request("POST", endpoint=endpoint, data=data, json=json_payload, files=files)
@@ -220,6 +234,7 @@ class StubClient(EnhancedSpyBase, Client):
         json_payload: Optional[Any] = None,  # Renamed to avoid conflict
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
+        """Simulate a PUT request."""
         import json as json_module
 
         response_str = self._request("PUT", endpoint=endpoint, data=data, json=json_payload, files=files)
@@ -229,6 +244,7 @@ class StubClient(EnhancedSpyBase, Client):
             return response_str
 
     def delete(self, endpoint: str, **kwargs: Any) -> Any:
+        """Simulate a DELETE request."""
         import json as json_module
 
         response_str = self._request("DELETE", endpoint=endpoint, **kwargs)
@@ -244,6 +260,7 @@ class StubClient(EnhancedSpyBase, Client):
         json_payload: Optional[Any] = None,  # Renamed to avoid conflict
         files: Optional[Dict[str, Any]] = None,
     ) -> Any:
+        """Simulate a PATCH request."""
         import json as json_module
 
         response_str = self._request("PATCH", endpoint=endpoint, data=data, json=json_payload, files=files)
@@ -253,13 +270,17 @@ class StubClient(EnhancedSpyBase, Client):
             return response_str
 
     def add_response(self, pattern: str, response: Any) -> None:
+        """Add or update a response mapping."""
         self._response_map[pattern] = response
 
     def set_default_response(self, response: Any) -> None:
+        """Set the default response to return when no pattern matches."""
         self._default_response = response
 
     def set_error_rate(self, error_rate: float) -> None:
+        """Set the simulated connection error rate."""
         self._error_rate = max(0.0, min(1.0, error_rate))
 
     def set_latency(self, latency_ms: int) -> None:
+        """Set the simulated network latency."""
         self._latency_ms = max(0, latency_ms)

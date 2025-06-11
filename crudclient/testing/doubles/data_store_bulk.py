@@ -15,7 +15,7 @@ def bulk_create_items(
     items: List[Dict[str, Any]],
     skip_validation: bool = False,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
+    """Creates multiple items in the specified collection."""
     created_items = []
     items_to_create = []
 
@@ -69,7 +69,7 @@ def bulk_update_items(
     skip_validation: bool = False,
     check_version: bool = True,
 ) -> List[Optional[Dict[str, Any]]]:
-    # Docstring moved to .pyi
+    """Updates multiple items in the specified collection."""
     updated_items_results: List[Optional[Dict[str, Any]]] = []  # Added type annotation
     updates_to_perform = []  # Store tuples of (id, data_to_update)
 
@@ -148,7 +148,7 @@ def bulk_delete_items(
     soft_delete: bool = False,
     cascade: bool = False,
 ) -> int:
-    # Docstring moved to .pyi
+    """Deletes multiple items by ID."""
     deleted_count = 0
     items_to_delete = []
     collection_data = data_store.get_collection(collection)

@@ -4,13 +4,13 @@ from typing import Any, Dict, List
 
 
 def perform_soft_delete(item: Dict[str, Any], deleted_field: str = "_deleted", updated_at_field: str = "_updated_at") -> None:
-    # Docstring moved to .pyi
+    """Mark an item as deleted (soft delete)."""
     item[deleted_field] = True
     item[updated_at_field] = datetime.now().isoformat()
 
 
 def delete_items_by_indices(items: List[Dict[str, Any]], indices: List[int]) -> None:
-    # Docstring moved to .pyi
+    """Delete items from a list using their indices in reverse order."""
     for i in reversed(indices):
         del items[i]
 
@@ -23,7 +23,7 @@ def handle_one_to_one_cascade(
     deleted_field: str,
     updated_at_field: str,
 ) -> None:
-    # Docstring moved to .pyi
+    """Handle cascade delete for one-to-one relationships."""
     for i, target_item in enumerate(target_items):
         if target_item.get(relationship.target_key) == source_key_value:
             if soft_delete:
@@ -41,7 +41,7 @@ def handle_one_to_many_cascade(
     deleted_field: str,
     updated_at_field: str,
 ) -> None:
-    # Docstring moved to .pyi
+    """Handle cascade delete for one-to-many relationships."""
     indices_to_delete = []
 
     for i, target_item in enumerate(target_items):
@@ -63,7 +63,7 @@ def handle_many_to_many_junction(
     deleted_field: str,
     updated_at_field: str,
 ) -> List[Any]:
-    # Docstring moved to .pyi
+    """Handle junction table for many-to-many relationships and return target IDs."""
     junction_indices_to_delete = []
     target_ids = []
 
@@ -95,7 +95,7 @@ def handle_many_to_many_targets(
     deleted_field: str,
     updated_at_field: str,
 ) -> None:
-    # Docstring moved to .pyi
+    """Handle target items deletion for many-to-many relationships."""
     target_indices_to_delete = []
 
     for i, target_item in enumerate(target_items):

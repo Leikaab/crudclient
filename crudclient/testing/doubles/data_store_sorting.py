@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 
 def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], sort_desc: Union[bool, List[bool]]) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
+    """Sorts a list of dictionaries based on specified fields and directions."""
     if not data:
         return data
 
@@ -67,7 +67,7 @@ def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], so
     temp_data = data[:]  # Work on a copy
     for i in range(len(sort_by_list) - 1, -1, -1):
         # Create a key function for *only* the current level
-        def get_single_level_key(item: Dict[str, Any], level=i) -> Tuple[int, Any]:
+        def get_single_level_key(item: Dict[str, Any], level: int = i) -> Tuple[int, Any]:
             # Docstring moved to .pyi (inner function, technically not needed in stub)
             # This needs to access the outer scope's get_sort_key or replicate its logic for one level
             # Replicating part of get_sort_key logic for clarity and independence:
