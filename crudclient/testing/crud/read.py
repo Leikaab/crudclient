@@ -1,3 +1,5 @@
+"""Read operation mock for testing GET endpoints with rich query handling."""
+
 import copy
 import json
 import re
@@ -15,19 +17,24 @@ else:
 
 
 class ReadMock(BaseCrudMock):
-    _parent_id_handling: bool  # Declare type for parent_id_handling
-    request_history: List["RequestRecord"]  # Declare type for request_history
+    """Mock for read operations supporting filtering and pagination."""
 
-    def __init__(self):
+    _parent_id_handling: bool
+    request_history: List["RequestRecord"]  # type: ignore[assignment]
+
+    def __init__(self) -> None:
+        """Initialize the read mock with default data."""
         super().__init__()
         self.default_response = MockResponse(status_code=200, json_data={"id": 1, "name": "Default Read Resource"})
         self._stored_resources: List[Dict[str, Any]] = []  # List of resources for dynamic handling
 
     def set_stored_resources(self, resources: List[Dict[str, Any]]) -> "ReadMock":
+        """Provide a list of resources for dynamic querying."""
         self._stored_resources = copy.deepcopy(resources)
         return self
 
     def get(self, url: str, **kwargs: Any) -> Any:
+        """Handle a GET request and return the configured response."""
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop("parent_id", None)
         if parent_id and self._parent_id_handling:
@@ -213,10 +220,12 @@ class ReadMock(BaseCrudMock):
         return response_obj
 
     def with_single_resource(self, url_pattern: str, resource_data: Dict[str, Any], **kwargs: Any) -> "ReadMock":
+        """Return ``resource_data`` when ``url_pattern`` matches."""
         self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=200, json_data=resource_data), **kwargs)
         return self
 
     def with_resource_list(self, url_pattern: str, resources: List[Dict[str, Any]], **kwargs: Any) -> "ReadMock":
+        """Return ``resources`` list when ``url_pattern`` matches."""
         self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=200, text=json.dumps(resources)), **kwargs)
         return self
 

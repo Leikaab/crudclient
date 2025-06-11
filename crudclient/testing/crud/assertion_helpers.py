@@ -1,3 +1,5 @@
+"""Helper functions for asserting conditions on CRUD mock requests."""
+
 from typing import Any, Dict, List, Optional, Type
 
 from crudclient.testing.response_builder.response import (
@@ -9,6 +11,8 @@ from crudclient.testing.response_builder.response import (
 
 
 class Request:
+    """Represents a request made to a mock API."""
+
     url: str
     method: str
     params: Optional[Dict[str, Any]]
@@ -23,6 +27,7 @@ def check_request_payload(
     url_pattern: Optional[str],
     match_all: bool,
 ) -> None:
+    """Check that requests were made with a specific payload."""
     if not requests:
         raise AssertionError(f"No matching requests found. Filter: url_pattern={url_pattern}")
 
@@ -71,6 +76,7 @@ def check_query_parameters(
     url_pattern: str,
     method: Optional[str],
 ) -> None:
+    """Checks if at least one matching request contains the expected query parameters."""
     assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
 
     found_matching_request = False
@@ -116,6 +122,7 @@ def check_body_parameters(
     url_pattern: str,
     method: Optional[str],
 ) -> None:
+    """Checks if at least one matching request contains the expected body parameters."""
     assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
 
     found_matching_request = False
@@ -163,6 +170,7 @@ def check_response_handling(
     url_pattern: str,
     method: Optional[str],
 ) -> None:
+    """Check that responses had the expected status and data."""
     assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
 
     for i, request in enumerate(requests):
@@ -204,16 +212,16 @@ def check_error_handling(
     url_pattern: str,
     method: Optional[str],
 ) -> bool:
+    """Check that errors of the expected type were raised."""
     assert requests, f"No matching requests found for URL pattern: {url_pattern}, method: {method}"
 
     error_found_in_history = False
     for i, request in enumerate(requests):
         # Check if the response associated with the request has an error attribute
-        if hasattr(request.response, "error") and request.response.error:  # type: ignore[attr-defined]
+        if hasattr(request.response, "error") and request.response.error:
             error_found_in_history = True
-            assert isinstance(request.response.error, expected_error_type), (  # type: ignore[attr-defined]
-                f"Request {i} error type is {type(request.response.error)}, "  # type: ignore[attr-defined]
-                f"expected {expected_error_type}. URL: {request.url}"
+            assert isinstance(request.response.error, expected_error_type), (
+                f"Request {i} error type is {type(request.response.error)}, " f"expected {expected_error_type}. URL: {request.url}"
             )
 
             # Check status code if provided

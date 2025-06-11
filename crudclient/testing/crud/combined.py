@@ -1,47 +1,59 @@
+"""Combined mock implementation for all CRUD operations."""
+
 import re
 from typing import Any, Dict, List, Optional
 
 from .create import CreateMock
 from .delete import DeleteMock
 from .read import ReadMock
+from .request_record import RequestRecord
 from .update import UpdateMock
 
 
 class CombinedCrudMock:
-    def __init__(self):
+    """Unified interface exposing create, read, update and delete mocks."""
+
+    def __init__(self) -> None:
+        """Create individual mocks and initialise shared request history."""
         self.create_mock = CreateMock()
         self.read_mock = ReadMock()
         self.update_mock = UpdateMock()
         self.delete_mock = DeleteMock()
-        self.request_history = []
+        self.request_history: List[RequestRecord] = []
         self._parent_id_handling = True
 
     def get(self, url: str, **kwargs: Any) -> Any:
+        """Delegate GET requests to the ``ReadMock``."""
         result = self.read_mock.get(url, **kwargs)
-        self.request_history.extend(self.read_mock.request_history)  # type: ignore
+        self.request_history.extend(self.read_mock.request_history)
         return result
 
     def post(self, url: str, **kwargs: Any) -> Any:
+        """Delegate POST requests to the ``CreateMock``."""
         result = self.create_mock.post(url, **kwargs)
-        self.request_history.extend(self.create_mock.request_history)  # type: ignore
+        self.request_history.extend(self.create_mock.request_history)  # type: ignore[arg-type]
         return result
 
     def put(self, url: str, **kwargs: Any) -> Any:
+        """Delegate PUT requests to the ``UpdateMock``."""
         result = self.update_mock.put(url, **kwargs)
-        self.request_history.extend(self.update_mock.request_history)  # type: ignore
+        self.request_history.extend(self.update_mock.request_history)  # type: ignore[arg-type]
         return result
 
     def patch(self, url: str, **kwargs: Any) -> Any:
+        """Delegate PATCH requests to the ``UpdateMock``."""
         result = self.update_mock.patch(url, **kwargs)
-        self.request_history.extend(self.update_mock.request_history)  # type: ignore
+        self.request_history.extend(self.update_mock.request_history)  # type: ignore[arg-type]
         return result
 
     def delete(self, url: str, **kwargs: Any) -> Any:
+        """Delegate DELETE requests to the ``DeleteMock``."""
         result = self.delete_mock.delete(url, **kwargs)
-        self.request_history.extend(self.delete_mock.request_history)  # type: ignore
+        self.request_history.extend(self.delete_mock.request_history)  # type: ignore[arg-type]
         return result
 
     def with_parent_id_handling(self, enabled: bool = True) -> "CombinedCrudMock":
+        """Enable or disable ``parent_id`` handling for all mocks."""
         self._parent_id_handling = enabled
         self.create_mock.with_parent_id_handling(enabled)
         self.read_mock.with_parent_id_handling(enabled)
@@ -50,6 +62,7 @@ class CombinedCrudMock:
         return self
 
     def verify_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
+        """Assert that a certain number of requests were made."""
         matching_requests = self.request_history
         if url_pattern:
             pattern = re.compile(url_pattern)
@@ -59,6 +72,7 @@ class CombinedCrudMock:
         assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
     def verify_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
+        """Assert that requests were made in a specific order."""
         if not sequence:
             return
 
@@ -90,6 +104,7 @@ class CombinedCrudMock:
             raise AssertionError(f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests.")
 
     def verify_crud_operation_sequence(self, operations: List[str], resource_id: Optional[str] = None, url_pattern: Optional[str] = None) -> None:
+        """Assert that CRUD operations were performed in the given order."""
         # Map operation names to HTTP methods
         method_map = {"create": "POST", "read": "GET", "update": "PUT", "partial_update": "PATCH", "delete": "DELETE"}
 

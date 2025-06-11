@@ -42,14 +42,14 @@ class UpdateMock(BaseCrudMock):
     def _handle_request(self, method: str, url: str, **kwargs: Any) -> Any:
         # Process parent_id if present
         parent_id = kwargs.pop("parent_id", None)
-        if parent_id and self._parent_id_handling:  # type: ignore[attr-defined]
+        if parent_id and self._parent_id_handling:
             url = self._process_parent_id(url, parent_id)
 
         # Record the request
         record = RequestRecord(
             method=method, url=url, params=kwargs.get("params"), data=kwargs.get("data"), json=kwargs.get("json"), headers=kwargs.get("headers")
         )
-        self.request_history.append(record)  # type: ignore[attr-defined]
+        self.request_history.append(record)  # type: ignore[arg-type]
 
         # Find a matching pattern
         pattern = self._find_matching_pattern(method, url, **kwargs)
@@ -202,7 +202,7 @@ class UpdateMock(BaseCrudMock):
         self.with_response(url_pattern=url_pattern, response=conditional_response, **kwargs)
         return self
 
-    def with_not_found(self, url_pattern: str, **kwargs: Any) -> "UpdateMock":
+    def with_not_found(self, url_pattern: str, **kwargs: Any) -> "UpdateMock":  # type: ignore[override]
         """
         Configures the mock to raise a NotFoundError (simulating a 404 response)
         for PUT/PATCH requests matching the URL pattern.
