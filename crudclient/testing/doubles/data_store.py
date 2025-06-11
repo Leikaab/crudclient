@@ -19,8 +19,10 @@ from .data_store_relationships import RelationshipType  # Updated import locatio
 
 
 class DataStore:
+    """An in-memory data store simulating a relational database backend."""
 
     def __init__(self) -> None:  # Added return type annotation
+        """Initializes an empty DataStore."""
         self.collections: Dict[str, List[Dict[str, Any]]] = {}
         self.relationships: List[Relationship] = []
         self.validation_rules: List[ValidationRule] = []
@@ -33,12 +35,14 @@ class DataStore:
         self.track_timestamps = True
 
     def get_collection(self, name: str) -> List[Dict[str, Any]]:
+        """Retrieves a collection by name, creating it if it doesn't exist."""
         if name not in self.collections:
             self.collections[name] = []
 
         return self.collections[name]
 
     def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "DataStore":
+        """Defines a relationship between two collections, simulating foreign keys."""
         relationship = Relationship(
             source_collection=source_collection, target_collection=target_collection, relationship_type=relationship_type, **kwargs
         )
@@ -53,6 +57,7 @@ class DataStore:
     def add_validation_rule(
         self, field: str, validator_func: Callable[[Any], bool], error_message: str, collection: Optional[str] = None
     ) -> "DataStore":
+        """Adds a custom validation rule for a specific field within a collection."""
         rule = ValidationRule(field=field, validator_func=validator_func, error_message=error_message, collection=collection)
         self.validation_rules.append(rule)
         return self
@@ -60,6 +65,7 @@ class DataStore:
     def add_unique_constraint(
         self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
     ) -> "DataStore":
+        """Adds a unique constraint across one or more fields within a collection."""
         constraint = UniqueConstraint(fields=fields, error_message=error_message, collection=collection)
         self.unique_constraints.append(constraint)
 
@@ -76,6 +82,7 @@ class DataStore:
         return self
 
     def set_timestamp_tracking(self, enabled: bool) -> "DataStore":
+        """Enables or disables automatic timestamp tracking for item creation and updates."""
         self.track_timestamps = enabled
         return self
 
@@ -93,7 +100,7 @@ class DataStore:
         include_related: Optional[List[str]] = None,
         fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        # Docstring moved to .pyi
+        """Lists items from a collection with filtering, sorting, and pagination."""
         return list_items(
             data_store=self,
             collection=collection,
@@ -115,7 +122,7 @@ class DataStore:
         include_related: Optional[List[str]] = None,
         fields: Optional[List[str]] = None,
     ) -> Optional[Dict[str, Any]]:
-        # Docstring moved to .pyi
+        """Retrieves a single item from a collection by its primary identifier ('id')."""
         return get_item(
             data_store=self,
             collection=collection,
@@ -128,6 +135,7 @@ class DataStore:
     def create(self, collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
         # Docstring moved to .pyi
         # Note: create_item handles validation internally based on skip_validation
+        """Creates a new item in the specified collection."""
         return create_item(
             data_store=self,
             collection=collection,
@@ -140,6 +148,7 @@ class DataStore:
     ) -> Optional[Dict[str, Any]]:
         # Docstring moved to .pyi
         # Note: update_item handles validation internally based on skip_validation
+        """Updates an existing item in a collection identified by its ID."""
         return update_item(
             data_store=self,
             collection=collection,
@@ -150,7 +159,7 @@ class DataStore:
         )
 
     def delete(self, collection: str, id: Any, soft_delete: bool = False, cascade: bool = False) -> bool:
-        # Docstring moved to .pyi
+        """Deletes an item from a collection by its ID."""
         return delete_item(
             data_store=self,
             collection=collection,
@@ -167,7 +176,7 @@ class DataStore:
         items: List[Dict[str, Any]],
         skip_validation: bool = False,
     ) -> List[Dict[str, Any]]:
-        # Docstring moved to .pyi
+        """Creates multiple items in the specified collection efficiently."""
         return bulk_create_items(
             data_store=self,
             collection=collection,
@@ -182,7 +191,7 @@ class DataStore:
         skip_validation: bool = False,
         check_version: bool = True,
     ) -> List[Optional[Dict[str, Any]]]:
-        # Docstring moved to .pyi
+        """Updates multiple items in the specified collection efficiently."""
         return bulk_update_items(
             data_store=self,
             collection=collection,
@@ -198,7 +207,7 @@ class DataStore:
         soft_delete: bool = False,
         cascade: bool = False,
     ) -> int:
-        # Docstring moved to .pyi
+        """Deletes multiple items from a collection identified by their IDs."""
         return bulk_delete_items(
             data_store=self,
             collection=collection,

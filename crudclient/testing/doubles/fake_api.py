@@ -12,14 +12,17 @@ from .data_store import DataStore
 
 
 class FakeCrud:
+    """Internal helper simulating a single CRUD endpoint's operations for `FakeAPI`."""
 
     def __init__(self, database: DataStore, collection: str, model: Optional[Type[Any]] = None):
+        """Initialize a FakeCrud instance (typically called by `FakeAPI.register_endpoint`)."""
         self.database = database
         self.collection = collection
         self.model = model
 
     def list(self, **kwargs: Any) -> Any:
         # Extract pagination, sorting, and filtering parameters
+        """Simulates listing items, delegating to `DataStore.list`."""
         filters = kwargs.pop("filters", {})
         sort_by = kwargs.pop("sort_by", None)
         sort_desc = kwargs.pop("sort_desc", False)
@@ -54,6 +57,7 @@ class FakeCrud:
         return data
 
     def get(self, id: Any, **kwargs: Any) -> Any:
+        """Simulates retrieving a single item by ID, delegating to `DataStore.get`."""
         include_deleted = kwargs.pop("include_deleted", False)
         include_related = kwargs.pop("include_related", None)
         fields = kwargs.pop("fields", None)
@@ -77,6 +81,7 @@ class FakeCrud:
         return data
 
     def create(self, data: Any, **kwargs: Any) -> Any:
+        """Simulates creating an item, delegating to `DataStore.create`."""
         skip_validation = kwargs.pop("skip_validation", False)
 
         # Convert model instance to dict if needed
@@ -98,6 +103,7 @@ class FakeCrud:
         return created_data
 
     def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
+        """Simulates updating an item by ID, delegating to `DataStore.update`."""
         skip_validation = kwargs.pop("skip_validation", False)
         check_version = kwargs.pop("check_version", True)
 
@@ -128,12 +134,14 @@ class FakeCrud:
         return updated_data
 
     def delete(self, id: Any, **kwargs: Any) -> bool:
+        """Simulates deleting an item by ID, delegating directly to `DataStore.delete`."""
         soft_delete = kwargs.pop("soft_delete", False)
         cascade = kwargs.pop("cascade", False)
 
         return self.database.delete(self.collection, id, soft_delete=soft_delete, cascade=cascade)
 
     def bulk_create(self, data: List[Any], **kwargs: Any) -> List[Any]:
+        """Simulates creating multiple items, delegating to `DataStore.bulk_create`."""
         skip_validation = kwargs.pop("skip_validation", False)
 
         # Convert model instances to dicts if needed
@@ -162,6 +170,7 @@ class FakeCrud:
         return created_data
 
     def bulk_update(self, data: List[Any], **kwargs: Any) -> List[Any]:
+        """Simulates updating multiple items, delegating to `DataStore.bulk_update`."""
         skip_validation = kwargs.pop("skip_validation", False)
         check_version = kwargs.pop("check_version", True)
 
@@ -192,6 +201,7 @@ class FakeCrud:
         return updated_data
 
     def bulk_delete(self, ids: List[Any], **kwargs: Any) -> int:
+        """Simulates deleting multiple items by ID, delegating to `DataStore.bulk_delete`."""
         soft_delete = kwargs.pop("soft_delete", False)
         cascade = kwargs.pop("cascade", False)
 
@@ -199,9 +209,12 @@ class FakeCrud:
 
 
 class FakeAPI(API):
+    """A test double (fake) implementation of `crudclient.api.API` for testing."""
+
     client_class = Client
 
     def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
+        """Initialize a FakeAPI instance."""
         if client_config is None:
             client_config = ClientConfig(hostname="https://api.example.com")
         super().__init__(client, client_config, **kwargs)
@@ -209,36 +222,42 @@ class FakeAPI(API):
         self.endpoints: Dict[str, FakeCrud] = {}
 
     def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> FakeCrud:
+        """Registers a simulated CRUD endpoint, making it accessible as an attribute."""
         crud = FakeCrud(self.database, name, model)
         self.endpoints[name] = crud
         setattr(self, name, crud)
         return crud
 
     def define_relationship(self, source_collection: str, target_collection: str, relationship_type: str, **kwargs: Any) -> "FakeAPI":
+        """Convenience method to define a relationship in the underlying DataStore."""
         self.database.define_relationship(
             source_collection=source_collection, target_collection=target_collection, relationship_type=relationship_type, **kwargs
         )
         return self
 
     def add_validation_rule(self, field: str, validator_func: Any, error_message: str, collection: Optional[str] = None) -> "FakeAPI":
+        """Convenience method to add a validation rule to the underlying DataStore."""
         self.database.add_validation_rule(field=field, validator_func=validator_func, error_message=error_message, collection=collection)
         return self
 
     def add_unique_constraint(
         self, fields: Union[str, List[str]], error_message: Optional[str] = None, collection: Optional[str] = None
     ) -> "FakeAPI":
+        """Convenience method to add a unique constraint to the underlying DataStore."""
         self.database.add_unique_constraint(fields=fields, error_message=error_message, collection=collection)
         return self
 
     def set_timestamp_tracking(self, enabled: bool) -> "FakeAPI":
+        """Convenience method to configure timestamp tracking in the underlying DataStore."""
         self.database.set_timestamp_tracking(enabled)
         return self
 
     def __getattr__(self, name: str) -> Any:
+        """Provides access to registered endpoints via attribute lookup."""
         if name in self.endpoints:
             return self.endpoints[name]
 
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def _register_endpoints(self) -> None:
-        pass
+        """Register default endpoints. This is a no-op in FakeAPI."""
