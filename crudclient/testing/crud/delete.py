@@ -1,7 +1,9 @@
+"""Mock implementation for DELETE operations used in tests."""
+
 import copy
 import json
 import re
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 from crudclient.exceptions import CrudClientError
 from crudclient.testing.response_builder.response import MockResponse
@@ -11,19 +13,23 @@ from .request_record import RequestRecord
 
 
 class DeleteMock(BaseCrudMock):
-    def __init__(self):
+    """Mock implementation for DELETE operations in CRUD APIs."""
+
+    def __init__(self) -> None:
+        """Initialize the delete mock with default settings."""
         super().__init__()
-        self.default_response = MockResponse(status_code=204, json_data=None)
-        self._stored_resources = {}  # id -> resource dict
-        self._dependencies = {}  # id -> list of dependent resource IDs
-        self._soft_deleted_resources = {}  # id -> resource dict (for soft deletes)
-        self._cascade_enabled = False  # Whether cascading deletes are enabled
-        self._soft_delete_enabled = False  # Whether soft deletes are enabled
+        self.default_response: MockResponse = MockResponse(status_code=204, json_data=None)
+        self._stored_resources: Dict[str, Dict[str, Any]] = {}
+        self._dependencies: Dict[str, List[str]] = {}
+        self._soft_deleted_resources: Dict[str, Dict[str, Any]] = {}
+        self._cascade_enabled: bool = False
+        self._soft_delete_enabled: bool = False
 
     def delete(self, url: str, **kwargs: Any) -> Any:
+        """Handle a DELETE request to the mock API."""
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop("parent_id", None)
-        if parent_id and self._parent_id_handling:  # type: ignore
+        if parent_id and self._parent_id_handling:
             url = self._process_parent_id(url, parent_id)
 
         # Record the request
@@ -75,10 +81,12 @@ class DeleteMock(BaseCrudMock):
         return self.default_response.text
 
     def with_success(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
+        """Configure a successful deletion response."""
         self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=204, json_data=None), **kwargs)
         return self
 
     def with_resource_in_use_error(self, url_pattern: str, **kwargs: Any) -> "DeleteMock":
+        """Simulate a 409 resource-in-use error."""
         # Create a mock response for resource in use error
         mock_response = MockResponse(status_code=409, json_data={"error": "Resource is in use and cannot be deleted"})
 
@@ -100,11 +108,13 @@ class DeleteMock(BaseCrudMock):
         return self
 
     def with_stored_resource(self, resource_id: Union[str, int], resource: Dict[str, Any]) -> "DeleteMock":
+        """Add ``resource`` to the internal store under ``resource_id``."""
         str_id = str(resource_id)
         self._stored_resources[str_id] = copy.deepcopy(resource)
         return self
 
     def with_dependency(self, resource_id: Union[str, int], dependent_id: Union[str, int]) -> "DeleteMock":
+        """Declare that ``dependent_id`` depends on ``resource_id``."""
         str_id = str(resource_id)
         if str_id not in self._dependencies:
             self._dependencies[str_id] = []
@@ -113,6 +123,7 @@ class DeleteMock(BaseCrudMock):
         return self
 
     def with_cascading_delete(self, enabled: bool = True) -> "DeleteMock":
+        """Enable or disable cascading deletes."""
         self._cascade_enabled = enabled
 
         # Override the delete method to handle cascading deletes
@@ -151,11 +162,12 @@ class DeleteMock(BaseCrudMock):
             return original_delete(url, **kwargs)
 
         # Replace the delete method with our wrapper
-        self.delete = delete_with_cascading
+        self.delete = delete_with_cascading  # type: ignore[method-assign]
 
         return self
 
     def with_soft_delete(self, enabled: bool = True) -> "DeleteMock":
+        """Enable or disable soft delete behaviour."""
         self._soft_delete_enabled = enabled
 
         # Override the delete method to handle soft deletes
@@ -181,11 +193,12 @@ class DeleteMock(BaseCrudMock):
             return original_delete(url, **kwargs)
 
         # Replace the delete method with our wrapper
-        self.delete = delete_with_soft_delete
+        self.delete = delete_with_soft_delete  # type: ignore[method-assign]
 
         return self
 
     def with_referential_integrity_check(self, url_pattern: str) -> "DeleteMock":
+        """Fail deletions that violate referential integrity."""
         # Create a CrudClientError with a specific message
         error = CrudClientError("Referential integrity violation: Cannot delete resource with dependencies")
 
@@ -234,11 +247,12 @@ class DeleteMock(BaseCrudMock):
             return original_delete(url, **kwargs)
 
         # Replace the delete method with our wrapper
-        self.delete = delete_with_integrity_check
+        self.delete = delete_with_integrity_check  # type: ignore[method-assign]
 
         return self
 
     def verify_resource_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
+        """Assert that ``resource_id`` has been deleted."""
         str_id = str(resource_id)
 
         # Check that the resource is not in stored resources
@@ -249,6 +263,7 @@ class DeleteMock(BaseCrudMock):
             assert str_id in self._soft_deleted_resources, f"Resource {str_id} was not soft deleted"
 
     def verify_dependencies_deleted(self, resource_id: Union[str, int], soft_delete: bool = False) -> None:
+        """Assert that all dependencies of ``resource_id`` were deleted."""
         str_id = str(resource_id)
 
         # Check that the resource has dependencies

@@ -1,9 +1,11 @@
+"""Exception classes for CRUD mock operations."""
+
 from crudclient.exceptions import CrudClientError
 
 
 class ConcurrencyError(CrudClientError):
-    pass
+    """Raised when a concurrency conflict is detected."""
 
 
 class ValidationFailedError(CrudClientError):
-    pass
+    """Raised when validation of input data fails."""

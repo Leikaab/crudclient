@@ -1,3 +1,5 @@
+"""CRUD mock components for testing."""
+
 from .base import BaseCrudMock
 from .combined import CombinedCrudMock
 from .create import CreateMock
