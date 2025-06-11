@@ -1,3 +1,10 @@
+"""Mock HTTP client implementation.
+
+This module provides a mock implementation of the ``crudclient.http.Client``
+class that can be used in tests to simulate HTTP requests and responses without
+making actual network calls.
+"""
+
 import json
 import re
 import time  # Added
@@ -31,8 +38,21 @@ from ..types import (
 
 # Inherit from EnhancedSpyBase to add spying capabilities
 class MockHTTPClient(EnhancedSpyBase):
+    """Mock implementation of the crudclient.http.Client class.
+
+    This class simulates HTTP requests and responses without making actual
+    network calls. It allows configuring expected requests and their responses
+    for testing purposes, including exact path matches and regex pattern
+    matching. It also supports simulating basic network conditions like latency.
+    """
 
     def __init__(self, base_url: str = "https://api.example.com") -> None:
+        """Initialize a new MockHTTPClient.
+
+        Args:
+            base_url: The base URL for the mock client.
+        """
+
         # Initialize SpyBase first
         EnhancedSpyBase.__init__(self)
 
@@ -45,6 +65,8 @@ class MockHTTPClient(EnhancedSpyBase):
         self._latency_ms: float = 0.0
 
     def reset(self) -> None:
+        """Reset the mock HTTP client to its initial state, clearing all configurations."""
+
         # Reset spy calls along with mock configuration
         EnhancedSpyBase.reset(self)
         self._configured_responses = {}
@@ -60,6 +82,20 @@ class MockHTTPClient(EnhancedSpyBase):
         headers: Optional[Headers] = None,
         error: Optional[Exception] = None,
     ) -> None:
+        """Configure a response for a specific request with an exact path match.
+
+        This configuration takes precedence over patterns defined with
+        :meth:`with_response_pattern`.
+
+        Args:
+            method: The HTTP method of the request (e.g., 'GET', 'POST').
+            path: The exact path of the request (e.g., '/users/1').
+            status_code: The HTTP status code to return (default: 200).
+            data: The data to return in the response body (default: None).
+            headers: The headers to return in the response (default: None).
+            error: An exception to raise instead of returning a response (default: None).
+        """
+
         # Normalize the method to uppercase
         method = method.upper()
 
@@ -78,6 +114,21 @@ class MockHTTPClient(EnhancedSpyBase):
         headers: Optional[Headers] = None,
         error: Optional[Exception] = None,
     ) -> None:
+        """Configure a response for requests matching a path pattern (regex).
+
+        Patterns are checked in reverse order of addition (LIFO). The first
+        matching pattern for the given method and path will be used. Exact
+        matches configured with :meth:`configure_response` take precedence.
+
+        Args:
+            method: The HTTP method of the request (e.g., 'GET', 'POST').
+            path_pattern: A regex string or compiled pattern to match against the request path.
+            status_code: The HTTP status code to return (default: 200).
+            data: The data to return in the response body (default: None).
+            headers: The headers to return in the response (default: None).
+            error: An exception to raise instead of returning a response (default: None).
+        """
+
         # Normalize the method to uppercase
         method = method.upper()
 
@@ -99,12 +150,38 @@ class MockHTTPClient(EnhancedSpyBase):
         latency_ms: float = 0.0,
         # Future: packet_loss_rate: float = 0.0
     ) -> None:
+        """Configure simulated network conditions for the mock client.
+
+        Delegates to the underlying HTTP client's network condition configuration.
+        Currently supports simulating latency.
+
+        Args:
+            latency_ms: The delay in milliseconds to add before processing each request (default: 0.0).
+
+        Raises:
+            ValueError: If latency_ms is negative.
+        """
+
         if latency_ms < 0:
             raise ValueError("Latency cannot be negative.")
         self._latency_ms = latency_ms
         # self._packet_loss_rate = packet_loss_rate
 
     def _get_configured_response(self, method: HttpMethod, path: str) -> Tuple[StatusCode, ResponseBody, Headers, Optional[Exception]]:
+        """Find a configured response, checking exact matches first, then patterns (LIFO).
+
+        Args:
+            method: The HTTP method of the request.
+            path: The path of the request.
+
+        Returns:
+            A tuple of ``(status_code, response_body, headers, error)``.
+
+        Raises:
+            RequestNotConfiguredError: If no response is configured for the request
+                (neither exact match nor pattern match).
+        """
+
         # Normalize the method to uppercase
         method = method.upper()
 
@@ -133,6 +210,25 @@ class MockHTTPClient(EnhancedSpyBase):
         data: Optional[RequestBody] = None,
         **kwargs: Any,
     ) -> Response:
+        """Make a mock HTTP request, applying configured responses and network conditions.
+
+        Args:
+            method: The HTTP method of the request.
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            data: Optional body for the request.
+            **kwargs: Additional keyword arguments (ignored by mock, but captured).
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+
+        Raises:
+            RequestNotConfiguredError: If no response is configured for the request.
+            Exception: If an error is configured for the request.
+            ValueError: If network conditions are invalid (e.g., negative latency).
+        """
+
         start_request_time = time.time()
         response: Optional[Response] = None
         recorded_exception: Optional[Exception] = None
@@ -195,22 +291,85 @@ class MockHTTPClient(EnhancedSpyBase):
     # Convenience methods for common HTTP methods
 
     def get(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Response:
+        """Make a mock GET request.
+
+        Args:
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+        """
+
         return self.request(method="GET", path=path, headers=headers, params=params, **kwargs)
 
     def post(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
+        """Make a mock POST request.
+
+        Args:
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            data: Optional body for the request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+        """
+
         return self.request(method="POST", path=path, headers=headers, params=params, data=data, **kwargs)
 
     def put(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
+        """Make a mock PUT request.
+
+        Args:
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            data: Optional body for the request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+        """
+
         return self.request(method="PUT", path=path, headers=headers, params=params, data=data, **kwargs)
 
     def delete(self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, **kwargs: Any) -> Response:
+        """Make a mock DELETE request.
+
+        Args:
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+        """
+
         return self.request(method="DELETE", path=path, headers=headers, params=params, **kwargs)
 
     def patch(
         self, path: str, headers: Optional[Headers] = None, params: Optional[QueryParams] = None, data: Optional[RequestBody] = None, **kwargs: Any
     ) -> Response:
+        """Make a mock PATCH request.
+
+        Args:
+            path: The path of the request.
+            headers: Optional headers for the request.
+            params: Optional query parameters for the request.
+            data: Optional body for the request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A :class:`requests.Response` object with the configured response.
+        """
+
         return self.request(method="PATCH", path=path, headers=headers, params=params, data=data, **kwargs)
