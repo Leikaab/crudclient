@@ -2,6 +2,8 @@
 
 This package provides a comprehensive suite of tools for testing applications that utilize the `crudclient` library. It offers various utilities for mocking client behavior, verifying interactions, and simulating different API scenarios.
 
+All utilities now provide inline type hints directly in the source files, and the previous `.pyi` stub files have been removed.
+
 ## Overview
 
 The `crudclient.testing` module aims to facilitate robust testing by providing:

@@ -2,6 +2,8 @@
 
 This document summarizes the key software design patterns employed within the `crudclient.testing` module to facilitate robust and maintainable testing of the `crudclient` library.
 
+The testing utilities now contain inline type hints in the implementation files, eliminating the need for separate `.pyi` stubs.
+
 ## 1. Factory Pattern
 
 *   **What:** Provides an interface for creating objects, allowing subclasses or factory implementations to determine the exact type of object created.
