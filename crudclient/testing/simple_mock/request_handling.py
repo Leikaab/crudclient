@@ -286,7 +286,6 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
             text = text.decode()
         return text or ""
 
-
     def get(self, url: str, **kwargs: Any) -> str:
         """Perform a GET request.
 

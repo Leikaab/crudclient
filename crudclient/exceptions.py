@@ -7,6 +7,8 @@ ApiConfig accepts requests.Request/Response objects natively.
 
 from typing import Any, Optional
 
+from pydantic import ValidationError as PydanticValidationError
+
 # Import all apiconfig exceptions directly
 from apiconfig.exceptions import APIConfigError as CrudClientError
 from apiconfig.exceptions import (
@@ -31,7 +33,6 @@ from apiconfig.exceptions.http import (
 from apiconfig.exceptions.http import (
     create_api_client_error,
 )
-from pydantic import ValidationError as PydanticValidationError
 
 # CrudClient-specific exceptions that apiconfig doesn't provide
 
