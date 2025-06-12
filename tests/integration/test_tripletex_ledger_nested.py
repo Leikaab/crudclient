@@ -139,7 +139,7 @@ def test_read_voucher(api):
     # Get the list of vouchers with required date parameters
 
     # Set date range for the last 30 days
-    date_from, date_to = get_dates()
+    date_from, _ = get_dates()
 
     # Use params dictionary for query parameters
     params = {"dateFrom": date_from, "dateTo": "2025-05-05", "count": 2}  # Limit to just 2 items
