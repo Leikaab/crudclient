@@ -280,7 +280,10 @@ class SimpleMockClientRequestHandling(SimpleMockClientCore):
         """
         if response.json_data is not None:
             return json.dumps(response.json_data)
-        return response.text or ""
+        text = response.text or ""
+        if isinstance(text, (bytes, bytearray)):
+            return text.decode()
+        return text
 
     def get(self, url: str, **kwargs: Any) -> str:
         """Perform a GET request.

@@ -133,7 +133,6 @@ class DataStore:
         )
 
     def create(self, collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
-        # Docstring moved to .pyi
         # Note: create_item handles validation internally based on skip_validation
         """Creates a new item in the specified collection."""
         return create_item(
@@ -146,7 +145,6 @@ class DataStore:
     def update(
         self, collection: str, id: Any, data: Dict[str, Any], skip_validation: bool = False, check_version: bool = True
     ) -> Optional[Dict[str, Any]]:
-        # Docstring moved to .pyi
         # Note: update_item handles validation internally based on skip_validation
         """Updates an existing item in a collection identified by its ID."""
         return update_item(
