@@ -186,7 +186,7 @@ def check_response_handling(
             if not isinstance(response_json, dict):
                 raise AssertionError(
                     f"Request {i} response body is not a JSON object (or is empty), "
-                    f"but expected data was provided. URL: {request.url}. Body: {(request.response.text or '')[:100]}"  # Show snippet
+                    f"but expected data was provided. URL: {request.url}. Body: {(request.response.text.decode() if isinstance(request.response.text, bytes) else request.response.text or '')[:100]}"  # Show snippet
                 )
             # Add assertion to help type checker confirm response_json is not None here
             assert response_json is not None
