@@ -25,7 +25,6 @@ class StubAPI(API):
         self._data_store: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
     def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> StubCrud:
-        # Docstring moved to .pyi
         # Initialize data store for this endpoint if it doesn't exist
         """Register a new stubbed CRUD endpoint associated with this API instance."""
         if name not in self._data_store:

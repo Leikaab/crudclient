@@ -5,8 +5,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 
 class ValidationException(Exception):
-    # Docstring moved to .pyi
-
     """Exception raised for data validation errors."""
 
     def __init__(self, message: str, errors: Optional[Dict[str, List[str]]] = None):
@@ -16,8 +14,6 @@ class ValidationException(Exception):
 
 # Moved from data_store.py
 class Relationship:
-    # Docstring moved to .pyi
-
     """Defines a relationship between two collections in the DataStore."""
 
     def __init__(
@@ -53,8 +49,6 @@ class Relationship:
 
 # Moved from data_store.py
 class ValidationRule:
-    # Docstring moved to .pyi
-
     """Defines a validation rule for a specific field in a collection."""
 
     def __init__(
@@ -77,8 +71,6 @@ class ValidationRule:
 
 # Moved from data_store.py
 class UniqueConstraint:
-    # Docstring moved to .pyi
-
     """Defines a unique constraint across one or more fields in a collection."""
 
     def __init__(
