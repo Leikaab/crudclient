@@ -184,9 +184,13 @@ def check_response_handling(
             response_json = request.response.json()  # Use the public json() method
             # Ensure response_json is a dict if expected_data is provided
             if not isinstance(response_json, dict):
+                body_snippet = request.response.text or b""
+                if isinstance(body_snippet, (bytes, bytearray)):
+                    body_snippet = body_snippet.decode()
                 raise AssertionError(
                     f"Request {i} response body is not a JSON object (or is empty), "
                     f"but expected data was provided. URL: {request.url}. Body: {(request.response.text.decode() if isinstance(request.response.text, bytes) else request.response.text or '')[:100]}"  # Show snippet
+
                 )
             # Add assertion to help type checker confirm response_json is not None here
             assert response_json is not None

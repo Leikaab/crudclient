@@ -101,7 +101,6 @@ def _get_related_one_to_one(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if is_forward_relation:
         target_collection_name = related_name
         source_key = relationship.source_key
@@ -128,7 +127,6 @@ def _get_related_one_to_many(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if is_forward_relation:  # one(item)-to-many(related_name)
         target_collection_name = related_name
         source_key = relationship.source_key
@@ -155,7 +153,6 @@ def _get_related_many_to_many(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if not relationship.junction_collection or relationship.junction_collection not in collections:
         return []
 
@@ -202,7 +199,6 @@ def cascade_delete(
     deleted_field: str = "_deleted",
     updated_at_field: str = "_updated_at",
 ) -> None:
-    # Docstring moved to .pyi
     # Find relationships where this collection is the source
     """Performs cascading deletes based on relationship definitions."""
     for relationship in relationships:
