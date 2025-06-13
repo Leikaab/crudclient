@@ -3,8 +3,8 @@ Tests for general authentication setup failure handling in the crudclient librar
 """
 
 import pytest
-
 from apiconfig.exceptions.auth import AuthStrategyError
+
 from crudclient.auth import CustomAuth
 from crudclient.client import Client
 
