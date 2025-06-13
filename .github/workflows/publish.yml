@@ -36,40 +36,25 @@ jobs:
         id: versioning
         run: |
           BASE_VERSION=$(poetry version -s)
-          # Count commits since the last tag. If no tags, count all commits.
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$LAST_TAG" ]; then
-            COMMIT_COUNT=$(git rev-list --count HEAD)
-          else
-            COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
-          fi
-          # Ensure commit count is not 0 if on the tag commit itself
-          if [ "$COMMIT_COUNT" -eq 0 ]; then
-             # If the current commit IS the tag, check if it's the initial commit
-             if [ "$(git rev-list --count HEAD)" -eq 1 ]; then
-               COMMIT_COUNT=0 # Or 1, depending on desired initial dev version (e.g., .dev0 or .dev1)
-             else
-               # Re-calculate count from the commit *before* the tag
-               PREVIOUS_COMMIT_TO_TAG=$(git rev-list -n 1 ${LAST_TAG}^)
-               COMMIT_COUNT=$(git rev-list ${PREVIOUS_COMMIT_TO_TAG}..HEAD --count)
-             fi
-          fi
 
           # Parse version and increment patch level for pre-releases
-          # This ensures prereleases are considered newer than the last stable release
           IFS='.' read -ra VERSION_PARTS <<< "$BASE_VERSION"
           MAJOR="${VERSION_PARTS[0]}"
           MINOR="${VERSION_PARTS[1]}"
           PATCH="${VERSION_PARTS[2]}"
 
-          # Increment patch version
+          # Increment patch version for prereleases
           NEXT_PATCH=$((PATCH + 1))
 
-          # Create pre-release version with incremented patch
-          PRE_RELEASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.dev${COMMIT_COUNT}"
+          # Use timestamp-based sequential numbering to ensure monotonic increment
+          # Format: YYYYMMDDHHMM (12 digits, always increasing)
+          TIMESTAMP=$(date -u +%Y%m%d%H%M)
+
+          # Create pre-release version with timestamp
+          PRE_RELEASE_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.dev${TIMESTAMP}"
 
           echo "Base version: $BASE_VERSION"
-          echo "Commit count since last tag ($LAST_TAG): $COMMIT_COUNT"
+          echo "Timestamp: $TIMESTAMP"
           echo "Calculated pre-release version: $PRE_RELEASE_VERSION"
           echo "version=${PRE_RELEASE_VERSION}" >> $GITHUB_OUTPUT
 
