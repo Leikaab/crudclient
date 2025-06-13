@@ -6,7 +6,7 @@ It handles request preparation, authentication, response handling, and error han
 """
 
 import logging
-from typing import Any, Dict, Literal, Optional, Tuple, Union, cast, overload
+from typing import Any, Dict, Literal, Optional, Tuple, Type, Union, cast, overload
 
 import requests
 
@@ -33,6 +33,14 @@ class Client:
 
     This class delegates HTTP operations to the HttpClient class, which handles
     request preparation, authentication, response handling, and error handling.
+    It can be used as a context manager to ensure the session is closed
+    automatically:
+
+    ```python
+    config = ClientConfig(hostname="https://api.example.com")
+    with Client(config) as client:
+        data = client.get("/users")
+    ```
     """
 
     config: ClientConfig
@@ -416,6 +424,19 @@ class Client:
         """
         self.http_client.close()
         log.debug("Client closed.")
+
+    def __enter__(self) -> "Client":
+        """Enter the runtime context and return the client instance."""
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[Any],
+    ) -> None:
+        """Exit the runtime context and close the client."""
+        self.close()
 
     @property
     def session(self) -> requests.Session:
