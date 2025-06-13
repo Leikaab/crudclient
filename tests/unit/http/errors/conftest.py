@@ -15,7 +15,7 @@ class MockConfig(ClientConfig):
     def __init__(self):
         super().__init__(hostname="https://api.example.com", version="v1")
         self.auth_strategy = None
-        self.timeout = 5.0  # Default timeout for tests
+        self.timeout = 5  # Default timeout for tests
         self.retries = 0
 
 

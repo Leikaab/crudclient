@@ -14,14 +14,14 @@ files = [
 
 [[package]]
 name = "apiconfig"
-version = "0.3.2.dev17"
+version = "0.3.3.dev538"
 description = "api config library"
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "apiconfig-0.3.2.dev17-py3-none-any.whl", hash = "sha256:9d2bd3cc0a228176ae139bc19eef6d55bfa51567920ae17440b9313654d7dd27"},
-    {file = "apiconfig-0.3.2.dev17.tar.gz", hash = "sha256:4d17ab5bcf09ebcdfeaebc7500761f84df5e1526cfed08143bc67717d53aafd7"},
+    {file = "apiconfig-0.3.3.dev538-py3-none-any.whl", hash = "sha256:228f1c2b0f7c00b56229fdd157f9c25323bde0d8e57eb7096b60eea69899363e"},
+    {file = "apiconfig-0.3.3.dev538.tar.gz", hash = "sha256:531e00eac5657071954ae494d60ad4e889c7e2c9aa0e907a0df4fff893fe3b21"},
 ]
 
 [[package]]

@@ -20,21 +20,21 @@ repos:
         name: autoflake
         stages: [pre-commit]
         language: system
-        entry: poetry run autoflake --remove-all-unused-imports --in-place --recursive
+        entry: poetry run autoflake --remove-all-unused-imports --in-place --recursive --exclude=apiconfig
         types: [python]
 
       - id: isort
         name: isort
         stages: [pre-commit]
         language: system
-        entry: poetry run isort --profile black
+        entry: poetry run isort --profile black --skip-glob="**/apiconfig/*"
         types: [python]
 
       - id: black
         name: black
         stages: [pre-commit]
         language: system
-        entry: poetry run black .
+        entry: poetry run black . --extend-exclude="apiconfig/"
         types: [python]
 
       - id: flake8

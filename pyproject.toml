@@ -80,7 +80,8 @@ exclude = ["artifacts/"]
 [tool.isort]
 profile = "black"
 skip = ["tests/debug.py", "crudclient/config.pyi", "crudclient/client.pyi"]
-extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*", "**/artifacts/*"]
+extend_skip_glob = ["**/.mypy_cache/*", "**/.pytest_cache/*", "**/.venv/*", "**/node_modules/*", "**/draft/*", "**/artifacts/*", "**/apiconfig/*"]
+known_third_party = ["apiconfig"]
 
 
 
@@ -100,5 +101,6 @@ extend-exclude = '''
   | build
   | dist
   | artifacts
+  | apiconfig
 )/
 '''
