@@ -164,6 +164,19 @@ if __name__ == '__main__':
 </details>
 
 <details>
+  <summary>Using Client as a context manager</summary>
+
+```python
+from crudclient.client import Client, ClientConfig
+
+config = ClientConfig(hostname="https://api.example.com")
+with Client(config) as client:
+    users = client.get("/users")
+```
+
+</details>
+
+<details>
   <summary>Using ResourceGroups for nested resources</summary>
 
 ```python
