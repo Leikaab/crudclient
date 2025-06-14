@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from response_strategies.base import ModelDumpable
+from crudclient.response_strategies.base import ModelDumpable
 
 from ..crud import TripletexCrud
 from ..models import (

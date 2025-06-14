@@ -1,15 +1,15 @@
 from typing import Optional, cast
 
-from crudclient.groups import ResourceGroup
 from crudclient.models import ListResponseWrapper
 from crudclient.types import JSONDict
 
+from ...crud import TripletexResourceGroup
 from ...models import Ledger
 from ...utils import ensure_date_params
 from .voucher_group import VoucherGroup
 
 
-class LedgerGroup(ResourceGroup[Ledger]):
+class LedgerGroup(TripletexResourceGroup[Ledger]):
     """
     ResourceGroup for Tripletex ledger operations.
 

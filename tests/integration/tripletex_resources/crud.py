@@ -1,6 +1,7 @@
 from typing import Any, Generic, Optional, Type, TypeVar, Union
 
 from crudclient.crud import Crud
+from crudclient.groups import ResourceGroup
 from crudclient.response_strategies import ModelDumpable
 from crudclient.types import JSONDict, RawResponse
 
@@ -9,7 +10,22 @@ from .models.api_response_model import TripletexResponse
 T = TypeVar("T", bound=ModelDumpable)
 
 
-class TripletexCrud(Crud[T], Generic[T]):
+class TripletexMixin:
+    """
+    Mixin class for Tripletex-specific configurations.
+
+    This mixin provides common Tripletex API configurations that are shared
+    between both TripletexCrud and TripletexResourceGroup.
+    """
+
+    # Set API-level response wrapper for all Tripletex list operations
+    _api_response_model: Type[Any] = TripletexResponse
+
+    # Tripletex uses 'values' for list data
+    _list_return_keys = ["values", "data", "results", "items"]
+
+
+class TripletexCrud(TripletexMixin, Crud[T], Generic[T]):
     """
     Base class for Tripletex CRUD operations.
 
@@ -21,12 +37,6 @@ class TripletexCrud(Crud[T], Generic[T]):
     # Override these attributes to allow for different model types
     _create_model: Optional[Type[Any]] = None
     _update_model: Optional[Type[Any]] = None
-
-    # Set API-level response wrapper for all Tripletex list operations
-    _api_response_model: Type[Any] = TripletexResponse
-
-    # Tripletex uses 'values' for list data
-    _list_return_keys = ["values", "data", "results", "items"]
 
     def _convert_to_model(self, data: RawResponse) -> Union[T, JSONDict]:
         """
@@ -79,3 +89,12 @@ class TripletexCrud(Crud[T], Generic[T]):
         # Fall back to parent class behavior for other cases
         # List responses are handled by _validate_list_return, not this method
         return super()._convert_to_model(validated_data)
+
+
+class TripletexResourceGroup(TripletexMixin, ResourceGroup[T], Generic[T]):
+    """
+    Base class for Tripletex ResourceGroup operations.
+
+    This class extends the generic ResourceGroup class with Tripletex-specific
+    functionality to handle the Tripletex API response format.
+    """

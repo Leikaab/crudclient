@@ -16,8 +16,7 @@ from pydantic import ValidationError as PydanticValidationError
 
 if TYPE_CHECKING:
     from .base import Crud
-
-from crudclient.models import ListResponseWrapper
+    from crudclient.models import ListResponseWrapper
 
 from ..exceptions import DataValidationError
 from ..http.utils import redact_json_body
@@ -47,7 +46,7 @@ __all__ = [
 
 def list_operation(
     self: "Crud[T]", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
-) -> Union[JSONList, TypingList[T], ListResponseWrapper[T]]:
+) -> Union[JSONList, TypingList[T], "ListResponseWrapper[T]"]:
     """Retrieve a list of resources.
 
     The returned value depends on the configured response strategy. When an
@@ -448,7 +447,7 @@ def custom_action_operation(
     params: Optional[JSONDict] = None,
     files: Optional[JSONDict] = None,
     content_type: Optional[str] = None,
-) -> Union[T, JSONDict, TypingList[JSONDict], ListResponseWrapper[T]]:
+) -> Union[T, JSONDict, TypingList[JSONDict], "ListResponseWrapper[T]"]:
     """
     Perform a custom action on the resource.
 

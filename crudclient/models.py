@@ -168,6 +168,8 @@ class ListResponseWrapper(BaseModel, Generic[T]):
         The actual data items (can be populated from 'values' alias).
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     links: Optional[PaginationLinks] = Field(default=None, alias="_links", description="Pagination links")
     count: int = Field(..., ge=0, description="Total number of items")
     data: List[T] = Field(..., validation_alias=AliasChoices("data", "values"), description="The actual data items")

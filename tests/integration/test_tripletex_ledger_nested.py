@@ -10,9 +10,8 @@ import pytest
 from .tripletex_resources import TripletexAPI, TripletexTestConfig
 from .tripletex_resources.models import (
     Ledger,
-    LedgerResponse,
+    TripletexResponse,
     Voucher,
-    VoucherResponse,
 )
 
 
@@ -64,8 +63,8 @@ def test_list_ledgers(api):
     params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
     ledger_response = api.ledger.list(params=params)
 
-    # Check that we got a LedgerResponse object
-    assert isinstance(ledger_response, LedgerResponse)
+    # Check that we got a TripletexResponse object
+    assert isinstance(ledger_response, TripletexResponse)
     assert hasattr(ledger_response, "values")
 
     # Check that the values contains ledger objects
@@ -119,8 +118,8 @@ def test_list_vouchers(api):
     params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
     voucher_response = api.ledger.voucher.list(params=params)
 
-    # Check that we got a VoucherResponse object
-    assert isinstance(voucher_response, VoucherResponse)
+    # Check that we got a TripletexResponse object
+    assert isinstance(voucher_response, TripletexResponse)
     assert hasattr(voucher_response, "values")
 
     # If there are vouchers, check their structure
