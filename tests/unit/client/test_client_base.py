@@ -1,5 +1,7 @@
 import pytest
 
+from crudclient.client import Client
+
 # Import fixtures from conftest.py
 
 
@@ -291,3 +293,13 @@ class TestClient:
         close_mock.assert_called_once()
         assert client.http_client.session_manager.is_closed
         assert session.is_closed
+
+    def test_context_manager(self, default_mock_client_config, requests_mocker):
+        """Ensure Client can be used as a context manager."""
+        url = f"{default_mock_client_config.base_url}/users"
+        requests_mocker.get(url, text="[]")
+
+        with Client(default_mock_client_config) as cm_client:
+            response = cm_client.get("/users")
+
+        assert response == "[]"
