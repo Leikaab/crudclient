@@ -1,12 +1,10 @@
 from typing import Optional, cast
 
 from crudclient.groups import ResourceGroup
+from crudclient.models import ListResponseWrapper
 from crudclient.types import JSONDict
 
-from ...models import (
-    Ledger,
-    LedgerResponse,
-)
+from ...models import Ledger
 from ...utils import ensure_date_params
 from .voucher_group import VoucherGroup
 
@@ -27,7 +25,6 @@ class LedgerGroup(ResourceGroup[Ledger]):
 
     _resource_path = "ledger"
     _datamodel = Ledger
-    _api_response_model = LedgerResponse
     allowed_actions = ["list", "read"]
 
     def _register_child_groups(self) -> None:
@@ -39,7 +36,7 @@ class LedgerGroup(ResourceGroup[Ledger]):
         """
         self.voucher = VoucherGroup(self.client, parent=self)
 
-    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs) -> LedgerResponse:
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs) -> ListResponseWrapper[Ledger]:
         """
         List ledgers.
 
@@ -49,11 +46,71 @@ class LedgerGroup(ResourceGroup[Ledger]):
             **kwargs: Additional keyword arguments.
 
         Returns:
-            LedgerResponse object containing a list of Ledger objects.
+            ListResponseWrapper[Ledger] object containing a list of Ledger objects.
         """
         # Ensure required date parameters are present
         params = ensure_date_params(params)
 
         # Call the parent list method with the updated params
         result = super().list(parent_id=parent_id, params=params, **kwargs)
-        return cast(LedgerResponse, result)
+        return cast(ListResponseWrapper[Ledger], result)
+
+    def open_post(
+        self,
+        date: str,
+        account_id: Optional[int] = None,
+        supplier_id: Optional[int] = None,
+        customer_id: Optional[int] = None,
+        employee_id: Optional[int] = None,
+        department_id: Optional[int] = None,
+        project_id: Optional[int] = None,
+        product_id: Optional[int] = None,
+        from_index: int = 0,
+        count: int = 1000,
+        sorting: Optional[str] = None,
+        fields: Optional[str] = None,
+    ) -> ListResponseWrapper[Ledger]:
+        """
+        Find open posts corresponding with sent data.
+
+        Args:
+            date: Invoice date. Format is yyyy-MM-dd (to and excl.)
+            account_id: Element ID for filtering
+            supplier_id: Element ID for filtering
+            customer_id: Element ID for filtering
+            employee_id: Element ID for filtering
+            department_id: Element ID for filtering
+            project_id: Element ID for filtering
+            product_id: Element ID for filtering
+            from_index: From index
+            count: Number of elements to return
+            sorting: Sorting pattern (note: 'date' is not a valid sorting field)
+            fields: Fields filter pattern
+
+        Returns:
+            ListResponseWrapper[Ledger] object containing the open posts
+        """
+        params = {"date": date, "from": from_index, "count": count}
+
+        if account_id:
+            params["accountId"] = account_id
+        if supplier_id:
+            params["supplierId"] = supplier_id
+        if customer_id:
+            params["customerId"] = customer_id
+        if employee_id:
+            params["employeeId"] = employee_id
+        if department_id:
+            params["departmentId"] = department_id
+        if project_id:
+            params["projectId"] = project_id
+        if product_id:
+            params["productId"] = product_id
+        if sorting:
+            params["sorting"] = sorting
+        if fields:
+            params["fields"] = fields
+
+        result = self.custom_action("openPost", method="get", params=params)
+
+        return cast(ListResponseWrapper[Ledger], result)

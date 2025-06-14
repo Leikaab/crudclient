@@ -17,9 +17,10 @@ from pydantic import ValidationError as PydanticValidationError
 if TYPE_CHECKING:
     from .base import Crud
 
+from crudclient.models import ListResponseWrapper
+
 from ..exceptions import DataValidationError
 from ..http.utils import redact_json_body
-from ..models import ApiResponse
 from ..types import JSONDict, JSONList
 from .base import T
 
@@ -46,12 +47,12 @@ __all__ = [
 
 def list_operation(
     self: "Crud[T]", parent_id: Optional[str] = None, params: Optional[JSONDict] = None
-) -> Union[JSONList, TypingList[T], ApiResponse]:
+) -> Union[JSONList, TypingList[T], ListResponseWrapper[T]]:
     """Retrieve a list of resources.
 
     The returned value depends on the configured response strategy. When an
     ``_api_response_model`` is set (or the active strategy produces one), the
-    method returns an :class:`ApiResponse` instance containing the list in its
+    method returns an :class:`ListResponseWrapper[T]` instance containing the list in its
     ``data``/``values`` attribute along with any metadata. Callers expecting only
     the raw list should access ``.data`` on the returned object instead of
     overriding this method.
@@ -65,8 +66,8 @@ def list_operation(
 
     Returns
     -------
-    Union[JSONList, List[T], ApiResponse]
-        Validated list data or the full ``ApiResponse`` wrapper.
+    Union[JSONList, List[T], ListResponseWrapper[T]]
+        Validated list data or the full ``ListResponseWrapper[T]`` wrapper.
 
     Raises
     ------
@@ -447,7 +448,7 @@ def custom_action_operation(
     params: Optional[JSONDict] = None,
     files: Optional[JSONDict] = None,
     content_type: Optional[str] = None,
-) -> Union[T, JSONDict, TypingList[JSONDict]]:
+) -> Union[T, JSONDict, TypingList[JSONDict], ListResponseWrapper[T]]:
     """
     Perform a custom action on the resource.
 

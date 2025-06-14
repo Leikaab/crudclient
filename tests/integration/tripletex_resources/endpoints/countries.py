@@ -1,3 +1,5 @@
+from typing import List
+
 from ..crud import TripletexCrud
 from ..models import Country
 
@@ -9,4 +11,4 @@ class TripletexCountries(TripletexCrud[Country]):
 
     _resource_path = "country"
     _datamodel = Country
-    allowed_actions = ["list", "read"]
+    allowed_actions: List[str] = ["list", "read"]
