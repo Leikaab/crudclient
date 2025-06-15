@@ -16,7 +16,10 @@ from typing import (
     TypeVar,
 )
 
+from apiconfig.testing.auth_verification import AuthHeaderVerification
+
 from crudclient.auth import ApiKeyAuth, AuthStrategy
+from crudclient.exceptions import AuthenticationError
 
 from .api_key_rate_limiter import ApiKeyRateLimiter
 from .api_key_usage_tracker import ApiKeyUsageTracker
@@ -351,7 +354,12 @@ class ApiKeyAuthMock(AuthMockBase):
         if not self.header_name:
             return False
 
-        return bool(header_value) and self.validate_key(header_value)
+        try:
+            AuthHeaderVerification.verify_api_key_header(header_value)
+        except AuthenticationError:
+            return False
+
+        return self.validate_key(header_value)
 
     def verify_token_usage(self, token: str) -> bool:
         """

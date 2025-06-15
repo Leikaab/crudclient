@@ -8,7 +8,10 @@ for different grant types, scopes, and advanced authentication scenarios.
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
+from apiconfig.testing.auth_verification import AuthHeaderVerification
+
 from crudclient.auth import AuthStrategy, CustomAuth
+from crudclient.exceptions import AuthenticationError
 
 from .base import AuthMockBase
 from .oauth_grant_handler import OAuthGrantHandler
@@ -271,23 +274,13 @@ class OAuthMock(AuthMockBase):
         return self
 
     def verify_auth_header(self, header_value: str) -> bool:
-        """
-        Verify that the Bearer Auth header has the correct format and token is valid.
-
-        Args:
-            header_value: The value of the Authorization header
-
-        Returns:
-            True if the header is valid, False otherwise
-        """
-        # Check if it's a Bearer token
-        if not header_value.startswith("Bearer "):
+        """Verify that the Bearer Auth header has the correct format and token is valid."""
+        try:
+            AuthHeaderVerification.verify_bearer_auth_header(header_value)
+        except AuthenticationError:
             return False
 
-        # Extract the token
         token = header_value[7:]
-
-        # Validate the token
         return self.token_manager.validate_token(token)
 
     def verify_token_usage(self, token: str) -> bool:
