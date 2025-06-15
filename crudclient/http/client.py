@@ -122,7 +122,7 @@ class HttpClient:
         self.request_formatter = request_formatter or RequestFormatter(config=self.config)
         self.response_handler = response_handler or ResponseHandler()
         self.error_handler = error_handler or ErrorHandler()
-        self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries)
+        self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries or 0)
         self.http_logger = HttpLifecycleLogger(config=config, logger=logger)
 
         self.rate_limiter = get_rate_limiter(config)

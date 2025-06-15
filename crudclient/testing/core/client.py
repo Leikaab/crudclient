@@ -1,3 +1,11 @@
+"""Mock Object Pattern Implementation for ``crudclient.Client``.
+
+This module provides ``MockClient``, an implementation of the **Mock Object
+pattern** for the ``crudclient.client.Client`` interface. It allows tests to
+simulate client behavior, configure specific responses or errors for defined
+request patterns, and verify interactions without making actual network calls.
+"""
+
 import json
 import time
 from typing import Any, Dict, List, Optional, Pattern, Union
@@ -322,7 +330,7 @@ class MockClient(EnhancedSpyBase):
             if auth_headers:
                 final_headers.update(auth_headers)
             if auth_params:
-                final_params.update(auth_params)  # type: ignore[arg-type]
+                final_params.update(auth_params)
 
         return {"headers": final_headers, "params": final_params}
 
@@ -424,7 +432,7 @@ class MockClient(EnhancedSpyBase):
                 call_kwargs["data"] = data
             call_kwargs.update(kwargs)
 
-            self._record_call(  # type: ignore[attr-defined]
+            self._record_call(
                 method_name=method_name.upper(), args=(path,), kwargs=call_kwargs, result=result, exception=exception, duration=duration
             )
 

@@ -34,7 +34,7 @@ class ConcreteChildCrud(Crud[ResourceTestModel]):
     _datamodel = ResourceTestModel
 
 
-class ConcreteChildGroup(ResourceGroup):
+class ConcreteChildGroup(ResourceGroup[ResourceTestModel]):
     """Concrete ResourceGroup class for testing as a child group."""
 
     _resource_path = "child-group"
@@ -45,14 +45,14 @@ class ConcreteChildGroup(ResourceGroup):
         self.nested_resource = ConcreteChildCrud(self.client, parent=self)
 
 
-class ConcreteResourceGroup(ResourceGroup):
+class ConcreteResourceGroup(ResourceGroup[ResourceTestModel]):
     """Concrete ResourceGroup class for testing basic functionality."""
 
     _resource_path = "test-group"
     _datamodel = ResourceTestModel
 
 
-class ConcreteParentGroup(ResourceGroup):
+class ConcreteParentGroup(ResourceGroup[ResourceTestModel]):
     """Concrete ResourceGroup class for testing parent-child relationships."""
 
     _resource_path = "parent-group"

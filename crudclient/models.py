@@ -66,7 +66,7 @@ class RoleBasedModel(BaseModel):
         ValueError
             If a required field is missing or a disallowed field is present.
         """
-        # Implementation placeholder - this is a stub in the .pyi file
+        # Implementation placeholder - real validation logic should be implemented here
         return values
 
 
@@ -150,12 +150,13 @@ class IdUrl(BaseModel):
     url: Optional[HttpUrl] = None
 
 
-class ApiResponse(BaseModel, Generic[T]):
+class ListResponseWrapper(BaseModel, Generic[T]):
     """
-    A generic model for API responses with pagination.
+    A generic model for API list responses with pagination.
 
-    This model represents a standard API response format with pagination links,
-    a count of total items, and the actual data.
+    This model represents a standard API response format for lists with pagination links,
+    a count of total items, and the actual data. This is the base class for API-specific
+    response wrappers.
 
     Attributes
     ----------
@@ -166,6 +167,8 @@ class ApiResponse(BaseModel, Generic[T]):
     data : List[T]
         The actual data items (can be populated from 'values' alias).
     """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     links: Optional[PaginationLinks] = Field(default=None, alias="_links", description="Pagination links")
     count: int = Field(..., ge=0, description="Total number of items")
@@ -178,3 +181,7 @@ class ApiResponse(BaseModel, Generic[T]):
         if v < 0:
             raise ValueError("Count cannot be negative")
         return v
+
+
+# Backward compatibility alias
+ApiResponse = ListResponseWrapper

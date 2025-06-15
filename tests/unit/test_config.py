@@ -137,15 +137,17 @@ class TestClientConfig:
         assert custom_config.headers == custom_original
 
     def test_static_merge_configs_type_error(self):
-        """Test that merge_configs raises TypeError for invalid arguments."""
+        """Test that merge_configs raises AttributeError for invalid arguments."""
         base_config = ClientConfig()
 
-        # Test with non-ClientConfig objects
-        with pytest.raises(TypeError):
-            ClientConfig.merge_configs(base_config, "not a config")  # type: ignore
-
-        with pytest.raises(TypeError):
+        # Test with non-ClientConfig objects - apiconfig raises AttributeError
+        # when trying to call .merge() on a string
+        with pytest.raises(AttributeError, match="'str' object has no attribute 'merge'"):
             ClientConfig.merge_configs("not a config", base_config)  # type: ignore
+
+        # This one should raise TypeError from the instance merge method
+        with pytest.raises(TypeError, match="Cannot merge ClientConfig with object of type"):
+            ClientConfig.merge_configs(base_config, "not a config")  # type: ignore
 
     def test_get_config_errors(self) -> None:
         """Validate get_config_errors reports missing hostname."""

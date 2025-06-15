@@ -20,17 +20,32 @@ from ..http.utils import redact_json_body  # Import redaction utility
 from ..models import ApiResponse
 from ..response_strategies import (
     DefaultResponseModelStrategy,
+    ModelDumpable,
     PathBasedResponseModelStrategy,
 )
 from ..types import JSONDict, JSONList, RawResponse
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "_init_response_strategy",
+    "_validate_response",
+    "_convert_to_model",
+    "_convert_to_list_model",
+    "_validate_list_return",
+    "_fallback_list_conversion",
+    "_dump_model_instance",
+    "_validate_partial_dict",
+    "_validate_and_dump_full_dict",
+    "_dump_dictionary",
+    "_dump_data",
+]
+
 # Define T type variable
-T = TypeVar("T")
+T = TypeVar("T", bound="ModelDumpable")
 
 
-def _init_response_strategy(self: "Crud") -> None:
+def _init_response_strategy(self: "Crud[T]") -> None:
     """
     Initialize the response model strategy.
 
@@ -60,7 +75,7 @@ def _init_response_strategy(self: "Crud") -> None:
         )
 
 
-def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONList, str]:
+def _validate_response(self: "Crud[T]", data: RawResponse) -> Union[JSONDict, JSONList, str]:
     """
     Validate the API response data.
 
@@ -108,7 +123,7 @@ def _validate_response(self: "Crud", data: RawResponse) -> Union[JSONDict, JSONL
     return data
 
 
-def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
+def _convert_to_model(self: "Crud[T]", data: RawResponse) -> Union[T, JSONDict]:
     """
     Convert the API response to the datamodel type.
 
@@ -158,7 +173,7 @@ def _convert_to_model(self: "Crud", data: RawResponse) -> Union[T, JSONDict]:
         raise
 
 
-def _convert_to_list_model(self: "Crud", data: JSONList) -> Union[List[T], JSONList]:
+def _convert_to_list_model(self: "Crud[T]", data: JSONList) -> Union[List[T], JSONList]:
     """
     Convert the API response to a list of datamodel types.
 
@@ -193,7 +208,7 @@ def _convert_to_list_model(self: "Crud", data: JSONList) -> Union[List[T], JSONL
         raise
 
 
-def _validate_list_return(self: "Crud", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
     """
     Validate and convert the list response data.
 
@@ -240,7 +255,7 @@ def _validate_list_return(self: "Crud", data: RawResponse) -> Union[JSONList, Li
         raise
 
 
-def _fallback_list_conversion(self: "Crud", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _fallback_list_conversion(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
     """
     Fallback conversion logic for list responses when the strategy fails.
 
@@ -291,7 +306,7 @@ def _fallback_list_conversion(self: "Crud", data: RawResponse) -> Union[JSONList
     return []
 
 
-def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSONDict:
+def _dump_model_instance(self: "Crud[T]", model_instance: T, partial: bool) -> JSONDict:
     """
     Dump a Pydantic model instance to a dictionary.
 
@@ -327,7 +342,7 @@ def _dump_model_instance(self: "Crud", model_instance: T, partial: bool) -> JSON
         raise TypeError(f"Cannot dump model instance of type {type(model_instance)}")
 
 
-def _validate_partial_dict(self: "Crud", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> None:
+def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> None:
     """
     Validate provided fields in a dictionary against the specified validation model for partial updates.
 
@@ -366,7 +381,7 @@ def _validate_partial_dict(self: "Crud", data_dict: JSONDict, validation_model: 
             raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
-def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> JSONDict:
+def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> JSONDict:
     """
     Validate a dictionary against the specified validation model and dump the result.
 
@@ -407,7 +422,7 @@ def _validate_and_dump_full_dict(self: "Crud", data_dict: JSONDict, validation_m
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
-def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool, validation_model: Optional[Type[T]] = None) -> JSONDict:
+def _dump_dictionary(self: "Crud[T]", data_dict: JSONDict, partial: bool, validation_model: Optional[Type[T]] = None) -> JSONDict:
     """
     Validate and dump a dictionary based on the specified validation model.
 
@@ -440,7 +455,7 @@ def _dump_dictionary(self: "Crud", data_dict: JSONDict, partial: bool, validatio
         return self._validate_and_dump_full_dict(data_dict, validation_model)  # type: ignore[no-any-return]
 
 
-def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], validation_model: Optional[Type[T]] = None, partial: bool = False) -> JSONDict:
+def _dump_data(self: "Crud[T]", data: Optional[Union[JSONDict, T]], validation_model: Optional[Type[T]] = None, partial: bool = False) -> JSONDict:
     """
     Dump the data model to a JSON-serializable dictionary.
 
@@ -477,13 +492,12 @@ def _dump_data(self: "Crud", data: Optional[Union[JSONDict, T]], validation_mode
             validation_model = self._datamodel
 
     try:
-        if validation_model and (isinstance(data, validation_model) or (hasattr(data, "model_dump") or hasattr(data, "dict"))):
-            return cast(JSONDict, self._dump_model_instance(data, partial))
-        elif isinstance(data, dict):
-            data_dict = cast(JSONDict, data)
+        if isinstance(data, dict):
+            data_dict: JSONDict = data
             return cast(JSONDict, self._dump_dictionary(data_dict, partial, validation_model))
         else:
-            raise TypeError(f"Input data must be a dict or a Pydantic model instance, got {type(data).__name__}")
+            # If not a dict, it must be a model instance of type T
+            return cast(JSONDict, self._dump_model_instance(data, partial))
 
     except DataValidationError:
         raise

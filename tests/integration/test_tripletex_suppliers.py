@@ -2,7 +2,8 @@ import os
 
 import pytest
 
-from .tripletex_resources.models.supplier import Supplier, SupplierResponse
+from .tripletex_resources.models.api_response_model import TripletexResponse
+from .tripletex_resources.models.supplier import Supplier
 
 
 @pytest.mark.no_parallel
@@ -15,8 +16,8 @@ def test_list_suppliers(api):
     suppliers = api.suppliers.list(params={"count": 2})
 
     # Check that we got a list of suppliers
-    # The API returns a SupplierResponse object
-    assert isinstance(suppliers, SupplierResponse)
+    # The API returns a TripletexResponse object
+    assert isinstance(suppliers, TripletexResponse)
     assert isinstance(suppliers.values, list)
     assert all(isinstance(supplier, Supplier) for supplier in suppliers.values)
     assert len(suppliers.values) > 0

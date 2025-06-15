@@ -7,13 +7,19 @@ while also serving as a container for child resources and nested groups.
 """
 
 from abc import ABC
-from typing import Optional
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 
 from .client import Client
 from .crud.base import Crud
+from .response_strategies import ModelDumpable
+
+if TYPE_CHECKING:
+    pass
+
+T = TypeVar("T", bound=ModelDumpable)
 
 
-class ResourceGroup(Crud, ABC):
+class ResourceGroup(Crud[T], Generic[T], ABC):
     """Base class for grouping related CRUD resources and other ResourceGroups.
 
     Under a common path segment, a ResourceGroup can also have its own

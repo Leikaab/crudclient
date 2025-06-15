@@ -85,6 +85,10 @@ class FileJSONBackend(StorageBackend):
                 return
             except portalocker.LockException:
                 # Lock is held by another process/thread
+                try:
+                    handle.close()
+                except Exception:
+                    pass
                 if attempt == 0:
                     logger.debug(f"Lock busy, waiting... (thread: {threading.current_thread().name})")
                 attempt += 1

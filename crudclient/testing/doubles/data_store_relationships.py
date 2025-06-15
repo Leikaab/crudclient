@@ -20,7 +20,8 @@ if TYPE_CHECKING:
 
 
 class RelationshipType:
-    # Docstring moved to .pyi
+    """Defines the types of relationships between collections."""
+
     ONE_TO_ONE = "one_to_one"
     ONE_TO_MANY = "one_to_many"
     MANY_TO_MANY = "many_to_many"
@@ -34,7 +35,7 @@ def include_related_data(
     collections: Dict[str, List[Dict[str, Any]]],
     deleted_field: str = "_deleted",
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
+    """Includes related data for a list of items based on defined relationships."""
     result = []
     for item in data:
         result.append(include_related_item(collection, item, include_related, relationships, collections, deleted_field))
@@ -49,7 +50,7 @@ def include_related_item(
     collections: Dict[str, List[Dict[str, Any]]],
     deleted_field: str = "_deleted",
 ) -> Dict[str, Any]:
-    # Docstring moved to .pyi
+    """Includes related data for a single item based on defined relationships."""
     result = copy.deepcopy(item)
 
     for related_name in include_related:
@@ -100,7 +101,6 @@ def _get_related_one_to_one(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if is_forward_relation:
         target_collection_name = related_name
         source_key = relationship.source_key
@@ -127,7 +127,6 @@ def _get_related_one_to_many(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if is_forward_relation:  # one(item)-to-many(related_name)
         target_collection_name = related_name
         source_key = relationship.source_key
@@ -154,7 +153,6 @@ def _get_related_many_to_many(
     is_forward_relation: bool,
     related_name: str,
 ) -> List[Dict[str, Any]]:
-    # Docstring moved to .pyi
     if not relationship.junction_collection or relationship.junction_collection not in collections:
         return []
 
@@ -201,8 +199,8 @@ def cascade_delete(
     deleted_field: str = "_deleted",
     updated_at_field: str = "_updated_at",
 ) -> None:
-    # Docstring moved to .pyi
     # Find relationships where this collection is the source
+    """Performs cascading deletes based on relationship definitions."""
     for relationship in relationships:
         if relationship.source_collection != collection or not relationship.cascade_delete:
             continue

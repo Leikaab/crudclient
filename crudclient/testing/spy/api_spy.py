@@ -1,3 +1,5 @@
+"""Concrete Test Spy for the ``API`` Interface using Enhanced Spying."""
+
 from typing import Any, Optional, Type
 
 from crudclient.api import API
@@ -11,11 +13,13 @@ from .enhanced import ClassSpy, EnhancedSpyBase
 # Note: This class now primarily acts as a wrapper and provider of specific assertions.
 # The core spying mechanism (call recording, basic assertions) is handled by ClassSpy/EnhancedSpyBase.
 class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions and call storage
+    """A Test Spy specifically for the :class:`crudclient.api.API` interface."""
 
     # client_class is part of the original API, keep it if needed for target API instantiation
     client_class = Client
 
     def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
+        """Initialize an :class:`ApiSpy` instance."""
         # 1. Create the actual API instance that will be spied upon
         # Use the provided client/config or defaults
         if client_config is None and client is None:
@@ -49,6 +53,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
 
     # Delegate method calls and attribute access
     def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the spy wrapper, base class, or target API."""
         # Priority 1: Is it a method being spied on by the wrapper?
         if hasattr(self._spy_wrapper, name) and callable(getattr(self._spy_wrapper, name)):
             method_spy = getattr(self._spy_wrapper, name)
@@ -82,6 +87,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
     # Example: Adjusting assert_endpoint_registered
 
     def verify_endpoint_registered(self, name: str) -> None:
+        """Verify that an endpoint with the given name was registered."""
         # Access self.get_calls() provided by EnhancedSpyBase, filtered by method name
         for call in self.get_calls("register_endpoint"):  # call is now a CallRecord
             # Endpoint name is typically the first positional argument
@@ -92,6 +98,7 @@ class ApiSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions an
 
     # Adjust other custom assertions similarly...
     def verify_endpoint_registered_with_model(self, name: str, model: Type[Any]) -> None:
+        """Verify that an endpoint was registered with a specific model."""
         for call in self.get_calls("register_endpoint"):
             if call.args and call.args[0] == name and "model" in call.kwargs and call.kwargs["model"] == model:
                 return

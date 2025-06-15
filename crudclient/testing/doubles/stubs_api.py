@@ -10,10 +10,12 @@ from .stubs_crud import StubCrud
 
 
 class StubAPI(API):
-    # Docstring moved to .pyi
+    """A stub implementation of the API class for testing, managing multiple stubbed endpoints."""
+
     client_class = Client  # Can be overridden if needed, e.g., with StubClient
 
     def __init__(self, client: Optional[Client] = None, client_config: Optional[ClientConfig] = None, **kwargs: Any):
+        """Initialize the StubAPI."""
         if client_config is None:
             # Provide a default config if none is given
             client_config = ClientConfig(hostname="https://stub.api.example.com")
@@ -23,8 +25,8 @@ class StubAPI(API):
         self._data_store: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
     def register_endpoint(self, name: str, endpoint: str, model: Optional[Type[Any]] = None, **kwargs: Any) -> StubCrud:
-        # Docstring moved to .pyi
         # Initialize data store for this endpoint if it doesn't exist
+        """Register a new stubbed CRUD endpoint associated with this API instance."""
         if name not in self._data_store:
             self._data_store[name] = {}
 
@@ -40,11 +42,10 @@ class StubAPI(API):
         return crud
 
     def _register_endpoints(self) -> None:
-        # Docstring moved to .pyi
-        pass
+        """Internal method override; endpoints are registered via `register_endpoint`."""
 
     def __getattr__(self, name: str) -> Any:
-        # Docstring moved to .pyi
+        """Provide attribute-style access to registered `StubCrud` endpoints."""
         if name in self.endpoints:
             return self.endpoints[name]
 
@@ -52,11 +53,11 @@ class StubAPI(API):
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def get_data_store(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
-        # Docstring moved to .pyi
+        """Retrieve the complete, partitioned data store for all registered endpoints."""
         return self._data_store
 
     def clear_data_store(self) -> None:
-        # Docstring moved to .pyi
+        """Clear all data from the data stores of all registered endpoints and reset"""
         for endpoint_store in self._data_store.values():
             endpoint_store.clear()
         # Also reset next_id counters in each StubCrud instance if necessary
@@ -64,7 +65,7 @@ class StubAPI(API):
             crud_instance._next_id = 1  # Reset ID counter
 
     def populate_data_store(self, endpoint_name: str, data: List[Dict[str, Any]]) -> None:
-        # Docstring moved to .pyi
+        """Populate the data store for a specific registered endpoint with initial data."""
         if endpoint_name not in self._data_store:
             # If endpoint wasn't pre-registered, initialize its store part
             self._data_store[endpoint_name] = {}

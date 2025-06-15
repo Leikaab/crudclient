@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 
 class ValidationException(Exception):
-    # Docstring moved to .pyi
+    """Exception raised for data validation errors."""
 
     def __init__(self, message: str, errors: Optional[Dict[str, List[str]]] = None):
         super().__init__(message)
@@ -14,7 +14,7 @@ class ValidationException(Exception):
 
 # Moved from data_store.py
 class Relationship:
-    # Docstring moved to .pyi
+    """Defines a relationship between two collections in the DataStore."""
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class Relationship:
 
 # Moved from data_store.py
 class ValidationRule:
-    # Docstring moved to .pyi
+    """Defines a validation rule for a specific field in a collection."""
 
     def __init__(
         self,
@@ -64,14 +64,14 @@ class ValidationRule:
         self.collection = collection
 
     def validate(self, value: Any) -> Tuple[bool, Optional[str]]:
-        # Docstring moved to .pyi
+        """Validates a value using the defined function."""
         is_valid = self.validator_func(value)
         return is_valid, None if is_valid else self.error_message
 
 
 # Moved from data_store.py
 class UniqueConstraint:
-    # Docstring moved to .pyi
+    """Defines a unique constraint across one or more fields in a collection."""
 
     def __init__(
         self,
@@ -85,7 +85,7 @@ class UniqueConstraint:
         self._values: Set[str] = set()  # Stores unique value combinations
 
     def validate(self, item: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-        # Docstring moved to .pyi
+        """Checks if the item violates the unique constraint."""
         composite_key = self._get_composite_key(item)
         if composite_key is None:
             # If any required field is missing, we can't validate uniqueness yet
@@ -99,13 +99,13 @@ class UniqueConstraint:
         return True, None
 
     def remove_value(self, item: Dict[str, Any]) -> None:
-        # Docstring moved to .pyi
+        """Removes an item's value combination from the tracked set."""
         composite_key = self._get_composite_key(item)
         if composite_key is not None and composite_key in self._values:
             self._values.remove(composite_key)
 
     def _get_composite_key(self, item: Dict[str, Any]) -> Optional[str]:
-        # Docstring moved to .pyi
+        """Generates the composite key string for an item."""
         key_parts = []
         for field in self.fields:
             if field not in item:

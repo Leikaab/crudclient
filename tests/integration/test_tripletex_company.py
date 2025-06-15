@@ -5,7 +5,7 @@ import pytest
 
 from tests.integration.tripletex_resources.models import Company
 
-from .tripletex_resources.setup import TripletexAPI, TripletexTestConfig
+from .tripletex_resources import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture

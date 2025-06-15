@@ -15,7 +15,7 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
         *   `client.py` (`Client`): The high-level client orchestrator, applying configuration (auth, retries) and delegating actual HTTP communication to the `http/` layer.
         *   `http/` (HTTP Layer): Contains components (`client.py`, `request.py`, `response.py`, `errors.py`, `retry.py`, `session.py`, `retry_strategies.py`, `retry_conditions.py`) responsible for raw HTTP communication, request/response object handling, HTTP-specific error management, sophisticated retry logic, and session management (e.g., using `requests`).
         *   `crud/` (CRUD Abstraction): Contains components (`base.py`, `endpoint.py`, `operations.py`, `response_conversion.py`) providing abstractions for defining and executing CRUD operations on API endpoints, including URL construction and Pydantic model conversion.
-        *   `groups.py` (`ResourceGroup`): Defines the `ResourceGroup` class which inherits from `Crud` and enables typed, hierarchical nesting of API resources. It allows for organizing related resources under a common path segment while also supporting its own CRUD operations.
+        *   `groups.py` (`ResourceGroup`): Defines the `ResourceGroup` class which inherits from `Crud` and enables typed, hierarchical nesting of API resources. It allows for organizing related resources under a common path segment while also supporting its own CRUD operations. For detailed usage examples, see [docs/resource_groups.md](resource_groups.md).
         *   `response_strategies/`: Provides different strategies (e.g., `DefaultResponseStrategy`, `PathBasedResponseStrategy`) for parsing and extracting relevant data from diverse API response structures.
         *   `api.py` (`API`): Acts as an entry point, composing the `Client` and registering both `Crud` resource endpoints and `ResourceGroup` instances.
         *   `models.py`: Defines base Pydantic models for common API patterns (like `ApiResponse`).
@@ -41,7 +41,7 @@ The primary goal of `crudclient` is to provide a **flexible, reusable, and robus
     *   **PEP 8:** We follow PEP 8 guidelines, particularly for naming conventions.
     *   **Black & isort:** Code formatting and import sorting are automated using `Black` and `isort`.
     *   **Flake8:** Linting is performed using `Flake8`. Configuration is in `.flake8`.
-    *   **Pre-Commit Hooks:** These tools, along with custom checks (like docstring validation, stub file checks, file length limits located in `hooks/`), are enforced automatically via pre-commit hooks defined in `.pre-commit-config.yaml` to ensure consistency and quality before code is committed.
+    *   **Pre-Commit Hooks:** These tools, along with custom checks (like docstring validation, type hint checks, file length limits located in `hooks/`), are enforced automatically via pre-commit hooks defined in `.pre-commit-config.yaml` to ensure consistency and quality before code is committed.
 
 3.  **Design Patterns:**
     *   **Strategy Pattern:** Used for authentication mechanisms, response parsing strategies, and retry logic.
@@ -89,5 +89,6 @@ The `crudclient.testing` module provides a sophisticated, factory-based testing 
 *   **Verification:** Tools are provided to assert that interactions with mock objects occurred as expected.
 *   **Response Building:** Helpers exist to easily construct mock `requests.Response` objects.
 *   **Modular Structure:** The framework is organized into submodules (`auth`, `core`, `crud`, `doubles`, `helpers`, `response_builder`, `simple_mock`, `spy`, `verification`) reflecting the structure of the main library, allowing for targeted mocking and testing.
+*   **Inline Type Hints:** All testing utilities have inline type hints in the source files. Separate `.pyi` stubs are no longer used.
 
 This framework enables robust unit and integration testing by providing fine-grained control over the simulated behavior of `crudclient` components. Refer to `crudclient/testing/README.md` for more detailed usage examples.

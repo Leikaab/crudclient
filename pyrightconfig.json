@@ -1,0 +1,44 @@
+{
+  "include": [
+    "crudclient",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".venv",
+    "artifacts",
+    "apiconfig",
+    "coverage_html_report",
+    "data",
+    "docs",
+    "hooks",
+    "project_dev_plan",
+    "scripts",
+    "code_project_work_plan"
+  ],
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11",
+  "venvPath": ".",
+  "venv": ".venv",
+  "stubPath": "typings",
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "warning",
+  "reportUnusedImport": true,
+  "reportUnusedClass": true,
+  "reportUnusedFunction": true,
+  "reportUnusedVariable": true,
+  "reportDuplicateImport": true,
+  "pythonPlatform": "All",
+  "executionEnvironments": [
+    {
+      "root": "crudclient",
+      "pythonVersion": "3.11",
+      "extraPaths": []
+    },
+    {
+      "root": "tests",
+      "pythonVersion": "3.11",
+      "extraPaths": ["crudclient"]
+    }
+  ]
+}

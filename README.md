@@ -7,7 +7,7 @@
 
 ### Status of project
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/crudclient)
-![PyPI - Version](https://img.shields.io/pypi/v/crudclient)
+[![PyPI - Version](https://img.shields.io/pypi/v/crudclient)](https://pypi.org/project/crudclient/)
 
 ### Status of testing
 [![Test DevContainer Build](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml/badge.svg)](https://github.com/Leikaab/crudclient/actions/workflows/test_devcontainer.yml)
@@ -34,10 +34,23 @@
   - **ResourceGroup Feature**: The framework provides a `ResourceGroup` class for organizing related API resources under a common path segment, enabling typed, hierarchical nesting of resources. This improves type hinting, code organization, and maintainability for complex APIs. See [docs/resource_groups.md](docs/resource_groups.md) for details.
 
   - **Rate Limiting (EXPERIMENTAL)**: The framework includes an experimental rate limiting module that provides cross-process coordination to prevent HTTP 429 errors. Currently supports Tripletex API headers only. ⚠️ **WARNING: This feature is experimental and may change in future releases.** See [crudclient/ratelimit/README.md](crudclient/ratelimit/README.md) for details.
+  - **Inline Type Hints**: All testing utilities now include inline type hints directly in the `.py` files. The separate `.pyi` stub files have been removed.
 
   This framework is designed to help developers focus on implementing the specific logic required for their APIs while relying on a solid, reusable foundation for the underlying infrastructure. It supports a modular approach, making it easier to manage and scale API client development across various projects.
 
 </details>
+
+## Quickstart
+
+1. Install dependencies with Poetry:
+```bash
+poetry install
+```
+
+2. Copy the basic example from the Usage section into a file named `example.py` and run it:
+```bash
+poetry run python example.py
+```
 
 ## Usage
 
@@ -151,6 +164,19 @@ if __name__ == '__main__':
 </details>
 
 <details>
+  <summary>Using Client as a context manager</summary>
+
+```python
+from crudclient.client import Client, ClientConfig
+
+config = ClientConfig(hostname="https://api.example.com")
+with Client(config) as client:
+    users = client.get("/users")
+```
+
+</details>
+
+<details>
   <summary>Using ResourceGroups for nested resources</summary>
 
 ```python
@@ -237,7 +263,7 @@ logging.getLogger('crudclient.api').setLevel(logging.WARNING)
 
 
 ## Project uses devcontainers
-This project is set up using devcontainers for easy developement across enviroments and hardware.
+This project is set up using devcontainers for easy development across environments and hardware.
 
 ### How to run project locally via dev-containers
 <details>
@@ -258,7 +284,7 @@ If this is your first time using a development container, please ensure your sys
   <summary>Details after setup</summary>
 Once you have this project opened, you'll be able to work with it like you would locally.
 
-Note that ha bounch of key extentions are allready installed + there is local project settings set up in the background, even though there is no settings.json file. These settings are made to match with developmental team standards.
+Note that a bunch of key extensions are already installed, and project settings are configured in the background even though there is no `settings.json` file. These settings are made to match the development team's standards.
 
 > **Note:** This container runs as a non-root user with sudo access by default.
 
@@ -321,7 +347,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   By enforcing these checks before pushing, the project ensures that all changes are thoroughly validated, reducing the risk of introducing issues into the main codebase.
 
-</details
+</details>
 
 ## Poetry
 
@@ -354,9 +380,12 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
 
   - **Development Dependencies**: Poetry distinguishes between production and development dependencies, ensuring that only the necessary packages are included in the final distribution, keeping it lightweight and efficient.
 
-  - **Environment Configuration**: Although Poetry typically creates a virtual environment (`venv`) for each project, in this setup, we have configured Poetry to avoid creating virtual environments due to our use of development containers. This ensures that dependencies are installed directly into the container environment, simplifying the setup and avoiding potential conflicts.
-
-  This configuration is particularly beneficial in a devcontainer environment, where the container itself acts as the isolated development environment, eliminating the need for a separate virtual environment.
+  - **Environment Configuration**: Poetry is configured to create an in-project virtual environment (`.venv`).
+    The `poetry.toml` file sets `create = true` and `in-project = true`, so the virtual
+    environment resides inside the repository. When using a development container,
+    this environment is created within the container itself, keeping dependencies
+    isolated from the host system while still leveraging Poetry's environment
+    management.
 
 </details>
 
@@ -407,7 +436,7 @@ This project employs `pytest` for local testing and cd/ci, and also coverage to 
   - **Build and Test DevContainer**: Builds the development container and runs basic tests to verify the setup.
   - **Validate DevContainer**: Ensures that critical tools like Poetry are correctly installed and configured within the container.
 
-  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions enviroments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be rapported in the issues section on github.
+  This workflow is triggered whenever changes are made to the `.devcontainer` folder, ensuring that the development environment remains stable and usable. Currently because of limitations in github actions environments we are only testing devcontainers on ubuntu through cd/ci. Issues with MacOS or Windows needs to be reported in the issues section on github.
 
 </details>
 

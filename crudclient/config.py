@@ -32,6 +32,8 @@ class ClientConfig(_ApiConfigClientConfig):
         Legacy auth type ("bearer", "basic", etc).
     """
 
+    # Override apiconfig defaults to require explicit hostname configuration
+    hostname: Optional[str] = None
     api_key: Optional[str] = None
     auth_type: str = "bearer"
 
@@ -295,7 +297,8 @@ class ClientConfig(_ApiConfigClientConfig):
         """
         errors: Dict[str, str] = {}
 
-        if not self.hostname:
+        # Check if hostname is None or empty, or if it's the default value from apiconfig
+        if not self.hostname or self.hostname == "api.example.com":
             errors["hostname"] = "hostname is required"
 
         return errors

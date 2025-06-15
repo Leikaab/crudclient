@@ -1,9 +1,24 @@
+"""
+Basic response builder utilities for mock client.
+
+This module provides utilities for building basic API responses with structured data,
+nested structures, and GraphQL format. These utilities help create consistent and
+realistic mock responses for testing API interactions.
+"""
+
 from typing import Any, Dict, List, Optional
 
 from .response import MockResponse
 
 
 class BasicResponseBuilder:
+    """
+    Builder for creating basic API responses.
+
+    This class provides static methods for creating various types of API responses
+    with structured data, including responses with metadata, links, and nested
+    structures. It also supports GraphQL-specific response formats.
+    """
 
     DEFAULT_HEADERS = {"Content-Type": "application/json"}
 
@@ -18,6 +33,24 @@ class BasicResponseBuilder:
         headers: Optional[Dict[str, str]] = None,
         content_type: Optional[str] = "application/json",
     ) -> MockResponse:
+        """
+        Create a mock response with structured data.
+
+        This method creates a response with a standardized structure that includes
+        data, metadata, links, and errors sections, following common API design
+        patterns.
+
+        Args:
+            status_code: HTTP status code for the response
+            data: Primary response data
+            metadata: Response metadata such as pagination info or timestamps
+            links: HATEOAS links for resource navigation
+            errors: Error details if the response represents an error
+            headers: HTTP headers to include in the response
+
+        Returns:
+            A MockResponse instance with the specified structure and content
+        """
         final_headers = cls.DEFAULT_HEADERS.copy()
         if headers:
             final_headers.update(headers)
@@ -61,6 +94,19 @@ class BasicResponseBuilder:
         links: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> MockResponse:
+        """
+        Creates a 201 Created response.
+
+        Args:
+            data: Primary response data
+            location: Location header value for the created resource
+            metadata: Response metadata
+            links: HATEOAS links for resource navigation
+            headers: Additional HTTP headers
+
+        Returns:
+            A MockResponse with 201 status code and the specified data
+        """
         final_headers = headers or {}
         if location:
             final_headers["Location"] = location
@@ -74,6 +120,15 @@ class BasicResponseBuilder:
 
     @classmethod
     def no_content(cls, headers: Optional[Dict[str, str]] = None) -> MockResponse:
+        """
+        Creates a 204 No Content response.
+
+        Args:
+            headers: HTTP headers to include in the response
+
+        Returns:
+            A MockResponse with 204 status code and no content
+        """
         # 204 should not have a Content-Type header typically
         final_headers = headers or {}
         return cls.create_response(status_code=204, headers=final_headers, content_type=None)
@@ -85,7 +140,50 @@ class BasicResponseBuilder:
         status_code: int = 200,
         headers: Optional[Dict[str, str]] = None,
     ) -> MockResponse:
+        """
+        Create a response with a nested structure.
+
+        This method allows for creating responses with arbitrary nested structures,
+        which is useful for testing APIs that return complex, deeply nested JSON.
+
+        Args:
+            structure: Nested structure for the response body
+            status_code: HTTP status code for the response
+            headers: HTTP headers to include in the response
+
+        Returns:
+            A MockResponse instance with the specified nested structure
+        """
         final_headers = cls.DEFAULT_HEADERS.copy()
         if headers:
             final_headers.update(headers)
         return MockResponse(status_code=status_code, json_data=structure, headers=final_headers)
+
+    @staticmethod
+    def create_graphql_response(
+        data: Optional[Dict[str, Any]] = None,
+        errors: Optional[List[Dict[str, Any]]] = None,
+        extensions: Optional[Dict[str, Any]] = None,
+    ) -> MockResponse:
+        """Create a GraphQL response.
+
+        This helper builds a response body that follows the GraphQL
+        specification with ``data``, ``errors`` and ``extensions`` fields.
+
+        Args:
+            data: GraphQL data returned for the query.
+            errors: Optional list of error objects.
+            extensions: Optional extensions providing additional metadata.
+
+        Returns:
+            A ``MockResponse`` formatted according to the GraphQL spec.
+        """
+        body: Dict[str, Any] = {}
+        if data is not None:
+            body["data"] = data
+        if errors is not None:
+            body["errors"] = errors
+        if extensions is not None:
+            body["extensions"] = extensions
+
+        return MockResponse(status_code=200, json_data=body, headers={"Content-Type": "application/json"})

@@ -1,3 +1,5 @@
+"""Read operation mock for testing GET endpoints with rich query handling."""
+
 import copy
 import json
 import re
@@ -15,19 +17,24 @@ else:
 
 
 class ReadMock(BaseCrudMock):
-    _parent_id_handling: bool  # Declare type for parent_id_handling
-    request_history: List["RequestRecord"]  # Declare type for request_history
+    """Mock for read operations supporting filtering and pagination."""
 
-    def __init__(self):
+    _parent_id_handling: bool
+    request_history: List["RequestRecord"]  # type: ignore[assignment]
+
+    def __init__(self) -> None:
+        """Initialize the read mock with default data."""
         super().__init__()
         self.default_response = MockResponse(status_code=200, json_data={"id": 1, "name": "Default Read Resource"})
         self._stored_resources: List[Dict[str, Any]] = []  # List of resources for dynamic handling
 
     def set_stored_resources(self, resources: List[Dict[str, Any]]) -> "ReadMock":
+        """Provide a list of resources for dynamic querying."""
         self._stored_resources = copy.deepcopy(resources)
         return self
 
     def get(self, url: str, **kwargs: Any) -> Any:
+        """Handle a GET request and return the configured response."""
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop("parent_id", None)
         if parent_id and self._parent_id_handling:
@@ -168,7 +175,7 @@ class ReadMock(BaseCrudMock):
     def _handle_pattern_matching(self, url: str, kwargs: Dict[str, Any], record: RequestRecord) -> Any:
         pattern = self._find_matching_pattern("GET", url, **kwargs)
         if pattern:
-            response_obj = self._process_pattern_response(pattern, url, kwargs)
+            response_obj = self._process_pattern_response(pattern, url, kwargs, record)
             record.response = response_obj
             return response_obj.json() if response_obj.json_data is not None else response_obj.text
 
@@ -176,7 +183,7 @@ class ReadMock(BaseCrudMock):
         record.response = self.default_response
         return self.default_response.json() if self.default_response.json_data is not None else self.default_response.text
 
-    def _process_pattern_response(self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any]) -> MockResponse:
+    def _process_pattern_response(self, pattern: Dict[str, Any], url: str, kwargs: Dict[str, Any], record: RequestRecord) -> MockResponse:
         response_obj = pattern["response"]
 
         # Handle callable responses
@@ -185,8 +192,12 @@ class ReadMock(BaseCrudMock):
 
         # Handle errors defined in the pattern
         if "error" in pattern and pattern["error"]:
-            # TODO: Consider how to record the error response before raising
-            raise pattern["error"]
+            error = pattern["error"]
+            record.response = MockResponse(
+                status_code=pattern.get("status_code", 500),
+                json_data={"error": str(error)},
+            )
+            raise error
 
         # Ensure response_obj is a MockResponse
         if not isinstance(response_obj, MockResponse):
@@ -209,10 +220,12 @@ class ReadMock(BaseCrudMock):
         return response_obj
 
     def with_single_resource(self, url_pattern: str, resource_data: Dict[str, Any], **kwargs: Any) -> "ReadMock":
+        """Return ``resource_data`` when ``url_pattern`` matches."""
         self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=200, json_data=resource_data), **kwargs)
         return self
 
     def with_resource_list(self, url_pattern: str, resources: List[Dict[str, Any]], **kwargs: Any) -> "ReadMock":
+        """Return ``resources`` list when ``url_pattern`` matches."""
         self.with_response(url_pattern=url_pattern, response=MockResponse(status_code=200, text=json.dumps(resources)), **kwargs)
         return self
 

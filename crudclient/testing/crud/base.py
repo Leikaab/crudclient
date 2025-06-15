@@ -1,3 +1,11 @@
+"""Base Mock Object for CRUD Operations using Builder Configuration.
+
+This module provides ``BaseCrudMock``, the foundation for mocking specific CRUD
+operations within the ``crudclient`` testing framework. It implements the
+**Mock Object pattern** for simulating CRUD endpoint behaviour and uses a
+Builder style API via the ``with_...`` methods for flexible configuration.
+"""
+
 import json
 import re
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -16,8 +24,16 @@ from .assertion_helpers import (
 
 
 class BaseCrudMock:
+    """Base **Mock Object** for simulating CRUD endpoint interactions.
 
-    def __init__(self):
+    This class serves as the base for specific CRUD operation mocks and
+    implements a fluent builder interface for configuring responses. Incoming
+    requests are recorded so tests can later assert behaviour using the
+    ``verify_*`` helper methods.
+    """
+
+    def __init__(self) -> None:
+        """Initialize the base CRUD mock."""
         self.response_patterns: List[Dict[str, Any]] = []
         self.request_history: List[PreparedRequest] = []
         self.default_response = MockResponse(status_code=404, json_data={"error": "No matching mock response configured"})
@@ -29,6 +45,22 @@ class BaseCrudMock:
         response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str, Callable[..., Optional[MockResponse]]],
         **kwargs: Any,
     ) -> "BaseCrudMock":
+        """Add a response pattern to the mock.
+
+        This configures the mock to return ``response`` whenever a request
+        matching ``url_pattern`` and the optional matchers in ``kwargs`` is
+        received.
+
+        Args:
+            url_pattern: Regular expression pattern to match request URLs.
+            response: Response to return. Can be a ``MockResponse`` instance,
+                raw data structures or a callable returning a ``MockResponse``.
+            **kwargs: Additional criteria for matching requests and configuration
+                options such as ``max_calls`` or ``error``.
+
+        Returns:
+            Self for method chaining.
+        """
         # Ensure response is a MockResponse object if it's a dict, list, or str
         # Note: Callable responses are handled later in _find_matching_pattern
         if not callable(response):
@@ -51,10 +83,12 @@ class BaseCrudMock:
         return self
 
     def with_default_response(self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]) -> "BaseCrudMock":
+        """Set the default response for unmatched requests."""
         self.default_response = self._ensure_mock_response(response)
         return self
 
     def with_parent_id_handling(self, enabled: bool = True) -> "BaseCrudMock":
+        """Enable or disable ``parent_id`` handling."""
         self._parent_id_handling = enabled
         return self
 
@@ -120,7 +154,9 @@ class BaseCrudMock:
     # --- End Error Simulation Helpers ---
 
     def with_validation_error(self, url_pattern: str, model_class: Type, invalid_data: Dict[str, Any], **kwargs: Any) -> "BaseCrudMock":
-        def validation_error_response(**request_kwargs):
+        """Configure a validation error response."""
+
+        def validation_error_response(**request_kwargs: Any) -> MockResponse:
             try:
                 model_class(**invalid_data)
                 # If validation doesn't fail, return a generic error
@@ -140,6 +176,7 @@ class BaseCrudMock:
         return self.with_response(url_pattern=url_pattern, response=validation_error_response, **kwargs)
 
     def _find_matching_pattern(self, method: str, url: str, **kwargs: Any) -> Optional[Dict[str, Any]]:
+        """Find a matching response pattern for the given request."""
         for pattern in self.response_patterns:
             if re.search(pattern["url_pattern"], url):
                 # Check if we've reached the max calls for this pattern
@@ -190,6 +227,7 @@ class BaseCrudMock:
         return None
 
     def _process_parent_id(self, url: str, parent_id: Optional[str]) -> str:
+        """Process ``parent_id`` to build the correct URL."""
         if not self._parent_id_handling or not parent_id:
             return url
 
@@ -201,6 +239,7 @@ class BaseCrudMock:
         return f"parents/{parent_id}/{resource_path}"
 
     def _filter_requests(self, url_pattern: Optional[str] = None, method: Optional[str] = None) -> List[PreparedRequest]:
+        """Filter the recorded requests by URL pattern and method."""
         filtered_requests = self.request_history
         if url_pattern:
             pattern = re.compile(url_pattern)
@@ -210,6 +249,7 @@ class BaseCrudMock:
         return filtered_requests
 
     def _ensure_mock_response(self, response: Union[MockResponse, Dict[str, Any], List[Dict[str, Any]], str]) -> MockResponse:
+        """Ensure the given value is a ``MockResponse`` instance."""
         if isinstance(response, dict):
             return MockResponse(status_code=200, json_data=response)
         elif isinstance(response, list):
@@ -218,15 +258,17 @@ class BaseCrudMock:
         elif isinstance(response, str):
             return MockResponse(status_code=200, text=response)
         # Assume it's already a MockResponse if not dict/list/str
-        return response  # type: ignore[return-value]
+        return response
 
     def verify_request_count(self, count: int, url_pattern: Optional[str] = None) -> None:
+        """Assert that a specific number of matching requests were made."""
         matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         actual_count = len(matching_requests)
         assert actual_count == count, f"Expected {count} matching requests, but found {actual_count}. " f"Filter: url_pattern={url_pattern}"
 
     def verify_query_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+        """Assert that requests were made with specific query parameters."""
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
         check_query_parameters(
             requests=matching_requests,  # type: ignore[arg-type]
@@ -236,6 +278,7 @@ class BaseCrudMock:
         )
 
     def verify_body_parameters(self, url_pattern: str, expected_params: Dict[str, Any], method: Optional[str] = None) -> None:
+        """Assert that requests were made with specific body parameters."""
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
         check_body_parameters(
             requests=matching_requests,  # type: ignore[arg-type]
@@ -245,6 +288,7 @@ class BaseCrudMock:
         )
 
     def verify_request_sequence(self, sequence: List[Dict[str, Any]], strict: bool = False) -> None:
+        """Assert that requests were made in a specific sequence."""
         if not sequence:
             return
 
@@ -272,6 +316,7 @@ class BaseCrudMock:
             raise AssertionError(f"Request sequence not found. Matched {sequence_idx} of {len(sequence)} expected requests.")
 
     def verify_request_payload(self, payload: Dict[str, Any], url_pattern: Optional[str] = None, match_all: bool = False) -> None:
+        """Assert that requests contained the expected JSON payload."""
         matching_requests = self._filter_requests(url_pattern=url_pattern)
 
         check_request_payload(
@@ -284,6 +329,7 @@ class BaseCrudMock:
     def verify_response_handling(
         self, url_pattern: str, expected_status: int, expected_data: Optional[Dict[str, Any]] = None, method: Optional[str] = None
     ) -> None:
+        """Assert that responses were handled correctly."""
         matching_requests = self._filter_requests(url_pattern=url_pattern, method=method)
 
         check_response_handling(
@@ -297,6 +343,7 @@ class BaseCrudMock:
     def verify_error_handling(
         self, url_pattern: str, expected_error_type: Type[Exception], expected_status: Optional[int] = None, method: Optional[str] = None
     ) -> None:
+        """Assert that errors were handled correctly."""
         # Check if a pre-configured error pattern matches
         for pattern_item in self.response_patterns:
             if "error" in pattern_item and pattern_item["error"] and isinstance(pattern_item["error"], expected_error_type):

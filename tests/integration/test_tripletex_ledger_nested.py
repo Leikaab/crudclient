@@ -7,13 +7,12 @@ focusing on deeply nested resources like ledger and its sub-resources.
 
 import pytest
 
+from .tripletex_resources import TripletexAPI, TripletexTestConfig
 from .tripletex_resources.models import (
     Ledger,
-    LedgerResponse,
+    TripletexResponse,
     Voucher,
-    VoucherResponse,
 )
-from .tripletex_resources.setup import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture
@@ -64,8 +63,8 @@ def test_list_ledgers(api):
     params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
     ledger_response = api.ledger.list(params=params)
 
-    # Check that we got a LedgerResponse object
-    assert isinstance(ledger_response, LedgerResponse)
+    # Check that we got a TripletexResponse object
+    assert isinstance(ledger_response, TripletexResponse)
     assert hasattr(ledger_response, "values")
 
     # Check that the values contains ledger objects
@@ -119,8 +118,8 @@ def test_list_vouchers(api):
     params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
     voucher_response = api.ledger.voucher.list(params=params)
 
-    # Check that we got a VoucherResponse object
-    assert isinstance(voucher_response, VoucherResponse)
+    # Check that we got a TripletexResponse object
+    assert isinstance(voucher_response, TripletexResponse)
     assert hasattr(voucher_response, "values")
 
     # If there are vouchers, check their structure
@@ -139,7 +138,7 @@ def test_read_voucher(api):
     # Get the list of vouchers with required date parameters
 
     # Set date range for the last 30 days
-    date_from, date_to = get_dates()
+    date_from, _ = get_dates()
 
     # Use params dictionary for query parameters
     params = {"dateFrom": date_from, "dateTo": "2025-05-05", "count": 2}  # Limit to just 2 items

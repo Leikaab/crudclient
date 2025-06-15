@@ -54,11 +54,23 @@ class PathBasedResponseModelStrategy(ResponseModelStrategy[T]):
         if not path:
             return data
 
-        current = data
+        current: Any = data
         for part in path.split("."):
-            if not isinstance(current, dict) or part not in current:
-                raise ValueError(f"Could not find '{part}' in path '{path}' in response data")
-            current = current[part]
+            if isinstance(current, list):
+                try:
+                    index = int(part)
+                except ValueError:
+                    raise ValueError(f"Expected integer index in path '{path}', got '{part}'")
+                try:
+                    current = current[index]
+                except IndexError:
+                    raise ValueError(f"Index {index} out of range in path '{path}'")
+            elif isinstance(current, dict):
+                if part not in current:
+                    raise ValueError(f"Could not find '{part}' in path '{path}' in response data")
+                current = current[part]
+            else:
+                raise ValueError(f"Unable to traverse into '{part}' from type {type(current)} while processing path '{path}'")
 
         return current
 

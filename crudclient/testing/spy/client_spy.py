@@ -1,3 +1,5 @@
+"""Concrete Test Spy for the ``Client`` Interface using Enhanced Spying."""
+
 from typing import Any, Dict, Union
 
 from crudclient.client import Client
@@ -10,8 +12,10 @@ from .enhanced import ClassSpy, EnhancedSpyBase
 # Note: This class now primarily acts as a wrapper and provider of specific assertions.
 # The core spying mechanism (call recording, basic assertions) is handled by ClassSpy/EnhancedSpyBase.
 class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions and call storage
+    """A Test Spy specifically for the :class:`crudclient.client.Client` interface."""
 
     def __init__(self, config: Union[ClientConfig, Dict[str, Any]], **kwargs: Any):
+        """Initialize a :class:`ClientSpy` instance."""
         # 1. Create the actual client instance that will be spied upon
         target_client = Client(config, **kwargs)
 
@@ -35,6 +39,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
 
     # Delegate method calls to the spy wrapper
     def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the spy wrapper or base class."""
         # If it's a method we are spying on, get it from the wrapper
         if hasattr(self._spy_wrapper, name) and callable(getattr(self._spy_wrapper, name)):
             # The ClassSpy needs access to *this* instance's _record_call
@@ -60,6 +65,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
 
     # Example: Adjusting assert_endpoint_called
     def verify_endpoint_called(self, endpoint: str) -> None:
+        """Verify that an endpoint was called via any HTTP method."""
         # Access self.get_calls() provided by EnhancedSpyBase
         for call in self.get_calls():  # call is now a CallRecord
             # Endpoint is typically the first positional argument
@@ -70,6 +76,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
 
     # Adjust other custom assertions similarly...
     def verify_endpoint_called_with_method(self, method: str, endpoint: str) -> None:
+        """Verify that an endpoint was called with a specific HTTP method."""
         for call in self.get_calls(method):  # Filter by method name using get_calls(method)
             if call.args and call.args[0] == endpoint:
                 return
@@ -77,6 +84,7 @@ class ClientSpy(EnhancedSpyBase):  # Inherit from EnhancedSpyBase for assertions
         raise VerificationError(f"Endpoint {endpoint} was not called with method {method}")
 
     def verify_json_payload_sent(self, method: str, endpoint: str, expected_json: Any) -> None:
+        """Verify that a JSON payload was sent to an endpoint using ``method``."""
         for call in self.get_calls(method):
             if call.args and call.args[0] == endpoint and "json" in call.kwargs and call.kwargs["json"] == expected_json:
                 return

@@ -7,35 +7,43 @@ from typing import Any, Dict, List, Optional, Union
 
 
 class Response:
+    """Abstract base class defining the interface for an HTTP response object."""
 
     def __init__(self) -> None:
         pass
 
     @property
     def status_code(self) -> int:
+        """The HTTP status code of the response."""
         raise NotImplementedError
 
     @property
     def content(self) -> bytes:
+        """The response body as bytes."""
         raise NotImplementedError
 
     @property
     def text(self) -> str:
+        """The response body decoded as text."""
         raise NotImplementedError
 
     @property
     def headers(self) -> Dict[str, str]:
+        """A dictionary of response headers."""
         raise NotImplementedError
 
     def json(self) -> Any:
+        """Parse the response body as JSON."""
         raise NotImplementedError
 
     def raise_for_status(self) -> None:
+        """Raise an HTTPError for bad status codes (4xx or 5xx)."""
         raise NotImplementedError
 
 
 # CrudBase moved to stubs_crud.py
 class StubResponse(Response):
+    """A concrete stub implementation of the Response interface for testing."""
 
     def __init__(
         self,
@@ -45,6 +53,7 @@ class StubResponse(Response):
         encoding: str = "utf-8",
         elapsed: Optional[timedelta] = None,
     ):
+        """Initialize the StubResponse."""
         super().__init__()
         self._status_code = status_code
         self._headers = headers or {}
@@ -95,10 +104,12 @@ class StubResponse(Response):
 
     @property
     def encoding(self) -> str:
+        """The encoding used for text decoding."""
         return self._encoding
 
     @property
     def elapsed(self) -> timedelta:
+        """The simulated time elapsed for the request."""
         return self._elapsed
 
     def json(self) -> Any:

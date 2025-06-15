@@ -4,7 +4,7 @@ from .models import User, UserResponse
 from .resources import UserAlbumsCrud, UserPostsCrud, UserTodosCrud
 
 
-class UserGroup(ResourceGroup):
+class UserGroup(ResourceGroup[User]):
     """
     ResourceGroup for JSONPlaceholder users.
 

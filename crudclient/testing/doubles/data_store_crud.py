@@ -30,7 +30,7 @@ def list_items(
     include_related: Optional[List[str]] = None,
     fields: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
-    # Docstring moved to .pyi
+    """Lists items from a collection with filtering, sorting, pagination,"""
     data = data_store.get_collection(collection)
 
     # Filter out soft-deleted items unless explicitly included
@@ -74,7 +74,7 @@ def get_item(
     include_related: Optional[List[str]] = None,
     fields: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
-    # Docstring moved to .pyi
+    """Gets a single item by ID."""
     data = data_store.get_collection(collection)
 
     for item in data:
@@ -101,7 +101,7 @@ def get_item(
 
 
 def create_item(data_store: "DataStore", collection: str, data: Dict[str, Any], skip_validation: bool = False) -> Dict[str, Any]:
-    # Docstring moved to .pyi
+    """Creates a single item in a collection."""
     collection_data = data_store.get_collection(collection)
 
     # Create a copy to avoid modifying the original
@@ -136,7 +136,7 @@ def create_item(data_store: "DataStore", collection: str, data: Dict[str, Any], 
 def update_item(
     data_store: "DataStore", collection: str, id: Any, data: Dict[str, Any], skip_validation: bool = False, check_version: bool = True
 ) -> Optional[Dict[str, Any]]:
-    # Docstring moved to .pyi
+    """Updates a single item by ID."""
     collection_data = data_store.get_collection(collection)
 
     for i, item in enumerate(collection_data):
@@ -190,7 +190,7 @@ def update_item(
 
 
 def delete_item(data_store: "DataStore", collection: str, id: Any, soft_delete: bool = False, cascade: bool = False) -> bool:
-    # Docstring moved to .pyi
+    """Deletes a single item by ID."""
     collection_data = data_store.get_collection(collection)
 
     for i, item in enumerate(collection_data):

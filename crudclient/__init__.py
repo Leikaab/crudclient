@@ -12,18 +12,36 @@ Main Components
 - Client: HTTP client for making API requests.
 - ClientConfig: Configuration for the client.
 - Crud: Base class for CRUD operations on API resources.
+- ResourceGroup: Base class for grouping related CRUD resources and other ResourceGroups.
 - AuthStrategy: Base class for authentication strategies.
 
 Example
 -------
 ```python
-from crudclient import API, ClientConfig
+from crudclient import API, ClientConfig, ResourceGroup, Crud
 from crudclient.auth import BearerAuth
+
+class UsersCrud(Crud):
+    _resource_path = "users"
+    _datamodel = User
+
+class PostsCrud(Crud):
+    _resource_path = "posts"
+    _datamodel = Post
+
+class UserGroup(ResourceGroup[User]):
+    _resource_path = "users"
+    _datamodel = User
+
+    def _register_child_endpoints(self):
+        self.posts = PostsCrud(self.client, parent=self)
 
 class MyAPI(API):
     def _register_endpoints(self):
         self.users = UsersCrud(self.client)
-        self.posts = PostsCrud(self.client)
+
+    def _register_groups(self):
+        self.user_group = UserGroup(self.client)
 
 # Create a configuration with bearer token authentication
 config = ClientConfig(
@@ -36,6 +54,8 @@ api = MyAPI(client_config=config)
 
 # Use the API client
 users = api.users.list()
+# Or use resource groups for nested resources
+user_posts = api.user_group.posts.list()
 ```
 """
 
@@ -74,6 +94,7 @@ from .exceptions import (  # Updated imports
     ResponseParsingError,
     ServiceUnavailableError,
 )
+from .groups import ResourceGroup
 from .models import ApiResponse
 from .types import JSONDict, JSONList, RawResponse
 
@@ -88,6 +109,7 @@ __all__ = [  # Updated __all__
     "Client",
     "ClientConfig",
     "Crud",
+    "ResourceGroup",
     # Authentication classes
     "AuthStrategy",
     "AuthStrategyError",

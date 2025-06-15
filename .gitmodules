@@ -1,0 +1,3 @@
+[submodule "apiconfig"]
+	path = apiconfig
+	url = https://github.com/leikaab/apiconfig.git

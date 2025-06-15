@@ -3,46 +3,54 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from crudclient.client import Client
 
+# mypy: ignore-errors
+
 
 class CrudBase:
-    # Docstring moved to .pyi
+    """Abstract base class defining the standard interface for CRUD operations"""
+
     def __init__(self, client: Optional[Client] = None, endpoint: str = "", model: Optional[Type[Any]] = None):
+        """Initialize the CrudBase."""
         self.client = client
         self.endpoint = endpoint
         self.model = model
 
     def list(self, **kwargs: Any) -> List[Any]:
-        # Docstring moved to .pyi
+        """Retrieve a list of resources, potentially filtered or paginated."""
         raise NotImplementedError
 
     def get(self, id: Any, **kwargs: Any) -> Any:
-        # Docstring moved to .pyi
+        """Retrieve a single resource by its unique identifier."""
         raise NotImplementedError
 
     def create(self, data: Any, **kwargs: Any) -> Any:
-        # Docstring moved to .pyi
+        """Create a new resource."""
         raise NotImplementedError
 
     def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
-        # Docstring moved to .pyi
+        """Update an existing resource identified by its ID."""
         raise NotImplementedError
 
     def delete(self, id: Any, **kwargs: Any) -> bool:
-        # Docstring moved to .pyi
+        """Delete a resource identified by its ID."""
         raise NotImplementedError
 
 
 class StubCrud(CrudBase):
-    # Docstring moved to .pyi
-    def configure_list(self, response=None, handler=None):
+    """A stub implementation of CrudBase for testing, using an in-memory data store."""
+
+    def configure_list(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
+        """Configure a static response or a dynamic handler for the `list` operation."""
         self._list_response = response
         self._list_handler = handler
 
-    def configure_get(self, response=None, handler=None):
+    def configure_get(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
+        """Configure a static response or a dynamic handler for the `get` operation."""
         self._get_response = response
         self._get_handler = handler
 
-    def configure_create(self, response=None, handler=None):
+    def configure_create(self, response: Optional[Any] = None, handler: Optional[Callable] = None) -> None:
+        """Configure a static response or a dynamic handler for the `create` operation."""
         self._create_response = response
         self._create_handler = handler
 
@@ -55,6 +63,7 @@ class StubCrud(CrudBase):
         data_store: Optional[Dict[str, Dict[str, Any]]] = None,
     ):
         # Handle the case where the first argument is a string (name)
+        """Initialize the StubCrud instance."""
         if isinstance(client_or_name, str):
             client = None
             # If the first argument is a string, use it as the endpoint
@@ -96,6 +105,7 @@ class StubCrud(CrudBase):
 
     def list(self, **kwargs: Any) -> List[Any]:
         # Call before hook
+        """Simulate retrieving a list of resources from the in-memory store."""
         if self._before_list_hook:
             self._before_list_hook(kwargs)
 
@@ -149,6 +159,7 @@ class StubCrud(CrudBase):
 
     def get(self, id: Any, **kwargs: Any) -> Any:
         # Call before hook
+        """Simulate retrieving a single resource by ID from the in-memory store."""
         if self._before_get_hook:
             self._before_get_hook(id, kwargs)
 
@@ -184,6 +195,7 @@ class StubCrud(CrudBase):
 
     def create(self, data: Any, **kwargs: Any) -> Any:
         # Call before hook
+        """Simulate creating a new resource in the in-memory store."""
         if self._before_create_hook:
             data = self._before_create_hook(data, kwargs)
 
@@ -227,6 +239,7 @@ class StubCrud(CrudBase):
 
     def update(self, id: Any, data: Any, **kwargs: Any) -> Any:
         # Call before hook
+        """Simulate updating an existing resource in the in-memory store."""
         if self._before_update_hook:
             data = self._before_update_hook(id, data, kwargs)
 
@@ -265,6 +278,7 @@ class StubCrud(CrudBase):
 
     def delete(self, id: Any, **kwargs: Any) -> bool:
         # Call before hook
+        """Simulate deleting a resource from the in-memory store."""
         if self._before_delete_hook:
             self._before_delete_hook(id, kwargs)
 
@@ -283,35 +297,46 @@ class StubCrud(CrudBase):
         return True
 
     def set_before_list_hook(self, hook: Callable) -> None:
+        """Set a hook to run before the list operation."""
         self._before_list_hook = hook
 
     def set_after_list_hook(self, hook: Callable) -> None:
+        """Set a hook to run after the list operation, modifying the result."""
         self._after_list_hook = hook
 
     def set_before_get_hook(self, hook: Callable) -> None:
+        """Set a hook to run before the get operation."""
         self._before_get_hook = hook
 
     def set_after_get_hook(self, hook: Callable) -> None:
+        """Set a hook to run after the get operation, modifying the result."""
         self._after_get_hook = hook
 
     def set_before_create_hook(self, hook: Callable) -> None:
+        """Set a hook to run before the create operation, modifying the input data."""
         self._before_create_hook = hook
 
     def set_after_create_hook(self, hook: Callable) -> None:
+        """Set a hook to run after the create operation, modifying the result."""
         self._after_create_hook = hook
 
     def set_before_update_hook(self, hook: Callable) -> None:
+        """Set a hook to run before the update operation, modifying the input data."""
         self._before_update_hook = hook
 
     def set_after_update_hook(self, hook: Callable) -> None:
+        """Set a hook to run after the update operation, modifying the result."""
         self._after_update_hook = hook
 
     def set_before_delete_hook(self, hook: Callable) -> None:
+        """Set a hook to run before the delete operation."""
         self._before_delete_hook = hook
 
     def set_after_delete_hook(self, hook: Callable) -> None:
+        """Set a hook to run after the delete operation."""
         self._after_delete_hook = hook
 
     def verify_deleted(self, id: Any) -> bool:
+        """Check if a resource with the given ID is absent from the data store."""
         str_id = str(id)
         return str_id not in self._data_store

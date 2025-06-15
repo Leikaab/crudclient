@@ -1,8 +1,9 @@
 # import copy # No longer used directly here
 import re
-from typing import (  # Removed Callable, Union, datetime
+from typing import (  # Removed Union, datetime
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     List,
     Optional,
@@ -18,6 +19,7 @@ if TYPE_CHECKING:  # Relationship import no longer needed
 
 
 def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Applies various filters to a list of dictionaries."""
     filtered_data = []
 
     for item in data:
@@ -73,49 +75,59 @@ def apply_filters(data: List[Dict[str, Any]], filters: Dict[str, Any]) -> List[D
 
 
 def _op_eq(value: Any, op_value: Any) -> bool:
-    return value == op_value
+    """Check if value equals op_value."""
+    return bool(value == op_value)
 
 
 def _op_ne(value: Any, op_value: Any) -> bool:
-    return value != op_value
+    """Check if value does not equal op_value."""
+    return bool(value != op_value)
 
 
 def _op_gt(value: Any, op_value: Any) -> bool:
-    return value > op_value
+    """Check if value is greater than op_value."""
+    return bool(value > op_value)
 
 
 def _op_gte(value: Any, op_value: Any) -> bool:
-    return value >= op_value
+    """Check if value is greater than or equal to op_value."""
+    return bool(value >= op_value)
 
 
 def _op_lt(value: Any, op_value: Any) -> bool:
-    return value < op_value
+    """Check if value is less than op_value."""
+    return bool(value < op_value)
 
 
 def _op_lte(value: Any, op_value: Any) -> bool:
-    return value <= op_value
+    """Check if value is less than or equal to op_value."""
+    return bool(value <= op_value)
 
 
 def _op_in(value: Any, op_value: Any) -> bool:
-    return value in op_value
+    """Check if value is in op_value."""
+    return bool(value in op_value)
 
 
 def _op_nin(value: Any, op_value: Any) -> bool:
-    return value not in op_value
+    """Check if value is not in op_value."""
+    return bool(value not in op_value)
 
 
 def _op_exists(value: Any, op_value: bool) -> bool:
+    """Check if value exists (is not None) when op_value is True,"""
     if op_value:
-        return value is not None
-    return value is None
+        return bool(value is not None)
+    return bool(value is None)
 
 
 def _op_regex(value: Any, op_value: str) -> bool:
-    return isinstance(value, str) and bool(re.search(op_value, value))
+    """Check if value matches the regex pattern in op_value."""
+    return bool(isinstance(value, str) and re.search(op_value, value))
 
 
 # Map of operators to their handler functions
-_OPERATOR_HANDLERS = {
+_OPERATOR_HANDLERS: Dict[str, Callable[[Any, Any], bool]] = {
     "$eq": lambda v, op_v: _op_ne(v, op_v) is False,  # Inverted to match original logic
     "$ne": lambda v, op_v: _op_eq(v, op_v) is False,  # Inverted to match original logic
     "$gt": _op_gt,
@@ -130,6 +142,7 @@ _OPERATOR_HANDLERS = {
 
 
 def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
+    """Applies MongoDB-style operators to filter a value."""
     for op, op_value in operators.items():
         handler = _OPERATOR_HANDLERS.get(op)
         if handler:
@@ -144,6 +157,7 @@ def apply_operator_filter(value: Any, operators: Dict[str, Any]) -> bool:
 
 
 def apply_pagination(data: List[Dict[str, Any]], page: int, page_size: int) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Applies pagination to a list of data."""
     total_count = len(data)
     total_pages = (total_count + page_size - 1) // page_size if page_size > 0 else 1
 
@@ -161,10 +175,12 @@ def apply_pagination(data: List[Dict[str, Any]], page: int, page_size: int) -> T
 
 
 def apply_field_selection(data: List[Dict[str, Any]], fields: List[str]) -> List[Dict[str, Any]]:
+    """Selects only the specified fields from a list of dictionaries."""
     return [{k: v for k, v in item.items() if k in fields} for item in data]
 
 
 def validate_item(data_store: "DataStore", collection: str, item: Dict[str, Any], add_to_constraints: bool = True) -> None:
+    """Validates an item against defined validation rules, unique constraints,"""
     errors: Dict[str, List[str]] = {}  # Added type annotation
 
     # Apply validation rules defined in DataStore

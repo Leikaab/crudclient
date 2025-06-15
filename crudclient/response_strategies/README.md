@@ -34,8 +34,8 @@ This strategy extends the conversion logic by allowing data extraction from nest
     *   `single_item_path: Optional[str]`: A dot-notation path (e.g., `"result.data"`) to locate the single item data within the response.
     *   `list_item_path: Optional[str]`: A dot-notation path to locate the list data within the response.
     *   `pre_transform: Optional[ResponseTransformer]`: A callable function to modify the raw response data *before* path extraction or model conversion.
-*   **`convert_single`**: Prepares the data (handles `dict`, `str`, `bytes`), applies the `pre_transform` if provided, extracts the relevant part using `single_item_path` if provided, and then converts it using the `datamodel` (or returns the extracted `JSONDict` if no model).
-*   **`convert_list`**: Prepares the data, applies `pre_transform`. If an `api_response_model` is provided and the data is a dictionary, it attempts to parse using that model. Otherwise, it extracts the list data using `list_item_path` if provided. Finally, it converts list items using the `datamodel` if specified, or returns the extracted `JSONList`.
+*   **`convert_single`**: Prepares the data (handles `dict`, `str`, `bytes`), applies the `pre_transform` if provided, extracts the relevant part using `single_item_path` if provided, and then converts it using the `datamodel` (or returns the extracted `JSONDict` if no model). Path segments may include numeric indices to access list elements (for example `"results.0.item"`).
+*   **`convert_list`**: Prepares the data, applies `pre_transform`. If an `api_response_model` is provided and the data is a dictionary, it attempts to parse using that model. Otherwise, it extracts the list data using `list_item_path` if provided. Numeric indices in the path are also supported. Finally, it converts list items using the `datamodel` if specified, or returns the extracted `JSONList`.
 
 ## Supporting Types
 

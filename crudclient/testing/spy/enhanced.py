@@ -1,3 +1,5 @@
+"""Enhanced spy components for detailed interaction recording and verification."""
+
 import inspect
 import time
 from datetime import datetime
@@ -8,6 +10,7 @@ from .spy_assertions import SpyAssertionsMixin
 
 
 class CallRecord(MethodCall):
+    """Represents a single recorded method call with enhanced details."""
 
     def __init__(
         self,
@@ -19,6 +22,7 @@ class CallRecord(MethodCall):
         result: Any = None,
         exception: Optional[Exception] = None,
     ):
+        """Initializes an enhanced record of a method call."""
         # Initialize the base MethodCall with the common attributes
         super().__init__(method_name, args, kwargs, result, exception)
 
@@ -47,6 +51,7 @@ class CallRecord(MethodCall):
                 break
 
     def __repr__(self) -> str:
+        """Return a developer-friendly representation of the call record."""
         args_str = ", ".join([repr(arg) for arg in self.args])
         kwargs_str = ", ".join([f"{k}={repr(v)}" for k, v in self.kwargs.items()])
         all_args = ", ".join(filter(None, [args_str, kwargs_str]))
@@ -64,8 +69,10 @@ class CallRecord(MethodCall):
 
 
 class EnhancedSpyBase(SpyAssertionsMixin):
+    """Base class for enhanced spies providing call recording and retrieval logic."""
 
     def __init__(self) -> None:
+        """Initializes the spy with empty call lists."""
         self._calls: List[CallRecord] = []
         self._method_calls: Dict[str, List[CallRecord]] = {}
 
@@ -78,6 +85,7 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         exception: Optional[Exception] = None,
         duration: Optional[float] = None,
     ) -> None:
+        """Record a method call with its arguments and result."""
         timestamp = time.time()
 
         record = CallRecord(
@@ -92,18 +100,22 @@ class EnhancedSpyBase(SpyAssertionsMixin):
         self._method_calls[method_name].append(record)
 
     def get_calls(self, method_name: Optional[str] = None) -> List[CallRecord]:
+        """Retrieve recorded calls."""
         if method_name is None:
             return self._calls
 
         return self._method_calls.get(method_name, [])
 
     def get_call_count(self, method_name: Optional[str] = None) -> int:
+        """Get the number of times a method (or any method) was called."""
         return len(self.get_calls(method_name))
 
     def was_called(self, method_name: str) -> bool:
+        """Check if the specified method was called at least once."""
         return method_name in self._method_calls and len(self._method_calls[method_name]) > 0
 
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
+        """Check if the specified method was called with the exact arguments."""
         if not self.was_called(method_name):
             return False
 
@@ -131,19 +143,23 @@ class EnhancedSpyBase(SpyAssertionsMixin):
     # Assertion methods are inherited from SpyAssertionsMixin
 
     def reset(self) -> None:
+        """Clears all recorded calls."""
         self._calls = []
         self._method_calls = {}
 
 
 class MethodSpy:
+    """Wraps a single method to spy on its calls."""
 
     def __init__(self, original_method: Callable, spy: EnhancedSpyBase, method_name: str, record_only: bool = False):
+        """Initializes a spy for a specific method."""
         self.original_method = original_method
         self.spy = spy
         self.method_name = method_name
         self.record_only = record_only
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Handle calls to the spied method and record them."""
         start_time = time.time()
         result = None
         exception = None
@@ -161,8 +177,10 @@ class MethodSpy:
 
 
 class ClassSpy(EnhancedSpyBase):
+    """Spies on methods of a target object instance."""
 
     def __init__(self, target_object: Any, methods: Optional[List[str]] = None, record_only: bool = False):
+        """Initializes a spy for an object instance."""
         super().__init__()
         self.target_object = target_object
         self.record_only = record_only
@@ -179,13 +197,15 @@ class ClassSpy(EnhancedSpyBase):
                 setattr(self, method_name, spy_method)
 
     def __getattr__(self, name: str) -> Any:
-        # If the attribute is not a spied method, delegate to the target object
+        """Delegate attribute access to the target object if not a spied method."""
         return getattr(self.target_object, name)
 
 
 class FunctionSpy(EnhancedSpyBase):
+    """Spies on calls to a standalone function."""
 
     def __init__(self, target_function: Callable, record_only: bool = False):
+        """Initializes a spy for a standalone function."""
         super().__init__()
         self.target_function = target_function
         self.record_only = record_only
@@ -194,6 +214,7 @@ class FunctionSpy(EnhancedSpyBase):
         self.method_name = target_function.__name__
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Handle calls to the spied function and record them."""
         start_time = time.time()
         result = None
         exception = None
@@ -211,17 +232,21 @@ class FunctionSpy(EnhancedSpyBase):
 
 
 class EnhancedSpyFactory:
+    """Provides static methods to conveniently create different types of spies."""
 
     @staticmethod
     def create_class_spy(target_object: Any, methods: Optional[List[str]] = None, record_only: bool = False) -> ClassSpy:
+        """Factory method to create a :class:`ClassSpy`."""
         return ClassSpy(target_object, methods, record_only)
 
     @staticmethod
     def create_function_spy(target_function: Callable, record_only: bool = False) -> FunctionSpy:
+        """Factory method to create a :class:`FunctionSpy`."""
         return FunctionSpy(target_function, record_only)
 
     @staticmethod
     def patch_method(target_object: Any, method_name: str, record_only: bool = False) -> FunctionSpy:
+        """Patch a method on an object with a :class:`FunctionSpy`."""
         original_method = getattr(target_object, method_name)
         spy = FunctionSpy(original_method, record_only)
         setattr(target_object, method_name, spy)
