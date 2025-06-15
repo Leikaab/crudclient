@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union, cast
 if TYPE_CHECKING:
     from .base import Crud
 
+from apiconfig.utils.redaction import redact_body
 from pydantic import ValidationError as PydanticValidationError
 
 from ..exceptions import CrudClientError, DataValidationError, ResponseParsingError
-from ..http.utils import redact_json_body  # Import redaction utility
 from ..models import ApiResponse
 from ..response_strategies import (
     DefaultResponseModelStrategy,
@@ -165,7 +165,7 @@ def _convert_to_model(self: "Crud[T]", data: RawResponse) -> Union[T, JSONDict]:
         model_name = getattr(self._datamodel, "__name__", "Unknown")
         error_msg = f"Response data validation failed for model {model_name}"
         safe_data = locals().get("validated_data", data)
-        redacted_data = redact_json_body(safe_data) if isinstance(safe_data, (dict, list)) else safe_data
+        redacted_data = redact_body(safe_data) if isinstance(safe_data, (dict, list)) else safe_data
         logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
@@ -200,7 +200,7 @@ def _convert_to_list_model(self: "Crud[T]", data: JSONList) -> Union[List[T], JS
     except PydanticValidationError as e:
         model_name = getattr(self._datamodel, "__name__", "Unknown")
         error_msg = f"Response list item validation failed for model {model_name}"
-        redacted_data = redact_json_body(data) if isinstance(data, (dict, list)) else data
+        redacted_data = redact_body(data) if isinstance(data, (dict, list)) else data
         logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
@@ -247,7 +247,7 @@ def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList,
         model_name = getattr(self._datamodel, "__name__", "Unknown")
         error_msg = f"Response list validation failed for model {model_name}"
         safe_data = locals().get("validated_data", data)
-        redacted_data = redact_json_body(safe_data) if isinstance(safe_data, (dict, list)) else safe_data
+        redacted_data = redact_body(safe_data) if isinstance(safe_data, (dict, list)) else safe_data
         logger.error(f"{error_msg}: errors={json.dumps(e.errors())}")
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
     except Exception as e:
@@ -372,7 +372,7 @@ def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_mode
         if non_missing_errors:
             model_name = getattr(model, "__name__", "Unknown")
             error_msg = f"Partial update data validation failed for provided fields in model {model_name}"
-            redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
+            redacted_data = redact_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
             logger.warning(
                 "%s: %s",
                 error_msg,
@@ -413,7 +413,7 @@ def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validatio
     except PydanticValidationError as e:
         model_name = getattr(model, "__name__", "Unknown")
         error_msg = f"Input data validation failed for model {model_name}"
-        redacted_data = redact_json_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
+        redacted_data = redact_body(data_dict) if isinstance(data_dict, (dict, list)) else data_dict
         logger.warning(
             "%s: %s",
             error_msg,

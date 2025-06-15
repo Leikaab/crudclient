@@ -4,10 +4,10 @@ from typing import Any, Dict, cast  # Add cast
 from unittest.mock import MagicMock  # Import MagicMock
 
 import pytest
+from apiconfig.utils.redaction import redact_body
 from pydantic import BaseModel, Field, ValidationError
 
 from crudclient.exceptions import DataValidationError
-from crudclient.http.utils import redact_json_body
 
 # mock_client_config fixture is automatically discovered by pytest from tests/unit/http/conftest.py
 # No explicit import needed.
@@ -44,9 +44,9 @@ def test_log_response_body_redaction_simple(
     }
     # Simulate logging the response body (adapt based on actual HttpLifecycleLogger method)
     # Assuming a method like log_response_body exists or is part of log_request_completion
-    # For this test, let's directly call redact_json_body and log it
-    redacted_body = redact_json_body(response_body)
-    test_logger.debug(f"Response body (redacted): {redacted_body}")
+    # For this test, let's directly call redact_body and log it
+    redacted_body = redact_body(response_body)
+    test_logger.debug(f"Response body (redacted): {str(redacted_body)}")
 
     body_log_found = False
     for record in caplog.records:
@@ -90,8 +90,8 @@ def test_log_response_body_redaction_nested_list(
         ],
         "metadata": {"count": 3},
     }
-    redacted_body = redact_json_body(response_body)
-    test_logger.debug(f"Response body (redacted): {redacted_body}")
+    redacted_body = redact_body(response_body)
+    test_logger.debug(f"Response body (redacted): {str(redacted_body)}")
 
     body_log_found = False
     for record in caplog.records:
@@ -154,7 +154,7 @@ def test_data_validation_error_exception_redaction():
     except ValidationError as e:
         # Simulate the raising of DataValidationError as done in response_conversion.py
         # It redacts the data *before* passing it to the exception constructor.
-        redacted_input_data_for_exception = redact_json_body(invalid_data)
+        redacted_input_data_for_exception = redact_body(invalid_data)
         try:
             # Use the correct constructor parameters: message, data, pydantic_error
             raise DataValidationError(

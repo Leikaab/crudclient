@@ -60,13 +60,13 @@ Provides detailed logging throughout the HTTP request and response lifecycle, co
 *   Logs request details (method, URL, parameters, headers).
 *   Logs response details (status code, reason, headers).
 *   Optionally logs request and response bodies (truncating long bodies).
-*   Redacts sensitive information (e.g., passwords, tokens, API keys) from logged headers and JSON bodies using helpers from `crudclient.http.utils`.
+*   Redacts sensitive information (e.g., passwords, tokens, API keys) from logged headers and bodies using helpers from `apiconfig.utils.redaction`.
 *   Logs the final outcome (success or failure), attempt count, and total duration of the request.
 
 ### Utilities (`utils.py`)
-Contains helper functions primarily used for logging:
-*   `redact_sensitive_headers`: Redacts known sensitive headers (e.g., `Authorization`, `Cookie`) and prefixes (e.g., `X-API-Key`).
-*   `redact_json_body`: Recursively redacts known sensitive keys (e.g., `password`, `token`, `api_key`) within JSON-like dictionary/list structures.
+Re-exports redaction helpers from `apiconfig.utils.redaction`:
+*   `redact_headers`: Redacts sensitive headers (e.g., `Authorization`, `Cookie`).
+*   `redact_body`: Redacts sensitive values in JSON or form-encoded bodies.
 
 ## Key Exports
 

@@ -11,10 +11,10 @@ import time
 from typing import Any, Dict, Optional, Union
 
 import requests
+from apiconfig.utils.redaction import redact_body, redact_headers
 from requests.structures import CaseInsensitiveDict
 
 from ..config import ClientConfig
-from .utils import redact_json_body, redact_sensitive_headers
 
 _BODY_LOG_TRUNCATION_LIMIT = 1024
 
@@ -39,7 +39,7 @@ class HttpLifecycleLogger:
         if is_json and "json" in kwargs and kwargs["json"] is not None:
             try:
                 original_body = kwargs["json"]
-                redacted_body = redact_json_body(original_body)
+                redacted_body = redact_body(original_body)
                 body_to_log = json_lib.dumps(redacted_body)
                 content_type_display = "application/json (redacted)"
             except Exception as e:
@@ -85,7 +85,7 @@ class HttpLifecycleLogger:
             if content_type.startswith("application/json"):
                 try:
                     parsed_body = json_lib.loads(body_text)
-                    redacted_body = redact_json_body(parsed_body)
+                    redacted_body = redact_body(parsed_body)
                     body_to_log = json_lib.dumps(redacted_body)
                     log_content_type_display = "application/json (redacted)"
                 except json_lib.JSONDecodeError as json_err:
@@ -127,7 +127,7 @@ class HttpLifecycleLogger:
             # Convert if necessary, though response.headers usually is CaseInsensitiveDict
             headers_to_log = dict(headers_to_log)  # type: ignore
 
-        self.logger.debug("Response Headers: %s", redact_sensitive_headers(headers_to_log))
+        self.logger.debug("Response Headers: %s", redact_headers(headers_to_log))
 
         if self.config.log_response_body:
             self.log_response_body_content(response)
@@ -147,7 +147,7 @@ class HttpLifecycleLogger:
         if not isinstance(headers_to_log, (dict, CaseInsensitiveDict)):
             headers_to_log = dict(headers_to_log)
 
-        self.logger.debug("Request Headers: %s", redact_sensitive_headers(headers_to_log))
+        self.logger.debug("Request Headers: %s", redact_headers(headers_to_log))
 
         if self.config.log_request_body:
             self.log_request_body_content(kwargs)

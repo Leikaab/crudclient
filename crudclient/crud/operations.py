@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     from .base import Crud
     from crudclient.models import ListResponseWrapper
 
+from apiconfig.utils.redaction import redact_body
+
 from ..exceptions import DataValidationError
-from ..http.utils import redact_json_body
 from ..types import JSONDict, JSONList
 from .base import T
 
@@ -134,7 +135,7 @@ def create_operation(
         return self._convert_to_model(response)  # type: ignore[no-any-return]
 
     except PydanticValidationError as e:
-        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        redacted_data = redact_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'create' for resource '%s'. Errors: %s",
             getattr(model_for_create, "__name__", "Unknown") if model_for_create else "Unknown",
@@ -256,7 +257,7 @@ def update_operation(
         return self._convert_to_model(response)  # type: ignore[no-any-return]
 
     except PydanticValidationError as e:
-        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        redacted_data = redact_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'update' for resource '%s'. Errors: %s",
             getattr(model_for_update, "__name__", "Unknown") if model_for_update else "Unknown",
@@ -321,7 +322,7 @@ def partial_update_operation(
         return self._convert_to_model(response)  # type: ignore[no-any-return]
 
     except PydanticValidationError as e:
-        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        redacted_data = redact_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during 'partial_update' for resource '%s'. Errors: %s",
             getattr(model_for_partial_update, "__name__", "Unknown") if model_for_partial_update else "Unknown",
@@ -527,7 +528,7 @@ def custom_action_operation(
             raise
 
     except PydanticValidationError as e:
-        redacted_data = redact_json_body(data) if isinstance(data, (dict, TypingList)) else data
+        redacted_data = redact_body(data) if isinstance(data, (dict, TypingList)) else data
         logger.error(
             "Request data validation failed during custom action '%s'. Errors: %s",
             action,
