@@ -17,6 +17,9 @@ extraction methods may raise `ValueError` for invalid input formats.
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from apiconfig.exceptions.auth import AuthenticationError
+
+from ..exceptions import VerificationError
 from .auth_error_verification import AuthErrorVerification
 
 # Re-export the classes from their respective modules
@@ -57,7 +60,11 @@ class AuthVerificationHelpers:
             True
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_basic_auth_header("Bearer token")
         """
-        return AuthHeaderVerification.verify_basic_auth_header(header_value)
+        try:
+            AuthHeaderVerification.verify_basic_auth_header(header_value)
+            return True
+        except AuthenticationError:
+            return False
 
     @staticmethod
     def verify_bearer_auth_header(header_value: str) -> bool:
@@ -81,7 +88,11 @@ class AuthVerificationHelpers:
             True
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_bearer_auth_header("Basic dXNlcjpwYXNz")
         """
-        return AuthHeaderVerification.verify_bearer_auth_header(header_value)
+        try:
+            AuthHeaderVerification.verify_bearer_auth_header(header_value)
+            return True
+        except AuthenticationError:
+            return False
 
     @staticmethod
     def verify_api_key_header(header_value: str, expected_key: Optional[str] = None) -> bool:
@@ -111,7 +122,11 @@ class AuthVerificationHelpers:
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_api_key_header("secret1", expected_key="secret2")
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_api_key_header("")
         """
-        return AuthHeaderVerification.verify_api_key_header(header_value, expected_key)
+        try:
+            AuthHeaderVerification.verify_api_key_header(header_value, expected_key)
+            return True
+        except AuthenticationError:
+            return False
 
     @staticmethod
     def verify_auth_header_format(headers: Dict[str, str], auth_type: str, header_name: str = "Authorization") -> None:
@@ -138,7 +153,10 @@ class AuthVerificationHelpers:
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_auth_header_format(headers, "Basic")
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_auth_header_format({}, "Bearer")
         """
-        return AuthHeaderVerification.verify_auth_header_format(headers, auth_type, header_name)
+        try:
+            AuthHeaderVerification.verify_auth_header_format(headers, auth_type, header_name)
+        except AuthenticationError as exc:
+            raise VerificationError(str(exc)) from exc
 
     # Token verification methods
     @staticmethod
