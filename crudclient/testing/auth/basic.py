@@ -9,8 +9,12 @@ import base64
 import re
 from typing import TYPE_CHECKING, List, Optional, Pattern, Tuple
 
-from crudclient.auth import AuthStrategy, BasicAuth
+from apiconfig.testing.auth_verification import AuthHeaderVerification
 
+from crudclient.auth import AuthStrategy, BasicAuth
+from crudclient.exceptions import AuthenticationError
+
+from .auth_extraction_utils import AuthExtractionUtils
 from .base import AuthMockBase
 
 if TYPE_CHECKING:
@@ -143,28 +147,14 @@ class BasicAuthMock(AuthMockBase):
         return self
 
     def verify_auth_header(self, header_value: str) -> bool:
-        """
-        Verify that the authentication header has the correct format.
-
-        Args:
-            header_value: The value of the authentication header
-
-        Returns:
-            True if the header is valid, False otherwise
-        """
-        if not header_value.startswith("Basic "):
-            return False
-
+        """Verify that the authentication header has the correct format."""
         try:
-            encoded_part = header_value[6:]  # Skip "Basic "
-            decoded = base64.b64decode(encoded_part).decode("utf-8")
-            if ":" not in decoded:
-                return False
-
-            username, password = decoded.split(":", 1)
-            return self.validate_credentials(username, password)
-        except Exception:
+            AuthHeaderVerification.verify_basic_auth_header(header_value)
+            username, password = AuthExtractionUtils.extract_basic_auth_credentials(header_value)
+        except (AuthenticationError, ValueError):
             return False
+
+        return self.validate_credentials(username, password)
 
     def validate_credentials(self, username: str, password: str) -> bool:
         """
