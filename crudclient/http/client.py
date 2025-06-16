@@ -32,7 +32,7 @@ from ..exceptions import (
 from ..ratelimit import get_rate_limiter
 from ..types import RawResponseSimple
 from .errors import ErrorHandler
-from .logging import HttpLifecycleLogger
+from .logging import HttpLifecycleLogger, setup_http_logging
 from .request import RequestFormatter
 from .response import ResponseHandler
 from .retry import RetryHandler
@@ -123,6 +123,7 @@ class HttpClient:
         self.response_handler = response_handler or ResponseHandler()
         self.error_handler = error_handler or ErrorHandler()
         self.retry_handler = retry_handler or RetryHandler(max_retries=config.retries or 0)
+        setup_http_logging(logging.WARNING)
         self.http_logger = HttpLifecycleLogger(config=config, logger=logger)
 
         self.rate_limiter = get_rate_limiter(config)

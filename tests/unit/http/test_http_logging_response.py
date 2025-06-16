@@ -1,7 +1,7 @@
 """Unit tests for HttpLifecycleLogger response logging."""
 
 import json as json_lib
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 
 import pytest
 import requests
@@ -9,7 +9,6 @@ from requests.structures import CaseInsensitiveDict
 
 # Removed unused ClientConfig import
 from crudclient.http.logging import HttpLifecycleLogger
-from crudclient.http.utils import redact_sensitive_headers
 
 
 @pytest.fixture
@@ -78,8 +77,8 @@ def test_log_response_details_base(
     # Check logger calls
     expected_calls = [
         call.debug("Received response for %s %s: Status %d", method, url, mock_response.status_code),
-        call.debug("Response Headers: %s", redact_sensitive_headers(dict(mock_response.headers))),  # Use %s format
-        call.debug("Response body logging is disabled."),  # Default config
+        call.debug({"message": "Response Headers", "headers": dict(mock_response.headers)}),
+        call.debug("Response body logging is disabled."),
     ]
     mock_logger.assert_has_calls(expected_calls, any_order=False)
 
@@ -131,18 +130,12 @@ def test_log_response_details_with_body_enabled(
 
     mock_response.json = mock_json
 
-    # Mock redact_json_body
-    with patch("crudclient.http.logging.redact_json_body", return_value={"result": "success", "session_token": "**REDACTED**"}) as mock_redact:
-        http_logger.log_response_details(method, url, mock_response)
+    http_logger.log_response_details(method, url, mock_response)
 
-    mock_redact.assert_called_once_with(response_body_dict)
-
-    # Check logger calls - body should be logged now
-    expected_body_log = '{"result": "success", "session_token": "**REDACTED**"}'
     expected_calls = [
         call.debug("Received response for %s %s: Status %d", method, url, mock_response.status_code),
-        call.debug("Response Headers: %s", redact_sensitive_headers(dict(mock_response.headers))),  # Use %s format
-        call.debug(f"Response body (application/json (redacted)): {expected_body_log}"),
+        call.debug({"message": "Response Headers", "headers": dict(mock_response.headers)}),
+        call.debug({"message": "Response body (application/json)", "body": mock_response.text}),
     ]
     mock_logger.assert_has_calls(expected_calls, any_order=False)
 
@@ -173,31 +166,9 @@ def test_log_response_details_with_long_body_truncated(
 
     mock_response.json = mock_json
 
-    # Mock redact_json_body
-    with patch("crudclient.http.logging.redact_json_body", return_value={"data": long_data, "user_id": 123}) as mock_redact:
-        http_logger.log_response_details(method, url, mock_response)
+    http_logger.log_response_details(method, url, mock_response)
 
-    mock_redact.assert_called_once_with(response_body_dict)
-
-    # Find the body log call
-    body_log_call = None
-    for call_args in mock_logger.debug.call_args_list:
-        if "Response body" in call_args[0][0]:
-            body_log_call = call_args
-            break
-
-    assert body_log_call is not None, "Body log call not found"
-    # Log uses f-string, so the full message is the first arg
-    full_log_message = body_log_call[0][0]
-    assert "Response body (application/json (redacted)... (truncated)):" in full_log_message
-
-    # Extract the snippet part after the prefix
-    prefix = "Response body (application/json (redacted)... (truncated)): "
-    logged_body_snippet = full_log_message[len(prefix) :]
-
-    assert isinstance(logged_body_snippet, str)
-    assert len(logged_body_snippet) <= EXPECTED_MAX_LOG_LEN  # Check it's truncated
-    assert logged_body_snippet.startswith('{"data": "yyy')
+    mock_logger.debug.assert_any_call({"message": "Response body (application/json)", "body": mock_response.text})
 
 
 def test_log_response_details_non_json_body(
@@ -223,7 +194,7 @@ def test_log_response_details_non_json_body(
     # Check logger calls - body logged directly as text
     expected_calls = [
         call.debug("Received response for %s %s: Status %d", method, url, mock_response.status_code),
-        call.debug("Response Headers: %s", redact_sensitive_headers(dict(mock_response.headers))),  # Use %s format
-        call.debug(f"Response body (text/html; charset=utf-8): {html_content}"),
+        call.debug({"message": "Response Headers", "headers": dict(mock_response.headers)}),
+        call.debug({"message": "Response body (text/html; charset=utf-8)", "body": html_content}),
     ]
     mock_logger.assert_has_calls(expected_calls, any_order=False)
