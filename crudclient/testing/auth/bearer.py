@@ -16,7 +16,10 @@ from typing import (
     Tuple,
 )
 
+from apiconfig.testing.auth_verification import AuthHeaderVerification
+
 from crudclient.auth import AuthStrategy, BearerAuth
+from crudclient.exceptions import AuthenticationError
 
 from .base import AuthMockBase
 
@@ -260,19 +263,13 @@ class BearerAuthMock(AuthMockBase):
         return True
 
     def verify_auth_header(self, header_value: str) -> bool:
-        """
-        Verify that the authentication header has the correct format.
-
-        Args:
-            header_value: The value of the authentication header
-
-        Returns:
-            True if the header is valid, False otherwise
-        """
-        if not header_value.startswith("Bearer "):
+        """Verify that the authentication header has the correct format."""
+        try:
+            AuthHeaderVerification.verify_bearer_auth_header(header_value)
+        except AuthenticationError:
             return False
 
-        token = header_value[7:]  # Skip "Bearer "
+        token = header_value[7:]
         return self.validate_token(token)
 
     def validate_token(self, token: str) -> bool:

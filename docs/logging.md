@@ -37,6 +37,39 @@ logging.basicConfig(
 # ... operations ...
 ```
 
+### Example: Custom Handler and Body Logging
+
+This example shows how to configure a custom handler with a formatter that
+includes the timestamp and logger name. It also demonstrates enabling request
+and response body logging via `ClientConfig`.
+
+```python
+import logging
+from crudclient import Client, ClientConfig
+
+handler = logging.StreamHandler()
+handler.setFormatter(
+    logging.Formatter("%(asctime)s %(name)s %(levelname)s: %(message)s")
+)
+
+logger = logging.getLogger("crudclient")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
+config = ClientConfig(log_request_body=True, log_response_body=True)
+client = Client(config=config)
+
+# Example call
+# client.crud("items").read("some_id")
+```
+
+The output will look similar to the following when a request is made:
+
+```text
+2024-04-30 12:34:56,789 crudclient.http DEBUG: Request GET https://api.example.com/items/some_id
+2024-04-30 12:34:56,900 crudclient.http DEBUG: Response 200 OK
+```
+
 **2. Direct Logger Configuration**
 
 Provides fine-grained control by configuring the `'crudclient'` logger (or its children) directly.
