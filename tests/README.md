@@ -298,8 +298,17 @@ def test_paginated_response(create_paginated_api_response, requests_mocker):
 
 7. **Show extra test summary**:
    ```
-   poetry run pytest -ra  # Show extra test summary info for all except passed tests
-   ```
+poetry run pytest -ra  # Show extra test summary info for all except passed tests
+```
+
+### Live Integration Tests
+
+Integration tests that hit live endpoints are skipped by default. To enable
+them, set the environment variable `RUN_LIVE_TESTS=1` before running pytest:
+
+```bash
+RUN_LIVE_TESTS=1 poetry run pytest tests/integration
+```
 
 ## Coverage
 

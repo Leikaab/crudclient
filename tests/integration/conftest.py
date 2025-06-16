@@ -4,6 +4,7 @@ Pytest configuration and fixtures for integration tests.
 
 import datetime
 import logging
+import os
 import uuid
 from typing import List, Optional
 
@@ -15,7 +16,21 @@ from .tripletex_resources import TripletexAPI, TripletexTestConfig
 # Load environment variables from .env file
 load_dotenv()
 
+# Environment variable that controls running live tests
+RUN_LIVE_TESTS = os.getenv("RUN_LIVE_TESTS")
+
 logger = logging.getLogger(__name__)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip integration tests when RUN_LIVE_TESTS is not set."""
+    if RUN_LIVE_TESTS:
+        return
+
+    skip_marker = pytest.mark.skip(reason="RUN_LIVE_TESTS not set; skipping integration tests")
+    for item in items:
+        item.add_marker(skip_marker)
+
 
 # Prefix for test suppliers to identify them for cleanup
 TEST_SUPPLIER_PREFIX = "TEST_CRUDCLIENT_"
