@@ -18,6 +18,37 @@ import pytest
 from pytest import Item  # Added import
 from xdist.scheduler import LoadScheduling  # Moved import to top level
 
+# ---------------------------------------------------------------------------
+# Compatibility patch for pytest-httpserver < 1.2
+# ---------------------------------------------------------------------------
+try:
+    import inspect
+
+    from pytest_httpserver import httpserver as _httpserver  # type: ignore
+    from werkzeug.wrappers import Response
+
+    if "response_json" not in inspect.signature(_httpserver.RequestHandler.respond_with_response).parameters:
+        _orig_respond = _httpserver.RequestHandler.respond_with_response
+
+        def _patched_respond_with_response(
+            self,
+            response: Response,
+            *,
+            response_json=None,
+            response_data=None,
+        ):
+            if response_json is not None:
+                if "Content-Type" not in response.headers:
+                    response.headers["Content-Type"] = "application/json"
+                response.set_data(json.dumps(response_json))
+            elif response_data is not None:
+                response.set_data(response_data)
+            _orig_respond(self, response)
+
+        _httpserver.RequestHandler.respond_with_response = _patched_respond_with_response  # type: ignore[assignment]
+except Exception:  # pragma: no cover - patch is best effort
+    pass
+
 # Consider adding 'import xml.etree.ElementTree as ET' if XML parsing/mocking is needed
 
 pytest_plugins = [

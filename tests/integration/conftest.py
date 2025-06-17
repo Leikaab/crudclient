@@ -4,6 +4,7 @@ Pytest configuration and fixtures for integration tests.
 
 import datetime
 import logging
+import os
 import uuid
 from typing import List, Optional
 
@@ -98,6 +99,10 @@ def cleanup_orphaned_test_suppliers(request):
     """
 
     def cleanup():
+        if not (os.getenv("TRIPLETEX_TEST_CONSUMER_TOKEN") and os.getenv("TRIPLETEX_TEST_EMPLOYEE_TOKEN")):
+            logger.info("Skipping Tripletex test supplier cleanup due to missing tokens")
+            return
+
         config = TripletexTestConfig()
         api = TripletexAPI(client_config=config)
 
