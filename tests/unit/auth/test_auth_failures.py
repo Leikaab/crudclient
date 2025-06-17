@@ -37,7 +37,7 @@ class TestAuthFailures:
         # Check that the exception contains the error details
         assert "Auth setup failed" in str(excinfo.value)
 
-    def test_auth_param_setup_failure(self, mock_request, create_mock_client_config):
+    def test_auth_param_setup_failure(self, mock_request, create_valid_client_config):
         """
         Test that exceptions during auth parameter setup are propagated.
 
@@ -64,7 +64,7 @@ class TestAuthFailures:
 
         # Configure a client with this auth strategy
         # Configure a client using the factory to inject the custom auth strategy
-        config = create_mock_client_config(auth_strategy=custom_auth)
+        config = create_valid_client_config(auth_strategy=custom_auth)
         client = Client(config)
 
         # Act & Assert

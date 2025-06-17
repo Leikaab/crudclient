@@ -8,8 +8,14 @@ from unittest.mock import MagicMock  # Add MagicMock import
 
 import pytest
 import requests_mock
+from apiconfig.testing.unit.factories import (
+    create_invalid_client_config,
+)
+from apiconfig.testing.unit.factories import (
+    create_valid_client_config as _apiconfig_create_valid_client_config,
+)
 
-from crudclient.auth import AuthStrategy, BasicAuth, BearerAuth, CustomAuth
+from crudclient.auth import BasicAuth, BearerAuth, CustomAuth
 from crudclient.config import ClientConfig
 from crudclient.exceptions import APIError
 from crudclient.testing.response_builder import ResponseBuilder
@@ -49,42 +55,52 @@ def custom_auth_strategy() -> CustomAuth:
 # --- Client Configuration Factory ---
 
 
-@pytest.fixture
-def create_mock_client_config(bearer_auth_strategy: BearerAuth) -> Callable[..., ClientConfig]:
-    """
-    Factory fixture to create a mock ClientConfig instance.
-    Allows customization for different test scenarios.
-    """
+@pytest.fixture(name="create_mock_client_config")
+def create_mock_client_config_fixture(bearer_auth_strategy: BearerAuth) -> Callable[..., ClientConfig]:
+    """Wrapper around :func:`apiconfig.testing.unit.factories.create_valid_client_config`."""
 
-    def _factory(
-        hostname: str = "https://api.example.com",
-        version: str = "v1",
-        api_key: Optional[str] = "default-key",  # Retained for potential direct use if needed
-        auth_strategy: Optional[AuthStrategy] = None,
-        headers: Optional[Dict[str, str]] = None,
-        retries: int = 3,
-        timeout: int = 10,
-        **kwargs: Any,
-    ) -> ClientConfig:
-        config = ClientConfig()
-        config.hostname = hostname
-        config.version = version
-        config.api_key = api_key  # Store it, though auth_strategy is preferred
-        config.auth_strategy = auth_strategy if auth_strategy is not None else bearer_auth_strategy  # Default to Bearer
-        config.headers = headers if headers is not None else {"User-Agent": "crudclient-test"}
-        config.retries = retries
-        config.timeout = timeout
+    def _factory(**kwargs: Any) -> ClientConfig:
+        valid_cfg = _apiconfig_create_valid_client_config(**kwargs)
+        return ClientConfig(
+            hostname=valid_cfg.hostname,
+            version=valid_cfg.version,
+            headers=valid_cfg.headers,
+            timeout=valid_cfg.timeout,
+            retries=valid_cfg.retries,
+            auth_strategy=valid_cfg.auth_strategy or bearer_auth_strategy,
+            log_request_body=valid_cfg.log_request_body,
+            log_response_body=valid_cfg.log_response_body,
+        )
 
-        # Allow overriding any other ClientConfig attributes via kwargs
-        for key, value in kwargs.items():
-            if hasattr(config, key):
-                setattr(config, key, value)
-            else:
-                # Optionally raise an error for unknown kwargs or just ignore
-                # raise AttributeError(f"ClientConfig has no attribute '{key}'")
-                pass  # Ignoring unknown kwargs for flexibility
+    return _factory
 
-        return config
+
+@pytest.fixture(name="create_valid_client_config")
+def create_valid_client_config_fixture(bearer_auth_strategy: BearerAuth) -> Callable[..., ClientConfig]:
+    """Provide a :class:`ClientConfig` compatible with crudclient."""
+
+    def _factory(**kwargs: Any) -> ClientConfig:
+        valid_cfg = _apiconfig_create_valid_client_config(**kwargs)
+        return ClientConfig(
+            hostname=valid_cfg.hostname,
+            version=valid_cfg.version,
+            headers=valid_cfg.headers,
+            timeout=valid_cfg.timeout,
+            retries=valid_cfg.retries,
+            auth_strategy=valid_cfg.auth_strategy or bearer_auth_strategy,
+            log_request_body=valid_cfg.log_request_body,
+            log_response_body=valid_cfg.log_response_body,
+        )
+
+    return _factory
+
+
+@pytest.fixture(name="create_invalid_client_config")
+def create_invalid_client_config_fixture() -> Callable[..., Dict[str, Any]]:
+    """Expose apiconfig factory for invalid configurations."""
+
+    def _factory(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+        return create_invalid_client_config(*args, **kwargs)
 
     return _factory
 
