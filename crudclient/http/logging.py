@@ -20,6 +20,14 @@ from ..config import ClientConfig
 
 __all__ = ["setup_http_logging", "HttpLifecycleLogger"]
 
+# Library default logger. It uses a ``NullHandler`` so importing the module does
+# not configure logging by itself. The level is left as ``NOTSET`` to ensure the
+# parent logger's configuration controls output when no explicit setup is done.
+http_logger = logging.getLogger("crudclient.http")
+http_logger.addHandler(logging.NullHandler())
+http_logger.setLevel(logging.NOTSET)
+http_logger.propagate = True
+
 
 def setup_http_logging(level: int | str = logging.WARNING) -> logging.Logger:
     """Configure the ``crudclient.http`` logger.
