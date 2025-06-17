@@ -42,7 +42,10 @@ def setup_http_logging(level: int | str = logging.WARNING) -> logging.Logger:
         logger.handlers.clear()
     logger.addHandler(handler)
     logger.setLevel(level)
-    logger.propagate = False
+    logger.propagate = True
+
+    # Allow apiconfig logs to propagate so test fixtures can capture them
+    logging.getLogger("apiconfig").propagate = True
     return logger
 
 
