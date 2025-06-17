@@ -12,6 +12,9 @@ from dotenv import load_dotenv
 
 from .tripletex_resources import TripletexAPI, TripletexTestConfig
 
+# Re-export httpserver and related fixtures from apiconfig
+pytest_plugins = ["apiconfig.testing.integration.fixtures"]
+
 # Load environment variables from .env file
 load_dotenv()
 

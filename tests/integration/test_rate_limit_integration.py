@@ -9,7 +9,7 @@ import os
 import tempfile
 import time
 
-import requests_mock
+from apiconfig.testing.integration import configure_mock_response
 
 from crudclient.config import ClientConfig
 from crudclient.http import HttpClient
@@ -19,6 +19,7 @@ from crudclient.ratelimit import get_rate_limiter
 def api_worker(
     worker_id: int,
     state_dir: str,
+    base_url: str,
     results_queue: multiprocessing.Queue,
     requests_per_worker: int = 10,
 ) -> None:
@@ -33,7 +34,7 @@ def api_worker(
     """
     try:
         # Create config with rate limiting
-        config = ClientConfig(hostname="test.api")
+        config = ClientConfig(hostname=base_url)
         config.enable_rate_limiter(state_path=state_dir, buffer=2, buffer_time=0.05)
 
         # Create HTTP client
@@ -44,34 +45,30 @@ def api_worker(
         successful = 0
         blocked = 0
 
-        with requests_mock.Mocker() as m:
-            # Mock API endpoint
-            m.get("https://test.api/test", json={"status": "ok"})
+        for i in range(requests_per_worker):
+            start_time = time.time()
 
-            for i in range(requests_per_worker):
-                start_time = time.time()
+            try:
+                client.get("/test")
+                elapsed = time.time() - start_time
 
-                try:
-                    client.get("/test")
-                    elapsed = time.time() - start_time
+                if elapsed > 0.05:  # Adjusted assertion
+                    blocked += 1
+                    print(f"Worker {worker_id}: Request {i + 1} waited {elapsed:.3f}s")
 
-                    if elapsed > 0.05:  # Adjusted assertion
-                        blocked += 1
-                        print(f"Worker {worker_id}: Request {i + 1} waited {elapsed:.3f}s")
+                # If we got here without exception, request was successful
+                successful += 1
+            except Exception as e:
+                print(f"Worker {worker_id}: Request {i + 1} failed: {e}")
 
-                    # If we got here without exception, request was successful
-                    successful += 1
-                except Exception as e:
-                    print(f"Worker {worker_id}: Request {i + 1} failed: {e}")
+            # Update rate limit from response headers
+            # Simulate API returning decreasing rate limit
+            remaining = 10 - ((worker_id * requests_per_worker + i) % 10)
+            if limiter:
+                limiter.update_from_headers({"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.2"})  # Reduced reset window
 
-                # Update rate limit from response headers
-                # Simulate API returning decreasing rate limit
-                remaining = 10 - ((worker_id * requests_per_worker + i) % 10)
-                if limiter:
-                    limiter.update_from_headers({"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.2"})  # Reduced reset window
-
-                # Small delay between requests
-                time.sleep(0.001)
+            # Small delay between requests
+            time.sleep(0.001)
 
         results_queue.put((worker_id, successful, blocked))
 
@@ -87,14 +84,14 @@ def api_worker(
 class TestRateLimitIntegration:
     """Integration tests for rate limiting."""
 
-    def test_multi_process_rate_limiting(self):
+    def test_multi_process_rate_limiting(self, httpserver, mock_api_url):
         """Test rate limiting across multiple processes."""
         with tempfile.TemporaryDirectory() as temp_dir:
             num_workers = 4
             requests_per_worker = 10
 
             # Initialize rate limiter with starting state
-            config = ClientConfig(hostname="test.api")
+            config = ClientConfig(hostname=mock_api_url)
             config.enable_rate_limiter(state_path=temp_dir, buffer=2, buffer_time=0.05)
             limiter = get_rate_limiter(config)
 
@@ -108,8 +105,13 @@ class TestRateLimitIntegration:
             results_queue = multiprocessing.Queue()
             processes = []
 
+            configure_mock_response(httpserver, path="/test", response_data={"status": "ok"})
+
             for i in range(num_workers):
-                p = multiprocessing.Process(target=api_worker, args=(i, temp_dir, results_queue, requests_per_worker))
+                p = multiprocessing.Process(
+                    target=api_worker,
+                    args=(i, temp_dir, mock_api_url, results_queue, requests_per_worker),
+                )
                 p.start()
                 processes.append(p)
 
@@ -166,43 +168,37 @@ class TestRateLimitIntegration:
                 # We expect some blocking to occur
                 assert total_blocked > 0, f"No blocking occurred: {total_blocked} == 0"
 
-    def test_rate_limiter_with_http_client(self):
+    def test_rate_limiter_with_http_client(self, httpserver, mock_api_url):
         """Test rate limiter integration with HttpClient."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create config with rate limiting
-            config = ClientConfig(hostname="test.api")
+            config = ClientConfig(hostname=mock_api_url)
             config.enable_rate_limiter(state_path=temp_dir, buffer=1, buffer_time=0.05)
 
             # Create HTTP client
             client = HttpClient(config=config)
 
-            with requests_mock.Mocker() as m:
-                # Mock endpoint that returns rate limit headers
-                def custom_matcher(request):
-                    # Return decreasing rate limit
-                    remaining = max(0, 5 - custom_matcher.call_count)
-                    custom_matcher.call_count += 1
+            # Pre-configure ordered responses with decreasing rate limit headers
+            for i in range(7):
+                remaining = max(0, 5 - i)
+                configure_mock_response(
+                    httpserver,
+                    path="/test",
+                    response_data={"data": "test"},
+                    response_headers={"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.1"},
+                    ordered=True,
+                )
 
-                    return requests_mock.create_response(
-                        request,
-                        json={"data": "test"},
-                        headers={"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.1"},  # 100ms window
-                    )
+            # Make requests until we hit the rate limit
+            for i in range(7):
+                start_time = time.time()
+                response_data = client.get("/test")
+                elapsed = time.time() - start_time
 
-                custom_matcher.call_count = 0
+                # Successful if no exception was raised
+                assert response_data is not None
 
-                m.add_matcher(custom_matcher)
-
-                # Make requests until we hit the rate limit
-                for i in range(7):
-                    start_time = time.time()
-                    response_data = client.get("/test")
-                    elapsed = time.time() - start_time
-
-                    # Successful if no exception was raised
-                    assert response_data is not None
-
-                    # After 5 requests, we should be rate limited
-                    if i >= 5:
-                        # Should have waited for rate limit reset
-                        assert elapsed > 0.05, f"Request {i + 1} should have waited, but took {elapsed}s"
+                # After 5 requests, we should be rate limited
+                if i >= 5:
+                    # Should have waited for rate limit reset
+                    assert elapsed > 0.05, f"Request {i + 1} should have waited, but took {elapsed}s"
