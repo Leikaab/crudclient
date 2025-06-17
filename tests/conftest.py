@@ -20,7 +20,10 @@ from xdist.scheduler import LoadScheduling  # Moved import to top level
 
 # Consider adding 'import xml.etree.ElementTree as ET' if XML parsing/mocking is needed
 
-pytest_plugins = ["tests.unit.fixtures.mock_clients"]
+pytest_plugins = [
+    "tests.unit.fixtures.mock_clients",
+    "apiconfig.testing.integration.fixtures",
+]
 
 
 @pytest.fixture(scope="session")
