@@ -2,7 +2,7 @@
 Fixtures specific to authentication tests.
 """
 
-from typing import Optional, cast
+from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -22,15 +22,13 @@ DEFAULT_VERSION = "v1"
 
 
 def _build_config(auth_strategy, headers: Optional[dict] = None) -> ClientConfig:
-    return cast(
-        ClientConfig,
-        create_valid_client_config(
-            hostname=DEFAULT_HOSTNAME,
-            version=DEFAULT_VERSION,
-            headers=headers or {},
-            auth_strategy=auth_strategy,
-        ),
+    base_config = create_valid_client_config(
+        hostname=DEFAULT_HOSTNAME,
+        version=DEFAULT_VERSION,
+        headers=headers or {},
+        auth_strategy=auth_strategy,
     )
+    return ClientConfig(**base_config.__dict__)
 
 
 @pytest.fixture
