@@ -2,8 +2,8 @@ from crudclient.auth import BearerAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
-# Import fixtures from conftest.py
-from .conftest import MockBasicAuthConfig, MockCustomAuthConfig
+# Fixtures from conftest.py
+from .conftest import basic_auth_config, custom_auth_config
 
 
 class TestClientAuth:
@@ -24,9 +24,9 @@ class TestClientAuth:
         assert client.config.version == "v1"
         assert client.session.headers["X-Test"] == "1"
 
-    def test_client_basic_auth_sets_session_headers(self):
+    def test_client_basic_auth_sets_session_headers(self, basic_auth_config: ClientConfig):
         # Arrange
-        config = MockBasicAuthConfig()
+        config = basic_auth_config
 
         # Act
         client = Client(config)
@@ -35,9 +35,9 @@ class TestClientAuth:
         # Just check that the Authorization header exists
         assert "Authorization" in client.session.headers
 
-    def test_client_custom_auth_applies_headers(self):
+    def test_client_custom_auth_applies_headers(self, custom_auth_config: ClientConfig):
         # Arrange
-        config = MockCustomAuthConfig()
+        config = custom_auth_config
 
         # Act
         client = Client(config)

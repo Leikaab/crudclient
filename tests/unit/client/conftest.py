@@ -2,54 +2,61 @@
 Fixtures specific to client tests.
 """
 
+from typing import Optional, cast
+
 import pytest
 import requests_mock
+from apiconfig.testing.unit import create_valid_client_config
 
 from crudclient.auth import BasicAuth, BearerAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
-
-class MockBearerAuthConfig(ClientConfig):
-    """Mock config with Bearer Authentication."""
-
-    headers = {"X-Custom-Header": "custom-value"}
-    api_key = "supersecret"
-
-    def __init__(self):
-        super().__init__(hostname="https://api.example.com", version="v1")
-        self.auth_strategy = BearerAuth(access_token="supersecret")
-        self.retries = 0
+DEFAULT_HOSTNAME = "https://api.example.com"
+DEFAULT_VERSION = "v1"
 
 
-class MockBasicAuthConfig(ClientConfig):
-    """Mock config with Basic Authentication."""
-
-    def __init__(self):
-        super().__init__(hostname="https://api.example.com", version="v1")
-        self.auth_strategy = BasicAuth(username="user", password="pass")
-
-
-class MockCustomAuthConfig(ClientConfig):
-    """Mock config with Custom Authentication."""
-
-    def __init__(self):
-        super().__init__(hostname="https://api.example.com", version="v1")
-        self.called = False
-
-        def apply_auth_headers(session):
-            session.headers.update({"X-Auth": "yes"})
-            self.called = True
-            return {}
-
-        self.auth_strategy = CustomAuth(header_callback=lambda: {"X-Auth": "yes"})
+def _build_config(auth_strategy, headers: Optional[dict] = None) -> ClientConfig:
+    return cast(
+        ClientConfig,
+        create_valid_client_config(
+            hostname=DEFAULT_HOSTNAME,
+            version=DEFAULT_VERSION,
+            headers=headers or {},
+            auth_strategy=auth_strategy,
+        ),
+    )
 
 
 @pytest.fixture
-def client():
+def bearer_auth_config() -> ClientConfig:
+    """Return a ClientConfig with Bearer Authentication."""
+    auth_strategy = BearerAuth(access_token="supersecret")
+    config = _build_config(auth_strategy, headers={"X-Custom-Header": "custom-value"})
+    config.api_key = "supersecret"
+    config.retries = 0
+    return config
+
+
+@pytest.fixture
+def basic_auth_config() -> ClientConfig:
+    """Return a ClientConfig with Basic Authentication."""
+    auth_strategy = BasicAuth(username="user", password="pass")
+    return _build_config(auth_strategy)
+
+
+@pytest.fixture
+def custom_auth_config() -> ClientConfig:
+    """Return a ClientConfig with Custom Authentication."""
+    config = _build_config(CustomAuth(header_callback=lambda: {"X-Auth": "yes"}))
+    config.called = False  # type: ignore[attr-defined]
+    return config
+
+
+@pytest.fixture
+def client(bearer_auth_config: ClientConfig) -> Client:
     """Create a client with Bearer Authentication for testing."""
-    config = MockBearerAuthConfig()
-    return Client(config)
+    return Client(bearer_auth_config)
 
 
 @pytest.fixture
