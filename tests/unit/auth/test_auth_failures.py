@@ -10,7 +10,6 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 
 # Import fixtures from conftest.py - Fixtures are typically auto-discovered by pytest
-from .conftest import bearer_auth_config
 
 
 class TestAuthFailures:

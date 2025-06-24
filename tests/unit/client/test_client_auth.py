@@ -3,7 +3,6 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 
 # Fixtures from conftest.py
-from .conftest import basic_auth_config, custom_auth_config
 
 
 class TestClientAuth:
