@@ -7,15 +7,15 @@ from apiconfig.exceptions.auth import AuthStrategyError
 
 from crudclient.auth import CustomAuth
 from crudclient.client import Client
+from crudclient.config import ClientConfig
 
 # Import fixtures from conftest.py - Fixtures are typically auto-discovered by pytest
-from .conftest import MockBearerAuthConfig  # Needed for test_auth_setup_failure
 
 
 class TestAuthFailures:
     """Tests for general authentication failure handling."""
 
-    def test_auth_setup_failure(self, mock_request, mocker):
+    def test_auth_setup_failure(self, mock_request, mocker, bearer_auth_config: ClientConfig):
         """Test handling of authentication setup failures."""
         # Arrange
         # Create a bearer auth mock with a failing callback
@@ -25,7 +25,7 @@ class TestAuthFailures:
         mock_prepare_headers.side_effect = Exception("Auth setup failed")
 
         # Create a client with the failing auth
-        config = MockBearerAuthConfig()
+        config = bearer_auth_config
 
         # Act & Assert
         # Creating the client or making a request should raise the exception
