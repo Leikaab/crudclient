@@ -18,13 +18,16 @@ extraction methods may raise `ValueError` for invalid input formats.
 from typing import Any, Dict, List, Optional, Tuple
 
 from apiconfig.exceptions.auth import AuthenticationError
+from apiconfig.testing.auth_verification import (
+    AuthHeaderVerification,
+    AuthTestHelpers,
+)
 
 from ..exceptions import VerificationError
 from .auth_error_verification import AuthErrorVerification
 
 # Re-export the classes from their respective modules
 from .auth_extraction_utils import AuthExtractionUtils
-from .auth_header_verification import AuthHeaderVerification
 from .auth_token_verification import AuthTokenVerification
 
 
@@ -61,9 +64,9 @@ class AuthVerificationHelpers:
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_basic_auth_header("Bearer token")
         """
         try:
-            AuthHeaderVerification.verify_basic_auth_header(header_value)
+            AuthTestHelpers.assert_auth_applied({"Authorization": header_value}, "basic")
             return True
-        except AuthenticationError:
+        except AssertionError:
             return False
 
     @staticmethod
@@ -89,9 +92,9 @@ class AuthVerificationHelpers:
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_bearer_auth_header("Basic dXNlcjpwYXNz")
         """
         try:
-            AuthHeaderVerification.verify_bearer_auth_header(header_value)
+            AuthTestHelpers.assert_auth_applied({"Authorization": header_value}, "bearer")
             return True
-        except AuthenticationError:
+        except AssertionError:
             return False
 
     @staticmethod
@@ -154,8 +157,8 @@ class AuthVerificationHelpers:
             >>> # Raises VerificationError: AuthVerificationHelpers.verify_auth_header_format({}, "Bearer")
         """
         try:
-            AuthHeaderVerification.verify_auth_header_format(headers, auth_type, header_name)
-        except AuthenticationError as exc:
+            AuthTestHelpers.assert_auth_applied(headers, auth_type, header_name=header_name)
+        except AssertionError as exc:
             raise VerificationError(str(exc)) from exc
 
     # Token verification methods
@@ -463,4 +466,10 @@ class AuthVerificationHelpers:
 
 
 # For backward compatibility
-__all__ = ["AuthVerificationHelpers", "AuthExtractionUtils", "AuthHeaderVerification", "AuthTokenVerification", "AuthErrorVerification"]
+__all__ = [
+    "AuthVerificationHelpers",
+    "AuthExtractionUtils",
+    "AuthTokenVerification",
+    "AuthErrorVerification",
+    "AuthTestHelpers",
+]
