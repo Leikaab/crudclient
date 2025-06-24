@@ -13,6 +13,13 @@ By default, `crudclient` is configured to avoid interfering with the consuming a
 
 To capture log messages from `crudclient`, you must configure the Python `logging` system in your application. This typically involves adding a handler (to specify the destination, e.g., console or file) and setting the desired logging level (e.g., `INFO`, `DEBUG`).
 
+### Quick setup with `setup_logging`
+
+```python
+from crudclient import setup_logging
+setup_logging(level="INFO")
+```
+
 Here are common configuration methods:
 
 **1. Basic Configuration (`logging.basicConfig`)**
