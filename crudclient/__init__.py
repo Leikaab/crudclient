@@ -62,6 +62,8 @@ user_posts = api.user_group.posts.list()
 import logging
 from importlib.metadata import version
 
+from apiconfig.utils.logging import setup_logging
+
 from .api import API
 from .auth import (
     ApiKeyAuth,
@@ -140,6 +142,7 @@ __all__ = [  # Updated __all__
     "JSONDict",
     "JSONList",
     "RawResponse",
+    "setup_logging",
 ]
 
 __version__ = version("crudclient")
