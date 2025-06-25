@@ -114,7 +114,13 @@ def mock_request():
 
 @pytest.fixture
 def mock_auth_verification():
-    """Create auth verification helpers for testing."""
-    from crudclient.testing.auth import AuthVerificationHelpers
+    """Provide auth verification helpers from apiconfig."""
+    from apiconfig.testing.auth_verification import (
+        AuthHeaderVerification,
+        AuthTestHelpers,
+    )
 
-    yield AuthVerificationHelpers
+    class Helpers(AuthHeaderVerification, AuthTestHelpers):
+        pass
+
+    yield Helpers

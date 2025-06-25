@@ -8,7 +8,6 @@ for the crudclient library components (Client, API, CRUD, Auth, HTTPClient).
 from .auth import (
     ApiKeyAuthMock,
     AuthMockBase,
-    AuthVerificationHelpers,
     BasicAuthMock,
     BearerAuthMock,
     CustomAuthMock,
@@ -77,7 +76,6 @@ __all__ = [
     # Auth mocks
     "ApiKeyAuthMock",
     "AuthMockBase",
-    "AuthVerificationHelpers",
     "BasicAuthMock",
     "BearerAuthMock",
     "CustomAuthMock",

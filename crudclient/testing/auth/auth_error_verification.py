@@ -6,7 +6,7 @@ focused on checking the structure and content of common authentication-related
 error response bodies and standard rate limit headers.
 
 These methods are typically used internally by higher-level verification helpers
-(like `AuthVerificationHelpers`) or can be used directly for fine-grained checks.
+(e.g., those in `apiconfig.testing.auth_verification`) or can be used directly for fine-grained checks.
 They raise `VerificationError` upon failure.
 """
 
