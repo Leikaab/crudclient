@@ -6,7 +6,7 @@ focused on checking the validity and content of authentication tokens, primarily
 assuming JWT format for detailed claim inspection (scopes, expiration, identity).
 
 These methods are typically used internally by higher-level verification helpers
-(like `AuthVerificationHelpers`) or can be used directly for fine-grained token checks.
+(e.g., those in `apiconfig.testing.auth_verification`) or can be used directly for fine-grained token checks.
 They raise `VerificationError` upon failure.
 """
 

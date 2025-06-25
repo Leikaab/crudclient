@@ -6,9 +6,9 @@ in real-world testing scenarios.
 """
 
 import pytest
+from apiconfig.testing.auth_verification import AuthHeaderVerification
 
 from crudclient.exceptions import AuthenticationError
-from crudclient.testing.auth import AuthVerificationHelpers
 
 from .common import create_mock_client
 
@@ -39,10 +39,11 @@ class TestBasicAuthExamples:
         assert request.kwargs["headers"]["Authorization"].startswith("Basic ")
 
         # Use verification helpers
-        assert AuthVerificationHelpers.verify_basic_auth_header(request.kwargs["headers"]["Authorization"])
-        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(request.kwargs["headers"]["Authorization"])
-        assert username == "testuser"
-        assert password == "testpass"
+        assert AuthHeaderVerification.verify_basic_auth_header(
+            request.kwargs["headers"]["Authorization"],
+            expected_username="testuser",
+            expected_password="testpass",
+        )
 
     def test_basic_auth_failure_scenario(self):
         """Example of testing a Basic Auth failure scenario."""
