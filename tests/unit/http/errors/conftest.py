@@ -4,25 +4,26 @@ Shared fixtures and utilities for HTTP client error tests.
 
 import pytest
 import requests_mock
+from apiconfig.testing.unit import create_valid_client_config
 
 from crudclient.config import ClientConfig
 from crudclient.http.client import HttpClient
 
 
-class MockConfig(ClientConfig):
-    """Mock configuration for testing."""
-
-    def __init__(self):
-        super().__init__(hostname="https://api.example.com", version="v1")
-        self.auth_strategy = None
-        self.timeout = 5  # Default timeout for tests
-        self.retries = 0
-
-
 @pytest.fixture
 def config():
     """Fixture for a mock configuration."""
-    return MockConfig()
+    base_config = create_valid_client_config(timeout=5, retries=0, auth_strategy=None)
+    return ClientConfig(
+        hostname=base_config.hostname,
+        version=base_config.version,
+        headers=base_config.headers,
+        timeout=base_config.timeout,
+        retries=base_config.retries,
+        auth_strategy=base_config.auth_strategy,
+        log_request_body=base_config.log_request_body,
+        log_response_body=base_config.log_response_body,
+    )
 
 
 @pytest.fixture
