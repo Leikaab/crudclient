@@ -24,7 +24,7 @@ class MockSpyObject:
 class TestVerifier:
     """Tests for the Verifier class."""
 
-    def test_verify_called_with_success(self):
+    def test_verify_called_with_success(self) -> None:
         """Test verify_called_with when the method was called with the given arguments."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"})])
@@ -32,7 +32,7 @@ class TestVerifier:
         # Act & Assert
         assert Verifier.verify_called_with(mock_spy, "test_method", 1, 2, a="b") is True
 
-    def test_verify_called_with_failure(self):
+    def test_verify_called_with_failure(self) -> None:
         """Test verify_called_with when the method was not called with the given arguments."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"})])
@@ -43,7 +43,7 @@ class TestVerifier:
 
         assert "Method test_method was not called with arguments" in str(excinfo.value)
 
-    def test_verify_called_with_no_calls_attribute(self):
+    def test_verify_called_with_no_calls_attribute(self) -> None:
         """Test verify_called_with when the target object does not have a calls attribute."""
         # Arrange
         mock_object = object()
@@ -54,7 +54,7 @@ class TestVerifier:
 
         assert "does not have 'calls' attribute" in str(excinfo.value)
 
-    def test_verify_called_once_with_success(self):
+    def test_verify_called_once_with_success(self) -> None:
         """Test verify_called_once_with when the method was called exactly once with the given arguments."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"})])
@@ -62,7 +62,7 @@ class TestVerifier:
         # Act & Assert
         assert Verifier.verify_called_once_with(mock_spy, "test_method", 1, 2, a="b") is True
 
-    def test_verify_called_once_with_failure_no_calls(self):
+    def test_verify_called_once_with_failure_no_calls(self) -> None:
         """Test verify_called_once_with when the method was not called with the given arguments."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("other_method", (1, 2), {"a": "b"})])
@@ -73,7 +73,7 @@ class TestVerifier:
 
         assert "Method test_method was not called with arguments" in str(excinfo.value)
 
-    def test_verify_called_once_with_failure_multiple_calls(self):
+    def test_verify_called_once_with_failure_multiple_calls(self) -> None:
         """Test verify_called_once_with when the method was called multiple times with the given arguments."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"}), MethodCall("test_method", (1, 2), {"a": "b"})])
@@ -103,7 +103,7 @@ class TestVerifier:
 
         assert "Method test_method was called" in str(excinfo.value)
 
-    def test_verify_call_count_success(self):
+    def test_verify_call_count_success(self) -> None:
         """Test verify_call_count when the method was called exactly count times."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"}), MethodCall("test_method", (3, 4), {"c": "d"})])
@@ -111,7 +111,7 @@ class TestVerifier:
         # Act & Assert
         assert Verifier.verify_call_count(mock_spy, "test_method", 2) is True
 
-    def test_verify_call_count_failure(self):
+    def test_verify_call_count_failure(self) -> None:
         """Test verify_call_count when the method was not called exactly count times."""
         # Arrange
         mock_spy = MockSpyObject([MethodCall("test_method", (1, 2), {"a": "b"})])
