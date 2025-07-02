@@ -2,6 +2,8 @@
 Examples of using the enhanced mock client for testing.
 """
 
+from typing import Any, Callable, Dict
+
 import pytest
 
 from crudclient.testing.core.client import MockClient
@@ -13,7 +15,7 @@ from crudclient.testing.response_builder.pagination import (
 class TestMockClientExamples:
     """Examples of using the enhanced mock client for testing."""
 
-    def test_basic_response_pattern(self, mock_client: MockClient):
+    def test_basic_response_pattern(self, mock_client: MockClient) -> None:
         """Test basic response pattern matching."""
         # Configure the mock client with a response pattern
         mock_client.with_response_pattern(method="GET", path_pattern=r"/users/\d+", data={"id": 123, "name": "Test User"})
@@ -24,7 +26,7 @@ class TestMockClientExamples:
         # Verify the response
         assert response.json() == {"id": 123, "name": "Test User"}
 
-    def test_multiple_response_patterns(self, mock_client: MockClient):
+    def test_multiple_response_patterns(self, mock_client: MockClient) -> None:
         """Test multiple response patterns with different HTTP methods."""
         # Configure the mock client with multiple response patterns
         mock_client.with_response_pattern(method="GET", path_pattern=r"/users$", data={"users": [{"id": 1}, {"id": 2}]})
@@ -43,7 +45,7 @@ class TestMockClientExamples:
         assert create_response.json() == {"id": 3, "created": True}  # Note: Python boolean True
         assert user_one_response.json() == {"id": 1, "name": "User One"}
 
-    def test_parameter_matching(self, mock_client: MockClient):
+    def test_parameter_matching(self, mock_client: MockClient) -> None:
         """Test matching requests based on query parameters."""
         # Configure the mock client with parameter matching
         mock_client.with_response_pattern(
@@ -72,7 +74,7 @@ class TestMockClientExamples:
         # Since param matching isn't implemented, both requests get the first matching pattern's data.
         assert other_response.json() == {"results": ["test result"]}
 
-    def test_network_conditions(self, mock_client: MockClient):
+    def test_network_conditions(self, mock_client: MockClient) -> None:
         """Test simulating network conditions."""
         # Configure the mock client with network conditions
         mock_client.with_network_condition(
@@ -91,7 +93,7 @@ class TestMockClientExamples:
             # We expect some requests to fail with network errors
             assert "Simulated network error" in str(e)
 
-    def test_rate_limiting(self, mock_client: MockClient):
+    def test_rate_limiting(self, mock_client: MockClient) -> None:
         """Test simulating rate limiting."""
         # Configure the mock client with rate limiting
         mock_client.with_rate_limiter(limit=2, window_seconds=60)
@@ -114,7 +116,7 @@ class TestMockClientExamples:
         assert response3.status_code == 200
         # Or: assert "Rate limit exceeded" in response3.text # Check response body text
 
-    def test_request_verification(self, mock_client: MockClient):
+    def test_request_verification(self, mock_client: MockClient) -> None:
         """Test request verification helpers."""
         # Configure the mock client
         mock_client.with_response_pattern(method="GET", path_pattern=r"/users$", data={"users": []})
@@ -143,7 +145,7 @@ class TestMockClientExamples:
         assert len(get_calls) > 0
         assert get_calls[0].kwargs.get("params", {}).get("page") == "1"
 
-    def test_pagination_helper(self, mock_client: MockClient, create_user_data):
+    def test_pagination_helper(self, mock_client: MockClient, create_user_data: Callable[..., Dict[str, Any]]) -> None:
         """Test pagination helper."""
         # Create test data
         users = [create_user_data(id=i) for i in range(1, 26)]
