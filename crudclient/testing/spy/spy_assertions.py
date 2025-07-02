@@ -15,14 +15,22 @@ class SpyProtocol(Protocol):
     def was_called(self, method_name: str) -> bool:
         """Check if the specified method was called at least once."""
 
+        ...
+
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
         """Check if the specified method was called with the exact arguments."""
+
+        ...
 
     def get_call_count(self, method_name: Optional[str] = None) -> int:
         """Get the number of times a method (or any method) was called."""
 
+        ...
+
     def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]:
         """Retrieve recorded calls for a specific method or all methods."""
+
+        ...
 
 
 class SpyAssertionsMixin:
