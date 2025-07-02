@@ -44,7 +44,7 @@ class Ledger(BaseModel):
     is_applicable_for_customer_invoice: Optional[bool] = Field(None, alias="isApplicableForCustomerInvoice")
     vat_type: Optional[IdUrl] = Field(None, alias="vatType")
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -59,7 +59,7 @@ class LedgerResponse(TripletexResponse[Ledger]):
     """
 
     # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class Voucher(BaseModel):
@@ -92,7 +92,7 @@ class Voucher(BaseModel):
     created: Optional[Change] = None
     updated: Optional[Change] = None
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class VoucherResponse(TripletexResponse[Voucher]):
@@ -101,7 +101,7 @@ class VoucherResponse(TripletexResponse[Voucher]):
     """
 
     # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class HistoricalVoucher(BaseModel):
@@ -119,7 +119,7 @@ class HistoricalVoucher(BaseModel):
     year: Optional[int] = None
     postings: Optional[List[dict]] = None
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class HistoricalVoucherResponse(TripletexResponse[HistoricalVoucher]):
@@ -128,4 +128,4 @@ class HistoricalVoucherResponse(TripletexResponse[HistoricalVoucher]):
     """
 
     # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")

@@ -131,7 +131,7 @@ class IdRef(BaseModel):
 
     id: int
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
 
 class IdUrl(BaseModel):

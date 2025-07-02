@@ -37,7 +37,7 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
         return self.values
 
     # Override model_config to handle both Tripletex and ApiResponse field names
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
     def __init__(self, **data):
         # If count is not provided, use the length of values
