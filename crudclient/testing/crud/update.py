@@ -55,11 +55,11 @@ class UpdateMock(BaseCrudMock):
         pattern = self._find_matching_pattern(method, url, **kwargs)
 
         if pattern:
-            response_obj = pattern["response"]
+            raw_response = pattern["response"]
+            if callable(raw_response):
+                raw_response = raw_response(**kwargs)
 
-            # Handle callable responses
-            if callable(response_obj):
-                response_obj = response_obj(**kwargs)
+            response_obj: MockResponse | Dict[str, Any] | List[Dict[str, Any]] | str = raw_response
 
             # Handle errors
             if "error" in pattern and pattern["error"]:
