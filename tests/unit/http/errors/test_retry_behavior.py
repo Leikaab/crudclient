@@ -5,10 +5,12 @@ This module contains tests for how the HTTP client handles retries for various
 error conditions, including network errors, timeouts, and SSL errors.
 """
 
+from typing import cast
 from unittest.mock import patch
 
 import pytest
 import requests
+import requests_mock
 
 from crudclient.exceptions import CrudClientError
 from crudclient.http import RetryCondition, RetryHandler
@@ -39,7 +41,7 @@ class TestHttpClientNetworkErrorRetries:
         # Create an HTTP client with the custom retry handler
         return HttpClient(retry_config, retry_handler=retry_handler)
 
-    def test_connection_error_retry(self, retry_client, mock_request):
+    def test_connection_error_retry(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test retry behavior for connection errors.
 
@@ -72,10 +74,10 @@ class TestHttpClientNetworkErrorRetries:
             assert response.get("id") == 1
             assert response.get("name") == "Test User"
         else:
-            assert '"id": 1' in response
-            assert '"name": "Test User"' in response
+            assert '"id": 1' in cast(str, response)
+            assert '"name": "Test User"' in cast(str, response)
 
-    def test_timeout_error_retry(self, retry_client, mock_request):
+    def test_timeout_error_retry(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test retry behavior for timeout errors.
 
@@ -110,10 +112,10 @@ class TestHttpClientNetworkErrorRetries:
                 assert response.get("id") == 1
                 assert response.get("name") == "Test User"
             else:
-                assert '"id": 1' in response
-                assert '"name": "Test User"' in response
+                assert '"id": 1' in cast(str, response)
+                assert '"name": "Test User"' in cast(str, response)
 
-    def test_ssl_error_retry(self, retry_client, mock_request):
+    def test_ssl_error_retry(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test retry behavior for SSL errors.
 
@@ -146,10 +148,10 @@ class TestHttpClientNetworkErrorRetries:
             assert response.get("id") == 1
             assert response.get("name") == "Test User"
         else:
-            assert '"id": 1' in response
-            assert '"name": "Test User"' in response
+            assert '"id": 1' in cast(str, response)
+            assert '"name": "Test User"' in cast(str, response)
 
-    def test_max_retries_exceeded(self, retry_client, mock_request):
+    def test_max_retries_exceeded(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test behavior when maximum retries are exceeded.
 
@@ -170,7 +172,7 @@ class TestHttpClientNetworkErrorRetries:
             assert "Connection refused" in str(excinfo.value)
             assert "Request failed" in str(excinfo.value)
 
-    def test_mixed_error_retry(self, retry_client, mock_request):
+    def test_mixed_error_retry(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test retry behavior with different types of network errors.
 
@@ -208,10 +210,10 @@ class TestHttpClientNetworkErrorRetries:
                 assert response.get("id") == 1
                 assert response.get("name") == "Test User"
             else:
-                assert '"id": 1' in response
-                assert '"name": "Test User"' in response
+                assert '"id": 1' in cast(str, response)
+                assert '"name": "Test User"' in cast(str, response)
 
-    def test_retry_with_backoff(self, retry_client, mock_request):
+    def test_retry_with_backoff(self, retry_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test retry with exponential backoff.
 
