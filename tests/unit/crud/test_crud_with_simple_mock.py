@@ -59,6 +59,8 @@ def test_list_operation_success(
 
     # Call the list operation
     result = base_test_crud_httpserver.list()
+    if hasattr(result, "data"):
+        result = result.data
 
     # Verify the result
     assert len(result) == 2
