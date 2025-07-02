@@ -423,6 +423,12 @@ class Client:
         to ensure proper cleanup of resources.
         """
         self.http_client.close()
+        # Ensure the session exposes the `is_closed` attribute even if it
+        # wasn't accessed prior to calling ``close``. Accessing the
+        # ``session`` property attaches a dynamic ``is_closed`` property
+        # to the underlying ``requests.Session`` instance that proxies the
+        # value from ``SessionManager``.
+        _ = self.session
         log.debug("Client closed.")
 
     def __enter__(self) -> "Client":
