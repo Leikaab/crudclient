@@ -194,7 +194,7 @@ class PartialResponseHelper:
             final_value: The value to set at the end of the path
         """
         current = result
-        for i, part in enumerate(parts[:-1]):
+        for part in parts[:-1]:
             if part not in current:
                 current[part] = {}
             current = current[part]
