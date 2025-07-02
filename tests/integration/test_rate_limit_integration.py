@@ -87,7 +87,7 @@ def api_worker(
 class TestRateLimitIntegration:
     """Integration tests for rate limiting."""
 
-    def test_multi_process_rate_limiting(self):
+    def test_multi_process_rate_limiting(self) -> None:
         """Test rate limiting across multiple processes."""
         with tempfile.TemporaryDirectory() as temp_dir:
             num_workers = 4
@@ -166,7 +166,7 @@ class TestRateLimitIntegration:
                 # We expect some blocking to occur
                 assert total_blocked > 0, f"No blocking occurred: {total_blocked} == 0"
 
-    def test_rate_limiter_with_http_client(self):
+    def test_rate_limiter_with_http_client(self) -> None:
         """Test rate limiter integration with HttpClient."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create config with rate limiting
