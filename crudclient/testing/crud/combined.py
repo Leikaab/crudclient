@@ -1,7 +1,9 @@
 """Combined mock implementation for all CRUD operations."""
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
+
+from crudclient.testing.types import ResponseBody
 
 from .create import CreateMock
 from .delete import DeleteMock
@@ -22,33 +24,33 @@ class CombinedCrudMock:
         self.request_history: List[RequestRecord] = []
         self._parent_id_handling = True
 
-    def get(self, url: str, **kwargs: Any) -> Any:
+    def get(self, url: str, **kwargs: Any) -> ResponseBody:
         """Delegate GET requests to the ``ReadMock``."""
-        result = self.read_mock.get(url, **kwargs)
+        result = cast(ResponseBody, self.read_mock.get(url, **kwargs))
         self.request_history.extend(self.read_mock.request_history)
         return result
 
-    def post(self, url: str, **kwargs: Any) -> Any:
+    def post(self, url: str, **kwargs: Any) -> ResponseBody:
         """Delegate POST requests to the ``CreateMock``."""
-        result = self.create_mock.post(url, **kwargs)
+        result = cast(ResponseBody, self.create_mock.post(url, **kwargs))
         self.request_history.extend(self.create_mock.request_history)  # type: ignore[arg-type]
         return result
 
-    def put(self, url: str, **kwargs: Any) -> Any:
+    def put(self, url: str, **kwargs: Any) -> ResponseBody:
         """Delegate PUT requests to the ``UpdateMock``."""
-        result = self.update_mock.put(url, **kwargs)
+        result = cast(ResponseBody, self.update_mock.put(url, **kwargs))
         self.request_history.extend(self.update_mock.request_history)  # type: ignore[arg-type]
         return result
 
-    def patch(self, url: str, **kwargs: Any) -> Any:
+    def patch(self, url: str, **kwargs: Any) -> ResponseBody:
         """Delegate PATCH requests to the ``UpdateMock``."""
-        result = self.update_mock.patch(url, **kwargs)
+        result = cast(ResponseBody, self.update_mock.patch(url, **kwargs))
         self.request_history.extend(self.update_mock.request_history)  # type: ignore[arg-type]
         return result
 
-    def delete(self, url: str, **kwargs: Any) -> Any:
+    def delete(self, url: str, **kwargs: Any) -> ResponseBody:
         """Delegate DELETE requests to the ``DeleteMock``."""
-        result = self.delete_mock.delete(url, **kwargs)
+        result = cast(ResponseBody, self.delete_mock.delete(url, **kwargs))
         self.request_history.extend(self.delete_mock.request_history)  # type: ignore[arg-type]
         return result
 
