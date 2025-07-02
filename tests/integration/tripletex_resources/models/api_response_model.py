@@ -3,8 +3,9 @@ from typing import Generic, List, Optional, TypeVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from crudclient.models import ApiResponse
+from crudclient.response_strategies import ModelDumpable
 
-T = TypeVar("T")
+T = TypeVar("T", bound=ModelDumpable)
 
 
 class TripletexResponse(ApiResponse[T], Generic[T]):
