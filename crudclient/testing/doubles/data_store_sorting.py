@@ -21,41 +21,12 @@ def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], so
         else:
             sort_desc_list = sort_desc[: len(sort_by_list)]  # Truncate if longer
 
-    # --- Define multi-level sort key function ---
-    def get_sort_key(item: Dict[str, Any]) -> Tuple[Tuple[int, Any], ...]:
-        key_parts = []
-        for field in sort_by_list:
-            value: Any = None
-            # Handle nested keys with dot notation
-            if "." in field:
-                parts = field.split(".")
-                current_val: Any = item
-                for part in parts:
-                    if isinstance(current_val, dict) and part in current_val:
-                        current_val = current_val[part]
-                    else:
-                        current_val = None
-                        break
-                value = current_val
-            else:
-                value = item.get(field)
-
-            # Handle None values: sort them consistently (e.g., always last)
-            # We use a tuple (0, value) for non-None and (1, None) for None
-            # This ensures Nones group together and sort predictably.
-            if value is None:
-                key_parts.append((1, None))
-            else:
-                key_parts.append((0, value))
-
-        return tuple(key_parts)
-
     # --- Perform multi-level sort ---
     # Python's sort is stable, so we can sort by each key in reverse order of significance
     # However, a single sort with a multi-level key function is generally more efficient.
 
-    # Sort using the multi-level key
-    # sorted_data = sorted(data, key=get_sort_key) # Original single-pass sort
+    # Sort using a single multi-level key
+    # sorted_data = sorted(data, key=multi_level_key)  # Original single-pass approach
 
     # Apply reverse order where specified (needs careful handling for stability)
     # Since the primary sort handles None placement, we only need to reverse sections
@@ -67,8 +38,7 @@ def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], so
     for i in range(len(sort_by_list) - 1, -1, -1):
         # Create a key function for *only* the current level
         def get_single_level_key(item: Dict[str, Any], level: int = i) -> Tuple[int, Any]:
-            # This needs to access the outer scope's get_sort_key or replicate its logic for one level
-            # Replicating part of get_sort_key logic for clarity and independence:
+            # Replicating part of the multi-level sort logic for a single field
             field = sort_by_list[level]
             value: Any = None
             if "." in field:
@@ -96,12 +66,12 @@ def apply_sorting(data: List[Dict[str, Any]], sort_by: Union[str, List[str]], so
     # --- Alternative (potentially less stable or more complex) reverse logic ---
     # This was the previous attempt, which might have stability issues with multiple reverse keys.
     # Keeping the multi-pass sort above as it's generally safer for stability.
-    # sorted_data = sorted(data, key=get_sort_key)
+    # sorted_data = sorted(data, key=multi_level_key)
     # for i, reverse in enumerate(sort_desc_list):
     #     if reverse:
     #         def key_func(item: Dict[str, Any], idx: int = i) -> Any:
     #              # Ensure this key function correctly handles the (0, value) / (1, None) tuple
-    #              return get_sort_key(item)[idx]
+    #              return multi_level_key(item)[idx]
     #
     #         # This part needs careful implementation to maintain stability across multiple reverse sorts
     #         # It involves sorting sub-groups, which is complex.
