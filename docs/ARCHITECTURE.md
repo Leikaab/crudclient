@@ -83,12 +83,11 @@ The `crudclient.testing` module provides a sophisticated, factory-based testing 
 
 *   **Factories:**
     *   `MockClientFactory`: The primary factory for creating highly configurable mock `Client` instances.
-    *   `SimpleMockFactory`: A simpler factory for basic request/response mocking.
     *   Specialized factories exist for components like authentication.
 *   **Test Doubles:** The framework provides various types of doubles (mocks, stubs, spies) generated via the factories, tailored for different testing needs.
 *   **Verification:** Tools are provided to assert that interactions with mock objects occurred as expected.
 *   **Response Building:** Helpers exist to easily construct mock `requests.Response` objects.
-*   **Modular Structure:** The framework is organized into submodules (`auth`, `core`, `crud`, `doubles`, `helpers`, `response_builder`, `simple_mock`, `spy`, `verification`) reflecting the structure of the main library, allowing for targeted mocking and testing.
+*   **Modular Structure:** The framework is organized into submodules (`auth`, `core`, `crud`, `doubles`, `helpers`, `response_builder`, `spy`, `verification`) reflecting the structure of the main library, allowing for targeted mocking and testing.
 *   **Inline Type Hints:** All testing utilities have inline type hints in the source files. Separate `.pyi` stubs are no longer used.
 
 This framework enables robust unit and integration testing by providing fine-grained control over the simulated behavior of `crudclient` components. Refer to `crudclient/testing/README.md` for more detailed usage examples.

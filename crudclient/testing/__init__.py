@@ -41,7 +41,6 @@ from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatter
 from .response_builder.response import (
     MockResponse,  # Import MockResponse from response_builder
 )
-from .simple_mock import SimpleMockClient  # Import SimpleMockClient
 from .spy import MethodCall, SpyBase
 from .verification import Verifier
 
@@ -56,7 +55,6 @@ __all__ = [
     "MethodCall",
     "SpyBase",
     "MockResponse",
-    "SimpleMockClient",
     "APIPatternBuilder",
     "ResponseBuilder",
     # Auth mocks

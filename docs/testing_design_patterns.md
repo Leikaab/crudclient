@@ -8,7 +8,7 @@ The testing utilities now contain inline type hints in the implementation files,
 
 *   **What:** Provides an interface for creating objects, allowing subclasses or factory implementations to determine the exact type of object created.
 *   **Why:** Used to centralize and simplify the creation of test doubles (like `MockClient` or specific auth mocks) with various configurations needed for different test scenarios. It decouples the test setup from the specific implementation details of the doubles.
-*   **Where:** Implemented in dedicated factory classes such as `crudclient.testing.mock_client_factory.MockClientFactory`, `crudclient.testing.simple_mock_factory.SimpleMockFactory`, and `crudclient.testing.auth.factory` for creating authentication-related mocks.
+*   **Where:** Implemented in dedicated factory classes such as `crudclient.testing.mock_client_factory.MockClientFactory` and `crudclient.testing.auth.factory` for creating authentication-related mocks.
 
 ## 2. Verifier Pattern
 
