@@ -10,7 +10,7 @@ def api():
     return JsonplaceholderAPI(client_config=config)
 
 
-def test_list_posts(api):
+def test_list_posts(api) -> None:
     """
     Test listing posts from the JSONPlaceholder API.
 
@@ -26,7 +26,7 @@ def test_list_posts(api):
 
 
 @pytest.mark.no_parallel
-def test_create_post(api):
+def test_create_post(api) -> None:
     """
     Test creating a post in the JSONPlaceholder API.
 
@@ -52,7 +52,7 @@ def test_create_post(api):
     assert created_post_dict.body == "bar2"
 
 
-def test_read_post(api):
+def test_read_post(api) -> None:
     """
     Test reading a post from the JSONPlaceholder API.
 
@@ -67,7 +67,7 @@ def test_read_post(api):
 
 
 @pytest.mark.no_parallel
-def test_update_post(api):
+def test_update_post(api) -> None:
     """
     Test updating a post in the JSONPlaceholder API.
 
@@ -86,7 +86,7 @@ def test_update_post(api):
 
 
 @pytest.mark.no_parallel
-def test_partial_update_post(api):
+def test_partial_update_post(api) -> None:
     """
     Test partially updating a post in the JSONPlaceholder API.
 
@@ -103,7 +103,7 @@ def test_partial_update_post(api):
 
 
 @pytest.mark.no_parallel
-def test_delete_post(api):
+def test_delete_post(api) -> None:
     """
     Test deleting a post in the JSONPlaceholder API.
 
@@ -115,7 +115,7 @@ def test_delete_post(api):
     # So we can't really assert anything meaningful here.
 
 
-def test_custom_action(api):
+def test_custom_action(api) -> None:
     """
     Test a custom action on the JSONPlaceholder API.
 
@@ -140,7 +140,7 @@ def test_custom_action(api):
 # ResourceGroup Tests
 
 
-def test_list_users(api):
+def test_list_users(api) -> None:
     """
     Test listing users from the JSONPlaceholder API using ResourceGroup.
 
@@ -156,7 +156,7 @@ def test_list_users(api):
     assert users[0].email is not None
 
 
-def test_read_user(api):
+def test_read_user(api) -> None:
     """
     Test reading a user from the JSONPlaceholder API using ResourceGroup.
 
@@ -170,7 +170,7 @@ def test_read_user(api):
     assert user.email is not None
 
 
-def test_user_posts(api):
+def test_user_posts(api) -> None:
     """
     Test listing posts for a specific user using nested ResourceGroup structure.
 
@@ -190,7 +190,7 @@ def test_user_posts(api):
         assert post.body is not None
 
 
-def test_user_albums(api):
+def test_user_albums(api) -> None:
     """
     Test listing albums for a specific user using nested ResourceGroup structure.
 
@@ -209,7 +209,7 @@ def test_user_albums(api):
         assert album.title is not None
 
 
-def test_user_todos(api):
+def test_user_todos(api) -> None:
     """
     Test listing todos for a specific user using nested ResourceGroup structure.
 
