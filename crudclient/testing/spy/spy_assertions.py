@@ -1,11 +1,21 @@
 """Assertion mixin for enhanced spy objects."""
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    runtime_checkable,
+)
 
 if TYPE_CHECKING:
     from .enhanced import CallRecord
 
 
+@runtime_checkable
 class SpyProtocol(Protocol):
     """Defines the protocol required by :class:`SpyAssertionsMixin`."""
 
@@ -14,15 +24,19 @@ class SpyProtocol(Protocol):
 
     def was_called(self, method_name: str) -> bool:
         """Check if the specified method was called at least once."""
+        ...
 
     def was_called_with(self, method_name: str, *args: Any, **kwargs: Any) -> bool:
         """Check if the specified method was called with the exact arguments."""
+        ...
 
     def get_call_count(self, method_name: Optional[str] = None) -> int:
         """Get the number of times a method (or any method) was called."""
+        ...
 
     def get_calls(self, method_name: Optional[str] = None) -> List["CallRecord"]:
         """Retrieve recorded calls for a specific method or all methods."""
+        ...
 
 
 class SpyAssertionsMixin:
