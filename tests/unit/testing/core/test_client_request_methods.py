@@ -8,7 +8,7 @@ from tests.unit.helpers import translate_mock_calls_for_verifier
 class TestMockClientRequestMethods:
     """Tests for the HTTP request methods of MockClient."""
 
-    def test_get_method(self):
+    def test_get_method(self) -> None:
         """Test get method."""
         # Arrange
         http_client = MagicMock()
@@ -38,7 +38,7 @@ class TestMockClientRequestMethods:
         assert calls[0].method_name == "GET"
         assert calls[0].args[0] == "/test"  # First positional arg is path
 
-    def test_post_method(self):
+    def test_post_method(self) -> None:
         """Test post method."""
         # Arrange
         http_client = MagicMock()
@@ -78,7 +78,7 @@ class TestMockClientRequestMethods:
         assert calls[0].method_name == "POST"
         assert calls[0].args[0] == "/test"  # First positional arg is path
 
-    def test_put_method(self):
+    def test_put_method(self) -> None:
         """Test put method."""
         # Arrange
         http_client = MagicMock()
@@ -118,7 +118,7 @@ class TestMockClientRequestMethods:
         assert calls[0].method_name == "PUT"
         assert calls[0].args[0] == "/test"  # First positional arg is path
 
-    def test_delete_method(self):
+    def test_delete_method(self) -> None:
         """Test delete method."""
         # Arrange
         http_client = MagicMock()
@@ -148,7 +148,7 @@ class TestMockClientRequestMethods:
         assert calls[0].method_name == "DELETE"
         assert calls[0].args[0] == "/test"  # First positional arg is path
 
-    def test_patch_method(self):
+    def test_patch_method(self) -> None:
         """Test patch method."""
         # Arrange
         http_client = MagicMock()
