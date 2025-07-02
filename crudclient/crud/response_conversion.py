@@ -342,7 +342,7 @@ def _dump_model_instance(self: "Crud[T]", model_instance: T, partial: bool) -> J
         raise TypeError(f"Cannot dump model instance of type {type(model_instance)}")
 
 
-def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> None:
+def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[ModelDumpable]] = None) -> None:
     """
     Validate provided fields in a dictionary against the specified validation model for partial updates.
 
@@ -352,7 +352,7 @@ def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_mode
     ----------
     data_dict : JSONDict
         The dictionary containing partial data.
-    validation_model : Optional[Type[T]], optional
+    validation_model : Optional[Type[ModelDumpable]], optional
         The model to validate against. If None, falls back to self._datamodel.
 
     Raises
@@ -381,7 +381,7 @@ def _validate_partial_dict(self: "Crud[T]", data_dict: JSONDict, validation_mode
             raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
-def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[T]] = None) -> JSONDict:
+def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validation_model: Optional[Type[ModelDumpable]] = None) -> JSONDict:
     """
     Validate a dictionary against the specified validation model and dump the result.
 
@@ -389,7 +389,7 @@ def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validatio
     ----------
     data_dict : JSONDict
         The dictionary to validate and dump.
-    validation_model : Optional[Type[T]], optional
+    validation_model : Optional[Type[ModelDumpable]], optional
         The model to validate against. If None, falls back to self._datamodel.
 
     Returns
@@ -422,7 +422,7 @@ def _validate_and_dump_full_dict(self: "Crud[T]", data_dict: JSONDict, validatio
         raise DataValidationError(error_msg, data=redacted_data, pydantic_error=e) from e
 
 
-def _dump_dictionary(self: "Crud[T]", data_dict: JSONDict, partial: bool, validation_model: Optional[Type[T]] = None) -> JSONDict:
+def _dump_dictionary(self: "Crud[T]", data_dict: JSONDict, partial: bool, validation_model: Optional[Type[ModelDumpable]] = None) -> JSONDict:
     """
     Validate and dump a dictionary based on the specified validation model.
 
@@ -435,7 +435,7 @@ def _dump_dictionary(self: "Crud[T]", data_dict: JSONDict, partial: bool, valida
         The dictionary to dump.
     partial : bool
         Whether this is a partial update.
-    validation_model : Optional[Type[T]], optional
+    validation_model : Optional[Type[ModelDumpable]], optional
         The model to validate against. If None, falls back to self._datamodel.
 
     Returns
@@ -455,7 +455,9 @@ def _dump_dictionary(self: "Crud[T]", data_dict: JSONDict, partial: bool, valida
         return self._validate_and_dump_full_dict(data_dict, validation_model)  # type: ignore[no-any-return]
 
 
-def _dump_data(self: "Crud[T]", data: Optional[Union[JSONDict, T]], validation_model: Optional[Type[T]] = None, partial: bool = False) -> JSONDict:
+def _dump_data(
+    self: "Crud[T]", data: Optional[Union[JSONDict, T]], validation_model: Optional[Type[ModelDumpable]] = None, partial: bool = False
+) -> JSONDict:
     """
     Dump the data model to a JSON-serializable dictionary.
 
@@ -463,7 +465,7 @@ def _dump_data(self: "Crud[T]", data: Optional[Union[JSONDict, T]], validation_m
     ----------
     data : Optional[Union[JSONDict, T]]
         The data to dump.
-    validation_model : Optional[Type[T]], optional
+    validation_model : Optional[Type[ModelDumpable]], optional
         Optional model to use for validation. If None, determines model based on operation type.
     partial : bool, optional
         Whether this is a partial update. Defaults to False.

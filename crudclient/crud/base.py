@@ -9,6 +9,7 @@ extended for specific API endpoints.
 
 import logging
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Generic,
@@ -81,9 +82,14 @@ class Crud(Generic[T]):
 
     _resource_path: str = ""
     _datamodel: Optional[Type[T]] = None
-    _api_response_model: ClassVar[Optional[Type[ListResponseWrapper]]] = None
-    _create_model: ClassVar[Optional[Type[Any]]] = None
-    _update_model: ClassVar[Optional[Type[Any]]] = None
+
+    if TYPE_CHECKING:
+        _api_response_model: ClassVar[Optional[Type[ListResponseWrapper[ModelDumpable]]]] = None
+    else:
+        _api_response_model: ClassVar[Optional[Type[ListResponseWrapper[Any]]]] = None
+
+    _create_model: ClassVar[Optional[Type[ModelDumpable]]] = None
+    _update_model: ClassVar[Optional[Type[ModelDumpable]]] = None
     _response_strategy: Optional[ResponseModelStrategy[T]] = None
     _list_return_keys: List[str] = ["data", "results", "items"]
     _update_mode: str = "standard"
