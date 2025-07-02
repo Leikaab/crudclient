@@ -28,7 +28,7 @@ SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 # === Update Operation Tests ===
 
 
-def test_update_operation_success_with_model(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_update_operation_success_with_model(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a model instance
     WHEN the update operation is called with a resource ID and the model
@@ -46,7 +46,7 @@ def test_update_operation_success_with_model(base_test_crud: BaseTestCrud, mock_
     assert result == updated_model
 
 
-def test_update_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_update_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a dictionary
     WHEN the update operation is called with a resource ID and the dictionary
@@ -65,7 +65,7 @@ def test_update_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_c
     assert result == BaseTestModel(**updated_payload)
 
 
-def test_update_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_update_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the update operation is called with a resource ID, data, and parent ID
@@ -87,7 +87,7 @@ def test_update_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_clie
     assert result == BaseTestModel(**updated_payload)
 
 
-def test_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and invalid data (non-integer ID)
     WHEN the update operation is called with the invalid data
@@ -106,7 +106,7 @@ def test_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_cl
     assert excinfo.value.data == invalid_data
 
 
-def test_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN the update operation is called
@@ -120,7 +120,7 @@ def test_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, m
         base_test_crud.update(resource_id="1", data=SAMPLE_PAYLOAD)
 
 
-def test_update_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_update_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'update' action not in allowed_actions
     WHEN the update operation is called
@@ -137,7 +137,7 @@ def test_update_operation_action_not_allowed(base_test_crud: BaseTestCrud):
 # === Partial Update Operation Tests ===
 
 
-def test_partial_update_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_partial_update_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning a complete resource
     WHEN the partial_update operation is called with a resource ID and partial data
@@ -156,7 +156,7 @@ def test_partial_update_operation_success(base_test_crud: BaseTestCrud, mock_cli
     assert result == BaseTestModel(**final_payload)
 
 
-def test_partial_update_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_partial_update_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the partial_update operation is called with a resource ID, partial data, and parent ID
@@ -174,7 +174,7 @@ def test_partial_update_operation_with_parent_id(base_test_crud: BaseTestCrud, m
     assert result == BaseTestModel(**final_payload)
 
 
-def test_partial_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_partial_update_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and invalid partial data (non-string name)
     WHEN the partial_update operation is called with the invalid data
@@ -195,7 +195,7 @@ def test_partial_update_operation_validation_error(base_test_crud: BaseTestCrud,
     assert excinfo.value.data == invalid_data
 
 
-def test_partial_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_partial_update_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN the partial_update operation is called
@@ -209,7 +209,7 @@ def test_partial_update_operation_model_conversion_error(base_test_crud: BaseTes
         base_test_crud.partial_update(resource_id="1", data={"name": "Test"})
 
 
-def test_partial_update_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_partial_update_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'partial_update' action not in allowed_actions
     WHEN the partial_update operation is called
