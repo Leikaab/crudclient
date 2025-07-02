@@ -15,12 +15,12 @@ from .oneflow_resources.setup import (
 
 
 @pytest.fixture
-def api():
+def api() -> OneflowAPI:
     config = OneflowConfig()
     return OneflowAPI(client_config=config)
 
 
-def test_api_configuration(api):
+def test_api_configuration(api) -> None:
     assert api.client.base_url == "https://api.test.oneflow.com/v1"
     # Check that we have an auth strategy set up
     assert api.client.config.auth_strategy is not None
@@ -35,7 +35,7 @@ def test_api_configuration(api):
     assert api.client.config.headers == {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
 
 
-def test_list_users(api):
+def test_list_users(api) -> None:
     users = api.users.list()
     assert isinstance(users, UsersResponse)
     assert len(users.data) > 0
@@ -43,7 +43,7 @@ def test_list_users(api):
     assert users.data[0].id is not None
 
 
-def test_list_template_types(api):
+def test_list_template_types(api) -> None:
     template_types = api.template_types.list()
     assert isinstance(template_types, TemplateTypesResponse)
     assert len(template_types.data) > 0
@@ -51,7 +51,7 @@ def test_list_template_types(api):
     assert template_types.data[0].id is not None
 
 
-def test_read_template_type(api):
+def test_read_template_type(api) -> None:
     template_type = api.template_types.read(220129)
     assert isinstance(template_type, TemplateType)
     assert template_type.id == 220129
@@ -60,7 +60,7 @@ def test_read_template_type(api):
 
 
 @pytest.mark.no_parallel
-def test_update_data_field(api):
+def test_update_data_field(api) -> None:
     template_type_id = api.template_types.read(220129)
     rand = random.randint(1, 1000)
     data = {
