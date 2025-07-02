@@ -21,6 +21,7 @@ from crudclient.exceptions import (
     UnprocessableEntityError,
 )
 from crudclient.testing.verification import Verifier
+from tests.unit.helpers import translate_mock_calls_for_verifier
 
 # Import fixtures from conftest.py
 
@@ -237,11 +238,14 @@ class TestClientErrorHandling:
         assert json.loads(str(response))["status"] == "success after retry"
 
         # 2. Check config handler was called (using attribute access on client)
-        # translate_mock_calls_for_verifier(client.config.handle_403_retry)
+        # TODO: Consider migrating to Mock's built-in assertion methods (client.config.handle_403_retry.assert_called_once_with(client))
+        # See verifier_pattern_fix_plan.md for migration details
+        translate_mock_calls_for_verifier(client.config.handle_403_retry)  # type: ignore[arg-type]
         Verifier.verify_called_once_with(client.config.handle_403_retry, "", client)
 
         # 3. Check auth was refreshed (using attribute access on client)
-        # translate_mock_calls_for_verifier(client.http_client.session_manager.refresh_auth)
+        # TODO: Consider migrating to Mock's built-in assertion methods (assert client.http_client.session_manager.refresh_auth.call_count == 1)
+        translate_mock_calls_for_verifier(client.http_client.session_manager.refresh_auth)  # type: ignore[arg-type]
         Verifier.verify_call_count(client.http_client.session_manager.refresh_auth, "", 1)
 
         # 4. Check two requests were made to the same URL
