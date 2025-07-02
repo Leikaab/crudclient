@@ -5,13 +5,14 @@ This module contains tests for how the HTTP client handles retries for various
 error conditions, including network errors, timeouts, and SSL errors.
 """
 
-from typing import cast
+from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
 import requests
 import requests_mock
 
+from crudclient.config import ClientConfig
 from crudclient.exceptions import CrudClientError
 from crudclient.http import RetryCondition, RetryHandler
 from crudclient.http.client import HttpClient
@@ -21,14 +22,14 @@ class TestHttpClientNetworkErrorRetries:
     """Tests for retry behavior with network errors in the HTTP client."""
 
     @pytest.fixture
-    def retry_config(self, config):
+    def retry_config(self, config: ClientConfig) -> ClientConfig:
         """Fixture for a configuration with custom retry settings."""
         # Set a short timeout for faster tests
-        config.timeout = 1.0
+        config.timeout = 1
         return config
 
     @pytest.fixture
-    def retry_client(self, retry_config):
+    def retry_client(self, retry_config: ClientConfig) -> HttpClient:
         """Fixture for an HTTP client with custom retry settings."""
         # Create a retry handler with custom settings
         retry_handler = RetryHandler(
@@ -54,12 +55,12 @@ class TestHttpClientNetworkErrorRetries:
         # Track the number of requests
         request_count = [0]
 
-        def side_effect(request, context):
+        def side_effect(request: requests.PreparedRequest, context: requests_mock.Mocker) -> dict[str, Any]:
             request_count[0] += 1
             if request_count[0] <= 2:  # Fail the first two attempts
                 raise requests.exceptions.ConnectionError("Connection refused")
             # Succeed on the third attempt
-            context.status_code = 200
+            context.status_code = 200  # type: ignore[attr-defined]
             return {"id": 1, "name": "Test User"}
 
         mock_request.get(url, json=side_effect)
@@ -90,12 +91,12 @@ class TestHttpClientNetworkErrorRetries:
         # Track the number of requests
         request_count = [0]
 
-        def side_effect(request, context):
+        def side_effect(request: requests.PreparedRequest, context: requests_mock.Mocker) -> dict[str, Any]:
             request_count[0] += 1
             if request_count[0] <= 2:  # Fail the first two attempts
                 raise requests.exceptions.Timeout("Request timed out")
             # Succeed on the third attempt
-            context.status_code = 200
+            context.status_code = 200  # type: ignore[attr-defined]
             return {"id": 1, "name": "Test User"}
 
         mock_request.get(url, json=side_effect)
@@ -128,12 +129,12 @@ class TestHttpClientNetworkErrorRetries:
         # Track the number of requests
         request_count = [0]
 
-        def side_effect(request, context):
+        def side_effect(request: requests.PreparedRequest, context: requests_mock.Mocker) -> dict[str, Any]:
             request_count[0] += 1
             if request_count[0] <= 2:  # Fail the first two attempts
                 raise requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED")
             # Succeed on the third attempt
-            context.status_code = 200
+            context.status_code = 200  # type: ignore[attr-defined]
             return {"id": 1, "name": "Test User"}
 
         mock_request.get(url, json=side_effect)
@@ -185,7 +186,7 @@ class TestHttpClientNetworkErrorRetries:
         # Track the number of requests
         request_count = [0]
 
-        def side_effect(request, context):
+        def side_effect(request: requests.PreparedRequest, context: requests_mock.Mocker) -> dict[str, Any]:
             request_count[0] += 1
             if request_count[0] == 1:
                 raise requests.exceptions.ConnectionError("Connection refused")
@@ -193,8 +194,9 @@ class TestHttpClientNetworkErrorRetries:
                 raise requests.exceptions.Timeout("Request timed out")
             elif request_count[0] == 3:
                 # Succeed on the third attempt instead of raising another error
-                context.status_code = 200
+                context.status_code = 200  # type: ignore[attr-defined]
                 return {"id": 1, "name": "Test User"}
+            return {"id": 1, "name": "Test User"}
 
         mock_request.get(url, json=side_effect)
 
