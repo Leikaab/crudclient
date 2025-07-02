@@ -26,7 +26,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_basic_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_basic_auth(self, mock_configure_auth, mock_create_basic) -> None:
+    def test_create_mock_client_with_basic_auth(self, mock_configure_auth: MagicMock, mock_create_basic: MagicMock) -> None:
         """Test create_mock_client with basic auth type."""
         # Arrange
         # mock_auth_strategy = BasicAuth("user", "pass") # No longer needed
@@ -51,7 +51,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_bearer_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_bearer_auth(self, mock_configure_auth, mock_create_bearer) -> None:
+    def test_create_mock_client_with_bearer_auth(self, mock_configure_auth: MagicMock, mock_create_bearer: MagicMock) -> None:
         """Test create_mock_client with bearer auth type."""
         # Arrange
         # mock_auth_strategy = BearerAuth("token") # No longer needed
@@ -75,7 +75,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_api_key_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth, mock_create_apikey) -> None:
+    def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth: MagicMock, mock_create_apikey: MagicMock) -> None:
         """Test create_mock_client with apikey auth type (header)."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -99,7 +99,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_api_key_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth, mock_create_apikey) -> None:
+    def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth: MagicMock, mock_create_apikey: MagicMock) -> None:
         """Test create_mock_client with apikey auth type (param)."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -125,7 +125,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_custom_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_custom_auth(self, mock_configure_auth, mock_create_custom) -> None:
+    def test_create_mock_client_with_custom_auth(self, mock_configure_auth: MagicMock, mock_create_custom: MagicMock) -> None:
         """Test create_mock_client with custom auth type."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -155,7 +155,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_oauth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_oauth_auth(self, mock_configure_auth, mock_create_oauth) -> None:
+    def test_create_mock_client_with_oauth_auth(self, mock_configure_auth: MagicMock, mock_create_oauth: MagicMock) -> None:
         """Test create_mock_client with oauth auth type."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -216,7 +216,7 @@ class TestCreateMockClient:
         assert mock_client.get_auth_strategy() is auth_strategy
 
     @patch("crudclient.testing.factory_helpers._create_api_patterns")
-    def test_create_mock_client_with_api_type(self, mock_create_patterns) -> None:
+    def test_create_mock_client_with_api_type(self, mock_create_patterns: MagicMock) -> None:
         """Test create_mock_client with api_type."""
         # Arrange
         mock_patterns = [{"method": "GET", "path": "/test", "status_code": 200}]
@@ -244,7 +244,7 @@ class TestCreateMockClient:
             pass  # Placeholder
 
     @patch("crudclient.testing.factory_helpers._add_error_responses")
-    def test_create_mock_client_with_error_responses(self, mock_add_errors) -> None:
+    def test_create_mock_client_with_error_responses(self, mock_add_errors: MagicMock) -> None:
         """Test create_mock_client with error_responses."""
         # Arrange
         error_config = {"validation": {"status_code": 422}}
