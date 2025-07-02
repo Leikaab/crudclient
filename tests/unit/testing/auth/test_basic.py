@@ -5,13 +5,13 @@ from crudclient.testing.auth.basic import BasicAuthMock
 
 
 # Helper to create the expected auth header value
-def create_basic_auth_header(username, password):
+def create_basic_auth_header(username: str, password: str) -> str:
     credentials = f"{username}:{password}"
     encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
     return f"Basic {encoded_credentials}"
 
 
-def test_basic_auth_mock_init_defaults():
+def test_basic_auth_mock_init_defaults() -> None:
     """Test default initialization."""
     mock = BasicAuthMock()
     assert mock.username == "user"
@@ -25,7 +25,7 @@ def test_basic_auth_mock_init_defaults():
     assert mock.valid_credentials == [("user", "pass")]
 
 
-def test_basic_auth_mock_init_custom():
+def test_basic_auth_mock_init_custom() -> None:
     """Test initialization with custom credentials."""
     mock = BasicAuthMock(username="testuser", password="testpassword")
     assert mock.username == "testuser"
@@ -35,7 +35,7 @@ def test_basic_auth_mock_init_custom():
     assert mock.valid_credentials == [("testuser", "testpassword")]
 
 
-def test_with_credentials():
+def test_with_credentials() -> None:
     """Test updating credentials."""
     mock = BasicAuthMock().with_credentials("newuser", "newpass")
     assert mock.username == "newuser"
@@ -45,13 +45,13 @@ def test_with_credentials():
     assert mock.valid_credentials == [("newuser", "newpass")]
 
 
-def test_with_additional_valid_credentials():
+def test_with_additional_valid_credentials() -> None:
     """Test adding more valid credentials."""
     mock = BasicAuthMock().with_additional_valid_credentials("admin", "secret")
     assert mock.valid_credentials == [("user", "pass"), ("admin", "secret")]
 
 
-def test_with_username_pattern():
+def test_with_username_pattern() -> None:
     """Test setting a username pattern."""
     mock = BasicAuthMock().with_username_pattern(r"^[a-z]+$")
     assert mock.username_pattern is not None
@@ -59,27 +59,27 @@ def test_with_username_pattern():
     assert not mock.username_pattern.match("InvalidUser1")
 
 
-def test_with_password_requirements():
+def test_with_password_requirements() -> None:
     """Test setting password requirements."""
     mock = BasicAuthMock().with_password_requirements(min_length=8, complexity=True)
     assert mock.password_min_length == 8
     assert mock.password_complexity is True
 
 
-def test_with_case_insensitive_username():
+def test_with_case_insensitive_username() -> None:
     """Test setting case-insensitive username matching."""
     mock = BasicAuthMock().with_case_insensitive_username()
     assert mock.case_sensitive is False
 
 
-def test_with_max_attempts():
+def test_with_max_attempts() -> None:
     """Test setting max authentication attempts."""
     mock = BasicAuthMock().with_max_attempts(3)
     assert mock.max_attempts == 3
     assert mock.current_attempts == 0
 
 
-def test_reset_attempts():
+def test_reset_attempts() -> None:
     """Test resetting authentication attempts."""
     mock = BasicAuthMock().with_max_attempts(3)
     mock.current_attempts = 2
@@ -87,51 +87,51 @@ def test_reset_attempts():
     assert mock.current_attempts == 0
 
 
-def test_get_auth_headers():
+def test_get_auth_headers() -> None:
     """Test generating the Authorization header."""
     mock = BasicAuthMock("test", "secret")
     expected_header = create_basic_auth_header("test", "secret")
     assert mock.get_auth_headers() == ("Authorization", expected_header)
 
 
-def test_validate_credentials_valid_default():
+def test_validate_credentials_valid_default() -> None:
     """Test validating default credentials."""
     mock = BasicAuthMock()
     assert mock.validate_credentials("user", "pass") is True
 
 
-def test_validate_credentials_valid_custom():
+def test_validate_credentials_valid_custom() -> None:
     """Test validating custom credentials."""
     mock = BasicAuthMock("custom", "pwd")
     assert mock.validate_credentials("custom", "pwd") is True
 
 
-def test_validate_credentials_valid_additional():
+def test_validate_credentials_valid_additional() -> None:
     """Test validating additional credentials."""
     mock = BasicAuthMock().with_additional_valid_credentials("admin", "secret")
     assert mock.validate_credentials("admin", "secret") is True
 
 
-def test_validate_credentials_invalid_password():
+def test_validate_credentials_invalid_password() -> None:
     """Test validating with incorrect password."""
     mock = BasicAuthMock()
     assert mock.validate_credentials("user", "wrongpass") is False
 
 
-def test_validate_credentials_invalid_username():
+def test_validate_credentials_invalid_username() -> None:
     """Test validating with incorrect username."""
     mock = BasicAuthMock()
     assert mock.validate_credentials("wronguser", "pass") is False
 
 
-def test_validate_credentials_case_sensitive():
+def test_validate_credentials_case_sensitive() -> None:
     """Test case-sensitive username validation."""
     mock = BasicAuthMock("User", "Pass")
     assert mock.validate_credentials("User", "Pass") is True
     assert mock.validate_credentials("user", "Pass") is False
 
 
-def test_validate_credentials_case_insensitive():
+def test_validate_credentials_case_insensitive() -> None:
     """Test case-insensitive username validation."""
     mock = BasicAuthMock("User", "Pass").with_case_insensitive_username()
     assert mock.validate_credentials("User", "Pass") is True
@@ -140,7 +140,7 @@ def test_validate_credentials_case_insensitive():
     assert mock.validate_credentials("uSER", "wrongpass") is False
 
 
-def test_validate_credentials_username_pattern_match():
+def test_validate_credentials_username_pattern_match() -> None:
     """Test validation with matching username pattern."""
     # Add the credentials that match the pattern AND are expected to be valid
     mock = BasicAuthMock().with_username_pattern(r"user\d+").with_additional_valid_credentials("user123", "pass")
@@ -148,31 +148,31 @@ def test_validate_credentials_username_pattern_match():
     assert mock.validate_credentials("user123", "pass") is True
 
 
-def test_validate_credentials_username_pattern_mismatch():
+def test_validate_credentials_username_pattern_mismatch() -> None:
     """Test validation with non-matching username pattern."""
     mock = BasicAuthMock().with_username_pattern(r"admin\d+")
     assert mock.validate_credentials("user123", "pass") is False
 
 
-def test_validate_credentials_password_length_met():
+def test_validate_credentials_password_length_met() -> None:
     """Test validation with password meeting min length."""
     mock = BasicAuthMock().with_password_requirements(min_length=4)
     assert mock.validate_credentials("user", "pass") is True
 
 
-def test_validate_credentials_password_length_not_met():
+def test_validate_credentials_password_length_not_met() -> None:
     """Test validation with password not meeting min length."""
     mock = BasicAuthMock().with_password_requirements(min_length=5)
     assert mock.validate_credentials("user", "pass") is False
 
 
-def test_validate_credentials_password_complexity_met():
+def test_validate_credentials_password_complexity_met() -> None:
     """Test validation with password meeting complexity."""
     mock = BasicAuthMock("user", "Pass1!").with_password_requirements(complexity=True)
     assert mock.validate_credentials("user", "Pass1!") is True
 
 
-def test_validate_credentials_password_complexity_not_met():
+def test_validate_credentials_password_complexity_not_met() -> None:
     """Test validation with password not meeting complexity."""
     mock = BasicAuthMock().with_password_requirements(complexity=True)
     assert mock.validate_credentials("user", "pass") is False  # Lacks upper, digit, special
@@ -181,7 +181,7 @@ def test_validate_credentials_password_complexity_not_met():
     assert mock.validate_credentials("user", "Password!") is False  # Lacks digit
 
 
-def test_validate_credentials_max_attempts():
+def test_validate_credentials_max_attempts() -> None:
     """Test validation respecting max attempts."""
     mock = BasicAuthMock().with_max_attempts(2)
     assert mock.validate_credentials("user", "wrong") is False
@@ -196,48 +196,48 @@ def test_validate_credentials_max_attempts():
     assert mock.current_attempts == 4
 
 
-def test_validate_credentials_max_attempts_reset_on_success():
+def test_validate_credentials_max_attempts_reset_on_success() -> None:
     """Test that attempts counter doesn't increment on success (implicitly tested elsewhere)."""
     mock = BasicAuthMock().with_max_attempts(2)
     assert mock.validate_credentials("user", "pass") is True
     assert mock.current_attempts == 0  # Should not increment on success
 
 
-def test_verify_auth_header_valid():
+def test_verify_auth_header_valid() -> None:
     """Test verifying a valid auth header."""
     mock = BasicAuthMock("test", "secret")
     header = create_basic_auth_header("test", "secret")
     assert mock.verify_auth_header(header) is True
 
 
-def test_verify_auth_header_invalid_prefix():
+def test_verify_auth_header_invalid_prefix() -> None:
     """Test verifying header with wrong prefix."""
     mock = BasicAuthMock()
     header = create_basic_auth_header("user", "pass").replace("Basic", "Bearer")
     assert mock.verify_auth_header(header) is False
 
 
-def test_verify_auth_header_invalid_encoding():
+def test_verify_auth_header_invalid_encoding() -> None:
     """Test verifying header with bad base64 encoding."""
     mock = BasicAuthMock()
     assert mock.verify_auth_header("Basic invalid-base64") is False
 
 
-def test_verify_auth_header_missing_colon():
+def test_verify_auth_header_missing_colon() -> None:
     """Test verifying header with decoded value missing colon."""
     mock = BasicAuthMock()
     no_colon = base64.b64encode(b"userpass").decode("utf-8")
     assert mock.verify_auth_header(f"Basic {no_colon}") is False
 
 
-def test_verify_auth_header_invalid_credentials():
+def test_verify_auth_header_invalid_credentials() -> None:
     """Test verifying header with incorrect credentials."""
     mock = BasicAuthMock("test", "secret")
     header = create_basic_auth_header("wrong", "credentials")
     assert mock.verify_auth_header(header) is False
 
 
-def test_verify_auth_header_case_insensitive():
+def test_verify_auth_header_case_insensitive() -> None:
     """Test verifying header with case-insensitive matching."""
     mock = BasicAuthMock("User", "Pass").with_case_insensitive_username()
     header_lower = create_basic_auth_header("user", "Pass")
@@ -246,7 +246,7 @@ def test_verify_auth_header_case_insensitive():
     assert mock.verify_auth_header(header_upper) is True
 
 
-def test_handle_auth_error():
+def test_handle_auth_error() -> None:
     """Test handle_auth_error always returns False."""
     mock = BasicAuthMock()
     # The argument type hint requires a MockResponse, but the method doesn't use it.
@@ -254,7 +254,7 @@ def test_handle_auth_error():
     assert mock.handle_auth_error(None) is False  # type: ignore
 
 
-def test_get_auth_strategy():
+def test_get_auth_strategy() -> None:
     """Test getting the underlying auth strategy."""
     mock = BasicAuthMock("test", "secret")
     strategy = mock.get_auth_strategy()

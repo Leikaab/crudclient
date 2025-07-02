@@ -6,7 +6,7 @@ from crudclient.testing.auth.oauth_token_manager import OAuthTokenManager
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_token_manager_init_and_default_token():
+def test_token_manager_init_and_default_token() -> None:
     """Test initialization and the default token state."""
     manager = OAuthTokenManager()
     manager.initialize_default_token(client_id="default_client", scope="default_scope")
@@ -26,7 +26,7 @@ def test_token_manager_init_and_default_token():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_create_token():
+def test_create_token() -> None:
     """Test creating a new token."""
     manager = OAuthTokenManager()
     token_info = manager.create_token(client_id="c1", scope="s1", expires_in=60, user="u1")
@@ -55,7 +55,7 @@ def test_create_token():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_create_authorization_code():
+def test_create_authorization_code() -> None:
     """Test creating an authorization code."""
     manager = OAuthTokenManager()
     code = manager.create_authorization_code(client_id="c1", redirect_uri="uri1", scope="s1", state="state1")
@@ -72,20 +72,20 @@ def test_create_authorization_code():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_validate_token_valid():
+def test_validate_token_valid() -> None:
     """Test validating a valid, non-expired token."""
     manager = OAuthTokenManager()
     token_info = manager.create_token(client_id="c1", expires_in=60)
     assert manager.validate_token(token_info["access_token"]) is True
 
 
-def test_validate_token_invalid():
+def test_validate_token_invalid() -> None:
     """Test validating a non-existent token."""
     manager = OAuthTokenManager()
     assert manager.validate_token("non_existent_token") is False
 
 
-def test_validate_token_expired():
+def test_validate_token_expired() -> None:
     """Test validating an expired token."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         manager = OAuthTokenManager()
@@ -97,7 +97,7 @@ def test_validate_token_expired():
         assert manager.validate_token(access_token) is False
 
 
-def test_refresh_token_valid():
+def test_refresh_token_valid() -> None:
     """Test refreshing a valid token."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         manager = OAuthTokenManager()
@@ -132,13 +132,13 @@ def test_refresh_token_valid():
         assert new_token_data["expires_at"] > datetime(2023, 1, 1, 12, 0, 1)  # New expiry
 
 
-def test_refresh_token_invalid_refresh_token():
+def test_refresh_token_invalid_refresh_token() -> None:
     """Test refreshing with an invalid refresh token."""
     manager = OAuthTokenManager()
     assert manager.refresh_token("invalid_refresh") is None
 
 
-def test_refresh_token_access_token_deleted():
+def test_refresh_token_access_token_deleted() -> None:
     """Test refreshing when the associated access token was deleted (edge case)."""
     manager = OAuthTokenManager()
     token_info = manager.create_token(client_id="c1")
@@ -152,7 +152,7 @@ def test_refresh_token_access_token_deleted():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_revoke_token():
+def test_revoke_token() -> None:
     """Test revoking an access token."""
     manager = OAuthTokenManager()
     token_info = manager.create_token(client_id="c1")
@@ -168,14 +168,14 @@ def test_revoke_token():
     assert refresh_token not in manager.refresh_tokens
 
 
-def test_revoke_token_invalid():
+def test_revoke_token_invalid() -> None:
     """Test revoking a non-existent token."""
     manager = OAuthTokenManager()
     assert manager.revoke_token("invalid_token") is False
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_revoke_current_token_updates_current():
+def test_revoke_current_token_updates_current() -> None:
     """Test that revoking the current token updates the current token pointer."""
     manager = OAuthTokenManager()
     token1_info = manager.create_token(client_id="c1")
@@ -202,7 +202,7 @@ def test_revoke_current_token_updates_current():
     assert manager.current_access_token == ""  # Becomes empty string
 
 
-def test_add_user():
+def test_add_user() -> None:
     """Test adding a user for password grant."""
     manager = OAuthTokenManager()
     manager.add_user("testuser", "testpass", ["scope1", "scope2"])
@@ -211,21 +211,21 @@ def test_add_user():
     assert manager.user_credentials["testuser"]["scopes"] == ["scope1", "scope2"]
 
 
-def test_validate_user_valid():
+def test_validate_user_valid() -> None:
     """Test validating a valid user."""
     manager = OAuthTokenManager()
     manager.add_user("testuser", "testpass", [])
     assert manager.validate_user("testuser", "testpass") is True
 
 
-def test_validate_user_invalid_password():
+def test_validate_user_invalid_password() -> None:
     """Test validating with an invalid password."""
     manager = OAuthTokenManager()
     manager.add_user("testuser", "testpass", [])
     assert manager.validate_user("testuser", "wrongpass") is False
 
 
-def test_validate_user_invalid_username():
+def test_validate_user_invalid_username() -> None:
     """Test validating a non-existent user."""
     manager = OAuthTokenManager()
     assert manager.validate_user("nonexistent", "pass") is False

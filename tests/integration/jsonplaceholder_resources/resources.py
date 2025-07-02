@@ -1,7 +1,9 @@
-from typing import List, Optional, TypeVar, cast
+from typing import List, Optional, TypeVar, Union, cast
 
 from crudclient.crud.base import Crud
+from crudclient.models import ListResponseWrapper
 from crudclient.response_strategies import ModelDumpable
+from crudclient.types import JSONDict, JSONList
 
 from .models import (
     Album,
@@ -47,7 +49,9 @@ class UserPostsCrud(Crud[Post]):
     _api_response_model = PostResponse
     allowed_actions = ["list"]
 
-    def list(self, parent_id: Optional[str] = None, **kwargs) -> List[Post]:
+    def list(
+        self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs
+    ) -> Union[JSONList, List[Post], ListResponseWrapper[Post]]:
         """
         List all posts for a specific user.
 
@@ -79,7 +83,9 @@ class UserAlbumsCrud(Crud[Album]):
     _api_response_model = AlbumResponse
     allowed_actions = ["list"]
 
-    def list(self, parent_id: Optional[str] = None, **kwargs) -> List[Album]:
+    def list(
+        self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs
+    ) -> Union[JSONList, List[Album], ListResponseWrapper[Album]]:
         """
         List all albums for a specific user.
 
@@ -111,7 +117,9 @@ class UserTodosCrud(Crud[Todo]):
     _api_response_model = TodoResponse
     allowed_actions = ["list"]
 
-    def list(self, parent_id: Optional[str] = None, **kwargs) -> List[Todo]:
+    def list(
+        self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs
+    ) -> Union[JSONList, List[Todo], ListResponseWrapper[Todo]]:
         """
         List all todos for a specific user.
 

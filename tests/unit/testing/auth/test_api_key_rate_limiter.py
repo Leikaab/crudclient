@@ -5,7 +5,7 @@ from freezegun import freeze_time
 from crudclient.testing.auth.api_key_rate_limiter import ApiKeyRateLimiter
 
 
-def test_rate_limiter_init():
+def test_rate_limiter_init() -> None:
     """Test initial state of the rate limiter."""
     limiter = ApiKeyRateLimiter()
     assert limiter.rate_limit_enabled is False
@@ -14,7 +14,7 @@ def test_rate_limiter_init():
     assert limiter.request_history == {}
 
 
-def test_enable_rate_limiting():
+def test_enable_rate_limiting() -> None:
     """Test enabling rate limiting with custom values."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=5, period_seconds=60)
@@ -23,7 +23,7 @@ def test_enable_rate_limiting():
     assert limiter.rate_limit_period == 60
 
 
-def test_initialize_key():
+def test_initialize_key() -> None:
     """Test initializing a key adds it to history."""
     limiter = ApiKeyRateLimiter()
     limiter.initialize_key("key1")
@@ -31,7 +31,7 @@ def test_initialize_key():
     assert limiter.request_history["key1"] == []
 
 
-def test_track_request_disabled():
+def test_track_request_disabled() -> None:
     """Test track_request when rate limiting is disabled."""
     limiter = ApiKeyRateLimiter()
     limiter.initialize_key("key1")
@@ -42,7 +42,7 @@ def test_track_request_disabled():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_track_request_enabled_within_limit():
+def test_track_request_enabled_within_limit() -> None:
     """Test track_request when enabled and within limit."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=2, period_seconds=60)
@@ -55,7 +55,7 @@ def test_track_request_enabled_within_limit():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_track_request_enabled_exceed_limit():
+def test_track_request_enabled_exceed_limit() -> None:
     """Test track_request when enabled and limit is exceeded."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=1, period_seconds=60)
@@ -68,7 +68,7 @@ def test_track_request_enabled_exceed_limit():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_track_request_history_cleanup():
+def test_track_request_history_cleanup() -> None:
     """Test that old requests are cleaned up."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=5, period_seconds=60)
@@ -93,7 +93,7 @@ def test_track_request_history_cleanup():
     assert datetime(2023, 1, 1, 12, 0, 0) in limiter.request_history["key1"]
 
 
-def test_track_request_limit_reset():
+def test_track_request_limit_reset() -> None:
     """Test that the limit resets after the period passes."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         limiter = ApiKeyRateLimiter()
@@ -111,14 +111,14 @@ def test_track_request_limit_reset():
         assert len(limiter.request_history["key1"]) == 1  # Only the latest request remains
 
 
-def test_get_rate_limit_status_disabled():
+def test_get_rate_limit_status_disabled() -> None:
     """Test get_rate_limit_status when disabled."""
     limiter = ApiKeyRateLimiter()
     assert limiter.get_rate_limit_status("key1") == {"enabled": False}
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_get_rate_limit_status_enabled_new_key():
+def test_get_rate_limit_status_enabled_new_key() -> None:
     """Test get_rate_limit_status for a new key when enabled."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=10, period_seconds=300)
@@ -133,7 +133,7 @@ def test_get_rate_limit_status_enabled_new_key():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_get_rate_limit_status_enabled_with_usage():
+def test_get_rate_limit_status_enabled_with_usage() -> None:
     """Test get_rate_limit_status with existing usage."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=5, period_seconds=60)
@@ -154,7 +154,7 @@ def test_get_rate_limit_status_enabled_with_usage():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_get_rate_limit_status_after_reset():
+def test_get_rate_limit_status_after_reset() -> None:
     """Test get_rate_limit_status after the period has passed."""
     limiter = ApiKeyRateLimiter()
     limiter.enable_rate_limiting(requests_per_period=5, period_seconds=60)

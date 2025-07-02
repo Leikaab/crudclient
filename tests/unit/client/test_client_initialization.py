@@ -14,7 +14,7 @@ class TestClientInitialization:
 
         # Act & Assert
         with pytest.raises(ConfigurationError) as excinfo:
-            Client(invalid_config)  # type: ignore
+            Client(invalid_config)  # type: ignore[arg-type]
 
         assert "Invalid config type provided" in str(excinfo.value)
         assert "expected ClientConfig or dict" in str(excinfo.value)

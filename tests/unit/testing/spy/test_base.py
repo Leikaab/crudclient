@@ -13,7 +13,7 @@ from crudclient.testing.spy.base import SpyBase
 class TestSpyBase:
     """Tests for the SpyBase class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test initialization of SpyBase."""
         # Arrange & Act
         spy = SpyBase()
@@ -21,7 +21,7 @@ class TestSpyBase:
         # Assert
         assert spy.calls == []
 
-    def test_record_call_basic(self):
+    def test_record_call_basic(self) -> None:
         """Test _record_call method with basic parameters."""
         # Arrange
         spy = SpyBase()
@@ -38,7 +38,7 @@ class TestSpyBase:
         assert call.return_value == "result"
         assert call.exception is None
 
-    def test_record_call_with_exception(self):
+    def test_record_call_with_exception(self) -> None:
         """Test _record_call method with an exception."""
         # Arrange
         spy = SpyBase()
@@ -56,7 +56,7 @@ class TestSpyBase:
         assert call.return_value is None
         assert call.exception is exception
 
-    def test_verify_called_success(self):
+    def test_verify_called_success(self) -> None:
         """Test verify_called when the method was called."""
         # Arrange
         spy = SpyBase()
@@ -65,7 +65,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_called("test_method")  # Should not raise an exception
 
-    def test_verify_called_failure(self):
+    def test_verify_called_failure(self) -> None:
         """Test verify_called when the method was not called."""
         # Arrange
         spy = SpyBase()
@@ -76,7 +76,7 @@ class TestSpyBase:
             spy.verify_called("test_method")
         assert "Method test_method was not called" in str(excinfo.value)
 
-    def test_verify_not_called_success(self):
+    def test_verify_not_called_success(self) -> None:
         """Test verify_not_called when the method was not called."""
         # Arrange
         spy = SpyBase()
@@ -85,7 +85,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_not_called("test_method")  # Should not raise an exception
 
-    def test_verify_not_called_failure(self):
+    def test_verify_not_called_failure(self) -> None:
         """Test verify_not_called when the method was called."""
         # Arrange
         spy = SpyBase()
@@ -96,7 +96,7 @@ class TestSpyBase:
             spy.verify_not_called("test_method")
         assert "Method test_method was called" in str(excinfo.value)
 
-    def test_verify_called_with_success_args_only(self):
+    def test_verify_called_with_success_args_only(self) -> None:
         """Test verify_called_with with matching positional arguments only."""
         # Arrange
         spy = SpyBase()
@@ -105,7 +105,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_called_with("test_method", 1, 2)  # Should not raise an exception
 
-    def test_verify_called_with_success_kwargs_only(self):
+    def test_verify_called_with_success_kwargs_only(self) -> None:
         """Test verify_called_with with matching keyword arguments only."""
         # Arrange
         spy = SpyBase()
@@ -114,7 +114,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_called_with("test_method", a="b", c="d")  # Should not raise an exception
 
-    def test_verify_called_with_success_args_and_kwargs(self):
+    def test_verify_called_with_success_args_and_kwargs(self) -> None:
         """Test verify_called_with with matching positional and keyword arguments."""
         # Arrange
         spy = SpyBase()
@@ -123,7 +123,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_called_with("test_method", 1, 2, a="b", c="d")  # Should not raise an exception
 
-    def test_verify_called_with_failure_wrong_method(self):
+    def test_verify_called_with_failure_wrong_method(self) -> None:
         """Test verify_called_with with wrong method name."""
         # Arrange
         spy = SpyBase()
@@ -134,7 +134,7 @@ class TestSpyBase:
             spy.verify_called_with("test_method", 1, 2, a="b")
         assert "Method test_method was not called with arguments" in str(excinfo.value)
 
-    def test_verify_called_with_failure_wrong_args(self):
+    def test_verify_called_with_failure_wrong_args(self) -> None:
         """Test verify_called_with with wrong positional arguments."""
         # Arrange
         spy = SpyBase()
@@ -145,7 +145,7 @@ class TestSpyBase:
             spy.verify_called_with("test_method", 1, 3, a="b")
         assert "Method test_method was not called with arguments" in str(excinfo.value)
 
-    def test_verify_called_with_failure_wrong_kwargs(self):
+    def test_verify_called_with_failure_wrong_kwargs(self) -> None:
         """Test verify_called_with with wrong keyword arguments."""
         # Arrange
         spy = SpyBase()
@@ -156,7 +156,7 @@ class TestSpyBase:
             spy.verify_called_with("test_method", 1, 2, a="c")
         assert "Method test_method was not called with arguments" in str(excinfo.value)
 
-    def test_verify_call_count_success(self):
+    def test_verify_call_count_success(self) -> None:
         """Test verify_call_count when the count matches."""
         # Arrange
         spy = SpyBase()
@@ -167,7 +167,7 @@ class TestSpyBase:
         # Act & Assert
         spy.verify_call_count("test_method", 2)  # Should not raise an exception
 
-    def test_verify_call_count_failure(self):
+    def test_verify_call_count_failure(self) -> None:
         """Test verify_call_count when the count doesn't match."""
         # Arrange
         spy = SpyBase()
@@ -178,7 +178,7 @@ class TestSpyBase:
             spy.verify_call_count("test_method", 2)
         assert "Method test_method was called 1 times, expected 2 times" in str(excinfo.value)
 
-    def test_get_calls(self):
+    def test_get_calls(self) -> None:
         """Test get_calls method."""
         # Arrange
         spy = SpyBase()
@@ -196,7 +196,7 @@ class TestSpyBase:
         assert calls[1].args == (5, 6)
         assert calls[1].kwargs == {"e": "f"}
 
-    def test_clear_calls(self):
+    def test_clear_calls(self) -> None:
         """Test clear_calls method."""
         # Arrange
         spy = SpyBase()

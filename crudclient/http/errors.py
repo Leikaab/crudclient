@@ -110,10 +110,7 @@ class ErrorHandler:
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
-            exception_class = cast(
-                Type[CrudClientError],
-                self.status_code_to_exception.get(status_code, APIError),
-            )
+            exception_class = self.status_code_to_exception.get(status_code, APIError)
 
             error_message = f"HTTP error {status_code}: {error_data}"
 

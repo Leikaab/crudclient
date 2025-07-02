@@ -59,8 +59,8 @@ def test_tripletex_rate_limiting_prevents_429():
     rate_limiter = get_rate_limiter(config_protected)
 
     # Shared results storage
-    unprotected_results = []
-    protected_results = []
+    unprotected_results: list[tuple[str, float]] = []
+    protected_results: list[tuple[str, float]] = []
     results_lock = threading.Lock()
 
     def make_requests(api, num_requests, results_list, client_name):
