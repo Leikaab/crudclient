@@ -1,6 +1,9 @@
 import logging  # &lt;-- Add import
+from unittest.mock import MagicMock
 
 import pytest
+import requests_mock
+from pytest_mock import MockerFixture
 
 from crudclient.exceptions import InternalServerError  # Corrected name
 from crudclient.exceptions import (
@@ -15,6 +18,7 @@ from crudclient.exceptions import (
     ServiceUnavailableError,
     UnprocessableEntityError,
 )
+from crudclient.http.client import HttpClient
 from crudclient.http.errors import ErrorHandler
 
 # Ensure HttpLifecycleLogger is imported if needed for type hints or direct use (though likely not needed here)
@@ -31,7 +35,7 @@ from tests.unit.helpers import translate_mock_calls_for_verifier
 
 class TestHttpClient:
 
-    def test_http_client_initialization(self, http_client, mock_client_config):
+    def test_http_client_initialization(self, http_client: HttpClient, mock_client_config: MagicMock) -> None:
         """Test that the HttpClient is initialized correctly with all components."""
         # Arrange - done via fixtures
 
@@ -45,7 +49,7 @@ class TestHttpClient:
         assert isinstance(http_client.error_handler, ErrorHandler)
         assert isinstance(http_client.retry_handler, RetryHandler)
 
-    def test_get_request(self, http_client, requests_mock):
+    def test_get_request(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that the get method makes a GET request to the correct URL."""
         # Arrange
         endpoint = "users"
@@ -58,7 +62,7 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_post_request(self, http_client, requests_mock):
+    def test_post_request(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that the post method makes a POST request to the correct URL."""
         # Arrange
         endpoint = "users"
@@ -72,7 +76,7 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_put_request(self, http_client, requests_mock):
+    def test_put_request(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that the put method makes a PUT request to the correct URL."""
         # Arrange
         endpoint = "users/1"
@@ -86,7 +90,7 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_delete_request(self, http_client, requests_mock):
+    def test_delete_request(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that the delete method makes a DELETE request to the correct URL."""
         # Arrange
         endpoint = "users/1"
@@ -99,7 +103,7 @@ class TestHttpClient:
         # Assert
         assert response == '{"status": "success"}'
 
-    def test_patch_request(self, http_client, requests_mock):
+    def test_patch_request(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that the patch method makes a PATCH request to the correct URL."""
         # Arrange
         endpoint = "users/1"
@@ -114,7 +118,12 @@ class TestHttpClient:
         assert response == '{"status": "success"}'
 
     # Modified test
-    def test_request_with_server_error_logs_error(self, http_client, requests_mock, caplog):
+    def test_request_with_server_error_logs_error(
+        self,
+        http_client: HttpClient,
+        requests_mock: requests_mock.Mocker,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """Test that server errors are handled correctly and logged at ERROR level."""
         # Arrange
         endpoint = "users"
@@ -144,7 +153,12 @@ class TestHttpClient:
 
     # New test for 4xx logging
 
-    def test_request_logs_http_error_4xx(self, http_client, requests_mock, caplog):
+    def test_request_logs_http_error_4xx(
+        self,
+        http_client: HttpClient,
+        requests_mock: requests_mock.Mocker,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """Test that 4xx HTTP errors are logged at WARNING level."""
         # Arrange
         endpoint = "users/missing"
@@ -172,7 +186,7 @@ class TestHttpClient:
                 break
         assert warning_log_found, "Expected WARNING log message not found"
 
-    def test_request_with_no_content(self, http_client, requests_mock):
+    def test_request_with_no_content(self, http_client: HttpClient, requests_mock: requests_mock.Mocker) -> None:
         """Test that 204 No Content responses return None."""
         # Arrange
         endpoint = "users/1"
@@ -185,7 +199,7 @@ class TestHttpClient:
         # Assert
         assert response is None
 
-    def test_close(self, http_client, mocker):
+    def test_close(self, http_client: HttpClient, mocker: MockerFixture) -> None:
         """Test that the close method closes the session."""
         # Arrange
         mock_close = mocker.patch.object(http_client.session_manager, "close")
@@ -212,7 +226,13 @@ class TestHttpClient:
             (418, APIError),  # Generic APIError for unmapped 4xx/5xx
         ],
     )
-    def test_api_error_subclasses_raised(self, http_client, requests_mock, status_code, expected_exception):
+    def test_api_error_subclasses_raised(
+        self,
+        http_client: HttpClient,
+        requests_mock: requests_mock.Mocker,
+        status_code: int,
+        expected_exception: type[APIError],
+    ) -> None:
         """Test that specific APIError subclasses are raised for HTTP status codes."""
         # Arrange
         endpoint = f"test/{status_code}"
