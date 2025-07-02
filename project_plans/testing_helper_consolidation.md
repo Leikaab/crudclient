@@ -5,7 +5,7 @@ This document outlines overlaps between `crudclient.testing` and `apiconfig.test
 ## Observed Overlaps
 
 - `crudclient.testing.auth.auth_header_verification` only re-exports `apiconfig.testing.auth_verification.AuthHeaderVerification`.
-- `crudclient.testing.auth.verification.AuthVerificationHelpers` duplicates functionality provided by `apiconfig.testing.auth_verification` (e.g. header checks, JWT helpers, `AuthTestHelpers`).
+- `crudclient.testing.auth.verification.AuthVerificationHelpers` duplicated functionality provided by `apiconfig.testing.auth_verification` (e.g. header checks, JWT helpers, `AuthTestHelpers`) and has now been removed.
 - The `Verifier` class in `crudclient.testing.verification` is a generic utility for asserting calls on spies/mocks. It could be useful for other packages.
 
 ## Proposed Changes

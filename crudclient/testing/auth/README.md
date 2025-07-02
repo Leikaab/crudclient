@@ -51,7 +51,7 @@ The `factory.py` module provides convenient functions (`create_basic_auth_mock`,
 
 ## Verification Helpers
 
-The `verification.py` module provides the `AuthVerificationHelpers` class, which aggregates static methods from several specialized utility classes:
+Authentication verification utilities are provided directly by `apiconfig.testing.auth_verification`:
 
 *   **`AuthHeaderVerification`** (from `apiconfig.testing`): Methods to verify the format and structure of `Authorization` headers (Basic, Bearer, API Key).
 *   **`AuthTokenVerification`**: Methods to verify token properties, primarily for JWTs (expiration, scopes, client ID, user) and refresh behavior.
