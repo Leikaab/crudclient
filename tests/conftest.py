@@ -9,6 +9,7 @@ from contextlib import contextmanager
 # Removed incorrect imports for internal types: LogCaptureHandler, Config
 from typing import (  # Ensure List and Type are imported
     Any,
+    Callable,
     List,
     Optional,
 )
@@ -30,7 +31,7 @@ def base_url() -> str:
 
 
 @pytest.fixture
-def mock_response_factory() -> Any:
+def mock_response_factory() -> Callable[..., Mock]:
     """
     Factory fixture to create mock response objects with custom attributes.
 
@@ -117,7 +118,7 @@ def temp_file(tmp_path: Any) -> Any:
 
 
 @pytest.fixture
-def manage_env_vars(monkeypatch: Any) -> Any:
+def manage_env_vars(monkeypatch: Any) -> tuple[Callable[[str, Any], None], Callable[[str, bool], None]]:
     """
     Fixture providing functions to safely set/unset environment variables
     during a test, automatically restoring the original state afterwards.
