@@ -5,6 +5,8 @@ This module contains utility functions that are used across multiple test module
 """
 
 from typing import Any, List
+
+__all__ = ["VerifiableMock", "translate_mock_calls_for_verifier"]
 from unittest.mock import MagicMock
 
 from crudclient.testing.spy.method_call import MethodCall
