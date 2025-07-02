@@ -40,6 +40,8 @@ class TestClientConfig:
         assert auth == {"Authorization": f"Bearer {config.api_key}"}
 
     def test_get_default_headers(self, config: MockClientConfig) -> None:
+        if config.headers is None:
+            config.headers = {}  # type: ignore[unreachable]
         config.headers["Accept"] = "application/json"
         assert isinstance(config.headers, dict)
         assert config.headers == {"Accept": "application/json"}
