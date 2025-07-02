@@ -11,7 +11,6 @@ from crudclient.testing.core.client import MockClient
 from crudclient.testing.core.http_client import MockHTTPClient  # Added import
 from crudclient.testing.response_builder import ResponseBuilder
 from crudclient.testing.response_builder.basic import BasicResponseBuilder
-from crudclient.testing.simple_mock import SimpleMockClient
 
 
 @pytest.fixture
@@ -66,19 +65,6 @@ def create_mock_client(create_mock_client_config: Callable[..., ClientConfig]) -
         return client
 
     return _factory
-
-
-@pytest.fixture
-def simple_mock_client(request) -> SimpleMockClient:
-    """
-    Provides a simple mock client for testing.
-
-    This fixture creates a SimpleMockClient instance for use in tests.
-    The SimpleMockClient is a lightweight alternative to MockClient that
-    doesn't inherit from the real Client class, making it more reliable
-    for testing.
-    """
-    return SimpleMockClient()
 
 
 @pytest.fixture

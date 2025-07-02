@@ -7,10 +7,11 @@ from unittest.mock import MagicMock
 
 import pytest
 from pydantic import BaseModel
+from pytest_httpserver import HTTPServer
 
 from crudclient.client import Client
+from crudclient.config import ClientConfig
 from crudclient.crud.base import Crud, T
-from crudclient.testing.simple_mock import SimpleMockClient
 from crudclient.types import JSONDict
 
 
@@ -113,15 +114,16 @@ def base_test_crud(mock_client):
 
 
 @pytest.fixture
-def simple_mock_client():
-    """Return a SimpleMockClient instance."""
-    return SimpleMockClient()
+def http_client(httpserver: HTTPServer) -> Client:
+    """Return a Client configured to communicate with the HTTPServer."""
+    config = ClientConfig(hostname=f"http://{httpserver.host}:{httpserver.port}")
+    return Client(config)
 
 
 @pytest.fixture
-def base_test_crud_with_simple_mock(simple_mock_client):
-    """Return a BaseTestCrud instance with a SimpleMockClient."""
-    return BaseTestCrud(simple_mock_client)
+def base_test_crud_httpserver(http_client: Client) -> BaseTestCrud:
+    """Return a BaseTestCrud instance using a real Client against HTTPServer."""
+    return BaseTestCrud(http_client)
 
 
 @pytest.fixture
