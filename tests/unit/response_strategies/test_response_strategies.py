@@ -86,15 +86,15 @@ class _TestCustomStrategy(ResponseModelStrategy[_TestModel]):
         if isinstance(data, dict) and "custom_items" in data:
             items = data["custom_items"]
             if isinstance(items, list) and self.datamodel:
-                return [self.datamodel(**item) for item in items]  # type: ignore # pylance-only
+                return [self.datamodel(**item) for item in items]
             return items if isinstance(items, list) else []
         if isinstance(data, list) and self.datamodel:
-            return [self.datamodel(**item) for item in data]  # type: ignore # pylance-only
+            return [self.datamodel(**item) for item in data]
         if isinstance(data, list):
             return data
         if isinstance(data, dict) and self.api_response_model:
             return self.api_response_model(**data)
-        return [] if not isinstance(data, list) else data  # type: ignore[unreachable] # pylance-only
+        return [] if not isinstance(data, list) else data
 
 
 class _TestCustomCrud(Crud[_TestModel]):
@@ -111,7 +111,7 @@ class _TestCustomCrud(Crud[_TestModel]):
 # Using client fixture from conftest.py
 
 
-def test_default_strategy_single_item(client):
+def test_default_strategy_single_item(client) -> None:
     # Arrange
     crud = _TestCrud(client)
     test_data = {"id": 1, "name": "Test Item"}
@@ -125,7 +125,7 @@ def test_default_strategy_single_item(client):
     assert result.name == "Test Item"
 
 
-def test_default_strategy_list(client):
+def test_default_strategy_list(client) -> None:
     # Arrange
     crud = _TestCrud(client)
     test_data = [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]
@@ -143,7 +143,7 @@ def test_default_strategy_list(client):
     assert result[1].id == 2
 
 
-def test_default_strategy_dict_with_data_key(client):
+def test_default_strategy_dict_with_data_key(client) -> None:
     # Arrange
     crud = _TestCrud(client)
     test_data = {"data": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
@@ -161,7 +161,7 @@ def test_default_strategy_dict_with_data_key(client):
     assert result[1].id == 2
 
 
-def test_default_strategy_single_item_validation_error(client):
+def test_default_strategy_single_item_validation_error(client) -> None:
     """Test default strategy raises DataValidationError for invalid single item."""
     # Arrange
     crud = _TestCrud(client)
@@ -176,7 +176,7 @@ def test_default_strategy_single_item_validation_error(client):
     assert excinfo.value.data == invalid_data
 
 
-def test_default_strategy_list_item_validation_error(client):
+def test_default_strategy_list_item_validation_error(client) -> None:
     """Test default strategy raises DataValidationError for invalid item in list."""
     # Arrange
     crud = _TestCrud(client)
@@ -195,7 +195,7 @@ def test_default_strategy_list_item_validation_error(client):
     assert excinfo.value.data == invalid_list_data
 
 
-def test_path_based_strategy_single_item(client):
+def test_path_based_strategy_single_item(client) -> None:
     # Arrange
     crud = _TestPathBasedCrud(client)
     test_data = {"data": {"item": {"id": 1, "name": "Test Item"}}}
@@ -209,7 +209,7 @@ def test_path_based_strategy_single_item(client):
     assert result.name == "Test Item"
 
 
-def test_path_based_strategy_single_item_validation_error(client):
+def test_path_based_strategy_single_item_validation_error(client) -> None:
     """Test path-based strategy raises DataValidationError for invalid single item."""
     # Arrange
     crud = _TestPathBasedCrud(client)
@@ -225,7 +225,7 @@ def test_path_based_strategy_single_item_validation_error(client):
     assert excinfo.value.data == invalid_data_nested
 
 
-def test_path_based_strategy_list(client):
+def test_path_based_strategy_list(client) -> None:
     # Arrange
     crud = _TestPathBasedCrud(client)
     test_data = {"data": {"items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}}
@@ -243,7 +243,7 @@ def test_path_based_strategy_list(client):
     assert result[1].id == 2
 
 
-def test_path_based_strategy_list_item_validation_error(client):
+def test_path_based_strategy_list_item_validation_error(client) -> None:
     """Test path-based strategy raises DataValidationError for invalid item in list."""
     # Arrange
     crud = _TestPathBasedCrud(client)
@@ -266,7 +266,7 @@ def test_path_based_strategy_list_item_validation_error(client):
     assert excinfo.value.data == invalid_list_data_nested
 
 
-def test_custom_strategy(client):
+def test_custom_strategy(client) -> None:
     # Arrange
     crud = _TestCustomCrud(client)
     test_data = {"custom_data": {"id": 1, "name": "Test Item"}}
@@ -280,7 +280,7 @@ def test_custom_strategy(client):
     assert result.name == "Test Item"
 
 
-def test_custom_strategy_list(client):
+def test_custom_strategy_list(client: Any) -> None:
     # Arrange
     crud = _TestCustomCrud(client)
     test_data = {"custom_items": [{"id": 1, "name": "Item 1"}, {"id": 2, "name": "Item 2"}]}
@@ -298,7 +298,7 @@ def test_custom_strategy_list(client):
     assert result[1].id == 2
 
 
-def test_fallback_to_original_behavior(client, mocker):
+def test_fallback_to_original_behavior(client: Any, mocker: Any) -> None:
     # Arrange
     crud = _TestCrud(client)
     # Create a strategy that will raise an exception

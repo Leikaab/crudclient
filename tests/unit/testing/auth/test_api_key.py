@@ -8,7 +8,7 @@ from crudclient.auth import ApiKeyAuth
 from crudclient.testing.auth.api_key import ApiKeyAuthMock
 
 
-def test_api_key_auth_mock_init_defaults():
+def test_api_key_auth_mock_init_defaults() -> None:
     """Test default initialization (header)."""
     mock = ApiKeyAuthMock()
     assert mock.api_key == "valid_api_key"
@@ -23,7 +23,7 @@ def test_api_key_auth_mock_init_defaults():
     assert mock.usage_tracker.usage_tracking_enabled is False
 
 
-def test_api_key_auth_mock_init_param():
+def test_api_key_auth_mock_init_param() -> None:
     """Test initialization with param."""
     mock = ApiKeyAuthMock(api_key="param_key", header_name=None, param_name="key")
     assert mock.api_key == "param_key"
@@ -36,13 +36,13 @@ def test_api_key_auth_mock_init_param():
     assert mock.validator.validate_key("param_key") is True
 
 
-def test_api_key_auth_mock_init_no_location_raises():
+def test_api_key_auth_mock_init_no_location_raises() -> None:
     """Test initialization without header or param raises ValueError."""
     with pytest.raises(ValueError, match="Either header_name or param_name must be provided"):
         ApiKeyAuthMock(header_name=None, param_name=None)
 
 
-def test_with_api_key():
+def test_with_api_key() -> None:
     """Test setting a new primary API key."""
     mock = ApiKeyAuthMock()
     mock.with_api_key("new_key_123")
@@ -53,7 +53,7 @@ def test_with_api_key():
     assert mock.validator.validate_key("valid_api_key") is True
 
 
-def test_with_additional_valid_key():
+def test_with_additional_valid_key() -> None:
     """Test adding another valid key."""
     mock = ApiKeyAuthMock()
     mock.with_additional_valid_key("key_two")
@@ -61,7 +61,7 @@ def test_with_additional_valid_key():
     assert mock.validator.validate_key("key_two") is True
 
 
-def test_with_key_metadata():
+def test_with_key_metadata() -> None:
     """Test setting metadata for a key."""
     mock = ApiKeyAuthMock()
     mock.with_key_metadata(owner="test_owner", permissions=["admin"], tier="premium")
@@ -71,7 +71,7 @@ def test_with_key_metadata():
     assert meta["tier"] == "premium"
 
 
-def test_with_key_metadata_for_specific_key():
+def test_with_key_metadata_for_specific_key() -> None:
     """Test setting metadata for a specific key."""
     mock = ApiKeyAuthMock().with_additional_valid_key("other_key")
     mock.with_key_metadata(api_key="other_key", owner="other_owner")
@@ -83,7 +83,7 @@ def test_with_key_metadata_for_specific_key():
     assert meta_other["owner"] == "other_owner"
 
 
-def test_with_key_metadata_expiration():
+def test_with_key_metadata_expiration() -> None:
     """Test setting expiration metadata."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         mock = ApiKeyAuthMock()
@@ -99,7 +99,7 @@ def test_with_key_metadata_expiration():
         assert mock.validate_key("valid_api_key") is False
 
 
-def test_with_key_format_validation():
+def test_with_key_format_validation() -> None:
     """Test key format validation."""
     mock = ApiKeyAuthMock().with_key_format_validation(r"^key-[a-z]{3}-\d{3}$")
     assert mock.validator.key_format_pattern == re.compile(r"^key-[a-z]{3}-\d{3}$")
@@ -113,7 +113,7 @@ def test_with_key_format_validation():
     assert mock.validate_key("valid_api_key") is False  # Default key doesn't match
 
 
-def test_revoke_key():
+def test_revoke_key() -> None:
     """Test revoking a key."""
     mock = ApiKeyAuthMock().with_additional_valid_key("key_to_revoke")
     assert mock.validate_key("key_to_revoke") is True
@@ -122,7 +122,7 @@ def test_revoke_key():
     assert "key_to_revoke" in mock.validator.revoked_keys
 
 
-def test_revoke_default_key():
+def test_revoke_default_key() -> None:
     """Test revoking the default/current key."""
     mock = ApiKeyAuthMock()
     assert mock.validate_key("valid_api_key") is True
@@ -131,7 +131,7 @@ def test_revoke_default_key():
     assert "valid_api_key" in mock.validator.revoked_keys
 
 
-def test_with_rate_limiting():
+def test_with_rate_limiting() -> None:
     """Test enabling and checking rate limiting."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         mock = ApiKeyAuthMock().with_rate_limiting(requests_per_period=2, period_seconds=60)
@@ -165,7 +165,7 @@ def test_with_rate_limiting():
         assert status4["limit"] == 2
 
 
-def test_with_usage_tracking():
+def test_with_usage_tracking() -> None:
     """Test enabling and checking usage tracking."""
     mock = ApiKeyAuthMock().with_usage_tracking()
     assert mock.usage_tracker.usage_tracking_enabled is True
@@ -181,7 +181,7 @@ def test_with_usage_tracking():
     assert stats["by_key"]["key2"] == 1  # Check count for key2 using the correct key
 
 
-def test_as_header():
+def test_as_header() -> None:
     """Test switching to header authentication."""
     mock = ApiKeyAuthMock(header_name=None, param_name="key").as_header("X-Custom-API-Key")
     assert mock.header_name == "X-Custom-API-Key"
@@ -191,7 +191,7 @@ def test_as_header():
     assert mock.auth_strategy.param_name is None
 
 
-def test_as_param():
+def test_as_param() -> None:
     """Test switching to param authentication."""
     mock = ApiKeyAuthMock(header_name="X-API-Key", param_name=None).as_param("custom_key_param")
     assert mock.header_name is None
@@ -201,52 +201,52 @@ def test_as_param():
     assert mock.auth_strategy.param_name == "custom_key_param"
 
 
-def test_validate_key_invalid():
+def test_validate_key_invalid() -> None:
     """Test validate_key returns false for an invalid key."""
     mock = ApiKeyAuthMock()
     assert mock.validate_key("invalid-key") is False
 
 
-def test_validate_key_revoked():
+def test_validate_key_revoked() -> None:
     """Test validate_key returns false for a revoked key."""
     mock = ApiKeyAuthMock().revoke_key()
     assert mock.validate_key("valid_api_key") is False
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_validate_key_expired():
+def test_validate_key_expired() -> None:
     """Test validate_key returns false for an expired key."""
     mock = ApiKeyAuthMock().with_key_metadata(expires_in_seconds=-1)
     assert mock.validate_key("valid_api_key") is False
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_validate_key_rate_limited():
+def test_validate_key_rate_limited() -> None:
     """Test validate_key returns false when rate limit exceeded."""
     mock = ApiKeyAuthMock().with_rate_limiting(requests_per_period=1, period_seconds=60)
     assert mock.validate_key("valid_api_key") is True  # First request ok
     assert mock.validate_key("valid_api_key") is False  # Second request fails
 
 
-def test_verify_auth_header_valid():
+def test_verify_auth_header_valid() -> None:
     """Test verify_auth_header with a valid key in header."""
     mock = ApiKeyAuthMock(api_key="abc", header_name="X-Test-Key")
     assert mock.verify_auth_header("abc") is True
 
 
-def test_verify_auth_header_invalid():
+def test_verify_auth_header_invalid() -> None:
     """Test verify_auth_header with an invalid key in header."""
     mock = ApiKeyAuthMock(api_key="abc", header_name="X-Test-Key")
     assert mock.verify_auth_header("xyz") is False
 
 
-def test_verify_auth_header_when_using_param():
+def test_verify_auth_header_when_using_param() -> None:
     """Test verify_auth_header returns false when configured for param auth."""
     mock = ApiKeyAuthMock(api_key="abc", header_name=None, param_name="key")
     assert mock.verify_auth_header("abc") is False
 
 
-def test_verify_token_usage():
+def test_verify_token_usage() -> None:
     """Test verify_token_usage delegates to validate_key."""
     mock = ApiKeyAuthMock()
     assert mock.verify_token_usage("valid_api_key") is True
@@ -255,25 +255,25 @@ def test_verify_token_usage():
     assert mock.verify_token_usage("valid_api_key") is False
 
 
-def test_get_auth_headers_for_header_auth():
+def test_get_auth_headers_for_header_auth() -> None:
     """Test get_auth_headers when using header auth."""
     mock = ApiKeyAuthMock(api_key="key123", header_name="X-My-Key")
     assert mock.get_auth_headers() == ("X-My-Key", "key123")
 
 
-def test_get_auth_headers_for_param_auth():
+def test_get_auth_headers_for_param_auth() -> None:
     """Test get_auth_headers returns None when using param auth."""
     mock = ApiKeyAuthMock(api_key="key123", header_name=None, param_name="api_token")
     assert mock.get_auth_headers() is None
 
 
-def test_handle_auth_error():
+def test_handle_auth_error() -> None:
     """Test handle_auth_error always returns False."""
     mock = ApiKeyAuthMock()
     assert mock.handle_auth_error(None) is False  # type: ignore
 
 
-def test_get_auth_strategy():
+def test_get_auth_strategy() -> None:
     """Test getting the underlying auth strategy."""
     mock = ApiKeyAuthMock(api_key="strat_key", header_name="X-Strat")
     strategy = mock.get_auth_strategy()

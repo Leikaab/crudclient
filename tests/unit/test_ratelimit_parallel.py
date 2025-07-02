@@ -72,7 +72,7 @@ def worker_process(
 class TestRateLimiterParallel:
     """Test rate limiter with parallel processes."""
 
-    def test_parallel_rate_limiting(self):
+    def test_parallel_rate_limiting(self) -> None:
         """Test that multiple processes respect the rate limit."""
         with tempfile.TemporaryDirectory() as temp_dir:
             num_workers = 4
@@ -155,7 +155,7 @@ class TestRateLimiterParallel:
             state_files = list(Path(temp_dir).glob("*.json"))
             assert len(state_files) > 0, "No state files created"
 
-    def test_rate_limit_reset_after_window(self, monkeypatch):
+    def test_rate_limit_reset_after_window(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that rate limit resets after the time window expires."""
         with tempfile.TemporaryDirectory() as temp_dir:
             from crudclient.config import ClientConfig

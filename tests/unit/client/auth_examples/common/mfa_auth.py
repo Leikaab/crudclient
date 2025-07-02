@@ -18,11 +18,11 @@ class MockMFAAuth(AuthBase):
         self.mfa_token: Optional[str] = None
         self.last_challenge: Optional[str] = None  # Store the last WWW-Authenticate header
 
-    def __call__(self, r):
+    def __call__(self, r: Any) -> Any:
         """Required by requests.auth.AuthBase but not used in our testing."""
         return r
 
-    def handle_response_sync(self, response, request) -> Optional[Any]:
+    def handle_response_sync(self, response: Any, request: Any) -> Optional[Any]:
         """Handles 401 responses to potentially trigger MFA flow."""
         self.last_challenge = response.headers.get("WWW-Authenticate")
         if response.status_code == 401 and self.last_challenge:
@@ -47,7 +47,7 @@ class MockMFAAuth(AuthBase):
                 return new_request  # Signal to retry with this new request
         return None  # No retry needed
 
-    def enrich_request_sync(self, request) -> Any:
+    def enrich_request_sync(self, request: Any) -> Any:
         """Adds MFA token header if available."""
         # This might be called before the *first* request too,
         # but handle_response_sync sets the token *after* the first failure.

@@ -15,7 +15,7 @@ from crudclient.ratelimit import get_rate_limiter
 class TestRateLimiterSimple:
     """Simple tests for rate limiter functionality."""
 
-    def test_basic_rate_limiting(self, monkeypatch):
+    def test_basic_rate_limiting(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that rate limiter blocks when limit is reached."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -80,7 +80,7 @@ class TestRateLimiterSimple:
             assert sleep_calls, "Rate limiter did not sleep when expected"
             assert 1.5 < elapsed < 2.5, f"Expected to wait ~2s, but waited {elapsed}s"
 
-    def test_unknown_state_proceeds(self, monkeypatch):
+    def test_unknown_state_proceeds(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that unknown state allows requests to proceed."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -107,7 +107,7 @@ class TestRateLimiterSimple:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should remain unknown"
 
-    def test_rate_limit_window_reset(self, monkeypatch):
+    def test_rate_limit_window_reset(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that rate limit resets after window expires."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -133,7 +133,7 @@ class TestRateLimiterSimple:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should be unknown after reset"
 
-    def test_delay_history_tracking(self, monkeypatch):
+    def test_delay_history_tracking(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Ensure delay history is recorded when track_delays is enabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
 
@@ -157,7 +157,7 @@ class TestRateLimiterSimple:
             limiter.clear_delay_history()
             assert limiter.get_delay_history() == []
 
-    def test_get_rate_limiter_disabled(self, monkeypatch):
+    def test_get_rate_limiter_disabled(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """get_rate_limiter returns None when rate limiting is disabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
         config = ClientConfig(hostname="test.api")
@@ -169,7 +169,7 @@ class TestRateLimiterSimple:
         assert limiter is None
         assert captured == []
 
-    def test_get_rate_limiter_enabled_warning(self, monkeypatch):
+    def test_get_rate_limiter_enabled_warning(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """get_rate_limiter emits FutureWarning when enabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
 

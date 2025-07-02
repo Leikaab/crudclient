@@ -60,7 +60,7 @@ class TestCreateAuthStrategy:
         """
         # GIVEN / WHEN / THEN
         with pytest.raises(TypeError, match="Basic auth token must be a string or tuple"):
-            create_auth_strategy("basic", 123)  # type: ignore
+            create_auth_strategy("basic", 123)  # type: ignore[arg-type]
 
     def test_create_basic_auth_string_token_raises_error(self):
         """

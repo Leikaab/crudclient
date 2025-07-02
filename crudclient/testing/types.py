@@ -4,7 +4,7 @@ Type definitions for the crudclient testing framework.
 This module provides type definitions and utility classes used throughout the testing framework.
 """
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Sequence, Union
 
 from typing_extensions import Protocol, TypeAlias
 
@@ -13,7 +13,7 @@ from crudclient.testing.spy.method_call import MethodCall
 
 # Type aliases for HTTP components
 Headers: TypeAlias = Dict[str, str]
-QueryParams: TypeAlias = Dict[str, str]
+QueryParams: TypeAlias = Dict[str, Union[str, int, float, bool, Sequence[Union[str, int, float, bool]], None]]
 HttpMethod: TypeAlias = str
 StatusCode: TypeAlias = int
 RequestBody: TypeAlias = Union[Dict[str, Any], List[Any], str, bytes, None]

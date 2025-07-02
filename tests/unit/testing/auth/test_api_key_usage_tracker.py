@@ -1,7 +1,7 @@
 from crudclient.testing.auth.api_key_usage_tracker import ApiKeyUsageTracker
 
 
-def test_usage_tracker_init():
+def test_usage_tracker_init() -> None:
     """Test initial state of the usage tracker."""
     tracker = ApiKeyUsageTracker()
     assert tracker.usage_tracking_enabled is False
@@ -9,14 +9,14 @@ def test_usage_tracker_init():
     assert tracker.usage_by_key == {}
 
 
-def test_enable_usage_tracking():
+def test_enable_usage_tracking() -> None:
     """Test enabling usage tracking."""
     tracker = ApiKeyUsageTracker()
     tracker.enable_usage_tracking()
     assert tracker.usage_tracking_enabled is True
 
 
-def test_initialize_key():
+def test_initialize_key() -> None:
     """Test initializing a key adds it to usage_by_key with zero count."""
     tracker = ApiKeyUsageTracker()
     tracker.initialize_key("key1")
@@ -24,7 +24,7 @@ def test_initialize_key():
     assert tracker.usage_by_key["key1"] == 0
 
 
-def test_track_request_disabled():
+def test_track_request_disabled() -> None:
     """Test track_request does nothing when tracking is disabled."""
     tracker = ApiKeyUsageTracker()
     assert tracker.usage_tracking_enabled is False
@@ -33,7 +33,7 @@ def test_track_request_disabled():
     assert tracker.usage_by_endpoint == {}
 
 
-def test_track_request_enabled_key_only():
+def test_track_request_enabled_key_only() -> None:
     """Test track_request increments key count when enabled."""
     tracker = ApiKeyUsageTracker()
     tracker.enable_usage_tracking()
@@ -50,7 +50,7 @@ def test_track_request_enabled_key_only():
     assert tracker.usage_by_key["key2"] == 1
 
 
-def test_track_request_enabled_with_endpoint():
+def test_track_request_enabled_with_endpoint() -> None:
     """Test track_request increments key and endpoint counts when enabled."""
     tracker = ApiKeyUsageTracker()
     tracker.enable_usage_tracking()
@@ -76,14 +76,14 @@ def test_track_request_enabled_with_endpoint():
     assert tracker.usage_by_endpoint["/posts"] == 1
 
 
-def test_get_usage_stats_empty():
+def test_get_usage_stats_empty() -> None:
     """Test get_usage_stats when no requests tracked."""
     tracker = ApiKeyUsageTracker()
     stats = tracker.get_usage_stats()
     assert stats == {"by_key": {}, "by_endpoint": {}, "total_requests": 0}
 
 
-def test_get_usage_stats_with_data():
+def test_get_usage_stats_with_data() -> None:
     """Test get_usage_stats returns correct aggregated data."""
     tracker = ApiKeyUsageTracker()
     tracker.enable_usage_tracking()

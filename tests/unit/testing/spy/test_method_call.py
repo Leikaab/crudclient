@@ -10,7 +10,7 @@ from crudclient.testing.spy.method_call import MethodCall
 class TestMethodCall:
     """Tests for the MethodCall class."""
 
-    def test_init_basic(self):
+    def test_init_basic(self) -> None:
         """Test initialization of MethodCall with basic parameters."""
         # Arrange & Act
         call = MethodCall(method_name="test_method", args=(1, 2), kwargs={"a": "b"}, return_value="result")
@@ -22,7 +22,7 @@ class TestMethodCall:
         assert call.return_value == "result"
         assert call.exception is None
 
-    def test_init_with_exception(self):
+    def test_init_with_exception(self) -> None:
         """Test initialization of MethodCall with an exception."""
         # Arrange
         exception = ValueError("Test error")
@@ -37,7 +37,7 @@ class TestMethodCall:
         assert call.return_value is None
         assert call.exception is exception
 
-    def test_repr_with_return_value(self):
+    def test_repr_with_return_value(self) -> None:
         """Test string representation of MethodCall with a return value."""
         # Arrange
         call = MethodCall(method_name="test_method", args=(1, "string"), kwargs={"a": "b"}, return_value={"result": "value"})
@@ -52,7 +52,7 @@ class TestMethodCall:
         assert "returned" in result
         assert "{'result': 'value'}" in result
 
-    def test_repr_with_exception(self):
+    def test_repr_with_exception(self) -> None:
         """Test string representation of MethodCall with an exception."""
         # Arrange
         exception = ValueError("Test error")
@@ -68,7 +68,7 @@ class TestMethodCall:
         assert "raised ValueError" in result
         assert "Test error" in result
 
-    def test_repr_with_no_return_or_exception(self):
+    def test_repr_with_no_return_or_exception(self) -> None:
         """Test string representation of MethodCall with no return value or exception."""
         # Arrange
         call = MethodCall(method_name="test_method", args=(1, "string"), kwargs={"a": "b"})
@@ -83,7 +83,7 @@ class TestMethodCall:
         assert "returned" not in result
         assert "raised" not in result
 
-    def test_repr_with_empty_args(self):
+    def test_repr_with_empty_args(self) -> None:
         """Test string representation of MethodCall with empty args."""
         # Arrange
         call = MethodCall(method_name="test_method", args=(), kwargs={"a": "b"}, return_value="result")
@@ -96,7 +96,7 @@ class TestMethodCall:
         assert "a='b'" in result
         assert "returned 'result'" in result
 
-    def test_repr_with_empty_kwargs(self):
+    def test_repr_with_empty_kwargs(self) -> None:
         """Test string representation of MethodCall with empty kwargs."""
         # Arrange
         call = MethodCall(method_name="test_method", args=(1, 2), kwargs={}, return_value="result")
@@ -109,7 +109,7 @@ class TestMethodCall:
         assert "1, 2" in result
         assert "returned 'result'" in result
 
-    def test_repr_with_empty_args_and_kwargs(self):
+    def test_repr_with_empty_args_and_kwargs(self) -> None:
         """Test string representation of MethodCall with empty args and kwargs."""
         # Arrange
         call = MethodCall(method_name="test_method", args=(), kwargs={}, return_value="result")

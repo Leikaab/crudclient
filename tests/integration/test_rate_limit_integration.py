@@ -105,7 +105,7 @@ class TestRateLimitIntegration:
                     limiter.backend.write(initial_state)
 
             # Start worker processes
-            results_queue = multiprocessing.Queue()
+            results_queue: multiprocessing.Queue[tuple[int, int, int]] = multiprocessing.Queue()
             processes = []
 
             for i in range(num_workers):
@@ -180,8 +180,8 @@ class TestRateLimitIntegration:
                 # Mock endpoint that returns rate limit headers
                 def custom_matcher(request):
                     # Return decreasing rate limit
-                    remaining = max(0, 5 - custom_matcher.call_count)
-                    custom_matcher.call_count += 1
+                    remaining = max(0, 5 - custom_matcher.call_count)  # type: ignore[attr-defined]
+                    custom_matcher.call_count += 1  # type: ignore[attr-defined]
 
                     return requests_mock.create_response(
                         request,
@@ -189,7 +189,7 @@ class TestRateLimitIntegration:
                         headers={"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.1"},  # 100ms window
                     )
 
-                custom_matcher.call_count = 0
+                custom_matcher.call_count = 0  # type: ignore[attr-defined]
 
                 m.add_matcher(custom_matcher)
 

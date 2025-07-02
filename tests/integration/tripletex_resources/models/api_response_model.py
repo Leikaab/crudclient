@@ -24,25 +24,27 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
     from_index: Optional[int] = Field(None, alias="from")
     version_digest: Optional[str] = Field(None, alias="versionDigest")
 
-    # Override the data field to use 'values' instead
-    values: List[T] = Field(default_factory=list)
+    # The parent ListResponseWrapper already handles data/values aliasing via validation_alias
+    # We don't need to override the data field - just let the parent handle it
 
-    # Override count to use the values length when not explicitly provided
+    # Override count to use the data length when not explicitly provided
     count: int = Field(default=0, ge=0, description="Total number of items")
 
-    # Make data an alias for values to maintain compatibility with ApiResponse
     @property
-    def data(self) -> List[T]:
-        """Alias for values to maintain compatibility with ApiResponse."""
-        return self.values
+    def values(self) -> List[T]:
+        """Convenience property to access data as 'values' for Tripletex API compatibility."""
+        return self.data
 
     # Override model_config to handle both Tripletex and ApiResponse field names
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
     def __init__(self, **data):
-        # If count is not provided, use the length of values
-        if "count" not in data and "values" in data:
-            data["count"] = len(data["values"])
+        # If count is not provided, use the length of values or data
+        if "count" not in data:
+            if "values" in data:
+                data["count"] = len(data["values"])
+            elif "data" in data:
+                data["count"] = len(data["data"])
         super().__init__(**data)
 
 
