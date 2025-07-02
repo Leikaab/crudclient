@@ -85,9 +85,7 @@ class TestRetryCondition:
     def test_custom_retry_condition(self) -> None:
         """Test that custom retry conditions work correctly."""
 
-        def custom_condition(
-            response: Optional[requests.Response], exception: Optional[BaseException]
-        ) -> bool:
+        def custom_condition(response: Optional[requests.Response], exception: Optional[BaseException]) -> bool:
             if response and response.headers.get("Retry-After"):
                 return True
             return False
@@ -109,9 +107,7 @@ class TestRetryCondition:
 class TestRetryHandler:
     """Tests for the retry handler class."""
 
-    def test_should_retry_status_code(
-        self, retry_handler: RetryHandler, mocker: MockerFixture
-    ) -> None:
+    def test_should_retry_status_code(self, retry_handler: RetryHandler, mocker: MockerFixture) -> None:
         """Test that the retry handler correctly identifies status codes to retry on."""
         response_500 = mocker.Mock(spec=requests.Response)
         response_500.status_code = 500
@@ -143,9 +139,7 @@ class TestRetryHandler:
         assert retry_handler.get_delay(2) == 0.01
         assert retry_handler.get_delay(3) == 0.01
 
-    def test_execute_with_retry_success_first_try(
-        self, retry_handler: RetryHandler, mocker: MockerFixture
-    ) -> None:
+    def test_execute_with_retry_success_first_try(self, retry_handler: RetryHandler, mocker: MockerFixture) -> None:
         """Test that the retry handler returns the response if the first try succeeds."""
         mock_sleep = mocker.patch("time.sleep")
         mock_response = mocker.Mock(spec=requests.Response)
@@ -161,9 +155,7 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(mock_sleep)
         Verifier.verify_not_called(mock_sleep, "")
 
-    def test_execute_with_retry_success_after_retry(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_execute_with_retry_success_after_retry(self, mocker: MockerFixture) -> None:
         """Test that the retry handler retries and returns the response if a retry succeeds."""
         # Instantiate specific handler for this test
         # Use jitter=False for predictable delay, default base_delay is 0.5
@@ -188,9 +180,7 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(mock_sleep)
         Verifier.verify_called_once_with(mock_sleep, "", 1.0)  # Expect default base delay (1.0)
 
-    def test_execute_with_retry_all_failures(
-        self, retry_handler: RetryHandler, mocker: MockerFixture
-    ) -> None:
+    def test_execute_with_retry_all_failures(self, retry_handler: RetryHandler, mocker: MockerFixture) -> None:
         """Test that the retry handler raises an exception if all retries fail."""
         mock_sleep = mocker.patch("time.sleep")
 
@@ -246,9 +236,7 @@ class TestRetryHandler:
                 break
         assert error_log_found, "Expected ERROR log for exhausted retries due to exception not found"
 
-    def test_execute_with_retry_non_retryable_exception(
-        self, retry_handler: RetryHandler, mocker: MockerFixture
-    ) -> None:
+    def test_execute_with_retry_non_retryable_exception(self, retry_handler: RetryHandler, mocker: MockerFixture) -> None:
         """Test that the retry handler doesn't retry on non-retryable exceptions."""
         mock_sleep = mocker.patch("time.sleep")
 
@@ -352,9 +340,7 @@ class TestRetryHandler:
         translate_mock_calls_for_verifier(callback)
         Verifier.verify_any_call(callback, "", 2, 0.01, mock_error_response, None)
 
-    def test_execute_with_retry_raises_network_error(
-        self, retry_handler: RetryHandler, mocker: MockerFixture
-    ) -> None:
+    def test_execute_with_retry_raises_network_error(self, retry_handler: RetryHandler, mocker: MockerFixture) -> None:
         """Test that NetworkError is raised for requests.exceptions.RequestException."""
         mock_sleep = mocker.patch("time.sleep")
         original_exception = requests_exceptions.ConnectionError("Failed to connect")
