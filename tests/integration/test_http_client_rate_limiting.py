@@ -18,7 +18,7 @@ from crudclient.ratelimit import get_rate_limiter
 class TestHttpClientRateLimitingSimple:
     """Test that HttpClient properly integrates with the rate limiter."""
 
-    def test_rate_limiter_called_before_request(self):
+    def test_rate_limiter_called_before_request(self) -> None:
         """Test that the rate limiter check_and_wait is called before making requests."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create config with rate limiting enabled
@@ -61,7 +61,7 @@ class TestHttpClientRateLimitingSimple:
                         mock_check_and_wait.assert_called_once()
                         mock_update.assert_called_once_with(mock_response.headers)
 
-    def test_rate_limiting_blocks_requests(self):
+    def test_rate_limiting_blocks_requests(self) -> None:
         """Test that rate limiting actually blocks requests when limit is reached."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Set worker count to avoid pytest-xdist interference
