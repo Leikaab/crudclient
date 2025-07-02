@@ -8,6 +8,8 @@ class MockResponse:
     Used in testing scenarios to provide controlled response data without making actual network calls.
     """
 
+    error: Optional[Exception] = None
+
     def __init__(
         self,
         status_code: int,
@@ -28,6 +30,7 @@ class MockResponse:
         self.json_data = json_data
         self.text = text
         self.headers = headers if headers is not None else {}
+        self.error = None
 
     def json(self) -> Optional[Dict]:
         """Returns the JSON data provided during initialization."""
