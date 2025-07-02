@@ -1,12 +1,14 @@
 import pytest
 import requests
 
+from crudclient.client import Client
+
 # Import fixtures from conftest.py
 
 
 class TestClient:
 
-    def test_prepare_data_sets_json_content_type(self, client):
+    def test_prepare_data_sets_json_content_type(self, client: Client) -> None:
         # Arrange
         json_data = {"a": 1}
 
@@ -20,7 +22,7 @@ class TestClient:
         assert headers["Content-Type"] == "application/json"
         assert client.session.headers["Content-Type"] == "application/json"
 
-    def test_prepare_data_sets_files_content_type(self, client):
+    def test_prepare_data_sets_files_content_type(self, client: Client) -> None:
         # Arrange
         files_data = {"file": b"abc"}
         form_data = {"name": "test"}
@@ -36,7 +38,7 @@ class TestClient:
         assert headers["Content-Type"] == "multipart/form-data"
         assert client.session.headers["Content-Type"] == "multipart/form-data"
 
-    def test_prepare_data_sets_form_content_type(self, client):
+    def test_prepare_data_sets_form_content_type(self, client: Client) -> None:
         # Arrange
         form_data = {"a": "b"}
 
@@ -50,7 +52,7 @@ class TestClient:
         assert headers["Content-Type"] == "application/x-www-form-urlencoded"
         assert client.session.headers["Content-Type"] == "application/x-www-form-urlencoded"
 
-    def test_prepare_data_empty(self, client):
+    def test_prepare_data_empty(self, client: Client) -> None:
         # Arrange
 
         # Act
@@ -60,11 +62,11 @@ class TestClient:
         assert headers == {}
         assert data == {}
 
-    def test_maybe_retry_after_403_should_retry(self, client, mock_request, mocker):
+    def test_maybe_retry_after_403_should_retry(self, client: Client, mock_request, mocker) -> None:
         # Arrange
         # Mock config to allow retry
-        client.config.should_retry_on_403 = lambda: True
-        client.config.handle_403_retry = mocker.Mock()
+        client.config.should_retry_on_403 = lambda: True  # type: ignore[assignment]
+        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
 
         url = "https://example.com/resource"
         mock_request.get(url, [{"status_code": 403}, {"text": "retried"}])
@@ -77,12 +79,12 @@ class TestClient:
 
         # Assert
         assert retried.status_code == 200 or retried.text == "retried"
-        assert client.config.handle_403_retry.called
+        assert client.config.handle_403_retry.called  # type: ignore[attr-defined]
 
-    def test_maybe_retry_after_403_should_not_retry(self, client, mock_request, mocker):
+    def test_maybe_retry_after_403_should_not_retry(self, client: Client, mock_request, mocker) -> None:
         # Arrange
-        client.config.should_retry_on_403 = lambda: False
-        client.config.handle_403_retry = mocker.Mock()
+        client.config.should_retry_on_403 = lambda: False  # type: ignore[assignment]
+        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
 
         url = "https://example.com/resource"
         mock_request.get(url, status_code=403)
@@ -93,11 +95,11 @@ class TestClient:
 
         # Assert
         assert result.status_code == 403
-        client.config.handle_403_retry.assert_not_called()
+        client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
 
-    def test_maybe_retry_after_403_no_403(self, client, mock_request, mocker):
+    def test_maybe_retry_after_403_no_403(self, client: Client, mock_request, mocker) -> None:
         # Arrange
-        client.config.handle_403_retry = mocker.Mock()
+        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
         url = "https://example.com/resource"
         mock_request.get(url, status_code=200)
         response = client.session.get(url)
@@ -107,9 +109,9 @@ class TestClient:
 
         # Assert
         assert result.status_code == 200
-        client.config.handle_403_retry.assert_not_called()
+        client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
 
-    def test_handle_response_octet_stream(self, client, mock_request):
+    def test_handle_response_octet_stream(self, client: Client, mock_request) -> None:
         # Arrange
         url = "https://example.com/resource"
         content = b"\x00\x01\x02"
@@ -123,7 +125,7 @@ class TestClient:
         assert isinstance(result, bytes)
         assert result == content
 
-    def test_handle_response_multipart(self, client, mock_request):
+    def test_handle_response_multipart(self, client: Client, mock_request) -> None:
         # Arrange
         url = "https://example.com/upload"
         content = b'--boundary\r\nContent-Disposition: form-data; name="file"; filename="test.txt"\r\n'
@@ -137,7 +139,7 @@ class TestClient:
         assert isinstance(result, bytes)
         assert result == content
 
-    def test_handle_error_response_value_error(self, client, mocker):
+    def test_handle_error_response_value_error(self, client: Client, mocker) -> None:
         # Arrange
         from crudclient.exceptions import CrudClientError
 
@@ -157,7 +159,7 @@ class TestClient:
         assert "500" in str(excinfo.value)
         assert "raw text error" in str(excinfo.value)
 
-    def test_handle_error_response_no_http_error(self, client, mocker):
+    def test_handle_error_response_no_http_error(self, client: Client, mocker) -> None:
         # Arrange
         from crudclient.exceptions import CrudClientError
 
@@ -185,14 +187,14 @@ class TestClient:
             ("GET", "https://example.com", {}, object(), "response must be a requests.Response object"),
         ],
     )
-    def test_maybe_retry_after_403_type_errors(self, client, method, url, kwargs, response, expected) -> None:
+    def test_maybe_retry_after_403_type_errors(self, client: Client, method, url, kwargs, response, expected) -> None:
         """_maybe_retry_after_403 should validate argument types."""
         with pytest.raises(TypeError, match=expected):
             client._maybe_retry_after_403(method, url, kwargs, response)
 
-    def test_maybe_retry_after_403_calls_setup_auth(self, client, mocker) -> None:
+    def test_maybe_retry_after_403_calls_setup_auth(self, client: Client, mocker) -> None:
         """_maybe_retry_after_403 should refresh auth before retrying."""
-        client.config.should_retry_on_403 = lambda: True
+        client.config.should_retry_on_403 = lambda: True  # type: ignore[assignment]
         mocker.patch.object(client.config, "handle_403_retry")
         setup_auth = mocker.patch.object(client, "_setup_auth")
 
@@ -211,7 +213,7 @@ class TestClient:
         )
 
         setup_auth.assert_called_once_with()
-        client._session.request.assert_called_once_with(
+        client._session.request.assert_called_once_with(  # type: ignore[attr-defined]
             "GET",
             "https://example.com",
             p="v",
