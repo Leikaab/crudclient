@@ -109,11 +109,6 @@ def _op_in(value: Any, op_value: Any) -> bool:
     return bool(value in op_value)
 
 
-def _op_nin(value: Any, op_value: Any) -> bool:
-    """Check if value is not in op_value."""
-    return bool(value not in op_value)
-
-
 def _op_exists(value: Any, op_value: bool) -> bool:
     """Check if value exists (is not None) when op_value is True,"""
     if op_value:
