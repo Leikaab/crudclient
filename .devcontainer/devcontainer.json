@@ -27,7 +27,8 @@
 				"tamasfe.even-better-toml",
 				"RooVeterinaryInc.roo-cline",
 				"ms-azuretools.vscode-containers",
-				"bierner.markdown-mermaid"
+				"bierner.markdown-mermaid",
+				"augment.vscode-augment"
 			]
 		}
 	},
