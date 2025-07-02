@@ -7,14 +7,16 @@ including connection errors, timeouts, and DNS resolution failures.
 
 import pytest
 import requests
+import requests_mock
 
 from crudclient.exceptions import CrudClientError
+from crudclient.http.client import HttpClient
 
 
 class TestHttpClientNetworkErrors:
     """Tests for handling network errors in the HTTP client."""
 
-    def test_connection_error(self, http_client, mock_request):
+    def test_connection_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of connection errors.
 
@@ -33,7 +35,7 @@ class TestHttpClientNetworkErrors:
         assert "Connection refused" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_connection_reset_error(self, http_client, mock_request):
+    def test_connection_reset_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of connection reset errors.
 
@@ -52,7 +54,7 @@ class TestHttpClientNetworkErrors:
         assert "Connection reset" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_timeout_error(self, http_client, mock_request):
+    def test_timeout_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of timeout errors.
 
@@ -71,7 +73,7 @@ class TestHttpClientNetworkErrors:
         assert "timed out" in str(excinfo.value).lower()
 
     @pytest.mark.no_parallel
-    def test_connect_timeout_error(self, http_client, mock_request):
+    def test_connect_timeout_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of connection timeout errors.
 
@@ -89,7 +91,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Connection timed out" in str(excinfo.value)
 
-    def test_read_timeout_error(self, http_client, mock_request):
+    def test_read_timeout_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of read timeout errors.
 
@@ -107,7 +109,7 @@ class TestHttpClientNetworkErrors:
         # Check that the exception contains the error details
         assert "Read timed out" in str(excinfo.value)
 
-    def test_dns_error(self, http_client, mock_request):
+    def test_dns_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of DNS resolution errors.
 
@@ -126,7 +128,7 @@ class TestHttpClientNetworkErrors:
         assert "Name or service not known" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_host_not_found_error(self, http_client, mock_request):
+    def test_host_not_found_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of host not found errors.
 
@@ -145,7 +147,7 @@ class TestHttpClientNetworkErrors:
         assert "No such host is known" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_proxy_error(self, http_client, mock_request):
+    def test_proxy_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of proxy errors.
 
@@ -164,7 +166,7 @@ class TestHttpClientNetworkErrors:
         assert "Proxy" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_ssl_error(self, http_client, mock_request):
+    def test_ssl_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of SSL/TLS errors.
 
@@ -183,7 +185,7 @@ class TestHttpClientNetworkErrors:
         assert "SSL" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_network_unreachable_error(self, http_client, mock_request):
+    def test_network_unreachable_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of network unreachable errors.
 
@@ -202,7 +204,7 @@ class TestHttpClientNetworkErrors:
         assert "Network is unreachable" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_socket_timeout_error(self, http_client, mock_request):
+    def test_socket_timeout_error(self, http_client: HttpClient, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of socket timeout errors.
 
