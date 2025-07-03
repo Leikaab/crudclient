@@ -20,7 +20,7 @@ class TestClientInitialization:
         assert "expected ClientConfig or dict" in str(excinfo.value)
         assert "got int" in str(excinfo.value)
 
-    def test_client_init_with_valid_clientconfig(self, valid_config) -> None:
+    def test_client_init_with_valid_clientconfig(self, valid_config: ClientConfig) -> None:
         """Test successful initialization with a ClientConfig object."""
         # Arrange (valid_config fixture from conftest)
 
