@@ -25,7 +25,7 @@ from crudclient.http.utils import redact_json_body
 def test_log_response_body_redaction_simple(
     mock_client_config: MagicMock,  # Use the imported fixture type
     caplog: pytest.LogCaptureFixture,
-):
+) -> None:
     """Verify simple sensitive keys in JSON response body are redacted."""
     mock_client_config.log_response_body = True  # Enable body logging
     caplog.set_level("DEBUG")
@@ -75,7 +75,7 @@ def test_log_response_body_redaction_simple(
 def test_log_response_body_redaction_nested_list(
     mock_client_config: MagicMock,  # Use the imported fixture type
     caplog: pytest.LogCaptureFixture,
-):
+) -> None:
     """Verify sensitive keys in nested lists within response body are redacted."""
     mock_client_config.log_response_body = True  # Enable body logging
     caplog.set_level("DEBUG")
@@ -138,7 +138,7 @@ class SensitiveModel(BaseModel):
 # Removed defunct test_data_validation_error_log_redaction
 
 
-def test_data_validation_error_exception_redaction():
+def test_data_validation_error_exception_redaction() -> None:
     """Verify sensitive data is redacted in DataValidationError exception attributes."""
     invalid_data = {
         "user_id": "not-an-int",

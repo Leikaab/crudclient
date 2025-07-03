@@ -1,7 +1,7 @@
 # tests/unit/test_logging_config.py
 import io
 import logging
-from typing import Any, Generator
+from typing import Generator
 
 import pytest
 
@@ -41,7 +41,7 @@ def ensure_logging_cleanup() -> Generator[None, None, None]:
     # logging.getLogger().handlers = [] # Be careful with global root logger
 
 
-def test_logging_default_configuration(caplog: Any) -> None:
+def test_logging_default_configuration(caplog: pytest.LogCaptureFixture) -> None:
     """Verify the default logging configuration for the library.
 
     - No handlers attached directly to the library logger (or only NullHandler).
@@ -73,7 +73,7 @@ def test_logging_default_configuration(caplog: Any) -> None:
     assert "Default: Crud warning message." in caplog.text
 
 
-def test_logging_set_level_root(caplog: Any) -> None:
+def test_logging_set_level_root(caplog: pytest.LogCaptureFixture) -> None:
     """Verify setting the level on the root crudclient logger captures messages."""
     # Add caplog's handler to the crudclient logger
     # No need to explicitly add handler, caplog does this implicitly
@@ -94,7 +94,7 @@ def test_logging_set_level_root(caplog: Any) -> None:
     assert "HTTP debug message via root." in caplog.text
 
 
-def test_logging_set_level_sub_logger(caplog: Any) -> None:
+def test_logging_set_level_sub_logger(caplog: pytest.LogCaptureFixture) -> None:
     """Verify setting a different level on a sub-logger filters correctly."""
     # Set root to DEBUG, but sub-logger to INFO
     caplog.set_level(logging.DEBUG, logger="crudclient")  # Capture everything from root
