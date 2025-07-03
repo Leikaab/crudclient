@@ -2,6 +2,7 @@
 
 import json as json_lib
 import logging
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -36,7 +37,7 @@ def mock_response(mock_prepared_request: MagicMock) -> MagicMock:
     response.elapsed.total_seconds.return_value = 0.1
     response.text = response._content.decode("utf-8")
 
-    def mock_json():
+    def mock_json() -> Any:
         return json_lib.loads(response.text)  # noqa: E704
 
     response.json = mock_json
