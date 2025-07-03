@@ -2,6 +2,8 @@
 Tests for general authentication setup failure handling in the crudclient library.
 """
 
+from typing import Callable, Dict
+
 import pytest
 import requests_mock
 from apiconfig.exceptions.auth import AuthStrategyError
@@ -47,7 +49,7 @@ class TestAuthFailures:
     def test_auth_param_setup_failure(
         self,
         mock_request: requests_mock.Mocker,
-        create_mock_client_config,
+        create_mock_client_config: Callable[..., ClientConfig],
     ) -> None:
         """
         Test that exceptions during auth parameter setup are propagated.
@@ -59,11 +61,11 @@ class TestAuthFailures:
         # Arrange
         exception_message = "Failed during auth param setup"
 
-        def failing_param_callback():
+        def failing_param_callback() -> Dict[str, str]:
             """Simulates a failure during parameter preparation."""
             raise ValueError(exception_message)
 
-        def dummy_header_callback():
+        def dummy_header_callback() -> Dict[str, str]:
             """A placeholder header callback, not expected to be called."""
             return {"X-Dummy-Header": "dummy_value"}
 
