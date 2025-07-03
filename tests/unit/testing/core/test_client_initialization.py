@@ -1,3 +1,4 @@
+from typing import Self
 from unittest.mock import MagicMock
 
 from crudclient.auth import BearerAuth
@@ -9,7 +10,7 @@ from tests.unit.helpers import translate_mock_calls_for_verifier
 class TestMockClientInitialization:
     """Tests for the initialization and configuration of MockClient."""
 
-    def test_init(self):
+    def test_init(self: Self) -> None:
         """Test initialization of MockClient."""
         # Arrange
         http_client = MagicMock()
@@ -25,7 +26,7 @@ class TestMockClientInitialization:
         assert client.get_call_count() == 0
         assert client._auth_strategy is None
 
-    def test_configure_response(self):
+    def test_configure_response(self: Self) -> None:
         """Test configure_response method."""
         # Arrange
         http_client = MagicMock()
@@ -53,7 +54,7 @@ class TestMockClientInitialization:
             error=None,
         )
 
-    def test_set_auth_strategy(self):
+    def test_set_auth_strategy(self: Self) -> None:
         """Test set_auth_strategy method."""
         # Arrange
         http_client = MagicMock()
@@ -67,7 +68,7 @@ class TestMockClientInitialization:
         assert client._auth_strategy == auth_strategy
         assert client.config.auth_strategy == auth_strategy
 
-    def test_get_auth_strategy(self):
+    def test_get_auth_strategy(self: Self) -> None:
         """Test get_auth_strategy method."""
         # Arrange
         http_client = MagicMock()
