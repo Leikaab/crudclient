@@ -16,7 +16,7 @@ from .tripletex_resources.models import (
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -37,7 +37,7 @@ def get_dates():
     return date_from, date_to
 
 
-def test_api_ledger_group_registration(api):
+def test_api_ledger_group_registration(api: TripletexAPI) -> None:
     """
     Test that the LedgerGroup is properly registered in the API.
     """
@@ -51,7 +51,7 @@ def test_api_ledger_group_registration(api):
     assert hasattr(api.ledger.voucher, "historical")
 
 
-def test_list_ledgers(api):
+def test_list_ledgers(api: TripletexAPI) -> None:
     """
     Test listing ledgers from the Tripletex API using ResourceGroup.
     """
@@ -78,7 +78,7 @@ def test_list_ledgers(api):
             assert hasattr(ledger, "closing_balance")
 
 
-def test_read_ledger(api):
+def test_read_ledger(api: TripletexAPI) -> None:
     """
     Test reading a specific ledger from the Tripletex API using ResourceGroup.
     """
@@ -106,7 +106,7 @@ def test_read_ledger(api):
     assert hasattr(first_ledger, "closing_balance")
 
 
-def test_list_vouchers(api):
+def test_list_vouchers(api: TripletexAPI) -> None:
     """
     Test listing vouchers from the Tripletex API using nested ResourceGroup.
     """
@@ -131,7 +131,7 @@ def test_list_vouchers(api):
             assert hasattr(voucher, "description")
 
 
-def test_read_voucher(api):
+def test_read_voucher(api: TripletexAPI) -> None:
     """
     Test reading a specific voucher from the Tripletex API using nested ResourceGroup.
     """

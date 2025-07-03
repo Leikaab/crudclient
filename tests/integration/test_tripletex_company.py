@@ -9,7 +9,7 @@ from .tripletex_resources import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -29,7 +29,7 @@ def generate_unique_name():
     reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
 )
 @pytest.mark.no_parallel
-def test_update_company_minimal(api):
+def test_update_company_minimal(api: TripletexAPI) -> None:
     """
     Test updating a company with minimal data.
 

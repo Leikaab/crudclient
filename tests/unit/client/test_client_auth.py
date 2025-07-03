@@ -7,7 +7,7 @@ from crudclient.config import ClientConfig
 
 class TestClientAuth:
 
-    def test_client_accepts_dict_config(self):
+    def test_client_accepts_dict_config(self) -> None:
         # Arrange
         config_dict = {
             "hostname": "https://example.com",
@@ -23,7 +23,7 @@ class TestClientAuth:
         assert client.config.version == "v1"
         assert client.session.headers["X-Test"] == "1"
 
-    def test_client_basic_auth_sets_session_headers(self, basic_auth_config: ClientConfig):
+    def test_client_basic_auth_sets_session_headers(self, basic_auth_config: ClientConfig) -> None:
         # Arrange
         config = basic_auth_config
 
@@ -34,7 +34,7 @@ class TestClientAuth:
         # Just check that the Authorization header exists
         assert "Authorization" in client.session.headers
 
-    def test_client_custom_auth_applies_headers(self, custom_auth_config: ClientConfig):
+    def test_client_custom_auth_applies_headers(self, custom_auth_config: ClientConfig) -> None:
         # Arrange
         config = custom_auth_config
 
@@ -44,7 +44,7 @@ class TestClientAuth:
         # Assert
         assert client.session.headers["X-Auth"] == "yes"
 
-    def test_client_bearer_token_auth_sets_session_headers(self):
+    def test_client_bearer_token_auth_sets_session_headers(self) -> None:
         """Test Client initialization with BearerTokenAuth sets the correct header."""
         # Arrange
         token = "my-secret-token"

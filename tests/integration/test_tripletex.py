@@ -11,7 +11,7 @@ from .tripletex_resources.models.api_response_model import TripletexResponse
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -19,7 +19,7 @@ def api():
     return TripletexAPI(client_config=config)
 
 
-def test_api_configuration(api):
+def test_api_configuration(api: TripletexAPI) -> None:
     """
     Test that the API client is configured correctly.
     """
@@ -45,7 +45,7 @@ def test_api_configuration(api):
 
 
 @pytest.mark.no_parallel
-def test_token_refresh(api):
+def test_token_refresh(api: TripletexAPI) -> None:
     """
     Test that the token can be refreshed.
     """
@@ -61,7 +61,7 @@ def test_token_refresh(api):
     assert new_token != old_token
 
 
-def test_auth_headers(api):
+def test_auth_headers(api: TripletexAPI) -> None:
     """
     Test that the authentication headers are correctly generated.
     """
@@ -74,7 +74,7 @@ def test_auth_headers(api):
     assert len(headers["Authorization"]) > 10  # Basic + space + base64 encoded string
 
 
-def test_list_countries(api):
+def test_list_countries(api: TripletexAPI) -> None:
     """
     Test that we can list countries from the Tripletex API.
     """
@@ -98,7 +98,7 @@ def test_list_countries(api):
         assert hasattr(country, "displayName")
 
 
-def test_read_country(api):
+def test_read_country(api: TripletexAPI) -> None:
     """
     Test that we can read a specific country from the Tripletex API.
     """

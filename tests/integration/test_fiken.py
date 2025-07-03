@@ -6,12 +6,12 @@ from .fiken_resources.setup import Company, Contact, FikenAPI, FikenConfig, User
 
 
 @pytest.fixture
-def api():
+def api() -> FikenAPI:
     config = FikenConfig()
     return FikenAPI(client_config=config)
 
 
-def test_api_configuration(api):
+def test_api_configuration(api: FikenAPI) -> None:
     assert api.client.base_url == "https://api.fiken.no/api/v2"
 
     # Skip auth tests if no token is provided
@@ -29,14 +29,14 @@ def test_api_configuration(api):
         assert api.client.config.auth_strategy.access_token != ""
 
 
-def test_retrive_user(api):
+def test_retrive_user(api: FikenAPI) -> None:
     user = api.user.read()
     assert isinstance(user, User)
     assert user.name is not None
     assert user.email is not None
 
 
-def test_list_companies(api):
+def test_list_companies(api: FikenAPI) -> None:
     companies = api.companies.list()
 
     assert isinstance(companies, list)
@@ -44,7 +44,7 @@ def test_list_companies(api):
     assert all(isinstance(company, Company) for company in companies)
 
 
-def test_list_contacts(api):
+def test_list_contacts(api: FikenAPI) -> None:
     contacts = api.contacts.bind_company("fiken-demo-faktisk-plante-as2").list()
     assert isinstance(contacts, list)
     assert len(contacts) > 0
