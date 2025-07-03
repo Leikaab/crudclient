@@ -133,10 +133,10 @@ class TestCreateMockClient:
         # mock_custom_auth_instance.get_auth_strategy.return_value = mock_auth_strategy # No longer needed
         mock_create_custom.return_value = mock_custom_auth_instance
 
-        def header_cb():
+        def header_cb() -> dict[str, str]:
             return {"X-Custom": "header"}
 
-        def param_cb():
+        def param_cb() -> dict[str, str]:
             return {"custom_param": "value"}
 
         auth_config = {"header_callback": header_cb, "param_callback": param_cb}
