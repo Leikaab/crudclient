@@ -5,6 +5,7 @@ Fixtures related to creating various mock clients for testing.
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import pytest
+from pytest import FixtureRequest
 
 from crudclient.config import ClientConfig
 from crudclient.testing.core.client import MockClient
@@ -68,7 +69,7 @@ def create_mock_client(create_mock_client_config: Callable[..., ClientConfig]) -
 
 
 @pytest.fixture
-def mock_client(request) -> MockClient:
+def mock_client(request: FixtureRequest) -> MockClient:
     """
     Provides a pre-configured mock client for testing.
 
