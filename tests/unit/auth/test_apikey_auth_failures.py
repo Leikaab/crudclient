@@ -6,11 +6,13 @@ from typing import cast
 
 import pytest
 import requests
+import requests_mock
 
+from crudclient.client import Client
 from crudclient.exceptions import AuthenticationError
 
 
-def test_apikey_header_auth_failure(apikey_header_client, mock_request):
+def test_apikey_header_auth_failure(apikey_header_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of API Key Header Authentication failures."""
     # Arrange
     url = f"{apikey_header_client.base_url}/items"
@@ -32,7 +34,7 @@ def test_apikey_header_auth_failure(apikey_header_client, mock_request):
     assert "api_key" not in request.url
 
 
-def test_apikey_param_auth_failure(apikey_param_client, mock_request):
+def test_apikey_param_auth_failure(apikey_param_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of API Key Param Authentication failures."""
     # Arrange
     endpoint = "/items"
