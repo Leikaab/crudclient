@@ -90,7 +90,7 @@ class ParentCrud(Crud[BaseModel]):  # Using BaseModel as a placeholder
 
 
 @pytest.fixture
-def mock_client():
+def mock_client() -> MagicMock:
     """Return a mock Client instance with enhanced parent_id handling."""
     client = MagicMock(spec=Client)
 
@@ -129,7 +129,7 @@ def base_test_crud_httpserver(http_client: Client) -> BaseTestCrud:
 
 
 @pytest.fixture
-def parent_crud(mock_client):
+def parent_crud(mock_client: MagicMock) -> ParentCrud:
     """Fixture for a parent CRUD resource instance."""
     return ParentCrud(mock_client)
 
