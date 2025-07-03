@@ -16,7 +16,7 @@ from crudclient.exceptions import APIError
 class TestHttpClientServerErrors:
     """Tests for handling server errors in the HTTP client."""
 
-    def test_500_error(self, http_client, mock_request):
+    def test_500_error(self, http_client, mock_request) -> None:
         """
         Test handling of 500 Internal Server Error.
 
@@ -35,7 +35,7 @@ class TestHttpClientServerErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Something went wrong"
 
-    def test_502_error(self, http_client, mock_request):
+    def test_502_error(self, http_client, mock_request) -> None:
         """
         Test handling of 502 Bad Gateway.
 
@@ -54,7 +54,7 @@ class TestHttpClientServerErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Invalid response from upstream server"
 
-    def test_503_error(self, http_client, mock_request):
+    def test_503_error(self, http_client, mock_request) -> None:
         """
         Test handling of 503 Service Unavailable.
 
@@ -73,7 +73,7 @@ class TestHttpClientServerErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Server is overloaded"
 
-    def test_504_error(self, http_client, mock_request):
+    def test_504_error(self, http_client, mock_request) -> None:
         """
         Test handling of 504 Gateway Timeout.
 

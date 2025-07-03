@@ -16,7 +16,7 @@ from .common import create_mock_client
 class TestCustomAuthExamples:
     """Examples of using Custom Authentication mocks."""
 
-    def test_custom_auth_success_scenario(self):
+    def test_custom_auth_success_scenario(self) -> None:
         """Example of testing a successful Custom Auth scenario."""
 
         # Define custom auth callbacks
@@ -50,7 +50,7 @@ class TestCustomAuthExamples:
         # Assuming 'path' contains the full URL or path with params
         assert request.kwargs["params"].get("tenant") == "test_tenant"
 
-    def test_custom_auth_failure_scenario(self):
+    def test_custom_auth_failure_scenario(self) -> None:
         """Example of testing a Custom Auth failure scenario."""
 
         # Define a custom auth callback that will fail

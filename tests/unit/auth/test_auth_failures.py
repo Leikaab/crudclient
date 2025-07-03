@@ -15,7 +15,7 @@ from crudclient.config import ClientConfig
 class TestAuthFailures:
     """Tests for general authentication failure handling."""
 
-    def test_auth_setup_failure(self, mock_request, mocker, bearer_auth_config: ClientConfig):
+    def test_auth_setup_failure(self, mock_request, mocker, bearer_auth_config: ClientConfig) -> None:
         """Test handling of authentication setup failures."""
         # Arrange
         # Create a bearer auth mock with a failing callback
@@ -37,7 +37,7 @@ class TestAuthFailures:
         # Check that the exception contains the error details
         assert "Auth setup failed" in str(excinfo.value)
 
-    def test_auth_param_setup_failure(self, mock_request, create_mock_client_config):
+    def test_auth_param_setup_failure(self, mock_request, create_mock_client_config) -> None:
         """
         Test that exceptions during auth parameter setup are propagated.
 

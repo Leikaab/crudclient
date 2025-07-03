@@ -28,7 +28,7 @@ SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 # === Create Operation Tests ===
 
 
-def test_create_operation_success_with_model(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_success_with_model(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a model instance
     WHEN the create operation is called with the model
@@ -47,7 +47,7 @@ def test_create_operation_success_with_model(base_test_crud: BaseTestCrud, mock_
     assert isinstance(result, BaseTestModel)
 
 
-def test_create_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a dictionary
     WHEN the create operation is called with the dictionary
@@ -65,7 +65,7 @@ def test_create_operation_success_with_dict(base_test_crud: BaseTestCrud, mock_c
     assert result == SAMPLE_MODEL
 
 
-def test_create_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the create operation is called with a model and parent ID
@@ -82,7 +82,7 @@ def test_create_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_clie
     assert result == SAMPLE_MODEL
 
 
-def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and invalid data (non-integer ID)
     WHEN the create operation is called with the invalid data
@@ -103,7 +103,7 @@ def test_create_operation_validation_error(base_test_crud: BaseTestCrud, mock_cl
     assert excinfo.value.data == invalid_data
 
 
-def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN the create operation is called
@@ -122,7 +122,7 @@ def test_create_operation_model_conversion_error(base_test_crud: BaseTestCrud, m
     assert excinfo.value.data == {"unexpected": "field"}
 
 
-def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'create' action not in allowed_actions
     WHEN the create operation is called
@@ -136,7 +136,7 @@ def test_create_operation_action_not_allowed(base_test_crud: BaseTestCrud):
     base_test_crud.allowed_actions = original_actions  # Restore
 
 
-def test_create_operation_with_params(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_create_operation_with_params(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and query parameters
     WHEN the create operation is called with params

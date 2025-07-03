@@ -15,7 +15,7 @@ from .common import create_mock_client
 class TestBearerAuthExamples:
     """Examples of using Bearer Authentication mocks."""
 
-    def test_bearer_auth_success_scenario(self):
+    def test_bearer_auth_success_scenario(self) -> None:
         """Example of testing a successful Bearer Auth scenario."""
         # Create a mock client with Bearer Auth
         client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token"})
@@ -38,7 +38,7 @@ class TestBearerAuthExamples:
         assert "Authorization" in request_call.kwargs["headers"]
         assert request_call.kwargs["headers"]["Authorization"] == "Bearer valid_token"
 
-    def test_bearer_auth_token_expiration_scenario(self):
+    def test_bearer_auth_token_expiration_scenario(self) -> None:
         """Example of testing a Bearer Auth token expiration scenario."""
         # Create a mock client with Bearer Auth configured with an expired token
         client = create_mock_client(auth_type="bearer", auth_config={"token": "expired_token", "token_expired": True})
@@ -56,7 +56,7 @@ class TestBearerAuthExamples:
         assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
         assert "Token expired" in str(excinfo.value)
 
-    def test_bearer_auth_token_refresh_scenario(self):
+    def test_bearer_auth_token_refresh_scenario(self) -> None:
         """Example of testing a Bearer Auth token refresh scenario."""
         # Create a mock client with Bearer Auth configured. The initial token value
         # doesn't matter much as the first request will be intercepted by the 401 pattern.

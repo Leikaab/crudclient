@@ -7,7 +7,7 @@ from .tripletex_resources.models.supplier import Supplier
 
 
 @pytest.mark.no_parallel
-def test_list_suppliers(api):
+def test_list_suppliers(api) -> None:
     """
     Test listing suppliers.
     """
@@ -28,7 +28,7 @@ def test_list_suppliers(api):
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker) -> None:
     """
     Test creating, updating, and destroying a supplier.
     Uses fixtures for reliable cleanup and unique naming.
@@ -95,7 +95,7 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker) -> None:
     """
     Test supplier number handling - either enforces uniqueness or allows duplicates.
     This test adapts to the API's behavior.
@@ -144,7 +144,7 @@ def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_suppl
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker) -> None:
     """
     Test creating multiple suppliers and ensuring they're all cleaned up.
     This tests the robustness of our cleanup mechanism.

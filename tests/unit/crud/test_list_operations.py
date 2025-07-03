@@ -27,7 +27,7 @@ SAMPLE_MODEL_LIST = [BaseTestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
 # === List Operation Tests ===
 
 
-def test_list_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_list_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning a list payload
     WHEN the list operation is called
@@ -42,7 +42,7 @@ def test_list_operation_success(base_test_crud: BaseTestCrud, mock_client: Magic
     assert all(isinstance(item, BaseTestModel) for item in result)
 
 
-def test_list_operation_with_params(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_list_operation_with_params(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN the list operation is called with filtering/pagination params
@@ -57,7 +57,7 @@ def test_list_operation_with_params(base_test_crud: BaseTestCrud, mock_client: M
     assert result == SAMPLE_MODEL_LIST
 
 
-def test_list_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_list_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN the list operation is called with a parent ID
@@ -72,7 +72,7 @@ def test_list_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client
     assert result == SAMPLE_MODEL_LIST
 
 
-def test_list_operation_empty(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_list_operation_empty(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning an empty list
     WHEN the list operation is called
@@ -86,7 +86,7 @@ def test_list_operation_empty(base_test_crud: BaseTestCrud, mock_client: MagicMo
     assert result == []
 
 
-def test_list_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_list_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'list' action not in allowed_actions
     WHEN the list operation is called
@@ -104,7 +104,7 @@ def test_list_operation_action_not_allowed(base_test_crud: BaseTestCrud):
 # Adding a basic one for completeness, assuming conversion happens on list items.
 
 
-def test_list_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_list_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid list item data
     WHEN the list operation is called
