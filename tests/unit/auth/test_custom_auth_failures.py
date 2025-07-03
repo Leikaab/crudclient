@@ -3,6 +3,7 @@ Tests for Custom Authentication failure handling in the crudclient library.
 """
 
 import pytest
+import requests_mock
 from apiconfig.exceptions.auth import AuthStrategyError
 
 from crudclient.auth import CustomAuth
@@ -11,7 +12,7 @@ from crudclient.config import ClientConfig
 from crudclient.exceptions import AuthenticationError
 
 
-def test_custom_auth_failure(mock_request, basic_auth_config: ClientConfig):
+def test_custom_auth_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test handling of custom authentication failures during setup."""
 
     def header_callback():
@@ -29,7 +30,7 @@ def test_custom_auth_failure(mock_request, basic_auth_config: ClientConfig):
     assert "Failed to generate custom header" in str(excinfo.value.__cause__)
 
 
-def test_custom_auth_param_callback_failure(mock_request, basic_auth_config: ClientConfig):
+def test_custom_auth_param_callback_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test that exceptions from param_callback are propagated."""
 
     def failing_param_callback() -> dict:
@@ -43,7 +44,7 @@ def test_custom_auth_param_callback_failure(mock_request, basic_auth_config: Cli
         client.get("/some/path")
 
 
-def test_custom_auth_api_failure(mock_request, basic_auth_config: ClientConfig):
+def test_custom_auth_api_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test handling of API returning 401/403 with CustomAuth."""
 
     def get_headers():
