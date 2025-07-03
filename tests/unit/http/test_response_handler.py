@@ -4,13 +4,14 @@ from unittest.mock import MagicMock
 
 import pytest
 import requests
+from pytest_mock import MockerFixture
 from requests import exceptions as requests_exceptions  # Import requests exceptions
 
 from crudclient.exceptions import ResponseParsingError
 from crudclient.http.response import ResponseHandler
 
 
-def test_response_parsing_error(mocker, caplog: pytest.LogCaptureFixture) -> None:
+def test_response_parsing_error(mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     """Test that ResponseParsingError is raised for invalid JSON responses."""
     # Arrange
     handler = ResponseHandler()
