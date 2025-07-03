@@ -16,7 +16,7 @@ from .common import create_mock_client
 class TestBasicAuthExamples:
     """Examples of using Basic Authentication mocks."""
 
-    def test_basic_auth_success_scenario(self):
+    def test_basic_auth_success_scenario(self) -> None:
         """Example of testing a successful Basic Auth scenario."""
         # Create a mock client with Basic Auth
         client = create_mock_client(auth_type="basic", auth_config={"username": "testuser", "password": "testpass"})
@@ -45,7 +45,7 @@ class TestBasicAuthExamples:
             expected_password="testpass",
         )
 
-    def test_basic_auth_failure_scenario(self):
+    def test_basic_auth_failure_scenario(self) -> None:
         """Example of testing a Basic Auth failure scenario."""
         # Create a mock client with Basic Auth configured to fail
         client = create_mock_client(
