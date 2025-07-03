@@ -68,7 +68,7 @@ def test_log_response_details_base(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_response: MagicMock,
-):
+) -> None:
     """Verify basic response details logging (status, headers)."""
     method = mock_response.request.method
     url = mock_response.request.url
@@ -88,7 +88,7 @@ def test_log_response_details_error_status(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_response: MagicMock,
-):
+) -> None:
     """Verify warning/error logging for non-2xx status codes."""
     method = mock_response.request.method
     url = mock_response.request.url
@@ -114,7 +114,7 @@ def test_log_response_details_with_body_enabled(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_response: MagicMock,
-):
+) -> None:
     """Verify response body logging when log_response_body is True."""
     mock_client_config.log_response_body = True  # Enable body logging
     method = mock_response.request.method
@@ -153,7 +153,7 @@ def test_log_response_details_with_long_body_truncated(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_response: MagicMock,
-):
+) -> None:
     """Verify response body truncation."""
     mock_client_config.log_response_body = True
     method = mock_response.request.method
@@ -205,7 +205,7 @@ def test_log_response_details_non_json_body(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_response: MagicMock,
-):
+) -> None:
     """Verify logging for non-JSON response bodies."""
     mock_client_config.log_response_body = True
     method = mock_response.request.method

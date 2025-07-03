@@ -1,3 +1,5 @@
+import requests_mock
+
 """
 Tests for client error handling in the crudclient library.
 
@@ -29,7 +31,7 @@ from tests.unit.helpers import translate_mock_calls_for_verifier
 class TestClientErrorHandling:
     """Tests for error handling in the Client class."""
 
-    def test_client_handles_connection_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_connection_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles connection errors correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -43,7 +45,7 @@ class TestClientErrorHandling:
         assert "Connection refused" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_client_handles_timeout(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_timeout(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles timeouts correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -57,7 +59,7 @@ class TestClientErrorHandling:
         assert "Request timed out" in str(excinfo.value)
 
     @pytest.mark.no_parallel
-    def test_client_handles_ssl_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_ssl_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles SSL errors correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -70,7 +72,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "SSL verification failed" in str(excinfo.value)
 
-    def test_client_handles_too_many_redirects(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_too_many_redirects(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles too many redirects correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -83,7 +85,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "Too many redirects" in str(excinfo.value)
 
-    def test_client_handles_malformed_json_response(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_malformed_json_response(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles malformed JSON responses correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -100,7 +102,7 @@ class TestClientErrorHandling:
         assert excinfo.value.response is not None  # Check response is attached
         assert excinfo.value.response.url == url
 
-    def test_client_handles_unexpected_response_format(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_unexpected_response_format(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles unexpected response formats correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -113,7 +115,7 @@ class TestClientErrorHandling:
         # This should not raise an exception, but return the raw response
         assert json.loads(str(response))["unexpected"] == "format"
 
-    def test_client_handles_empty_response(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_empty_response(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles empty responses correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -125,7 +127,7 @@ class TestClientErrorHandling:
         # Assert
         assert response is None or response == ""
 
-    def test_client_handles_non_json_content_type(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_non_json_content_type(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles non-JSON content types correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -137,7 +139,7 @@ class TestClientErrorHandling:
         # Assert
         assert response == "<html>Not JSON</html>"
 
-    def test_client_error_handling_chain(self, client: Client, mock_request: Any) -> None:
+    def test_client_error_handling_chain(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test the error handling chain in the client."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -152,7 +154,7 @@ class TestClientErrorHandling:
         assert len(mock_request.request_history) == 1
         assert mock_request.request_history[0].url == url
 
-    def test_client_handles_auth_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_auth_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles authentication errors correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -165,7 +167,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "401" in str(excinfo.value) or "Unauthorized" in str(excinfo.value)
 
-    def test_client_handles_forbidden_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_forbidden_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles forbidden errors correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -178,7 +180,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "403" in str(excinfo.value) or "Forbidden" in str(excinfo.value)
 
-    def test_client_handles_not_found_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_not_found_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles not found errors correctly."""
         # Arrange
         url = f"{client.base_url}/users/999"
@@ -191,7 +193,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "404" in str(excinfo.value) or "Not Found" in str(excinfo.value)
 
-    def test_client_handles_validation_error(self, client: Client, mock_request: Any) -> None:
+    def test_client_handles_validation_error(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         """Test that the client handles validation errors correctly."""
         # Arrange
         url = f"{client.base_url}/users"
@@ -209,7 +211,7 @@ class TestClientErrorHandling:
         # Check that the exception contains the error details
         assert "422" in str(excinfo.value) or "Validation Error" in str(excinfo.value)
 
-    def test_client_retries_on_403_if_configured(self, client: Client, mock_request: Any, mocker: Any) -> None:
+    def test_client_retries_on_403_if_configured(self, client: Client, mock_request: requests_mock.Mocker, mocker: Any) -> None:
         """Test that the client retries a request on 403 if configured."""
         # Arrange
         endpoint = "/protected/resource"

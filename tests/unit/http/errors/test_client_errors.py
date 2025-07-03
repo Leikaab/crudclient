@@ -1,3 +1,7 @@
+import requests_mock
+
+from crudclient.client import Client
+
 """
 Tests for client error handling in the HTTP client.
 
@@ -22,7 +26,7 @@ from crudclient.exceptions import (
 class TestHttpClientClientErrors:
     """Tests for handling client errors in the HTTP client."""
 
-    def test_400_error(self, http_client, mock_request):
+    def test_400_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 400 Bad Request.
 
@@ -41,7 +45,7 @@ class TestHttpClientClientErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Invalid parameters"
 
-    def test_401_error(self, http_client, mock_request):
+    def test_401_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 401 Unauthorized.
 
@@ -60,7 +64,7 @@ class TestHttpClientClientErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Authentication required"
 
-    def test_403_error(self, http_client, mock_request):
+    def test_403_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 403 Forbidden.
 
@@ -79,7 +83,7 @@ class TestHttpClientClientErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Insufficient permissions"
 
-    def test_404_error(self, http_client, mock_request):
+    def test_404_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 404 Not Found.
 
@@ -98,7 +102,7 @@ class TestHttpClientClientErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Resource not found"
 
-    def test_422_error(self, http_client, mock_request):
+    def test_422_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 422 Unprocessable Entity.
 
@@ -117,7 +121,7 @@ class TestHttpClientClientErrors:
         response = cast(requests.Response, excinfo.value.response)
         assert response.json()["message"] == "Validation failed"
 
-    def test_429_error(self, http_client, mock_request):
+    def test_429_error(self, http_client: Client, mock_request: requests_mock.Mocker) -> None:
         """
         Test handling of 429 Too Many Requests.
 

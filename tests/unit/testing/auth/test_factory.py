@@ -13,7 +13,7 @@ from crudclient.testing.auth.factory import (
 )
 
 
-def test_create_basic_auth_mock():
+def test_create_basic_auth_mock() -> None:
     """Verify creating a basic auth mock."""
     auth_mock = create_basic_auth_mock()
     assert isinstance(auth_mock, BasicAuthMock)
@@ -21,14 +21,14 @@ def test_create_basic_auth_mock():
     assert auth_mock.password == "pass"  # Check default value
 
 
-def test_create_bearer_auth_mock():
+def test_create_bearer_auth_mock() -> None:
     """Verify creating a bearer auth mock."""
     auth_mock = create_bearer_auth_mock()
     assert isinstance(auth_mock, BearerAuthMock)
     assert auth_mock.token == "valid_token"  # Check default value
 
 
-def test_create_api_key_auth_mock():
+def test_create_api_key_auth_mock() -> None:
     """Verify creating an API key auth mock."""
     auth_mock = create_api_key_auth_mock()
     assert isinstance(auth_mock, ApiKeyAuthMock)
@@ -36,14 +36,14 @@ def test_create_api_key_auth_mock():
     assert auth_mock.header_name == "X-API-Key"  # Check default value
 
 
-def test_create_custom_auth_mock():
+def test_create_custom_auth_mock() -> None:
     """Verify creating a custom auth mock."""
     auth_mock = create_custom_auth_mock()
     assert isinstance(auth_mock, CustomAuthMock)
     # Add more specific assertions if needed based on CustomAuthMock implementation
 
 
-def test_create_oauth_mock():
+def test_create_oauth_mock() -> None:
     """Verify creating an OAuth mock."""
     auth_mock = create_oauth_mock()
     assert isinstance(auth_mock, OAuthMock)

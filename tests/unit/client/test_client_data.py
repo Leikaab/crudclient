@@ -1,5 +1,6 @@
 import pytest
 import requests
+import requests_mock
 
 from crudclient.client import Client
 
@@ -62,7 +63,7 @@ class TestClient:
         assert headers == {}
         assert data == {}
 
-    def test_maybe_retry_after_403_should_retry(self, client: Client, mock_request, mocker) -> None:
+    def test_maybe_retry_after_403_should_retry(self, client: Client, mock_request: requests_mock.Mocker, mocker) -> None:
         # Arrange
         # Mock config to allow retry
         client.config.should_retry_on_403 = lambda: True  # type: ignore[assignment]
@@ -81,7 +82,7 @@ class TestClient:
         assert retried.status_code == 200 or retried.text == "retried"
         assert client.config.handle_403_retry.called  # type: ignore[attr-defined]
 
-    def test_maybe_retry_after_403_should_not_retry(self, client: Client, mock_request, mocker) -> None:
+    def test_maybe_retry_after_403_should_not_retry(self, client: Client, mock_request: requests_mock.Mocker, mocker) -> None:
         # Arrange
         client.config.should_retry_on_403 = lambda: False  # type: ignore[assignment]
         client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
@@ -97,7 +98,7 @@ class TestClient:
         assert result.status_code == 403
         client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
 
-    def test_maybe_retry_after_403_no_403(self, client: Client, mock_request, mocker) -> None:
+    def test_maybe_retry_after_403_no_403(self, client: Client, mock_request: requests_mock.Mocker, mocker) -> None:
         # Arrange
         client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
         url = "https://example.com/resource"
@@ -111,7 +112,7 @@ class TestClient:
         assert result.status_code == 200
         client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
 
-    def test_handle_response_octet_stream(self, client: Client, mock_request) -> None:
+    def test_handle_response_octet_stream(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         # Arrange
         url = "https://example.com/resource"
         content = b"\x00\x01\x02"
@@ -125,7 +126,7 @@ class TestClient:
         assert isinstance(result, bytes)
         assert result == content
 
-    def test_handle_response_multipart(self, client: Client, mock_request) -> None:
+    def test_handle_response_multipart(self, client: Client, mock_request: requests_mock.Mocker) -> None:
         # Arrange
         url = "https://example.com/upload"
         content = b'--boundary\r\nContent-Disposition: form-data; name="file"; filename="test.txt"\r\n'

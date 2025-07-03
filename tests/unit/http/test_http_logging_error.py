@@ -54,7 +54,7 @@ def test_log_http_error_4xx(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_response: MagicMock,  # Response attached to exception
-):
+) -> None:
     """Verify HTTPError logging for 4xx status codes."""
     # Ensure response has the correct attributes for this test
     mock_response.status_code = 404
@@ -82,7 +82,7 @@ def test_log_http_error_5xx(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_response: MagicMock,
-):
+) -> None:
     """Verify HTTPError logging for 5xx status codes."""
     # Ensure response has the correct attributes for this test
     mock_response.status_code = 503
@@ -109,7 +109,7 @@ def test_log_http_error_5xx(
 def test_log_http_error_no_response(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
-):
+) -> None:
     """Verify HTTPError logging when the error has no response object."""
     request = MagicMock(spec=requests.PreparedRequest, method="PUT", url="https://example.com/update")
     error = requests.exceptions.HTTPError("Some connection issue", request=request, response=None)
@@ -124,7 +124,7 @@ def test_log_http_error_no_response(
 def test_log_http_error_no_request_or_response(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
-):
+) -> None:
     """Verify HTTPError logging when the error has no request or response."""
     error = requests.exceptions.HTTPError("Very early error")
     error.request = None  # Explicitly set to None
