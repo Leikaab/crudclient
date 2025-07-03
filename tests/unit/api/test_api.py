@@ -76,10 +76,10 @@ class TestAPI:
         class FailingAPI(API):
             client_class = None
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname=standard_data.get("hostname"))
@@ -160,16 +160,16 @@ class TestAPI:
     def test_client_initialization_error_handling(self) -> None:
         # Arrange
         class ErrorClient(Client):
-            def __init__(self, config):
+            def __init__(self, config: ClientConfig) -> None:
                 raise Exception("Test error")
 
         class ErrorAPI(API):
             client_class = ErrorClient
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname="https://api.example.com")
@@ -182,7 +182,7 @@ class TestAPI:
         # Arrange
         requests_mocker.get(standard_data.get("full_url"), json={"status": "success"})
 
-        def raise_exception():
+        def raise_exception() -> None:
             with MockAPI(client_config=default_mock_client_config) as api:
                 api.test_resource.list()  # type: ignore[attr-defined]
                 raise ValueError("Test exception")
