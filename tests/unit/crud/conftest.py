@@ -2,7 +2,7 @@
 Fixtures specific to CRUD tests.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, TypeVar, Union, cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,6 +13,8 @@ from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.crud.base import Crud, T
 from crudclient.types import JSONDict
+
+_T = TypeVar("_T")
 
 
 class BaseTestModel(BaseModel):
@@ -107,20 +109,20 @@ def mock_client():
     return client
 
 
-@pytest.fixture
-def base_test_crud(mock_client):
+@cast(Callable[..., _T], pytest.fixture)
+def base_test_crud(mock_client: MagicMock) -> BaseTestCrud:
     """Return a BaseTestCrud instance with a mock client."""
     return BaseTestCrud(mock_client)
 
 
-@pytest.fixture
+@cast(Callable[..., _T], pytest.fixture)
 def http_client(httpserver: HTTPServer) -> Client:
     """Return a Client configured to communicate with the HTTPServer."""
     config = ClientConfig(hostname=f"http://{httpserver.host}:{httpserver.port}")
     return Client(config)
 
 
-@pytest.fixture
+@cast(Callable[..., _T], pytest.fixture)
 def base_test_crud_httpserver(http_client: Client) -> BaseTestCrud:
     """Return a BaseTestCrud instance using a real Client against HTTPServer."""
     return BaseTestCrud(http_client)
@@ -132,8 +134,8 @@ def parent_crud(mock_client):
     return ParentCrud(mock_client)
 
 
-@pytest.fixture
-def nested_base_test_crud(mock_client, parent_crud):
+@cast(Callable[..., _T], pytest.fixture)
+def nested_base_test_crud(mock_client: MagicMock, parent_crud: ParentCrud) -> BaseTestCrud:
     """Fixture for a BaseTestCrud instance nested under ParentCrud."""
     # Instantiate BaseTestCrud with parent_crud as the parent
     return BaseTestCrud(mock_client, parent=parent_crud)
