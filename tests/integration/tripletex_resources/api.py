@@ -16,7 +16,7 @@ class TripletexAPI(API):
 
     client_class = TripletexClient
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         """
         Register API endpoints.
         """
@@ -25,7 +25,7 @@ class TripletexAPI(API):
         self.suppliers = TripletexSuppliers(self.client)
         self.company = TripletexCompany(self.client)
 
-    def _register_groups(self):
+    def _register_groups(self) -> None:
         """
         Register top-level ResourceGroup instances.
 

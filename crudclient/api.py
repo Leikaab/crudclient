@@ -19,7 +19,7 @@ Example
 class MyAPI(API):
     client_class = MyClient
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         self.contacts = Contacts(self.client)
 
 api = MyAPI(client_config=ClientConfig(**{'api_key': 'your_api_key'}))

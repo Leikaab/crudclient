@@ -76,10 +76,10 @@ class TestAPI:
         class FailingAPI(API):
             client_class = None
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname=standard_data.get("hostname"))
@@ -166,10 +166,10 @@ class TestAPI:
         class ErrorAPI(API):
             client_class = ErrorClient
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname="https://api.example.com")

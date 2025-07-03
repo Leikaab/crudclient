@@ -72,7 +72,7 @@ class FikenContacts(FikenCrud[Contact]):
 class FikenAPI(API):
     client_class = Client
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         assert self.client is not None, "Client is required!"
         self.user = FikenUser(self.client)
         self.companies = FikenCompanies(self.client)

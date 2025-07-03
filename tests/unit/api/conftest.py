@@ -72,12 +72,12 @@ class MockCrud(Crud[BaseModel]):
 class MockAPI(API):
     client_class = Client
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         if self.client is None:
             raise ValueError("Client is required!")
         self.test_resource: Crud = MockCrud(self.client)
 
-    def _register_groups(self):
+    def _register_groups(self) -> None:
         """
         Implementation of the abstract method to register ResourceGroup instances.
         This mock implementation doesn't register any groups.
@@ -85,7 +85,7 @@ class MockAPI(API):
 
 
 @pytest.fixture
-def standard_data():
+def standard_data() -> Dict[str, str]:
     """Return standard test data for API tests."""
     full_url = "https://api.example.com/v1/test"
     hostname = "https://api.example.com"
