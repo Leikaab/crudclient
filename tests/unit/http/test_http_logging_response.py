@@ -1,6 +1,7 @@
 """Unit tests for HttpLifecycleLogger response logging."""
 
 import json as json_lib
+from typing import Any, Dict
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -49,8 +50,9 @@ def mock_response(mock_prepared_request: MagicMock) -> MagicMock:
     response.text = response._content.decode("utf-8")
 
     # Mock json() method
-    def mock_json():
-        return json_lib.loads(response.text)
+    def mock_json() -> Dict[str, Any]:
+        result: Dict[str, Any] = json_lib.loads(response.text)
+        return result
 
     response.json = mock_json
 
@@ -126,7 +128,7 @@ def test_log_response_details_with_body_enabled(
     mock_response.text = mock_response._content.decode("utf-8")
     mock_response.headers["Content-Type"] = "application/json"
 
-    def mock_json():
+    def mock_json() -> Dict[str, Any]:
         return response_body_dict  # noqa: E704 (ignore flake8 error for this line)
 
     mock_response.json = mock_json
@@ -168,7 +170,7 @@ def test_log_response_details_with_long_body_truncated(
     mock_response.text = mock_response._content.decode("utf-8")
     mock_response.headers["Content-Type"] = "application/json"
 
-    def mock_json():
+    def mock_json() -> Dict[str, Any]:
         return response_body_dict  # noqa: E704 (ignore flake8 error for this line)
 
     mock_response.json = mock_json
