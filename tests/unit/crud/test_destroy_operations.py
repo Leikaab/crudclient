@@ -18,7 +18,7 @@ from .conftest import BaseTestCrud  # Import fixtures/classes from conftest
 # === Destroy Operation Tests ===
 
 
-def test_destroy_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_destroy_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN the destroy operation is called with a resource ID
@@ -32,7 +32,7 @@ def test_destroy_operation_success(base_test_crud: BaseTestCrud, mock_client: Ma
     Verifier.verify_called_once_with(mock_client, "delete", "test-resources/1")
 
 
-def test_destroy_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_destroy_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the destroy operation is called with a resource ID and parent ID
@@ -47,7 +47,7 @@ def test_destroy_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_cli
     # Verifier.verify_called_once_with(mock_client, "delete", "parents/parent123/test-resources/1") # Example assertion
 
 
-def test_destroy_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_destroy_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'destroy' action not in allowed_actions
     WHEN the destroy operation is called
