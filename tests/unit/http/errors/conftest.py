@@ -13,7 +13,7 @@ from crudclient.http.client import HttpClient
 
 
 @pytest.fixture
-def config():
+def config() -> ClientConfig:
     """Fixture for a mock configuration."""
     base_config = create_valid_client_config(timeout=5, retries=0, auth_strategy=None)
     return ClientConfig(
@@ -29,7 +29,7 @@ def config():
 
 
 @pytest.fixture
-def http_client(config):
+def http_client(config: ClientConfig) -> HttpClient:
     """Fixture for an HTTP client."""
     return HttpClient(config)
 
