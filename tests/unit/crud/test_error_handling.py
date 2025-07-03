@@ -32,7 +32,7 @@ SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource", "secret": "password123"}  # 
 SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 
 
-def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_crud_operation_client_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client raising network errors
     WHEN CRUD operations are called
@@ -67,7 +67,7 @@ def test_crud_operation_client_error_4xx(
     status_code: int,
     expected_exception: Type[CrudClientError],
     error_payload: dict,
-):
+) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters
     WHEN operations that result in 4xx errors are called
@@ -147,7 +147,7 @@ def test_crud_operation_client_error_4xx(
         ("custom_action", {"action": "test-action", "method": "post"}),
     ],
 )
-def test_crud_operation_server_error_5xx(base_test_crud: BaseTestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict):
+def test_crud_operation_server_error_5xx(base_test_crud: BaseTestCrud, mock_client: MagicMock, operation_name: str, operation_args: dict) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and various operation parameters
     WHEN operations that result in 5xx errors are called
