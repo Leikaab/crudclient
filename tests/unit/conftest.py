@@ -123,7 +123,7 @@ def requests_mocker():
 
 
 @pytest.fixture
-def create_user_data():
+def create_user_data() -> Callable[..., Dict[str, Any]]:
     """Factory fixture to create user test data."""
     """Factory fixture to create user test data with unique IDs."""
     _id_counter = 1
@@ -140,7 +140,7 @@ def create_user_data():
 
 
 @pytest.fixture
-def create_api_response():
+def create_api_response() -> Callable[..., Dict[str, Any]]:
     """Factory fixture to create API response data."""
     """
     Factory fixture to create versatile API response data for requests_mock.
