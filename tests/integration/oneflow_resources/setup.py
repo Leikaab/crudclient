@@ -80,7 +80,7 @@ class OneflowDataFields(Crud[DataField]):
 class OneflowAPI(API):
     client_class = Client
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         assert self.client is not None, "Client is not initialized"
 
         self.users = UsersCrud(self.client)

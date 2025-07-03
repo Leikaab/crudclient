@@ -37,10 +37,10 @@ class UserGroup(ResourceGroup[User]):
         self.posts = PostsCrud(self.client, parent=self)
 
 class MyAPI(API):
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         self.users = UsersCrud(self.client)
 
-    def _register_groups(self):
+    def _register_groups(self) -> None:
         self.user_group = UserGroup(self.client)
 
 # Create a configuration with bearer token authentication
