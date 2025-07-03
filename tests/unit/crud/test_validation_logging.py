@@ -40,7 +40,7 @@ class TestCrudRequestValidationLogging:
         caplog,
         operation_name: str,
         operation_args: dict,
-    ):
+    ) -> None:
         """
         GIVEN a CRUD operation (create, update, partial_update)
         WHEN input data fails Pydantic validation before the API call
@@ -84,7 +84,7 @@ class TestCrudRequestValidationLogging:
         assert error_log_found, f"Expected ERROR log for {operation_name} request validation not found"
 
     # Optional: Add a specific test for custom_action if its validation path differs significantly
-    # def test_custom_action_request_validation_error_logs_error(...):
+    # def test_custom_action_request_validation_error_logs_error(...) -> None:
     #    ...
 
 
@@ -119,7 +119,7 @@ class TestCrudResponseValidationLogging:
         operation_name: str,
         operation_args: dict,
         client_method_name: str,
-    ):
+    ) -> None:
         """
         GIVEN a CRUD operation returning a single item
         WHEN the API response data fails Pydantic validation
@@ -173,7 +173,7 @@ class TestCrudResponseValidationLogging:
         base_test_crud: BaseTestCrud,
         mock_client: MagicMock,
         caplog,
-    ):
+    ) -> None:
         """
         GIVEN a 'list' operation
         WHEN the API response list contains data that fails Pydantic validation

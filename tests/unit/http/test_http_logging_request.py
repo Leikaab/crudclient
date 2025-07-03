@@ -41,7 +41,7 @@ def test_log_request_details_base(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_prepared_request: MagicMock,
-):
+) -> None:
     """Verify basic request details logging (method, URL, headers)."""
     method = mock_prepared_request.method
     url = mock_prepared_request.url
@@ -67,7 +67,7 @@ def test_log_request_details_no_params(
     http_logger: HttpLifecycleLogger,
     mock_logger: MagicMock,
     mock_prepared_request: MagicMock,
-):
+) -> None:
     """Verify request details logging when no params are present."""
     method = mock_prepared_request.method
     url = mock_prepared_request.url
@@ -87,7 +87,7 @@ def test_log_request_details_with_body_enabled(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_prepared_request: MagicMock,
-):
+) -> None:
     """Verify request body logging when log_request_body is True."""
     mock_client_config.log_request_body = True  # Enable body logging
     method = mock_prepared_request.method
@@ -116,7 +116,7 @@ def test_log_request_details_with_long_body_truncated(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_prepared_request: MagicMock,
-):
+) -> None:
     """Verify request body truncation."""
     mock_client_config.log_request_body = True
     method = mock_prepared_request.method
@@ -160,7 +160,7 @@ def test_log_request_details_with_data_kwarg(
     mock_logger: MagicMock,
     mock_client_config: MagicMock,  # Fixture from conftest.py
     mock_prepared_request: MagicMock,
-):
+) -> None:
     """Verify logging when 'data' kwarg is used instead of 'json'."""
     mock_client_config.log_request_body = True
     method = mock_prepared_request.method
@@ -187,7 +187,7 @@ def test_log_request_details_header_redaction(
     mock_client_config: MagicMock,  # Use config directly
     caplog: pytest.LogCaptureFixture,
     # mock_prepared_request: MagicMock, # Not needed as we define headers directly
-):
+) -> None:
     """Verify sensitive headers are redacted in logs using caplog."""
     # Instantiate logger with a real logger for caplog
     test_logger = logging.getLogger("test_header_redaction")
@@ -236,7 +236,7 @@ def test_log_request_details_body_redaction_simple(
     # http_logger: HttpLifecycleLogger, # Remove fixture
     caplog: pytest.LogCaptureFixture,
     mock_client_config: MagicMock,  # Fixture from conftest.py
-):
+) -> None:
     """Verify simple sensitive keys in JSON body are redacted using caplog."""
     # Instantiate logger with a real logger for caplog
     test_logger = logging.getLogger("test_body_redaction_simple")
@@ -289,7 +289,7 @@ def test_log_request_details_body_redaction_nested(
     # http_logger: HttpLifecycleLogger, # Remove fixture
     caplog: pytest.LogCaptureFixture,
     mock_client_config: MagicMock,  # Fixture from conftest.py
-):
+) -> None:
     """Verify nested sensitive keys in JSON body are redacted using caplog."""
     # Instantiate logger with a real logger for caplog
     test_logger = logging.getLogger("test_body_redaction_nested")
