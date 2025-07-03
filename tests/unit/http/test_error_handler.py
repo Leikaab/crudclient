@@ -11,6 +11,7 @@ import pytest
 import requests
 from pytest_mock import MockerFixture
 from requests import Response
+from requests.compat import Callable as RequestsCallable  # type: ignore[attr-defined]
 
 from crudclient.exceptions import ClientAuthenticationError  # Added specific auth error
 from crudclient.exceptions import (
@@ -28,10 +29,15 @@ from crudclient.http.errors import ErrorHandler
 
 
 @pytest.fixture
-def create_response_mock(mocker):
+def create_response_mock(mocker: MockerFixture) -> RequestsCallable[..., Response]:
     """Create a mock response."""
 
-    def _create_mock(status_code, json_data=None, headers=None, text=None):
+    def _create_mock(
+        status_code: int,
+        json_data: Any | None = None,
+        headers: dict | None = None,
+        text: str | None = None,
+    ) -> Response:
         response = mocker.Mock(spec=requests.Response)
         response.status_code = status_code
 
@@ -58,7 +64,7 @@ def create_response_mock(mocker):
         mock_request.url = "http://mock.test/api/resource"
         response.request = mock_request
 
-        return response
+        return cast(Response, response)
 
     return _create_mock
 
