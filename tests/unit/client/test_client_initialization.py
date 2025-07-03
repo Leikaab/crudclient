@@ -7,7 +7,7 @@ from crudclient.exceptions import ConfigurationError
 
 class TestClientInitialization:
 
-    def test_client_init_invalid_config_type_raises_typeerror(self):
+    def test_client_init_invalid_config_type_raises_typeerror(self) -> None:
         """Test that initializing Client with an invalid config type raises TypeError."""
         # Arrange
         invalid_config = 12345  # Not a ClientConfig or dict
@@ -20,7 +20,7 @@ class TestClientInitialization:
         assert "expected ClientConfig or dict" in str(excinfo.value)
         assert "got int" in str(excinfo.value)
 
-    def test_client_init_with_valid_clientconfig(self, valid_config):
+    def test_client_init_with_valid_clientconfig(self, valid_config) -> None:
         """Test successful initialization with a ClientConfig object."""
         # Arrange (valid_config fixture from conftest)
 
@@ -33,7 +33,7 @@ class TestClientInitialization:
         assert client.base_url == valid_config.base_url
         assert client.http_client is not None
 
-    def test_client_init_with_valid_dict(self):
+    def test_client_init_with_valid_dict(self) -> None:
         """Test successful initialization with a valid dictionary."""
         # Arrange
         config_dict = {
