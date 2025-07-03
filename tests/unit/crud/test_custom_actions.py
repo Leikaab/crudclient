@@ -3,6 +3,7 @@
 Unit tests for the custom_action method of the CRUD base class.
 """
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -17,16 +18,19 @@ from .conftest import (  # Import fixtures/classes from conftest
 )
 
 # Sample data (Consider moving to conftest.py later if shared across more files)
-SAMPLE_PAYLOAD = {"id": 1, "name": "Test Resource"}
-SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
-SAMPLE_LIST_PAYLOAD = [{"id": 1, "name": "Resource 1"}, {"id": 2, "name": "Resource 2"}]
-SAMPLE_MODEL_LIST = [BaseTestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
+SAMPLE_PAYLOAD: dict[str, Any] = {"id": 1, "name": "Test Resource"}
+SAMPLE_MODEL: BaseTestModel = BaseTestModel(**SAMPLE_PAYLOAD)
+SAMPLE_LIST_PAYLOAD: list[dict[str, Any]] = [
+    {"id": 1, "name": "Resource 1"},
+    {"id": 2, "name": "Resource 2"},
+]
+SAMPLE_MODEL_LIST: list[BaseTestModel] = [BaseTestModel(**item) for item in SAMPLE_LIST_PAYLOAD]
 
 
 # === Custom Action Tests ===
 
 
-def test_custom_action_post_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_post_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with POST method and data
@@ -45,7 +49,7 @@ def test_custom_action_post_success(base_test_crud: BaseTestCrud, mock_client: M
     assert result == SAMPLE_MODEL
 
 
-def test_custom_action_get_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_get_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with GET method and params
@@ -64,7 +68,7 @@ def test_custom_action_get_success(base_test_crud: BaseTestCrud, mock_client: Ma
     assert result == SAMPLE_LIST_PAYLOAD  # Check if it returns raw list as per implementation
 
 
-def test_custom_action_on_resource_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_on_resource_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called on a specific resource
@@ -86,7 +90,7 @@ def test_custom_action_on_resource_success(base_test_crud: BaseTestCrud, mock_cl
 
 
 # Use the nested_test_crud fixture which has a parent configured
-def test_custom_action_with_parent_id(nested_base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_with_parent_id(nested_base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN a custom action is called with a parent ID
@@ -108,7 +112,7 @@ def test_custom_action_with_parent_id(nested_base_test_crud: BaseTestCrud, mock_
     assert result == SAMPLE_MODEL
 
 
-def test_custom_action_invalid_method(base_test_crud: BaseTestCrud):
+def test_custom_action_invalid_method(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance
     WHEN a custom action is called with an invalid HTTP method
@@ -119,7 +123,7 @@ def test_custom_action_invalid_method(base_test_crud: BaseTestCrud):
         base_test_crud.custom_action(action="test", method="invalid")
 
 
-def test_custom_action_type_error(base_test_crud: BaseTestCrud):
+def test_custom_action_type_error(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance
     WHEN a custom action is called with invalid parameter types
@@ -134,7 +138,7 @@ def test_custom_action_type_error(base_test_crud: BaseTestCrud):
         base_test_crud.custom_action(action="test", parent_id=123)
 
 
-def test_custom_action_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN a custom action is called
