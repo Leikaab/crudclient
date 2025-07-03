@@ -1,14 +1,26 @@
+from typing import Type
+
 import pytest
 from apiconfig.exceptions.auth import AuthenticationError
+from apiconfig.testing.auth_verification import AuthHeaderVerification
+
+from crudclient.client import Client
+
+MockAuthVerifier = Type[AuthHeaderVerification]
 
 
 class TestAuthVerificationHelpers:
     """Tests for authentication verification helpers."""
 
-    def test_verify_basic_auth_header(self, basic_auth_client, mock_auth_verification):
+    def test_verify_basic_auth_header(
+        self,
+        basic_auth_client: Client,
+        mock_auth_verification: MockAuthVerifier,
+    ) -> None:
         """Test verification of Basic Auth headers."""
         # Arrange
         auth_strategy = basic_auth_client.config.auth_strategy
+        assert auth_strategy is not None
         headers = auth_strategy.prepare_request_headers()
 
         # Act & Assert
@@ -18,10 +30,15 @@ class TestAuthVerificationHelpers:
         with pytest.raises(AuthenticationError):
             mock_auth_verification.verify_basic_auth_header("NotBasic xyz")
 
-    def test_verify_bearer_auth_header(self, bearer_auth_client, mock_auth_verification):
+    def test_verify_bearer_auth_header(
+        self,
+        bearer_auth_client: Client,
+        mock_auth_verification: MockAuthVerifier,
+    ) -> None:
         """Test verification of Bearer Auth headers."""
         # Arrange
         auth_strategy = bearer_auth_client.config.auth_strategy
+        assert auth_strategy is not None
         headers = auth_strategy.prepare_request_headers()
 
         # Act & Assert
@@ -31,10 +48,15 @@ class TestAuthVerificationHelpers:
         with pytest.raises(AuthenticationError):
             mock_auth_verification.verify_bearer_auth_header("NotBearer xyz")
 
-    def test_assert_auth_header_format(self, bearer_auth_client, mock_auth_verification):
+    def test_assert_auth_header_format(
+        self,
+        bearer_auth_client: Client,
+        mock_auth_verification: MockAuthVerifier,
+    ) -> None:
         """Test assertion of auth header format."""
         # Arrange
         auth_strategy = bearer_auth_client.config.auth_strategy
+        assert auth_strategy is not None
         headers = auth_strategy.prepare_request_headers()
 
         # Act & Assert - Should not raise
@@ -44,10 +66,15 @@ class TestAuthVerificationHelpers:
         with pytest.raises(AuthenticationError):
             mock_auth_verification.verify_auth_header_format({"Authorization": "Invalid format"}, "bearer")
 
-    def test_assert_token_usage(self, bearer_auth_client, mock_auth_verification):
+    def test_assert_token_usage(
+        self,
+        bearer_auth_client: Client,
+        mock_auth_verification: MockAuthVerifier,
+    ) -> None:
         """Test assertion of token usage."""
         # Arrange
         auth_strategy = bearer_auth_client.config.auth_strategy
+        assert auth_strategy is not None
         headers = auth_strategy.prepare_request_headers()
 
         # Act & Assert - Extract token
@@ -57,7 +84,7 @@ class TestAuthVerificationHelpers:
         # call it separately without expecting it to compare values.
         # mock_auth_verification.assert_token_usage(token) # Example: Check JWT validity if needed
 
-    def test_assert_refresh_behavior(self, mock_auth_verification):
+    def test_assert_refresh_behavior(self, mock_auth_verification: MockAuthVerifier) -> None:
         """Test assertion of token refresh behavior."""
         # Arrange
         old_headers = {"Authorization": "Bearer old_token"}
