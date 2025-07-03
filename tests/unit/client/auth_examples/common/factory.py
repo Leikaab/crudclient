@@ -1,3 +1,5 @@
+from typing import Any
+
 from crudclient.testing.auth import (
     create_api_key_auth_mock,
     create_basic_auth_mock,
@@ -11,7 +13,7 @@ from crudclient.testing.core.http_client import MockHTTPClient
 
 
 # Function for backward compatibility
-def create_mock_client(**kwargs):
+def create_mock_client(**kwargs: Any) -> MockClient:
     """Create a mock client with the given configuration."""
     # Create a mock HTTP client
     base_url = kwargs.get("base_url", "https://api.example.com")
