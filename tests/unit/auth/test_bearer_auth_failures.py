@@ -7,12 +7,13 @@ from typing import cast
 
 import pytest
 import requests
+import requests_mock
 
 from crudclient.client import Client
 from crudclient.exceptions import AuthenticationError, ForbiddenError
 
 
-def test_bearer_auth_failure(bearer_auth_client: Client, mock_request) -> None:
+def test_bearer_auth_failure(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of Bearer Authentication failures."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
@@ -31,7 +32,7 @@ def test_bearer_auth_failure(bearer_auth_client: Client, mock_request) -> None:
     assert request.headers["Authorization"] == "Bearer valid_token"
 
 
-def test_token_refresh_on_401(refreshable_token_client: Client, mock_request) -> None:
+def test_token_refresh_on_401(refreshable_token_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test token refresh on 401 Unauthorized responses."""
     url = f"{refreshable_token_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Token expired"})
@@ -52,7 +53,7 @@ def test_token_refresh_on_401(refreshable_token_client: Client, mock_request) ->
     assert response.json()["message"] == "Token expired"
 
 
-def test_token_refresh_on_403(refreshable_token_client: Client, mock_request) -> None:
+def test_token_refresh_on_403(refreshable_token_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test token refresh on 403 Forbidden responses."""
     url = f"{refreshable_token_client.base_url}/users"
     mock_request.get(url, status_code=403, json={"error": "Forbidden", "message": "Insufficient permissions"})
@@ -67,7 +68,7 @@ def test_token_refresh_on_403(refreshable_token_client: Client, mock_request) ->
     assert response.json()["message"] == "Insufficient permissions"
 
 
-def test_token_refresh_failure(refreshable_token_client: Client, mock_request) -> None:
+def test_token_refresh_failure(refreshable_token_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of token refresh failures."""
     url = f"{refreshable_token_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Token expired"})
@@ -86,7 +87,7 @@ def test_token_refresh_failure(refreshable_token_client: Client, mock_request) -
     assert response.json()["message"] == "Token expired"
 
 
-def test_retry_after_auth_failure(bearer_auth_client: Client, mock_request) -> None:
+def test_retry_after_auth_failure(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test retry behavior after authentication failures."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
@@ -101,7 +102,7 @@ def test_retry_after_auth_failure(bearer_auth_client: Client, mock_request) -> N
     assert response.json()["message"] == "Invalid token"
 
 
-def test_auth_failure_with_retry_disabled(bearer_auth_client: Client, mock_request) -> None:
+def test_auth_failure_with_retry_disabled(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of authentication failures with retry disabled."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
@@ -116,7 +117,7 @@ def test_auth_failure_with_retry_disabled(bearer_auth_client: Client, mock_reque
     assert response.json()["message"] == "Invalid token"
 
 
-def test_auth_header_overriding(bearer_auth_client: Client, mock_request) -> None:
+def test_auth_header_overriding(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test that authentication headers can be overridden."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, json={"data": "success"})
@@ -132,7 +133,7 @@ def test_auth_header_overriding(bearer_auth_client: Client, mock_request) -> Non
     bearer_auth_client.http_client.session_manager.session.headers = original_headers
 
 
-def test_auth_header_merging(bearer_auth_client: Client, mock_request) -> None:
+def test_auth_header_merging(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test that authentication headers are merged with custom headers."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, json={"data": "success"})
@@ -149,7 +150,7 @@ def test_auth_header_merging(bearer_auth_client: Client, mock_request) -> None:
     bearer_auth_client.http_client.session_manager.session.headers = original_headers
 
 
-def test_multiple_auth_failures(bearer_auth_client: Client, mock_request) -> None:
+def test_multiple_auth_failures(bearer_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of multiple authentication failures."""
     url = f"{bearer_auth_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid token"})
