@@ -1,3 +1,6 @@
+from typing import Any, Callable
+from unittest.mock import MagicMock
+
 import pytest
 import requests
 
@@ -66,7 +69,7 @@ class TestClient:
         # Arrange
         # Mock config to allow retry
         client.config.should_retry_on_403 = lambda: True  # type: ignore[assignment]
-        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
+        client.config.handle_403_retry = MagicMock(spec=Callable[..., Any])  # type: ignore[assignment]
 
         url = "https://example.com/resource"
         mock_request.get(url, [{"status_code": 403}, {"text": "retried"}])
@@ -79,12 +82,12 @@ class TestClient:
 
         # Assert
         assert retried.status_code == 200 or retried.text == "retried"
-        assert client.config.handle_403_retry.called  # type: ignore[attr-defined]
+        assert client.config.handle_403_retry.called
 
     def test_maybe_retry_after_403_should_not_retry(self, client: Client, mock_request, mocker) -> None:
         # Arrange
         client.config.should_retry_on_403 = lambda: False  # type: ignore[assignment]
-        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
+        client.config.handle_403_retry = MagicMock(spec=Callable[..., Any])  # type: ignore[assignment]
 
         url = "https://example.com/resource"
         mock_request.get(url, status_code=403)
@@ -95,11 +98,11 @@ class TestClient:
 
         # Assert
         assert result.status_code == 403
-        client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
+        client.config.handle_403_retry.assert_not_called()
 
     def test_maybe_retry_after_403_no_403(self, client: Client, mock_request, mocker) -> None:
         # Arrange
-        client.config.handle_403_retry = mocker.Mock()  # type: ignore[assignment]
+        client.config.handle_403_retry = MagicMock(spec=Callable[..., Any])  # type: ignore[assignment]
         url = "https://example.com/resource"
         mock_request.get(url, status_code=200)
         response = client.session.get(url)
@@ -109,7 +112,7 @@ class TestClient:
 
         # Assert
         assert result.status_code == 200
-        client.config.handle_403_retry.assert_not_called()  # type: ignore[attr-defined]
+        client.config.handle_403_retry.assert_not_called()
 
     def test_handle_response_octet_stream(self, client: Client, mock_request) -> None:
         # Arrange
