@@ -19,7 +19,7 @@ from .common import create_mock_client
 class TestMultiFactorAuthExamples:
     """Examples of using Multi-Factor Authentication mocks."""
 
-    def test_mfa_required_scenario(self):
+    def test_mfa_required_scenario(self) -> None:
         """Example of testing an MFA required scenario."""
         client = create_mock_client(auth_type="bearer", auth_config={"token": "valid_token", "mfa_required": True, "mfa_verified": False})
 
@@ -42,7 +42,7 @@ class TestMultiFactorAuthExamples:
         assert "Authorization" in request_call.kwargs["headers"]
         assert request_call.kwargs["headers"]["Authorization"] == "Bearer valid_token"
 
-    def test_mfa_verification_success_scenario(self):
+    def test_mfa_verification_success_scenario(self) -> None:
         """
         Tests the scenario where an initial request requires MFA,
         the MFA code is provided via the auth handler, and the subsequent
