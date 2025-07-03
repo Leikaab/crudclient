@@ -2,7 +2,7 @@
 Tests for the create_auth_strategy factory function in the crudclient library.
 """
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union, cast
 
 import pytest
 
@@ -10,22 +10,25 @@ from crudclient.auth import BasicAuth, BearerAuth, create_auth_strategy
 
 
 class TestCreateAuthStrategy:
-    @pytest.mark.parametrize(
-        "auth_type, token, expected_class, expected_attrs",
-        [
-            ("bearer", "test_token", BearerAuth, {"access_token": "test_token"}),
-            # Basic auth with string now raises error due to empty password
-            # ("basic", "user", BasicAuth, {"username": "user", "password": ""}),  # This is no longer valid
-            ("basic", ("user", "pass"), BasicAuth, {"username": "user", "password": "pass"}),
-            ("none", "any_token", type(None), {}),
-            ("bearer", None, type(None), {}),
-            ("basic", None, type(None), {}),
-            # Assuming default/unknown falls back to None if token is None
-            ("unknown", None, type(None), {}),
-            # Assuming default/unknown falls back to Bearer if token is provided
-            ("custom", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
-            ("unknown", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
-        ],
+    @cast(
+        Callable[..., Callable[..., None]],
+        pytest.mark.parametrize(
+            "auth_type, token, expected_class, expected_attrs",
+            [
+                ("bearer", "test_token", BearerAuth, {"access_token": "test_token"}),
+                # Basic auth with string now raises error due to empty password
+                # ("basic", "user", BasicAuth, {"username": "user", "password": ""}),  # This is no longer valid
+                ("basic", ("user", "pass"), BasicAuth, {"username": "user", "password": "pass"}),
+                ("none", "any_token", type(None), {}),
+                ("bearer", None, type(None), {}),
+                ("basic", None, type(None), {}),
+                # Assuming default/unknown falls back to None if token is None
+                ("unknown", None, type(None), {}),
+                # Assuming default/unknown falls back to Bearer if token is provided
+                ("custom", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
+                ("unknown", "fallback_token", BearerAuth, {"access_token": "fallback_token"}),
+            ],
+        ),
     )
     def test_create_auth_strategy(
         self,
@@ -33,7 +36,7 @@ class TestCreateAuthStrategy:
         token: Optional[Union[str, Tuple[str, str]]],
         expected_class: type,
         expected_attrs: Dict[str, str],
-    ):
+    ) -> None:
         """
         GIVEN an auth type string and a token/credential
         WHEN create_auth_strategy is called
@@ -52,7 +55,7 @@ class TestCreateAuthStrategy:
             for attr, value in expected_attrs.items():
                 assert getattr(auth, attr) == value
 
-    def test_create_basic_auth_invalid_token_type(self):
+    def test_create_basic_auth_invalid_token_type(self) -> None:
         """
         GIVEN the auth type 'basic' and an invalid token type (int)
         WHEN create_auth_strategy is called
@@ -62,7 +65,7 @@ class TestCreateAuthStrategy:
         with pytest.raises(TypeError, match="Basic auth token must be a string or tuple"):
             create_auth_strategy("basic", 123)  # type: ignore[arg-type]
 
-    def test_create_basic_auth_string_token_raises_error(self):
+    def test_create_basic_auth_string_token_raises_error(self) -> None:
         """
         GIVEN the auth type 'basic' and a string token (username only)
         WHEN create_auth_strategy is called
@@ -78,7 +81,7 @@ class TestCreateAuthStrategy:
     # as they require more complex configuration (header/param names or callbacks).
     # This is expected behavior. We test that they fall back to BearerAuth if a token is given.
 
-    def test_create_apikey_falls_back_to_bearer(self):
+    def test_create_apikey_falls_back_to_bearer(self) -> None:
         """
         GIVEN the auth type 'apikey' and a token string
         WHEN create_auth_strategy is called
@@ -95,7 +98,7 @@ class TestCreateAuthStrategy:
         assert isinstance(auth, BearerAuth)
         assert auth.access_token == token
 
-    def test_create_custom_falls_back_to_bearer(self):
+    def test_create_custom_falls_back_to_bearer(self) -> None:
         """
         GIVEN the auth type 'custom' and a token string
         WHEN create_auth_strategy is called
