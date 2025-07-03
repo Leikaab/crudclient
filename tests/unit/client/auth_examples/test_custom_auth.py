@@ -5,6 +5,8 @@ This module demonstrates how to use the Custom Authentication mocking utilities
 in real-world testing scenarios.
 """
 
+from typing import Callable, cast
+
 import pytest
 
 from crudclient.config import ClientConfig
@@ -16,14 +18,14 @@ from .common import create_mock_client
 class TestCustomAuthExamples:
     """Examples of using Custom Authentication mocks."""
 
-    def test_custom_auth_success_scenario(self):
+    def test_custom_auth_success_scenario(self) -> None:
         """Example of testing a successful Custom Auth scenario."""
 
         # Define custom auth callbacks
-        def header_callback():
+        def header_callback() -> dict[str, str]:
             return {"X-Custom-Auth": "custom_value", "X-Timestamp": "12345678"}
 
-        def param_callback():
+        def param_callback() -> dict[str, str]:
             return {"tenant": "test_tenant"}
 
         # Create a mock client with Custom Auth
@@ -50,18 +52,18 @@ class TestCustomAuthExamples:
         # Assuming 'path' contains the full URL or path with params
         assert request.kwargs["params"].get("tenant") == "test_tenant"
 
-    def test_custom_auth_failure_scenario(self):
+    def test_custom_auth_failure_scenario(self) -> None:
         """Example of testing a Custom Auth failure scenario."""
 
         # Define a custom auth callback that will fail
-        def failing_header_callback():
+        def failing_header_callback() -> None:
             raise ValueError("Failed to generate auth headers")
 
         # Create a mock client with failing Custom Auth
         client = create_mock_client(config=ClientConfig(hostname="https://api.example.com", version="v1"))
 
         # Set up the auth strategy manually
-        auth_mock = CustomAuthMock(header_callback=failing_header_callback)
+        auth_mock = CustomAuthMock(header_callback=cast(Callable[[], dict[str, str]], failing_header_callback))
         client.set_auth_strategy(auth_mock.get_auth_strategy())
 
         # Configure a response (though it won't be reached)
