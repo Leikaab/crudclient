@@ -2,6 +2,8 @@
 Shared fixtures and utilities for HTTP client error tests.
 """
 
+from typing import Generator
+
 import pytest
 import requests_mock
 from apiconfig.testing.unit import create_valid_client_config
@@ -33,7 +35,7 @@ def http_client(config):
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Generator[requests_mock.Mocker, None, None]:
     """Fixture for mocking HTTP requests."""
     with requests_mock.Mocker() as m:
         yield m

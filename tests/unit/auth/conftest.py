@@ -2,13 +2,18 @@
 Fixtures specific to authentication tests.
 """
 
-from typing import Optional
+from typing import Generator, Optional, Type
 from unittest.mock import MagicMock
 
 import pytest
 import requests_mock
+from apiconfig.testing.auth_verification import (
+    AuthHeaderVerification,
+    AuthTestHelpers,
+)
 from apiconfig.testing.unit import create_valid_client_config
 
+from crudclient.auth import AuthStrategy
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 from crudclient.testing.auth import (
@@ -21,7 +26,11 @@ DEFAULT_HOSTNAME = "https://api.example.com"
 DEFAULT_VERSION = "v1"
 
 
-def _build_config(auth_strategy, headers: Optional[dict] = None) -> ClientConfig:
+class Helpers(AuthHeaderVerification, AuthTestHelpers):
+    """Combine auth verification mixins for convenience in tests."""
+
+
+def _build_config(auth_strategy: AuthStrategy, headers: Optional[dict] = None) -> ClientConfig:
     base_config = create_valid_client_config(
         hostname=DEFAULT_HOSTNAME,
         version=DEFAULT_VERSION,
@@ -106,21 +115,13 @@ def apikey_param_client(apikey_param_config: ClientConfig) -> Client:
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Generator[requests_mock.Mocker, None, None]:
     """Create a requests_mock for testing."""
     with requests_mock.Mocker() as m:
         yield m
 
 
 @pytest.fixture
-def mock_auth_verification():
+def mock_auth_verification() -> Generator[Type["Helpers"], None, None]:
     """Provide auth verification helpers from apiconfig."""
-    from apiconfig.testing.auth_verification import (
-        AuthHeaderVerification,
-        AuthTestHelpers,
-    )
-
-    class Helpers(AuthHeaderVerification, AuthTestHelpers):
-        pass
-
     yield Helpers

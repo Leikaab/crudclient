@@ -2,13 +2,13 @@
 Fixtures specific to client tests.
 """
 
-from typing import Optional
+from typing import Generator, Optional
 
 import pytest
 import requests_mock
 from apiconfig.testing.unit import create_valid_client_config
 
-from crudclient.auth import BasicAuth, BearerAuth, CustomAuth
+from crudclient.auth import AuthStrategy, BasicAuth, BearerAuth, CustomAuth
 from crudclient.client import Client
 from crudclient.config import ClientConfig
 
@@ -16,7 +16,7 @@ DEFAULT_HOSTNAME = "https://api.example.com"
 DEFAULT_VERSION = "v1"
 
 
-def _build_config(auth_strategy, headers: Optional[dict] = None) -> ClientConfig:
+def _build_config(auth_strategy: AuthStrategy, headers: Optional[dict] = None) -> ClientConfig:
     base_config = create_valid_client_config(
         hostname=DEFAULT_HOSTNAME,
         version=DEFAULT_VERSION,
@@ -58,7 +58,7 @@ def client(bearer_auth_config: ClientConfig) -> Client:
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Generator[requests_mock.Mocker, None, None]:
     """Create a requests_mock for testing."""
     with requests_mock.Mocker() as m:
         yield m
