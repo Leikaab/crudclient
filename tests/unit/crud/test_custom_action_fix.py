@@ -11,7 +11,7 @@ from .conftest import BaseTestCrud
 TEST_DATA = {"param": "value"}
 
 
-def test_custom_action_post_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_post_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with POST method and data
@@ -27,7 +27,7 @@ def test_custom_action_post_with_data(base_test_crud: BaseTestCrud, mock_client:
     assert result is not None
 
 
-def test_custom_action_put_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_put_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with PUT method and data
@@ -43,7 +43,7 @@ def test_custom_action_put_with_data(base_test_crud: BaseTestCrud, mock_client: 
     assert result is not None
 
 
-def test_custom_action_patch_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_patch_with_data(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with PATCH method and data
@@ -59,7 +59,7 @@ def test_custom_action_patch_with_data(base_test_crud: BaseTestCrud, mock_client
     assert result is not None
 
 
-def test_custom_action_with_files(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_with_files(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with files parameter
@@ -76,7 +76,7 @@ def test_custom_action_with_files(base_test_crud: BaseTestCrud, mock_client: Mag
     assert result is not None
 
 
-def test_custom_action_with_content_type(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_custom_action_with_content_type(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client
     WHEN a custom action is called with content_type parameter
