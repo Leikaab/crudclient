@@ -25,7 +25,7 @@ SAMPLE_MODEL = BaseTestModel(**SAMPLE_PAYLOAD)
 # === Read Operation Tests ===
 
 
-def test_read_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_read_operation_success(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning a resource payload
     WHEN the read operation is called with a resource ID
@@ -40,7 +40,7 @@ def test_read_operation_success(base_test_crud: BaseTestCrud, mock_client: Magic
     assert isinstance(result, BaseTestModel)
 
 
-def test_read_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_read_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance, a mocked client, and a parent ID
     WHEN the read operation is called with a resource ID and parent ID
@@ -55,7 +55,7 @@ def test_read_operation_with_parent_id(base_test_crud: BaseTestCrud, mock_client
     assert result == SAMPLE_MODEL
 
 
-def test_read_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock):
+def test_read_operation_model_conversion_error(base_test_crud: BaseTestCrud, mock_client: MagicMock) -> None:
     """
     GIVEN a TestCrud instance and a mocked client returning invalid response data
     WHEN the read operation is called
@@ -74,7 +74,7 @@ def test_read_operation_model_conversion_error(base_test_crud: BaseTestCrud, moc
     assert excinfo.value.data == {"unexpected": "field"}
 
 
-def test_read_operation_action_not_allowed(base_test_crud: BaseTestCrud):
+def test_read_operation_action_not_allowed(base_test_crud: BaseTestCrud) -> None:
     """
     GIVEN a TestCrud instance with 'read' action not in allowed_actions
     WHEN the read operation is called
