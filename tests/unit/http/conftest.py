@@ -5,6 +5,7 @@ from typing import Iterator  # Add explicit import for Iterator
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 # Assuming ClientConfig is the correct import based on logging.py
 # If this fails, we'll need to find the correct location.
@@ -32,7 +33,7 @@ def http_logger(mock_client_config: MagicMock, mock_logger: MagicMock) -> HttpLi
 
 
 @pytest.fixture()
-def patch_time(mocker):
+def patch_time(mocker: MockerFixture) -> MagicMock:
     """Patch time.monotonic to control duration calculations."""
     mock_time = mocker.patch("time.monotonic")
     # Provide the value for the end_time call inside log_request_completion
