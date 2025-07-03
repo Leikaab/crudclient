@@ -2,7 +2,7 @@
 Fixtures specific to client tests.
 """
 
-from typing import Optional
+from typing import Iterator, Optional
 
 import pytest
 import requests_mock
@@ -58,7 +58,7 @@ def client(bearer_auth_config: ClientConfig) -> Client:
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Iterator[requests_mock.Mocker]:
     """Create a requests_mock for testing."""
     with requests_mock.Mocker() as m:
         yield m

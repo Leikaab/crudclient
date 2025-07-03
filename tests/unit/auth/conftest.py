@@ -2,7 +2,7 @@
 Fixtures specific to authentication tests.
 """
 
-from typing import Optional
+from typing import Iterator, Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -106,7 +106,7 @@ def apikey_param_client(apikey_param_config: ClientConfig) -> Client:
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> Iterator[requests_mock.Mocker]:
     """Create a requests_mock for testing."""
     with requests_mock.Mocker() as m:
         yield m
