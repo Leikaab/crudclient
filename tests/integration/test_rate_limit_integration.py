@@ -4,6 +4,8 @@ Integration tests for rate limiting functionality.
 Tests the full rate limiting behavior with real HTTP clients and file storage.
 """
 
+from __future__ import annotations
+
 import multiprocessing
 import os
 import tempfile
@@ -19,7 +21,7 @@ from crudclient.ratelimit import get_rate_limiter
 def api_worker(
     worker_id: int,
     state_dir: str,
-    results_queue: multiprocessing.Queue,
+    results_queue: multiprocessing.Queue[tuple[int, int, int]],
     requests_per_worker: int = 10,
 ) -> None:
     """
