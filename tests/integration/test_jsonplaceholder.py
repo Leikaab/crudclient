@@ -5,7 +5,7 @@ from .jsonplaceholder_resources.setup import JsonplaceholderAPI, PlaceholderConf
 
 
 @pytest.fixture
-def api():
+def api() -> JsonplaceholderAPI:
     config = PlaceholderConfig()
     return JsonplaceholderAPI(client_config=config)
 
@@ -17,7 +17,7 @@ def test_list_posts(api) -> None:
     This test verifies that we can retrieve a list of posts and that each post
     is properly converted to a Post model instance.
     """
-    posts = api.posts.list()
+    posts: list[Post] = api.posts.list()
     assert isinstance(posts, list)
     assert len(posts) > 0
     assert isinstance(posts[0], Post)
@@ -44,7 +44,7 @@ def test_create_post(api) -> None:
     assert created_post.body == "bar"
 
     # Test with dictionary data as well
-    new_post_dict = {"title": "foo2", "body": "bar2", "userId": 1}
+    new_post_dict: dict[str, str | int] = {"title": "foo2", "body": "bar2", "userId": 1}
     created_post_dict = api.posts.create(new_post_dict)
     assert isinstance(created_post_dict, Post)
     assert created_post_dict.id is not None
@@ -124,7 +124,7 @@ def test_custom_action(api) -> None:
     """
     # Test getting comments for a specific post using the helper method
     post_id = "1"
-    comments = api.comments.get_comments_for_post(post_id)
+    comments: list[Comment] = api.comments.get_comments_for_post(post_id)
 
     assert isinstance(comments, list)
     assert len(comments) > 0
@@ -147,7 +147,7 @@ def test_list_users(api) -> None:
     This test verifies that we can retrieve a list of users through the UserGroup
     and that each user is properly converted to a User model instance.
     """
-    users = api.users.list()
+    users: list[User] = api.users.list()
     assert isinstance(users, list)
     assert len(users) > 0
     assert isinstance(users[0], User)
@@ -178,7 +178,7 @@ def test_user_posts(api) -> None:
     the nested UserPostsCrud under UserGroup.
     """
     user_id = "1"
-    posts = api.users.posts.list(parent_id=user_id)
+    posts: list[Post] = api.users.posts.list(parent_id=user_id)
 
     assert isinstance(posts, list)
     assert len(posts) > 0
@@ -198,7 +198,7 @@ def test_user_albums(api) -> None:
     the nested UserAlbumsCrud under UserGroup.
     """
     user_id = "1"
-    albums = api.users.albums.list(parent_id=user_id)
+    albums: list[Album] = api.users.albums.list(parent_id=user_id)
 
     assert isinstance(albums, list)
     assert len(albums) > 0
@@ -217,7 +217,7 @@ def test_user_todos(api) -> None:
     the nested UserTodosCrud under UserGroup.
     """
     user_id = "1"
-    todos = api.users.todos.list(parent_id=user_id)
+    todos: list[Todo] = api.users.todos.list(parent_id=user_id)
 
     assert isinstance(todos, list)
     assert len(todos) > 0
