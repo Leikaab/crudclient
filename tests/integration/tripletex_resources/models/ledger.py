@@ -120,12 +120,3 @@ class HistoricalVoucher(BaseModel):
     postings: Optional[List[dict]] = None
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
-
-
-class HistoricalVoucherResponse(TripletexResponse[HistoricalVoucher]):
-    """
-    Response model for historical voucher endpoints.
-    """
-
-    # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")

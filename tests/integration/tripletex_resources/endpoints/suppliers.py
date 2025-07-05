@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import ClassVar, List, Type
 
 from crudclient.response_strategies.base import ModelDumpable
 
@@ -29,6 +29,6 @@ class TripletexSuppliers(TripletexCrud[Supplier]):
 
     _resource_path = "supplier"
     _datamodel = Supplier  # Base model for type hints and API responses
-    _create_model: Type[ModelDumpable] = SupplierCreate  # Model for create operations
-    _update_model: Type[ModelDumpable] = SupplierUpdate  # Model for update operations
+    _create_model: ClassVar[Type[ModelDumpable]] = SupplierCreate  # Model for create operations
+    _update_model: ClassVar[Type[ModelDumpable]] = SupplierUpdate  # Model for update operations
     allowed_actions: List[str] = ["list", "read", "create", "update", "destroy"]

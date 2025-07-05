@@ -220,7 +220,7 @@ class TestAPI:
         assert update_response == {"id": 4, "name": "updated"}
 
         # Act & Assert - Delete operation
-        delete_response = api.test_resource.destroy("4")
+        delete_response: None = api.test_resource.destroy("4")  # type: ignore[func-returns-value]
         assert delete_response is None
 
     def test_custom_action(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:

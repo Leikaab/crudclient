@@ -33,6 +33,7 @@ from ..response_strategies import (
     PathBasedResponseModelStrategy,
     ResponseModelStrategy,
 )
+from ..types import JSONDict, JSONList
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -160,15 +161,8 @@ class Crud(Generic[T]):
     from .endpoint import _join_path_segments  # type: ignore
     from .endpoint import _validate_path_segments  # type: ignore
 
-    # --- Operations Methods ---
+    # --- Operations Helper Methods ---
     from .operations import _prepare_request_body_kwargs  # type: ignore
-    from .operations import create  # type: ignore
-    from .operations import custom_action  # type: ignore
-    from .operations import destroy  # type: ignore
-    from .operations import list  # type: ignore
-    from .operations import partial_update  # type: ignore
-    from .operations import read  # type: ignore
-    from .operations import update  # type: ignore
 
     # --- Response Conversion Methods ---
     from .response_conversion import _convert_to_list_model  # type: ignore
@@ -181,6 +175,74 @@ class Crud(Generic[T]):
     from .response_conversion import _validate_list_return  # type: ignore
     from .response_conversion import _validate_partial_dict  # type: ignore
     from .response_conversion import _validate_response  # type: ignore
+
+    # --- Operations Methods (defined as proper methods for type checking) ---
+    def list(
+        self, parent_id: Optional[str] = None, params: Optional["JSONDict"] = None, **kwargs: Any
+    ) -> Union["JSONList", List[T], "ListResponseWrapper[T]"]:
+        """Retrieve a list of resources."""
+        from .operations import list_operation
+
+        return list_operation(self, parent_id, params, **kwargs)
+
+    def create(
+        self, data: Union["JSONDict", T], parent_id: Optional[str] = None, params: Optional["JSONDict"] = None, **kwargs: Any
+    ) -> Union[T, "JSONDict"]:
+        """Create a new resource."""
+        from .operations import create_operation
+
+        return create_operation(self, data, parent_id, params, **kwargs)
+
+    def read(self, resource_id: str, parent_id: Optional[str] = None, params: Optional["JSONDict"] = None, **kwargs: Any) -> Union[T, "JSONDict"]:
+        """Retrieve a single resource."""
+        from .operations import read_operation
+
+        return read_operation(self, resource_id, parent_id, **kwargs)
+
+    def update(
+        self,
+        resource_id: Optional[str] = None,
+        data: Optional[Union["JSONDict", T]] = None,
+        parent_id: Optional[str] = None,
+        update_mode: Optional[str] = None,
+        params: Optional["JSONDict"] = None,
+        **kwargs: Any,
+    ) -> Union[T, "JSONDict"]:
+        """Update an existing resource."""
+        from .operations import update_operation
+
+        return update_operation(self, resource_id, data, parent_id, update_mode, params, **kwargs)
+
+    def partial_update(
+        self, resource_id: str, data: Union["JSONDict", T], parent_id: Optional[str] = None, params: Optional["JSONDict"] = None, **kwargs: Any
+    ) -> Union[T, "JSONDict"]:
+        """Partially update an existing resource."""
+        from .operations import partial_update_operation
+
+        return partial_update_operation(self, resource_id, data, parent_id, params, **kwargs)
+
+    def destroy(self, resource_id: str, parent_id: Optional[str] = None, params: Optional["JSONDict"] = None, **kwargs: Any) -> None:
+        """Delete a resource."""
+        from .operations import destroy_operation
+
+        return destroy_operation(self, resource_id, parent_id, params, **kwargs)
+
+    def custom_action(
+        self,
+        action: str,
+        method: str = "post",
+        resource_id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        data: Optional[Union["JSONDict", T]] = None,
+        params: Optional["JSONDict"] = None,
+        files: Optional["JSONDict"] = None,
+        content_type: Optional[str] = None,
+        **kwargs: Any,
+    ) -> Union[T, "JSONDict", List["JSONDict"], "ListResponseWrapper[T]"]:
+        """Perform a custom action on the resource."""
+        from .operations import custom_action_operation
+
+        return custom_action_operation(self, action, method, resource_id, parent_id, data, params, files, content_type, **kwargs)
 
 
 # Alias for backward compatibility
