@@ -3,6 +3,7 @@ import os
 import tempfile
 
 from crudclient.config import ClientConfig
+from crudclient.http import HttpClient
 
 from .auth import TripletexAuthStrategy
 
@@ -19,7 +20,7 @@ class TripletexConfig(ClientConfig):
     version = "v2"
     company_id = "0"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         consumer_token = os.getenv("TRIPLETEX_CONSUMER_TOKEN", "")
         employee_token = os.getenv("TRIPLETEX_EMPLOYEE_TOKEN", "")
@@ -35,7 +36,7 @@ class TripletexConfig(ClientConfig):
         logger.debug("403 received, allowing retry with token refresh")
         return True
 
-    def handle_403_retry(self, client) -> None:
+    def handle_403_retry(self, client: "HttpClient") -> None:
         """
         Handle 403 response by forcing token refresh.
         """
@@ -51,7 +52,7 @@ class TripletexTestConfig(TripletexConfig):
 
     hostname = "https://api-test.tripletex.tech/"
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Call grandparent's __init__ to set up basic config, skipping parent's __init__
         super(ClientConfig, self).__init__()
 
