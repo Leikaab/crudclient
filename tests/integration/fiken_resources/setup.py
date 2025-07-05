@@ -1,5 +1,5 @@
 import os
-from typing import TypeVar, cast
+from typing import Any, TypeVar, cast
 
 from dotenv import load_dotenv
 
@@ -24,7 +24,7 @@ class FikenConfig(ClientConfig):
     version = "v2"
     api_key = os.getenv("FIKEN_ACCESS_TOKEN")
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if self.api_key:
             self.auth_strategy = BearerAuth(access_token=self.api_key)
@@ -37,7 +37,7 @@ class FikenCrud(Crud[T]):
     def _endpoint_prefix(self) -> tuple[str | None] | list[str | None]:
         return ["companies", self._company_slug]
 
-    def bind_company(self, company_slug: str):
+    def bind_company(self, company_slug: str) -> "FikenCrud[T]":
         self._company_slug = company_slug
         return self
 
@@ -47,7 +47,7 @@ class FikenUser(FikenCrud[User]):
     _datamodel = User
     allowed_actions = ["read"]
 
-    def read(self, *args, **kwargs) -> User:
+    def read(self, *args: Any, **kwargs: Any) -> User:
         response = super().custom_action(action="", method="get")
         return cast(User, response)
 
