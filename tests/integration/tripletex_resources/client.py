@@ -1,4 +1,7 @@
+import requests
+
 from crudclient.client import Client
+from crudclient.types import RawResponseSimple
 
 
 class TripletexClient(Client):
@@ -6,7 +9,7 @@ class TripletexClient(Client):
     Custom client for Tripletex API.
     """
 
-    def _handle_response(self, response):
+    def _handle_response(self, response: requests.Response) -> RawResponseSimple:
         """
         Handle the response from the API.
 
