@@ -9,7 +9,7 @@ from .tripletex_resources import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """

@@ -11,7 +11,7 @@ from .tripletex_resources.models.api_response_model import TripletexResponse
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
