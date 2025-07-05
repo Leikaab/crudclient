@@ -10,6 +10,7 @@ from .voucher_group import VoucherGroup
 
 
 class LedgerGroup(TripletexResourceGroup[Ledger]):
+    voucher: VoucherGroup
     """
     ResourceGroup for Tripletex ledger operations.
 
