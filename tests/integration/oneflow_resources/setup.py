@@ -29,7 +29,7 @@ class OneflowConfig(ClientConfig):
     api_key = os.getenv("ONEFLOW_API_KEY")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if self.api_key:
             self.auth_strategy = ApiKeyAuth(api_key=self.api_key, header_name="x-oneflow-api-token")
