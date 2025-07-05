@@ -3,7 +3,7 @@ Models for Tripletex ledger resources.
 """
 
 from datetime import date as date_type
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -46,7 +46,7 @@ class Ledger(BaseModel):
 
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
-    def __init__(self, **data):
+    def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         # Set id from account.id if account is present and id is not provided
         if self.id is None and hasattr(self, "account") and self.account is not None and hasattr(self.account, "id"):
