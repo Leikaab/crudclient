@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import cast
 
 import pytest
 
@@ -11,7 +12,7 @@ from .tripletex_resources.models.api_response_model import TripletexResponse
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -19,54 +20,68 @@ def api():
     return TripletexAPI(client_config=config)
 
 
-def test_api_configuration(api):
+def test_api_configuration(api: TripletexAPI) -> None:
     """
     Test that the API client is configured correctly.
     """
-    assert api.client.base_url == "https://api-test.tripletex.tech/v2"
+    assert api.client is not None
+    client = api.client
+    assert client.base_url == "https://api-test.tripletex.tech/v2"
 
     # Check that we have an auth strategy set up
-    assert api.client.config.auth_strategy is not None
+    assert client.config.auth_strategy is not None
 
     # Check that the auth strategy is a TripletexAuthStrategy
     from .tripletex_resources import TripletexAuthStrategy
 
-    assert isinstance(api.client.config.auth_strategy, TripletexAuthStrategy)
+    assert isinstance(client.config.auth_strategy, TripletexAuthStrategy)
 
     # Check that the session token is set
-    assert api.client.config.auth_strategy.session_token is not None
-    assert len(api.client.config.auth_strategy.session_token) > 0
+    assert client.config.auth_strategy.session_token is not None
+    assert len(client.config.auth_strategy.session_token) > 0
 
     # Check that the session expiration date is set and in the future
-    assert api.client.config.auth_strategy.session_expires_at is not None
-    assert isinstance(api.client.config.auth_strategy.session_expires_at, datetime)
+    assert client.config.auth_strategy.session_expires_at is not None
+    assert isinstance(client.config.auth_strategy.session_expires_at, datetime)
     # Use timezone-aware datetime for comparison
-    assert api.client.config.auth_strategy.session_expires_at > datetime.now(timezone.utc)
+    assert client.config.auth_strategy.session_expires_at > datetime.now(timezone.utc)
 
 
 @pytest.mark.no_parallel
-def test_token_refresh(api):
+def test_token_refresh(api: TripletexAPI) -> None:
     """
     Test that the token can be refreshed.
     """
     # Store the current token
-    old_token = api.client.config.auth_strategy.session_token
+    assert api.client is not None
+    client = api.client
+    assert client.config.auth_strategy is not None
+    from .tripletex_resources import TripletexAuthStrategy
+
+    auth_strategy = cast(TripletexAuthStrategy, client.config.auth_strategy)
+    old_token = auth_strategy.session_token
 
     # Force a token refresh
-    api.client.config.auth_strategy.refresh_token(force=True)
+    auth_strategy.refresh_token(force=True)
 
     # Check that we got a new token
-    new_token = api.client.config.auth_strategy.session_token
+    new_token = auth_strategy.session_token
     assert new_token is not None
     assert new_token != old_token
 
 
-def test_auth_headers(api):
+def test_auth_headers(api: TripletexAPI) -> None:
     """
     Test that the authentication headers are correctly generated.
     """
     # Get the authentication headers
-    headers = api.client.config.auth_strategy.prepare_request_headers()
+    assert api.client is not None
+    client = api.client
+    assert client.config.auth_strategy is not None
+    from .tripletex_resources import TripletexAuthStrategy
+
+    auth_strategy = cast(TripletexAuthStrategy, client.config.auth_strategy)
+    headers = auth_strategy.prepare_request_headers()
 
     # Check that the Authorization header is present and correctly formatted
     assert "Authorization" in headers
@@ -74,20 +89,22 @@ def test_auth_headers(api):
     assert len(headers["Authorization"]) > 10  # Basic + space + base64 encoded string
 
 
-def test_list_countries(api):
+def test_list_countries(api: TripletexAPI) -> None:
     """
     Test that we can list countries from the Tripletex API.
     """
     # Get the list of countries
     # Limit to just 2 items to reduce output
+    assert api.client is not None
     countries = api.countries.list(params={"count": 2})
+    assert isinstance(countries, TripletexResponse)
+    countries_resp = cast(TripletexResponse[Country], countries)
 
     # Check that we got a list of countries
-    assert isinstance(countries, TripletexResponse)
-    assert len(countries.values) > 0
+    assert len(countries_resp.values) > 0
 
     # Check that each country has the expected structure
-    for country in countries.values:
+    for country in countries_resp.values:
         # The API returns Country objects, not dictionaries
         assert isinstance(country, Country)
         assert hasattr(country, "id")
@@ -98,19 +115,22 @@ def test_list_countries(api):
         assert hasattr(country, "displayName")
 
 
-def test_read_country(api):
+def test_read_country(api: TripletexAPI) -> None:
     """
     Test that we can read a specific country from the Tripletex API.
     """
     # Get the list of countries
     # Limit to just 2 items to reduce output
+    assert api.client is not None
     countries = api.countries.list(params={"count": 2})
+    assert isinstance(countries, TripletexResponse)
+    countries_resp = cast(TripletexResponse[Country], countries)
 
     # Get the first country's ID
-    first_country_id = countries.values[0].id
+    first_country_id = countries_resp.values[0].id
 
     # Read the country by ID
-    country = api.countries.read(first_country_id)
+    country = api.countries.read(str(first_country_id))
 
     # Check that we got the expected country
     assert isinstance(country, Country)
