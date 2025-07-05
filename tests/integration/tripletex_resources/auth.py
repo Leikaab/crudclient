@@ -101,7 +101,7 @@ class TripletexAuthStrategy(AuthStrategy):
         logger.debug("Created expiration date: %s", expiration_str)
         return expiration_str
 
-    def refresh_token(self, force=False) -> None:
+    def refresh_token(self, force: bool = False) -> None:
         """
         Refresh the session token.
         """
