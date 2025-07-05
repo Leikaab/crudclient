@@ -43,7 +43,7 @@ def supplier_tracker(api) -> Iterator[list[int]]:
     # Cleanup: Delete all tracked suppliers
     for supplier_id in created_suppliers:
         try:
-            api.suppliers.destroy(supplier_id)
+            api.suppliers.destroy(str(supplier_id))
             logger.info(f"Cleaned up test supplier with ID: {supplier_id}")
         except Exception as e:
             logger.warning(f"Failed to clean up supplier {supplier_id}: {e}")
@@ -91,7 +91,7 @@ def find_unused_supplier_number(api) -> Callable[[int, int], Optional[str]]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def cleanup_orphaned_test_suppliers(request) -> None:
+def cleanup_orphaned_test_suppliers(request: pytest.FixtureRequest) -> None:
     """
     Session-level fixture that runs after all tests to clean up any orphaned test suppliers.
     This catches suppliers that weren't cleaned up due to test failures.
@@ -117,7 +117,7 @@ def cleanup_orphaned_test_suppliers(request) -> None:
                 for supplier in suppliers.values:
                     if supplier.name and supplier.name.startswith(TEST_SUPPLIER_PREFIX):
                         try:
-                            api.suppliers.destroy(supplier.id)
+                            api.suppliers.destroy(str(supplier.id))
                             cleaned_count += 1
                             logger.info(f"Cleaned up orphaned test supplier: {supplier.name} (ID: {supplier.id})")
                         except Exception as e:
