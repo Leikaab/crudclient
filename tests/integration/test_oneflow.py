@@ -3,7 +3,7 @@ import random
 
 import pytest
 
-from .oneflow_resources.setup import (
+from .oneflow_resources import (
     DataField,
     OneflowAPI,
     OneflowConfig,
@@ -52,7 +52,7 @@ def test_list_template_types(api) -> None:
 
 
 def test_read_template_type(api) -> None:
-    template_type = api.template_types.read(220129)
+    template_type = api.template_types.read("220129")
     assert isinstance(template_type, TemplateType)
     assert template_type.id == 220129
     assert template_type.name == "TestTemplateGroup"
@@ -61,7 +61,7 @@ def test_read_template_type(api) -> None:
 
 @pytest.mark.no_parallel
 def test_update_data_field(api) -> None:
-    template_type_id = api.template_types.read(220129)
+    template_type_id = api.template_types.read("220129")
     rand = random.randint(1, 1000)
     data = {
         "name": "Employee_name",
@@ -71,10 +71,10 @@ def test_update_data_field(api) -> None:
     }
     new_data = data.copy()
     new_data["value"] = f"new value {rand}"
-    changed_data_field = api.template_types.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=new_data)
+    changed_data_field = api.template_types.data_fields.update(resource_id=str(template_type_id.id), parent_id=template_type_id.id, data=new_data)
     assert isinstance(changed_data_field, DataField)
     assert changed_data_field.value == f"new value {rand}"
 
-    reverted_data_field = api.template_types.data_fields.update(resource_id="employee_name", parent_id=template_type_id.id, data=data)
+    reverted_data_field = api.template_types.data_fields.update(resource_id=str(template_type_id.id), parent_id=template_type_id.id, data=data)
     assert isinstance(reverted_data_field, DataField)
     assert reverted_data_field.value == data["value"]
