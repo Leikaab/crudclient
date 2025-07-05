@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from crudclient.types import JSONDict
 
@@ -19,7 +19,7 @@ class TripletexHistoricalVoucherCrud(TripletexCrud[HistoricalVoucher]):
     _datamodel = HistoricalVoucher
     allowed_actions = ["list", "read", "create"]
 
-    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs) -> TripletexResponse[HistoricalVoucher]:
+    def list(self, parent_id: Optional[str] = None, params: Optional[JSONDict] = None, **kwargs: Any) -> TripletexResponse[HistoricalVoucher]:
         """
         List all historical vouchers.
 
