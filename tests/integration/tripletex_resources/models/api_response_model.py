@@ -1,4 +1,4 @@
-from typing import Generic, List, Optional, TypeVar
+from typing import Any, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -38,7 +38,7 @@ class TripletexResponse(ApiResponse[T], Generic[T]):
     # Override model_config to handle both Tripletex and ApiResponse field names
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
-    def __init__(self, **data):
+    def __init__(self, **data: Any) -> None:
         # If count is not provided, use the length of values or data
         if "count" not in data:
             if "values" in data:
