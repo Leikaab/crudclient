@@ -9,7 +9,7 @@ from .tripletex_resources import TripletexAPI, TripletexTestConfig
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -17,7 +17,7 @@ def api():
     return TripletexAPI(client_config=config)
 
 
-def generate_unique_name():
+def generate_unique_name() -> str:
     """
     Generate a unique name for a company to avoid conflicts in the test environment.
     """
@@ -63,3 +63,5 @@ def test_update_company_minimal(api):
 
     assert updated_company.id == updated_company2.id == read_company.id == read_company2.id
     assert updated_company2.name == read_company2.name
+
+    return None
