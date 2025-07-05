@@ -2,12 +2,13 @@ import os
 
 import pytest
 
+from .tripletex_resources.api import TripletexAPI
 from .tripletex_resources.models.api_response_model import TripletexResponse
 from .tripletex_resources.models.supplier import Supplier
 
 
 @pytest.mark.no_parallel
-def test_list_suppliers(api):
+def test_list_suppliers(api: TripletexAPI) -> None:
     """
     Test listing suppliers.
     """
@@ -28,7 +29,12 @@ def test_list_suppliers(api):
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_create_update_destroy_supplier(
+    api: TripletexAPI,
+    unique_supplier_name: str,
+    find_unused_supplier_number,
+    supplier_tracker: list[int],
+) -> None:
     """
     Test creating, updating, and destroying a supplier.
     Uses fixtures for reliable cleanup and unique naming.
@@ -54,7 +60,7 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
     supplier_tracker.append(created_supplier.id)
 
     # Read the supplier
-    read_supplier = api.suppliers.read(created_supplier.id)
+    read_supplier = api.suppliers.read(str(created_supplier.id))
     assert isinstance(read_supplier, Supplier)
 
     # Check that the supplier was read correctly
@@ -73,21 +79,22 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
     for field in read_only_fields:
         supplier_dict.pop(field, None)
 
-    updated_supplier = api.suppliers.update(created_supplier.id, supplier_dict)
+    updated_supplier = api.suppliers.update(str(created_supplier.id), supplier_dict)
+    assert isinstance(updated_supplier, Supplier)
 
     # Check that the supplier was updated correctly
     assert updated_supplier.id == created_supplier.id
     assert updated_supplier.name == updated_name
 
     # Clean up - delete the supplier
-    api.suppliers.destroy(created_supplier.id)
+    api.suppliers.destroy(str(created_supplier.id))
 
     # Remove from tracker since we manually cleaned up
     supplier_tracker.remove(created_supplier.id)
 
     # Verify that the supplier was deleted
     with pytest.raises(Exception):
-        api.suppliers.read(created_supplier.id)
+        api.suppliers.read(str(created_supplier.id))
 
 
 @pytest.mark.skipif(
@@ -95,7 +102,12 @@ def test_create_update_destroy_supplier(api, unique_supplier_name, find_unused_s
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_supplier_number_uniqueness(
+    api: TripletexAPI,
+    unique_supplier_name: str,
+    find_unused_supplier_number,
+    supplier_tracker: list[int],
+) -> None:
     """
     Test supplier number handling - either enforces uniqueness or allows duplicates.
     This test adapts to the API's behavior.
@@ -112,6 +124,7 @@ def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_suppl
     }
 
     first_supplier = api.suppliers.create(supplier_data)
+    assert isinstance(first_supplier, Supplier)
     supplier_tracker.append(first_supplier.id)
 
     # Try to create another supplier with the same number
@@ -124,6 +137,7 @@ def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_suppl
     try:
         # Attempt to create with duplicate number
         duplicate_supplier = api.suppliers.create(duplicate_data)
+        assert isinstance(duplicate_supplier, Supplier)
         # If it succeeds, the API allows duplicates - track for cleanup
         supplier_tracker.append(duplicate_supplier.id)
 
@@ -144,7 +158,12 @@ def test_supplier_number_uniqueness(api, unique_supplier_name, find_unused_suppl
     reason="Skip test since unstable in CI environment",
 )
 @pytest.mark.no_parallel
-def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_supplier_number, supplier_tracker):
+def test_multiple_suppliers_cleanup(
+    api: TripletexAPI,
+    unique_supplier_name: str,
+    find_unused_supplier_number,
+    supplier_tracker: list[int],
+) -> None:
     """
     Test creating multiple suppliers and ensuring they're all cleaned up.
     This tests the robustness of our cleanup mechanism.
@@ -165,6 +184,7 @@ def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_suppl
         }
 
         created_supplier = api.suppliers.create(supplier_data)
+        assert isinstance(created_supplier, Supplier)
         created_ids.append(created_supplier.id)
         supplier_tracker.append(created_supplier.id)
 
@@ -173,7 +193,8 @@ def test_multiple_suppliers_cleanup(api, unique_supplier_name, find_unused_suppl
 
     # Verify we can read all of them
     for supplier_id in created_ids:
-        supplier = api.suppliers.read(supplier_id)
+        supplier = api.suppliers.read(str(supplier_id))
+        assert isinstance(supplier, Supplier)
         assert supplier.id == supplier_id
 
     # The cleanup will happen automatically via the fixture
