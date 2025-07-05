@@ -1,7 +1,7 @@
 """Tests for CRUD operations using a real client and HTTPServer."""
 
 import json
-from typing import Any
+from typing import Any, List, cast
 
 from apiconfig.testing.integration.servers import (
     assert_request_received,
@@ -10,6 +10,8 @@ from apiconfig.testing.integration.servers import (
     configure_mock_response as _configure_mock_response,
 )
 from pytest_httpserver import HTTPServer
+
+from crudclient.models import ListResponseWrapper
 
 from .conftest import BaseTestCrud, BaseTestModel
 
@@ -59,16 +61,21 @@ def test_list_operation_success(
 
     # Call the list operation
     result = base_test_crud_httpserver.list()
-    if hasattr(result, "data"):
-        result = result.data
+
+    # Handle different return types from list operation
+    if isinstance(result, ListResponseWrapper):
+        result_list = result.data
+    else:
+        # result is either JSONList or List[BaseTestModel]
+        result_list = cast(List[BaseTestModel], result)
 
     # Verify the result
-    assert len(result) == 2
-    assert all(isinstance(item, BaseTestModel) for item in result)
-    assert result[0].id == 1
-    assert result[0].name == "Resource 1"
-    assert result[1].id == 2
-    assert result[1].name == "Resource 2"
+    assert len(result_list) == 2
+    assert all(isinstance(item, BaseTestModel) for item in result_list)
+    assert result_list[0].id == 1
+    assert result_list[0].name == "Resource 1"
+    assert result_list[1].id == 2
+    assert result_list[1].name == "Resource 2"
 
     # Verify the request
     assert_request_received(httpserver, "/test-resources", method="GET")

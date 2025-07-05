@@ -18,7 +18,6 @@ from .company import Company
 from .country import Country
 from .ledger import (
     HistoricalVoucher,
-    HistoricalVoucherResponse,
     Ledger,
     LedgerResponse,
     Voucher,

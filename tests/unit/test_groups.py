@@ -202,7 +202,7 @@ class TestResourceGroupAsCrud:
         resource_id = "123"
 
         # Act
-        result = group.destroy(resource_id=resource_id)
+        result = group.destroy(resource_id=resource_id)  # type: ignore[func-returns-value]
 
         # Assert
         # Check that the client was called with the correct path

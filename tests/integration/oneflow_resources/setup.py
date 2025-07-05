@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 
@@ -59,7 +59,20 @@ class OneflowDataFields(Crud[DataField]):
     _methods: List[str] = ["update", "destroy"]
     _parent_resource = OneflowTemplateTypes
 
-    def update(self, resource_id: str, data: Dict[str, Any] | DataField, parent_id: str | None = None) -> DataField | JSONDict:
+    def update(
+        self,
+        resource_id: Optional[str] = None,
+        data: Optional[Dict[str, Any] | DataField] = None,
+        parent_id: Optional[str] = None,
+        update_mode: Optional[str] = None,
+        params: Optional[JSONDict] = None,
+        **kwargs: Any,
+    ) -> Union[DataField, JSONDict]:
+        # OneFlow API requires these parameters, so validate them
+        if resource_id is None:
+            raise ValueError("Resource id is required for updating data fields")
+        if data is None:
+            raise ValueError("Data is required for updating data fields")
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
