@@ -7,7 +7,7 @@ and ensures proper formatting of URL paths.
 """
 
 import logging
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
 
 if TYPE_CHECKING:
     from .base import Crud
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
+def _endpoint_prefix(self: "Crud[Any]") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
     """
     Construct the endpoint prefix.
 
@@ -45,7 +45,7 @@ def _endpoint_prefix(self: "Crud") -> Union[Tuple[Optional[str], Optional[str]],
     return []
 
 
-def _validate_path_segments(self: "Crud", *args: PathArgs) -> None:
+def _validate_path_segments(self: "Crud[Any]", *args: PathArgs) -> None:
     """
     Validate the types of path segments.
 
@@ -64,7 +64,7 @@ def _validate_path_segments(self: "Crud", *args: PathArgs) -> None:
             raise TypeError(f"Path segment must be a string, integer, or None, got {type(arg).__name__}")
 
 
-def _get_parent_path(self: "Crud", parent_args: Optional[tuple] = None) -> str:
+def _get_parent_path(self: "Crud[Any]", parent_args: Optional[tuple[Any, ...]] = None) -> str:
     """
     Get the parent path if a parent exists.
 
@@ -86,7 +86,7 @@ def _get_parent_path(self: "Crud", parent_args: Optional[tuple] = None) -> str:
     return cast(str, self.parent._get_endpoint())
 
 
-def _build_resource_path(self: "Crud", *args: PathArgs) -> List[str]:
+def _build_resource_path(self: "Crud[Any]", *args: PathArgs) -> List[str]:
     """
     Build the current resource path segments.
 
@@ -100,14 +100,14 @@ def _build_resource_path(self: "Crud", *args: PathArgs) -> List[str]:
     List[str]
         The resource path segments.
     """
-    segments = []
+    segments: list[str] = []
     for arg in args:
         if arg is not None:
             segments.append(str(arg))
     return segments
 
 
-def _get_prefix_segments(self: "Crud") -> List[str]:
+def _get_prefix_segments(self: "Crud[Any]") -> List[str]:
     """
     Get the prefix segments for the endpoint.
 
@@ -122,7 +122,7 @@ def _get_prefix_segments(self: "Crud") -> List[str]:
     return cast(List[str], self._build_resource_path(*prefix))
 
 
-def _join_path_segments(self: "Crud", segments: List[str]) -> str:
+def _join_path_segments(self: "Crud[Any]", segments: List[str]) -> str:
     """
     Join path segments into a URL.
 
@@ -143,7 +143,7 @@ def _join_path_segments(self: "Crud", segments: List[str]) -> str:
     return path
 
 
-def _get_endpoint(self: "Crud", *args: Optional[Union[str, int]], parent_args: Optional[tuple] = None) -> str:
+def _get_endpoint(self: "Crud[Any]", *args: Optional[Union[str, int]], parent_args: Optional[tuple[Any, ...]] = None) -> str:
     """
     Construct the endpoint path.
 
@@ -170,10 +170,10 @@ def _get_endpoint(self: "Crud", *args: Optional[Union[str, int]], parent_args: O
 
     prefix_segments = self._get_prefix_segments()
 
-    resource_segments = [self._resource_path]
+    resource_segments: list[str] = [self._resource_path]
     resource_segments.extend(self._build_resource_path(*args))
 
-    all_segments = []
+    all_segments: list[str] = []
     if parent_path:
         all_segments.append(parent_path)
 

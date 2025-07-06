@@ -7,7 +7,7 @@ while also serving as a container for child resources and nested groups.
 """
 
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from .client import Client
 from .crud.base import Crud
@@ -42,7 +42,7 @@ class ResourceGroup(Crud[T], Generic[T], ABC):
         List of allowed methods for this resource group.
     """
 
-    def __init__(self, client: Client, parent: Optional[Crud] = None) -> None:
+    def __init__(self, client: Client, parent: Optional[Crud[Any]] = None) -> None:
         """
         Initialize the ResourceGroup.
 
