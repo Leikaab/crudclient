@@ -96,9 +96,9 @@ class Crud(Generic[T]):
     _update_mode: str = "standard"
     allowed_actions: List[str] = ["list", "create", "read", "update", "partial_update", "destroy"]
     client: Client
-    parent: Optional["Crud"]
+    parent: Optional["Crud[Any]"]
 
-    def __init__(self, client: Client, parent: Optional["Crud"] = None) -> None:
+    def __init__(self, client: Client, parent: Optional["Crud[Any]"] = None) -> None:
         """
         Initialize the CRUD resource.
 
@@ -122,7 +122,7 @@ class Crud(Generic[T]):
 
         self._init_response_strategy()
 
-    def _init_response_strategy(self: "Crud") -> None:
+    def _init_response_strategy(self: "Crud[Any]") -> None:
         """
         Initialize the response model strategy.
 

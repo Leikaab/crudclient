@@ -398,7 +398,7 @@ def _prepare_request_body_kwargs(
     ValueError
         If an unsupported content type is provided.
     """
-    request_body_kwargs = {}
+    request_body_kwargs: Dict[str, Any] = {}
 
     if files is not None:
         request_body_kwargs["files"] = files
@@ -507,7 +507,7 @@ def custom_action_operation(
     endpoint_args = [arg for arg in [resource_id, action] if arg is not None]
     endpoint = self._get_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
 
-    final_kwargs = {}
+    final_kwargs: Dict[str, Any] = {}
     if params:
         final_kwargs["params"] = params
 

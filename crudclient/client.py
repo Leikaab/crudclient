@@ -126,8 +126,8 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        assert_str(endpoint)
-        assert_dict_or_none(params)
+        assert_str(endpoint, param_name="endpoint")
+        assert_dict_or_none(params, param_name="params")
 
         try:
             raw_response = self.http_client.request_raw("GET", endpoint, params=params)
@@ -178,10 +178,10 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        assert_str(endpoint)
-        assert_dict_or_none(data)
-        assert_dict_or_none(files)
-        assert_dict_or_none(params)
+        assert_str(endpoint, param_name="endpoint")
+        assert_dict_or_none(data, param_name="data")
+        assert_dict_or_none(files, param_name="files")
+        assert_dict_or_none(params, param_name="params")
 
         try:
             raw_response = self.http_client.request_raw("POST", endpoint, data=data, json=json, files=files, params=params)
@@ -237,10 +237,10 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        assert_str(endpoint)
-        assert_dict_or_none(data)
-        assert_dict_or_none(files)
-        assert_dict_or_none(params)
+        assert_str(endpoint, param_name="endpoint")
+        assert_dict_or_none(data, param_name="data")
+        assert_dict_or_none(files, param_name="files")
+        assert_dict_or_none(params, param_name="params")
 
         try:
             raw_response = self.http_client.request_raw("PUT", endpoint, data=data, json=json, files=files, params=params)
@@ -285,8 +285,8 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        assert_str(endpoint)
-        assert_dict_or_none(params)
+        assert_str(endpoint, param_name="endpoint")
+        assert_dict_or_none(params, param_name="params")
 
         # Capture original kwargs for potential retry
         request_kwargs: Dict[str, Any] = kwargs.copy()
@@ -339,10 +339,10 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        assert_str(endpoint)
-        assert_dict_or_none(data)
-        assert_dict_or_none(files)
-        assert_dict_or_none(params)
+        assert_str(endpoint, param_name="endpoint")
+        assert_dict_or_none(data, param_name="data")
+        assert_dict_or_none(files, param_name="files")
+        assert_dict_or_none(params, param_name="params")
 
         try:
             raw_response = self.http_client.request_raw("PATCH", endpoint, data=data, json=json, files=files, params=params)
@@ -449,8 +449,8 @@ class Client:
                 - Headers dictionary with the appropriate content-type.
                 - A dictionary containing the prepared request data.
         """
-        assert_dict_or_none(data)
-        assert_dict_or_none(files)
+        assert_dict_or_none(data, param_name="data")
+        assert_dict_or_none(files, param_name="files")
         headers: Dict[str, str] = {}
         request_kwargs: Dict[str, Any] = {}
 

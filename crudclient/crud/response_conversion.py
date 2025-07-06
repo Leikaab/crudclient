@@ -208,7 +208,7 @@ def _convert_to_list_model(self: "Crud[T]", data: JSONList) -> Union[List[T], JS
         raise
 
 
-def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], "ApiResponse[T]"]:
     """
     Validate and convert the list response data.
 
@@ -223,7 +223,7 @@ def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList,
 
     Returns
     -------
-    Union[JSONList, List[T], ApiResponse]
+    Union[JSONList, List[T], ApiResponse[T]]
         Validated and converted list data.
 
     Raises
@@ -241,7 +241,7 @@ def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList,
         if self._response_strategy:
             return self._response_strategy.convert_list(validated_data)
 
-        return cast(Union[JSONList, List[T], ApiResponse], self._fallback_list_conversion(validated_data))
+        return cast(Union[JSONList, List[T], "ApiResponse[T]"], self._fallback_list_conversion(validated_data))
 
     except PydanticValidationError as e:
         model_name = getattr(self._datamodel, "__name__", "Unknown")
@@ -255,7 +255,7 @@ def _validate_list_return(self: "Crud[T]", data: RawResponse) -> Union[JSONList,
         raise
 
 
-def _fallback_list_conversion(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], ApiResponse]:
+def _fallback_list_conversion(self: "Crud[T]", data: RawResponse) -> Union[JSONList, List[T], "ApiResponse[T]"]:
     """
     Fallback conversion logic for list responses when the strategy fails.
 
@@ -268,7 +268,7 @@ def _fallback_list_conversion(self: "Crud[T]", data: RawResponse) -> Union[JSONL
 
     Returns
     -------
-    Union[JSONList, List[T], ApiResponse]
+    Union[JSONList, List[T], ApiResponse[T]]
         Converted list data.
 
     Raises
@@ -277,28 +277,28 @@ def _fallback_list_conversion(self: "Crud[T]", data: RawResponse) -> Union[JSONL
         If the response format is unexpected or conversion fails.
     """
     if isinstance(data, list):
-        return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(data))
+        return cast(Union[JSONList, List[T], "ApiResponse[T]"], self._convert_to_list_model(data))
 
     if isinstance(data, dict):
         if self._api_response_model:
             try:
-                return self._api_response_model(**data)
+                return cast("ApiResponse[T]", self._api_response_model(**data))
             except Exception as e:
                 logger.warning(f"Failed to convert to API response model: {e}", exc_info=True)
 
         for key in self._list_return_keys:
             if key in data and isinstance(data[key], list):
-                return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(cast(JSONList, data[key])))
+                return cast(Union[JSONList, List[T], "ApiResponse[T]"], self._convert_to_list_model(cast(JSONList, data[key])))
 
     if isinstance(data, str):
         try:
             parsed_data = json.loads(data)
             if isinstance(parsed_data, list):
-                return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(cast(JSONList, parsed_data)))
+                return cast(Union[JSONList, List[T], "ApiResponse[T]"], self._convert_to_list_model(cast(JSONList, parsed_data)))
             elif isinstance(parsed_data, dict):
                 for key in self._list_return_keys:
                     if key in parsed_data and isinstance(parsed_data[key], list):
-                        return cast(Union[JSONList, List[T], ApiResponse], self._convert_to_list_model(cast(JSONList, parsed_data[key])))
+                        return cast(Union[JSONList, List[T], "ApiResponse[T]"], self._convert_to_list_model(cast(JSONList, parsed_data[key])))
         except json.JSONDecodeError as e:
             logger.warning(f"Could not parse string response as JSON in fallback: {e}", exc_info=True)
 
