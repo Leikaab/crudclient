@@ -6,9 +6,16 @@ It handles request preparation, authentication, response handling, and error han
 """
 
 import logging
-from typing import Any, Dict, Literal, Optional, Tuple, Type, Union, cast, overload
+from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 import requests
+from apiconfig.utils.type_guards import (
+    assert_dict_or_none,
+    assert_str,
+    is_bool,
+    is_dict,
+    is_str,
+)
 
 from .config import ClientConfig
 from .exceptions import ConfigurationError, ForbiddenError
@@ -119,17 +126,14 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        if not isinstance(endpoint, str):
-            raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
-
-        if params is not None and not isinstance(params, dict):
-            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+        assert_str(endpoint)
+        assert_dict_or_none(params)
 
         try:
             raw_response = self.http_client.request_raw("GET", endpoint, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
-            kwargs = {"params": params} if params else {}
+            kwargs: Dict[str, Any] = {"params": params} if params else {}
             assert e.response is not None  # Ensure response exists for retry logic
             # Attempt retry. If it doesn't happen or fails, _maybe_retry_after_403 returns the original response.
             raw_response = self._maybe_retry_after_403("GET", url, kwargs, cast(requests.Response, e.response))
@@ -174,23 +178,16 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        if not isinstance(endpoint, str):
-            raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
-
-        if data is not None and not isinstance(data, dict):
-            raise TypeError(f"data must be a dictionary or None, got {type(data).__name__}")
-
-        if files is not None and not isinstance(files, dict):
-            raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
-
-        if params is not None and not isinstance(params, dict):
-            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+        assert_str(endpoint)
+        assert_dict_or_none(data)
+        assert_dict_or_none(files)
+        assert_dict_or_none(params)
 
         try:
             raw_response = self.http_client.request_raw("POST", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
-            kwargs = {}
+            kwargs: Dict[str, Any] = {}
             if data:
                 kwargs["data"] = data
             if json:
@@ -240,23 +237,16 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        if not isinstance(endpoint, str):
-            raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
-
-        if data is not None and not isinstance(data, dict):
-            raise TypeError(f"data must be a dictionary or None, got {type(data).__name__}")
-
-        if files is not None and not isinstance(files, dict):
-            raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
-
-        if params is not None and not isinstance(params, dict):
-            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+        assert_str(endpoint)
+        assert_dict_or_none(data)
+        assert_dict_or_none(files)
+        assert_dict_or_none(params)
 
         try:
             raw_response = self.http_client.request_raw("PUT", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
-            kwargs = {}
+            kwargs: Dict[str, Any] = {}
             if data:
                 kwargs["data"] = data
             if json:
@@ -295,17 +285,15 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        if not isinstance(endpoint, str):
-            raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
+        assert_str(endpoint)
+        assert_dict_or_none(params)
 
-        if params is not None and not isinstance(params, dict):
-            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+        # Capture original kwargs for potential retry
+        request_kwargs: Dict[str, Any] = kwargs.copy()
+        if params is not None:
+            request_kwargs["params"] = params
 
         try:
-            # Capture original kwargs for potential retry
-            request_kwargs = kwargs.copy()
-            if params is not None:
-                request_kwargs["params"] = params
             raw_response = self.http_client.request_raw("DELETE", endpoint, **request_kwargs)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
@@ -351,23 +339,16 @@ class Client:
         TypeError
             If the parameters are of incorrect types.
         """
-        if not isinstance(endpoint, str):
-            raise TypeError(f"endpoint must be a string, got {type(endpoint).__name__}")
-
-        if data is not None and not isinstance(data, dict):
-            raise TypeError(f"data must be a dictionary or None, got {type(data).__name__}")
-
-        if files is not None and not isinstance(files, dict):
-            raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
-
-        if params is not None and not isinstance(params, dict):
-            raise TypeError(f"params must be a dictionary or None, got {type(params).__name__}")
+        assert_str(endpoint)
+        assert_dict_or_none(data)
+        assert_dict_or_none(files)
+        assert_dict_or_none(params)
 
         try:
             raw_response = self.http_client.request_raw("PATCH", endpoint, data=data, json=json, files=files, params=params)
         except ForbiddenError as e:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
-            kwargs = {}
+            kwargs: Dict[str, Any] = {}
             if data:
                 kwargs["data"] = data
             if json:
@@ -383,31 +364,19 @@ class Client:
 
         return self._handle_response(raw_response)
 
-    @overload
-    def _request(
-        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[True] = True, **kwargs: Any
-    ) -> RawResponseSimple:
-        pass
-
-    @overload
-    def _request(
-        self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: Literal[False] = False, **kwargs: Any
-    ) -> requests.Response:
-        pass
-
     def _request(
         self, method: str, endpoint: Optional[str] = None, url: Optional[str] = None, handle_response: bool = True, **kwargs: Any
     ) -> Union[RawResponseSimple, requests.Response]:
-        if not isinstance(method, str):
+        if not is_str(method):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
 
-        if endpoint is not None and not isinstance(endpoint, str):
+        if not is_str(endpoint) and endpoint is not None:
             raise TypeError(f"endpoint must be a string or None, got {type(endpoint).__name__}")
 
-        if url is not None and not isinstance(url, str):
+        if not is_str(url) and url is not None:
             raise TypeError(f"url must be a string or None, got {type(url).__name__}")
 
-        if not isinstance(handle_response, bool):
+        if not is_bool(handle_response):
             raise TypeError(f"handle_response must be a boolean, got {type(handle_response).__name__}")
         # Use the correct return type based on handle_response
         if handle_response:
@@ -480,13 +449,10 @@ class Client:
                 - Headers dictionary with the appropriate content-type.
                 - A dictionary containing the prepared request data.
         """
-        if data is not None and not isinstance(data, dict):
-            raise TypeError(f"data must be a dictionary or None, got {type(data).__name__}")
-
-        if files is not None and not isinstance(files, dict):
-            raise TypeError(f"files must be a dictionary or None, got {type(files).__name__}")
-        headers = {}
-        request_kwargs = {}
+        assert_dict_or_none(data)
+        assert_dict_or_none(files)
+        headers: Dict[str, str] = {}
+        request_kwargs: Dict[str, Any] = {}
 
         if json is not None:
             headers["Content-Type"] = "application/json"
@@ -522,13 +488,13 @@ class Client:
         requests.Response
             The response from the retry or the original response if no retry.
         """
-        if not isinstance(method, str):
+        if not is_str(method):
             raise TypeError(f"method must be a string, got {type(method).__name__}")
 
-        if not isinstance(url, str):
+        if not is_str(url):
             raise TypeError(f"url must be a string, got {type(url).__name__}")
 
-        if not isinstance(kwargs, dict):
+        if not is_dict(kwargs):
             raise TypeError(f"kwargs must be a dictionary, got {type(kwargs).__name__}")
 
         # Simplified type checking for response
@@ -626,9 +592,9 @@ class Client:
             return config
 
         # Using a separate variable to help mypy understand the control flow
-        is_dict = isinstance(config, dict)
+        config_is_dict = is_dict(config)
 
-        if is_dict:
+        if config_is_dict:
             try:
                 return ClientConfig(**config)
             except (TypeError, ValueError) as e:

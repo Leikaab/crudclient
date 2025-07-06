@@ -48,7 +48,7 @@ from .exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T", bound=Crud)
+T = TypeVar("T", bound=Crud[Any])
 
 
 class API(ABC):
