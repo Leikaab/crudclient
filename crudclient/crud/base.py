@@ -16,6 +16,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -34,6 +35,7 @@ from ..response_strategies import (
     ResponseModelStrategy,
 )
 from ..types import JSONDict, JSONList
+from ..utils.endpoint_builder import EndpointBuilder
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -121,6 +123,16 @@ class Crud(Generic[T]):
         self.parent = parent
 
         self._init_response_strategy()
+        self._init_endpoint_builder()
+
+    def _init_endpoint_builder(self: "Crud[Any]") -> None:
+        """Initialize the endpoint builder."""
+        parent_builder = self.parent._endpoint_builder if self.parent else None
+        self._endpoint_builder = EndpointBuilder(
+            resource_path=self._resource_path,
+            parent_builder=parent_builder,
+            endpoint_prefix=None  # Will be handled in adapter methods if needed
+        )
 
     def _init_response_strategy(self: "Crud[Any]") -> None:
         """
@@ -152,14 +164,41 @@ class Crud(Generic[T]):
             )
 
     # Import methods from other modules
-    # --- Endpoint Methods ---
-    from .endpoint import _build_resource_path  # type: ignore
-    from .endpoint import _endpoint_prefix  # type: ignore
-    from .endpoint import _get_endpoint  # type: ignore
-    from .endpoint import _get_parent_path  # type: ignore
-    from .endpoint import _get_prefix_segments  # type: ignore
-    from .endpoint import _join_path_segments  # type: ignore
-    from .endpoint import _validate_path_segments  # type: ignore
+    # --- Endpoint Methods (Adapter methods for backward compatibility) ---
+    def _get_endpoint(self: "Crud[Any]", *args: Any, parent_args: Optional[Any] = None) -> str:
+        """Adapter method for backward compatibility."""
+        return self._endpoint_builder.build_endpoint(*args, parent_args=parent_args)
+
+    def _validate_path_segments(self: "Crud[Any]", *args: Any) -> None:
+        """Adapter method for backward compatibility."""
+        from ..utils.endpoint_builder import validate_path_segments
+        validate_path_segments(*args)
+
+    def _get_parent_path(self: "Crud[Any]", parent_args: Optional[Any] = None) -> str:
+        """Adapter method for backward compatibility."""
+        result = self._endpoint_builder.get_parent_path(parent_args)
+        return result if result is not None else ""
+
+    def _build_resource_path(self: "Crud[Any]", *args: Any) -> str:
+        """Adapter method for backward compatibility."""
+        from ..utils.endpoint_builder import build_resource_segments
+        segments = build_resource_segments(self._resource_path, *args)
+        return "/".join(segments)
+
+    def _get_prefix_segments(self: "Crud[Any]") -> List[str]:
+        """Adapter method for backward compatibility."""
+        return self._endpoint_builder.get_prefix_segments()
+
+    def _join_path_segments(self: "Crud[Any]", *args: Any) -> str:
+        """Adapter method for backward compatibility."""
+        from ..utils.endpoint_builder import join_path_segments
+        return join_path_segments(*args)
+
+    def _endpoint_prefix(self: "Crud[Any]") -> Union[Tuple[Optional[str], Optional[str]], List[Optional[str]]]:
+        """Adapter method for backward compatibility."""
+        if self.parent:
+            return (self.parent._resource_path, None)
+        return []
 
     # --- Operations Helper Methods ---
     from .operations import _prepare_request_body_kwargs  # type: ignore
