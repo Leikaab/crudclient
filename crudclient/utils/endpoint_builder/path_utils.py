@@ -48,7 +48,7 @@ def join_path_segments(*args: PathArgs) -> str:
     for arg in args:
         if arg is not None and str(arg).strip():
             # Strip leading and trailing slashes from each segment
-            segment = str(arg).strip('/')
+            segment = str(arg).strip("/")
             if segment:  # Only add non-empty segments after stripping
                 segments.append(segment)
 

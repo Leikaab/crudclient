@@ -10,7 +10,7 @@ Extract endpoint generation logic from the monolithic `Crud` class into a reusab
 crudclient/utils/endpoint_builder/
 ├── __init__.py          # Package initialization with exports
 ├── builder.py           # Main EndpointBuilder class
-├── validators.py        # Path validation functions  
+├── validators.py        # Path validation functions
 ├── path_utils.py        # Path joining utilities
 └── segments.py          # Resource segment building logic
 ```
@@ -54,7 +54,16 @@ Main class that orchestrates endpoint construction:
 - [x] Add integration tests for complex scenarios
 - [x] Modularize test suite into separate files per module
 
-### Phase 4: Future Migration to `apiconfig`
+### Phase 4: Fix Integration Test Failures 🚧 IN PROGRESS
+See detailed fix plan in [`endpoint_builder_fixes_plan.md`](./endpoint_builder_fixes_plan.md)
+
+Key issues to address:
+1. Overly strict validation (empty strings)
+2. Missing dynamic prefix support
+3. Architectural improvements needed
+4. Deprecation warnings for adapter methods
+
+### Phase 5: Future Migration to `apiconfig`
 - [ ] Move the `endpoint_builder` package to `apiconfig`
 - [ ] Update imports throughout the codebase
 - [ ] Deprecate old methods in `Crud` class
@@ -87,46 +96,20 @@ Main class that orchestrates endpoint construction:
 - Empty path segments are filtered out during joining
 - Parent paths take precedence over prefix segments
 
-## Current Status: Phase 3 COMPLETE ✅
+## Current Status: Phase 3 COMPLETE, Phase 4 IN PROGRESS ✅
 
 All unit tests passing (122/122):
 - 72 CRUD tests - Full backward compatibility maintained
 - 50 endpoint_builder tests - Complete coverage of new functionality
 
-### Integration Test Failures - Analysis
+### Integration Test Failures - Root Cause Analysis
 
-After running the full test suite, 3 integration tests failed:
+After running the full test suite, 3 integration tests failed. Detailed analysis and fixes are documented in [`endpoint_builder_fixes_plan.md`](./endpoint_builder_fixes_plan.md).
 
-1. **`test_retrive_user`** - `ValueError: Path segment cannot be empty`
-   - Cause: `FikenUser.read()` calls `custom_action(action="", method="get")` with empty action string
-   - The new `validate_path_segments` is stricter and rejects empty strings
+#### Summary of Issues:
+1. **Overly strict validation**: New validation rejects empty strings used in existing code
+2. **Missing dynamic prefix support**: `EndpointBuilder` doesn't call Crud's `_endpoint_prefix()` method
+3. **Architectural issues**: Need declarative style and better prefix handling
 
-2. **`test_list_contacts`** - 404 Not Found error  
-   - This appears unrelated to the refactoring (API endpoint issue)
-
-3. **`test_custom_action`** - `ValueError: Path segment cannot be empty`
-   - Similar to #1, likely using empty string in custom action
-
-### Root Cause
-
-The new `validate_path_segments` function is more strict than the original:
-- **Original**: Only validated types (None, str, int) but allowed empty strings
-- **New**: Raises ValueError for None, empty strings, or dangerous characters
-
-This breaks existing code that relies on passing empty strings as valid path segments.
-
-### Proposed Fix
-
-1. **Option A**: Relax validation to match original behavior
-   - Allow empty strings in `validate_path_segments`
-   - Keep dangerous character checks for security
-
-2. **Option B**: Update integration tests
-   - Modify tests to not use empty strings
-   - Risk: May break external code using same pattern
-
-3. **Option C**: Add compatibility mode
-   - Add `strict_validation` parameter to EndpointBuilder
-   - Default to False for backward compatibility
-
-**Recommendation**: Option A - Modify `validate_path_segments` to allow empty strings while keeping security checks. This maintains full backward compatibility while still improving validation where it matters.
+#### Next Steps:
+Implement the fixes outlined in the fixes plan document to resolve all integration test failures while improving the overall architecture.

@@ -82,8 +82,8 @@ def _get_parent_path(self: "Crud[Any]", parent_args: Optional[tuple[Any, ...]] =
         return ""
 
     if parent_args:
-        return cast(str, self.parent._get_endpoint(*parent_args))
-    return cast(str, self.parent._get_endpoint())
+        return self.parent._get_endpoint(*parent_args)
+    return self.parent._get_endpoint()
 
 
 def _build_resource_path(self: "Crud[Any]", *args: PathArgs) -> List[str]:

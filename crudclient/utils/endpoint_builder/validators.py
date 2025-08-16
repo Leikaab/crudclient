@@ -38,9 +38,7 @@ def validate_path_segments(*args: PathArgs) -> None:
             raise ValueError("Path segment cannot be None")
 
         if not isinstance(arg, (str, int)):
-            raise TypeError(
-                f"Path segment must be string or integer, got {type(arg).__name__}"
-            )
+            raise TypeError(f"Path segment must be string or integer, got {type(arg).__name__}")
 
         if isinstance(arg, str):
             if not arg.strip():

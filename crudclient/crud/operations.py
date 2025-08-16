@@ -504,7 +504,7 @@ def custom_action_operation(
     if parent_id is not None and not isinstance(parent_id, str):
         raise TypeError(f"Parent ID must be a string or None, got {type(parent_id).__name__}")
 
-    endpoint_args = [arg for arg in [resource_id, action] if arg is not None]
+    endpoint_args = [arg for arg in [resource_id, action] if arg is not None and arg != ""]
     endpoint = self._get_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
 
     final_kwargs: Dict[str, Any] = {}
