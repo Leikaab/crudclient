@@ -10,9 +10,9 @@ path validation and segment manipulation.
 """
 
 from .builder import EndpointBuilder
-from .validators import validate_path_segments
 from .path_utils import join_path_segments
 from .segments import build_resource_segments
+from .validators import validate_path_segments
 
 __all__ = [
     "EndpointBuilder",

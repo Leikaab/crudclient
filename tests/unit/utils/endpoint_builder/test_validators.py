@@ -3,6 +3,7 @@ Unit tests for endpoint_builder validators module.
 """
 
 import pytest
+
 from crudclient.utils.endpoint_builder.validators import validate_path_segments
 
 
