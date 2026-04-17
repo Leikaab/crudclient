@@ -86,6 +86,6 @@ class TestCustomStrategy(ResponseModelStrategy[TestModel]):
 
 
 @pytest.fixture
-def client():
+def client() -> MagicMock:
     """Return a mock client for testing."""
     return MagicMock()

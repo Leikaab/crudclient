@@ -30,7 +30,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from ..exceptions import CrudClientError  # Import base exception
-from .utils import redact_sensitive_headers  # Correct: utils is sibling # noqa: F401
 
 # Set up logging
 if TYPE_CHECKING:

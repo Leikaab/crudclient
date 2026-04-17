@@ -15,7 +15,7 @@ from .common import create_mock_client
 class TestApiKeyAuthExamples:
     """Examples of using API Key Authentication mocks."""
 
-    def test_api_key_header_auth_success_scenario(self):
+    def test_api_key_header_auth_success_scenario(self) -> None:
         """Example of testing a successful API Key header auth scenario."""
         # Create a mock client with API Key header auth
         client = create_mock_client(auth_type="apikey", auth_config={"api_key": "valid_api_key", "header_name": "X-API-Key"})
@@ -37,7 +37,7 @@ class TestApiKeyAuthExamples:
         assert "X-API-Key" in request.kwargs["headers"]
         assert request.kwargs["headers"]["X-API-Key"] == "valid_api_key"
 
-    def test_api_key_param_auth_success_scenario(self):
+    def test_api_key_param_auth_success_scenario(self) -> None:
         """Example of testing a successful API Key param auth scenario."""
         # Create a mock client with API Key param auth
         client = create_mock_client(auth_type="apikey", auth_config={"api_key": "valid_api_key", "param_name": "api_key"})
@@ -60,7 +60,7 @@ class TestApiKeyAuthExamples:
         assert "api_key" in request.kwargs["params"]
         assert request.kwargs["params"]["api_key"] == "valid_api_key"
 
-    def test_api_key_auth_failure_scenario(self):
+    def test_api_key_auth_failure_scenario(self) -> None:
         """Example of testing an API Key auth failure scenario."""
         # Create a mock client with API Key auth configured to fail
         client = create_mock_client(

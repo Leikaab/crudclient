@@ -32,7 +32,7 @@ logging.getLogger("crudclient.ratelimit").setLevel(logging.DEBUG)
     reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
 )
 @pytest.mark.no_parallel
-def test_tripletex_rate_limiting_prevents_429():
+def test_tripletex_rate_limiting_prevents_429() -> None:
     """
     Test that rate limiter prevents 429 errors under real rate limit conditions.
 
@@ -59,11 +59,16 @@ def test_tripletex_rate_limiting_prevents_429():
     rate_limiter = get_rate_limiter(config_protected)
 
     # Shared results storage
-    unprotected_results = []
-    protected_results = []
+    unprotected_results: list[tuple[str, float]] = []
+    protected_results: list[tuple[str, float]] = []
     results_lock = threading.Lock()
 
-    def make_requests(api, num_requests, results_list, client_name):
+    def make_requests(
+        api: TripletexAPI,
+        num_requests: int,
+        results_list: list[tuple[str, float]],
+        client_name: str,
+    ) -> None:
         """Make requests and track results."""
         local_results = []
 
@@ -167,7 +172,7 @@ def test_tripletex_rate_limiting_prevents_429():
     reason="Skip live API rate limiting tests in CI - file-based rate limiter doesn't work across matrix jobs",
 )
 @pytest.mark.no_parallel
-def test_rate_limiter_delay_tracking():
+def test_rate_limiter_delay_tracking() -> None:
     """Test that the rate limiter delay tracking mechanism works correctly."""
 
     print("\n=== Testing rate limiter delay tracking ===")

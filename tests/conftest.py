@@ -9,6 +9,7 @@ from contextlib import contextmanager
 # Removed incorrect imports for internal types: LogCaptureHandler, Config
 from typing import (  # Ensure List and Type are imported
     Any,
+    Callable,
     List,
     Optional,
 )
@@ -24,13 +25,13 @@ pytest_plugins = ["tests.unit.fixtures.mock_clients"]
 
 
 @pytest.fixture(scope="session")
-def base_url():
+def base_url() -> str:
     """Return the base URL for API tests."""
     return "https://api.example.com"
 
 
 @pytest.fixture
-def mock_response_factory():
+def mock_response_factory() -> Callable[..., Mock]:
     """
     Factory fixture to create mock response objects with custom attributes.
 
@@ -41,14 +42,14 @@ def mock_response_factory():
     """
 
     def _create_mock_response(
-        status_code=200,
-        json_data=None,
-        text_data=None,  # Default to None
-        headers=None,
-        reason=None,
-        url=None,
-        content=None,  # Add content for raw bytes
-    ):
+        status_code: int = 200,
+        json_data: Any = None,
+        text_data: Optional[str] = None,  # Default to None
+        headers: Optional[dict] = None,
+        reason: Optional[str] = None,
+        url: Optional[str] = None,
+        content: Optional[bytes] = None,  # Add content for raw bytes
+    ) -> Mock:
         mock = Mock()
         mock.status_code = status_code
         mock.reason = reason
@@ -79,7 +80,7 @@ def mock_response_factory():
         mock.content = content if content is not None else mock.text.encode("utf-8")
 
         # Add raise_for_status mock
-        def raise_for_status():
+        def raise_for_status() -> None:
             if 400 <= mock.status_code < 600:
                 # Using a generic exception for simplicity, replace with requests.exceptions.HTTPError if needed
                 error_msg = f"Mock HTTP Error: {mock.status_code} {mock.reason or 'Error'}"
@@ -95,13 +96,13 @@ def mock_response_factory():
 
 
 @pytest.fixture(params=["json", "xml", "text"])
-def api_response_type(request):
+def api_response_type(request: Any) -> Any:
     """Parametrized fixture for different API response content types."""
     return request.param
 
 
 @pytest.fixture
-def temp_file(tmp_path):
+def temp_file(tmp_path: Any) -> Any:
     """
     Provides a pathlib.Path object for a temporary file within the test's temp directory.
     The file is created empty. Cleanup is handled automatically by pytest.
@@ -117,7 +118,7 @@ def temp_file(tmp_path):
 
 
 @pytest.fixture
-def manage_env_vars(monkeypatch):
+def manage_env_vars(monkeypatch: Any) -> tuple[Callable[[str, Any], None], Callable[[str, bool], None]]:
     """
     Fixture providing functions to safely set/unset environment variables
     during a test, automatically restoring the original state afterwards.
@@ -130,10 +131,10 @@ def manage_env_vars(monkeypatch):
             del_var('MY_API_KEY') # Optional: explicitly delete if needed before test end
     """
 
-    def _set_var(key, value):
+    def _set_var(key: str, value: Any) -> None:
         monkeypatch.setenv(key, str(value))  # Ensure value is string
 
-    def _del_var(key, raising=False):
+    def _del_var(key: str, raising: bool = False) -> None:
         # raising=False: don't error if var doesn't exist
         monkeypatch.delenv(key, raising=raising)
 
@@ -143,13 +144,13 @@ def manage_env_vars(monkeypatch):
 class ExecutionTimer:
     """Helper class for the timer fixture."""
 
-    def __init__(self):
-        self.start_time = None
-        self.end_time = None
-        self.duration = None
+    def __init__(self) -> None:
+        self.start_time: Optional[float] = None
+        self.end_time: Optional[float] = None
+        self.duration: Optional[float] = None
 
     @contextmanager
-    def measure(self):
+    def measure(self) -> Any:
         """Context manager to measure execution time."""
         self.start_time = time.perf_counter()
         yield
@@ -160,7 +161,7 @@ class ExecutionTimer:
 
 
 @pytest.fixture
-def timer():
+def timer() -> ExecutionTimer:
     """
     Fixture providing a context manager to measure execution time.
 
@@ -184,7 +185,7 @@ def timer():
 # Use Any for config and items types for robustness against internal API changes
 
 
-def pytest_collection_modifyitems(session: Any, config: Any, items: List[Item]):
+def pytest_collection_modifyitems(session: Any, config: Any, items: List[Item]) -> None:
     """
     Hook to modify the list of collected items.
     We use it to cache items by their nodeid on the config object.

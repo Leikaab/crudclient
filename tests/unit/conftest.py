@@ -3,7 +3,7 @@ Fixtures specific to unit tests.
 """
 
 import uuid
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Callable, Dict, Iterator, Optional, Type
 from unittest.mock import MagicMock  # Add MagicMock import
 
 import pytest
@@ -116,14 +116,14 @@ def mock_client_config() -> MagicMock:
 
 
 @pytest.fixture
-def requests_mocker():
+def requests_mocker() -> Iterator[requests_mock.Mocker]:
     """Provide a requests mocker for HTTP request mocking."""
     with requests_mock.Mocker() as m:
         yield m
 
 
 @pytest.fixture
-def create_user_data():
+def create_user_data() -> Callable[..., Dict[str, Any]]:
     """Factory fixture to create user test data."""
     """Factory fixture to create user test data with unique IDs."""
     _id_counter = 1
@@ -140,7 +140,7 @@ def create_user_data():
 
 
 @pytest.fixture
-def create_api_response():
+def create_api_response() -> Callable[..., Dict[str, Any]]:
     """Factory fixture to create API response data."""
     """
     Factory fixture to create versatile API response data for requests_mock.
@@ -279,7 +279,7 @@ def mock_api_error() -> Type[APIError]:
 
 # --- Enhanced Mock Client Fixtures ---
 @pytest.fixture
-def api_pattern_builder():
+def api_pattern_builder() -> Type[APIPatternBuilder]:
     """
     Provides the APIPatternBuilder class for creating API patterns.
     """
@@ -287,7 +287,7 @@ def api_pattern_builder():
 
 
 @pytest.fixture
-def response_builder():
+def response_builder() -> Type[ResponseBuilder]:
     """
     Provides the ResponseBuilder class for creating complex responses.
     """
@@ -295,7 +295,7 @@ def response_builder():
 
 
 @pytest.fixture
-def request_verifier():
+def request_verifier() -> Type[Verifier]:
     """
     Provides the RequestVerifier class for verifying API requests.
     """
@@ -303,7 +303,7 @@ def request_verifier():
 
 
 @pytest.fixture
-def response_verifier():
+def response_verifier() -> Type[Verifier]:
     """
     Provides the ResponseVerifier class for verifying API responses.
     """

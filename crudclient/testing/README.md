@@ -8,8 +8,8 @@ All utilities now provide inline type hints directly in the source files, and th
 
 The `crudclient.testing` module aims to facilitate robust testing by providing:
 
-*   **Mock Clients:** Implementations like `MockClient` (via `MockClientFactory`) and `SimpleMockClient` (via `create_simple_mock_client`) allow simulating the behavior of the actual `crudclient` without making real network requests.
-*   **Factories:** The `MockClientFactory` and `create_simple_mock_client` function provide convenient ways to create and configure mock client instances with specific responses, authentication methods, and error conditions. Helper functions in `factory_helpers.py` support this configuration.
+*   **Mock Clients:** Implementations like `MockClient` (via `MockClientFactory`) allow simulating the behavior of the actual `crudclient` without making real network requests.
+*   **Factories:** The `MockClientFactory` provides convenient ways to create and configure mock client instances with specific responses, authentication methods, and error conditions. Helper functions in `factory_helpers.py` support this configuration.
 *   **Verification:** The `Verifier` class enables assertions on interactions with mock objects or spies, ensuring methods were called as expected.
 *   **Custom Exceptions:** A hierarchy of testing-specific exceptions (e.g., `TestingError`, `MockConfigurationError`, `VerificationError`) defined in `exceptions.py` helps pinpoint issues during tests.
 *   **Shared Types:** Common type aliases (e.g., `Headers`, `StatusCode`, `ResponseData`) are defined in `types.py` for consistency.
@@ -24,7 +24,6 @@ The testing utilities are organized into the following submodules:
 *   **[doubles](./doubles/README.md):** Offers test doubles like `FakeAPI` and `DataStore` for simulating external systems or data storage.
 *   **[helpers](./helpers/README.md):** Contains general-purpose helper functions and utilities useful across different testing scenarios.
 *   **[response_builder](./response_builder/README.md):** Provides tools (`ResponseBuilder`, `APIPatternBuilder`, `MockResponse`) for constructing and configuring mock API responses.
-*   **[simple_mock](./simple_mock/README.md):** Defines a simpler, pattern-based mock client (`SimpleMockClient`).
 *   **[spy](./spy/README.md):** Includes utilities (`SpyBase`, `MethodCall`) for spying on method calls to track interactions.
 
 Refer to the `README.md` file within each subdirectory for detailed information about its specific components and usage.

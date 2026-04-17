@@ -5,19 +5,19 @@ from .jsonplaceholder_resources.setup import JsonplaceholderAPI, PlaceholderConf
 
 
 @pytest.fixture
-def api():
+def api() -> JsonplaceholderAPI:
     config = PlaceholderConfig()
     return JsonplaceholderAPI(client_config=config)
 
 
-def test_list_posts(api):
+def test_list_posts(api) -> None:
     """
     Test listing posts from the JSONPlaceholder API.
 
     This test verifies that we can retrieve a list of posts and that each post
     is properly converted to a Post model instance.
     """
-    posts = api.posts.list()
+    posts: list[Post] = api.posts.list()
     assert isinstance(posts, list)
     assert len(posts) > 0
     assert isinstance(posts[0], Post)
@@ -26,7 +26,7 @@ def test_list_posts(api):
 
 
 @pytest.mark.no_parallel
-def test_create_post(api):
+def test_create_post(api) -> None:
     """
     Test creating a post in the JSONPlaceholder API.
 
@@ -44,7 +44,7 @@ def test_create_post(api):
     assert created_post.body == "bar"
 
     # Test with dictionary data as well
-    new_post_dict = {"title": "foo2", "body": "bar2", "userId": 1}
+    new_post_dict: dict[str, str | int] = {"title": "foo2", "body": "bar2", "userId": 1}
     created_post_dict = api.posts.create(new_post_dict)
     assert isinstance(created_post_dict, Post)
     assert created_post_dict.id is not None
@@ -52,7 +52,7 @@ def test_create_post(api):
     assert created_post_dict.body == "bar2"
 
 
-def test_read_post(api):
+def test_read_post(api) -> None:
     """
     Test reading a post from the JSONPlaceholder API.
 
@@ -67,7 +67,7 @@ def test_read_post(api):
 
 
 @pytest.mark.no_parallel
-def test_update_post(api):
+def test_update_post(api) -> None:
     """
     Test updating a post in the JSONPlaceholder API.
 
@@ -86,7 +86,7 @@ def test_update_post(api):
 
 
 @pytest.mark.no_parallel
-def test_partial_update_post(api):
+def test_partial_update_post(api) -> None:
     """
     Test partially updating a post in the JSONPlaceholder API.
 
@@ -103,7 +103,7 @@ def test_partial_update_post(api):
 
 
 @pytest.mark.no_parallel
-def test_delete_post(api):
+def test_delete_post(api) -> None:
     """
     Test deleting a post in the JSONPlaceholder API.
 
@@ -115,7 +115,7 @@ def test_delete_post(api):
     # So we can't really assert anything meaningful here.
 
 
-def test_custom_action(api):
+def test_custom_action(api) -> None:
     """
     Test a custom action on the JSONPlaceholder API.
 
@@ -124,7 +124,7 @@ def test_custom_action(api):
     """
     # Test getting comments for a specific post using the helper method
     post_id = "1"
-    comments = api.comments.get_comments_for_post(post_id)
+    comments: list[Comment] = api.comments.get_comments_for_post(post_id)
 
     assert isinstance(comments, list)
     assert len(comments) > 0
@@ -140,14 +140,14 @@ def test_custom_action(api):
 # ResourceGroup Tests
 
 
-def test_list_users(api):
+def test_list_users(api) -> None:
     """
     Test listing users from the JSONPlaceholder API using ResourceGroup.
 
     This test verifies that we can retrieve a list of users through the UserGroup
     and that each user is properly converted to a User model instance.
     """
-    users = api.users.list()
+    users: list[User] = api.users.list()
     assert isinstance(users, list)
     assert len(users) > 0
     assert isinstance(users[0], User)
@@ -156,7 +156,7 @@ def test_list_users(api):
     assert users[0].email is not None
 
 
-def test_read_user(api):
+def test_read_user(api) -> None:
     """
     Test reading a user from the JSONPlaceholder API using ResourceGroup.
 
@@ -170,7 +170,7 @@ def test_read_user(api):
     assert user.email is not None
 
 
-def test_user_posts(api):
+def test_user_posts(api) -> None:
     """
     Test listing posts for a specific user using nested ResourceGroup structure.
 
@@ -178,7 +178,7 @@ def test_user_posts(api):
     the nested UserPostsCrud under UserGroup.
     """
     user_id = "1"
-    posts = api.users.posts.list(parent_id=user_id)
+    posts: list[Post] = api.users.posts.list(parent_id=user_id)
 
     assert isinstance(posts, list)
     assert len(posts) > 0
@@ -190,7 +190,7 @@ def test_user_posts(api):
         assert post.body is not None
 
 
-def test_user_albums(api):
+def test_user_albums(api) -> None:
     """
     Test listing albums for a specific user using nested ResourceGroup structure.
 
@@ -198,7 +198,7 @@ def test_user_albums(api):
     the nested UserAlbumsCrud under UserGroup.
     """
     user_id = "1"
-    albums = api.users.albums.list(parent_id=user_id)
+    albums: list[Album] = api.users.albums.list(parent_id=user_id)
 
     assert isinstance(albums, list)
     assert len(albums) > 0
@@ -209,7 +209,7 @@ def test_user_albums(api):
         assert album.title is not None
 
 
-def test_user_todos(api):
+def test_user_todos(api) -> None:
     """
     Test listing todos for a specific user using nested ResourceGroup structure.
 
@@ -217,7 +217,7 @@ def test_user_todos(api):
     the nested UserTodosCrud under UserGroup.
     """
     user_id = "1"
-    todos = api.users.todos.list(parent_id=user_id)
+    todos: list[Todo] = api.users.todos.list(parent_id=user_id)
 
     assert isinstance(todos, list)
     assert len(todos) > 0

@@ -6,11 +6,13 @@ from typing import cast
 
 import pytest
 import requests
+import requests_mock
 
+from crudclient.client import Client
 from crudclient.exceptions import AuthenticationError
 
 
-def test_basic_auth_failure(basic_auth_client, mock_request):
+def test_basic_auth_failure(basic_auth_client: Client, mock_request: requests_mock.Mocker) -> None:
     """Test handling of Basic Authentication failures."""
     url = f"{basic_auth_client.base_url}/users"
     mock_request.get(url, status_code=401, json={"error": "Unauthorized", "message": "Invalid credentials"})

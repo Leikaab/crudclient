@@ -4,6 +4,8 @@ Integration tests for rate limiting functionality.
 Tests the full rate limiting behavior with real HTTP clients and file storage.
 """
 
+from __future__ import annotations
+
 import multiprocessing
 import os
 import tempfile
@@ -19,7 +21,7 @@ from crudclient.ratelimit import get_rate_limiter
 def api_worker(
     worker_id: int,
     state_dir: str,
-    results_queue: multiprocessing.Queue,
+    results_queue: multiprocessing.Queue[tuple[int, int, int]],
     requests_per_worker: int = 10,
 ) -> None:
     """
@@ -87,7 +89,7 @@ def api_worker(
 class TestRateLimitIntegration:
     """Integration tests for rate limiting."""
 
-    def test_multi_process_rate_limiting(self):
+    def test_multi_process_rate_limiting(self) -> None:
         """Test rate limiting across multiple processes."""
         with tempfile.TemporaryDirectory() as temp_dir:
             num_workers = 4
@@ -105,7 +107,7 @@ class TestRateLimitIntegration:
                     limiter.backend.write(initial_state)
 
             # Start worker processes
-            results_queue = multiprocessing.Queue()
+            results_queue: multiprocessing.Queue[tuple[int, int, int]] = multiprocessing.Queue()
             processes = []
 
             for i in range(num_workers):
@@ -166,7 +168,7 @@ class TestRateLimitIntegration:
                 # We expect some blocking to occur
                 assert total_blocked > 0, f"No blocking occurred: {total_blocked} == 0"
 
-    def test_rate_limiter_with_http_client(self):
+    def test_rate_limiter_with_http_client(self) -> None:
         """Test rate limiter integration with HttpClient."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create config with rate limiting
@@ -180,8 +182,8 @@ class TestRateLimitIntegration:
                 # Mock endpoint that returns rate limit headers
                 def custom_matcher(request):
                     # Return decreasing rate limit
-                    remaining = max(0, 5 - custom_matcher.call_count)
-                    custom_matcher.call_count += 1
+                    remaining = max(0, 5 - custom_matcher.call_count)  # type: ignore[attr-defined]
+                    custom_matcher.call_count += 1  # type: ignore[attr-defined]
 
                     return requests_mock.create_response(
                         request,
@@ -189,7 +191,7 @@ class TestRateLimitIntegration:
                         headers={"X-Rate-Limit-Remaining": str(remaining), "X-Rate-Limit-Reset": "0.1"},  # 100ms window
                     )
 
-                custom_matcher.call_count = 0
+                custom_matcher.call_count = 0  # type: ignore[attr-defined]
 
                 m.add_matcher(custom_matcher)
 

@@ -1,6 +1,7 @@
 # tests/unit/test_logging_config.py
 import io
 import logging
+from typing import Generator
 
 import pytest
 
@@ -15,7 +16,7 @@ http_logger = logging.getLogger("crudclient.http")
 
 # Helper function to ensure cleanup
 @pytest.fixture(autouse=True)
-def ensure_logging_cleanup():
+def ensure_logging_cleanup() -> Generator[None, None, None]:
     """Ensure logging state is reset after each test."""
     original_level = crud_logger.level
     original_handlers = crud_logger.handlers[:]
@@ -40,7 +41,7 @@ def ensure_logging_cleanup():
     # logging.getLogger().handlers = [] # Be careful with global root logger
 
 
-def test_logging_default_configuration(caplog):
+def test_logging_default_configuration(caplog: pytest.LogCaptureFixture) -> None:
     """Verify the default logging configuration for the library.
 
     - No handlers attached directly to the library logger (or only NullHandler).
@@ -72,7 +73,7 @@ def test_logging_default_configuration(caplog):
     assert "Default: Crud warning message." in caplog.text
 
 
-def test_logging_set_level_root(caplog):
+def test_logging_set_level_root(caplog: pytest.LogCaptureFixture) -> None:
     """Verify setting the level on the root crudclient logger captures messages."""
     # Add caplog's handler to the crudclient logger
     # No need to explicitly add handler, caplog does this implicitly
@@ -93,7 +94,7 @@ def test_logging_set_level_root(caplog):
     assert "HTTP debug message via root." in caplog.text
 
 
-def test_logging_set_level_sub_logger(caplog):
+def test_logging_set_level_sub_logger(caplog: pytest.LogCaptureFixture) -> None:
     """Verify setting a different level on a sub-logger filters correctly."""
     # Set root to DEBUG, but sub-logger to INFO
     caplog.set_level(logging.DEBUG, logger="crudclient")  # Capture everything from root
@@ -114,7 +115,7 @@ def test_logging_set_level_sub_logger(caplog):
     assert "Root warning again." in caplog.text
 
 
-def test_logging_add_handler_captures_logs():
+def test_logging_add_handler_captures_logs() -> None:
     """Verify adding a standard handler captures logs."""
     log_stream = io.StringIO()
     handler = logging.StreamHandler(log_stream)
@@ -142,7 +143,7 @@ def test_logging_add_handler_captures_logs():
     crud_logger.removeHandler(handler)
 
 
-def test_logging_custom_formatter():
+def test_logging_custom_formatter() -> None:
     """Verify a custom formatter formats logs correctly."""
     log_stream = io.StringIO()
     handler = logging.StreamHandler(log_stream)

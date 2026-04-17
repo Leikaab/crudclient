@@ -6,6 +6,19 @@ This module implements the **Verifier pattern** via the static methods on the
 assertions about interactions with test doubles (mocks, spies) used within the
 `crudclient` testing framework or potentially standard `unittest.mock` objects.
 
+**FUTURE CONSIDERATION**: This custom Verifier pattern may be considered for deprecation
+in favor of unittest.mock's built-in assertion methods. New tests should consider using
+Mock's built-in methods like assert_called_once_with(), assert_called_with(), etc.
+
+Reasons for potential future deprecation:
+1. unittest.mock already provides comprehensive assertion methods
+2. The translation layer (translate_mock_calls_for_verifier) adds complexity
+3. Type compatibility issues require frequent workarounds
+4. Standard Mock methods are better documented and more widely understood
+
+This pattern should primarily be used for custom spy objects that implement the SpyTarget
+protocol. For standard Mock objects, consider using Mock's built-in assertion methods.
+
 **Benefits:**
 - **Decoupling:** Separates assertion logic from the test double's implementation.
 - **Readability:** Offers a clear, fluent API for common verification tasks.

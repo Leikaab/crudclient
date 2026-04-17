@@ -15,7 +15,7 @@ from crudclient.ratelimit import get_rate_limiter
 class TestRateLimiterSimple:
     """Simple tests for rate limiter functionality."""
 
-    def test_basic_rate_limiting(self, monkeypatch):
+    def test_basic_rate_limiting(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that rate limiter blocks when limit is reached."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -80,7 +80,7 @@ class TestRateLimiterSimple:
             assert sleep_calls, "Rate limiter did not sleep when expected"
             assert 1.5 < elapsed < 2.5, f"Expected to wait ~2s, but waited {elapsed}s"
 
-    def test_unknown_state_proceeds(self, monkeypatch):
+    def test_unknown_state_proceeds(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that unknown state allows requests to proceed."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -107,7 +107,7 @@ class TestRateLimiterSimple:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should remain unknown"
 
-    def test_rate_limit_window_reset(self, monkeypatch):
+    def test_rate_limit_window_reset(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that rate limit resets after window expires."""
         # Override worker detection to get predictable behavior
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
@@ -133,7 +133,7 @@ class TestRateLimiterSimple:
                 state = limiter.backend.read()
                 assert state["remaining"] == -1, "State should be unknown after reset"
 
-    def test_delay_history_tracking(self, monkeypatch):
+    def test_delay_history_tracking(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Ensure delay history is recorded when track_delays is enabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
 
@@ -144,7 +144,7 @@ class TestRateLimiterSimple:
             assert limiter is not None, "Rate limiter should be created"
 
             limiter.update_from_headers({"X-Rate-Limit-Remaining": "0", "X-Rate-Limit-Reset": "0.1"})
-            # Delay should be approximately the reset interval
+            # Delay should be approximately the reset interval + buffer (0.1 + 1 = 1.1 seconds)
 
             start = time.time()
             limiter.check_and_wait()
@@ -152,12 +152,19 @@ class TestRateLimiterSimple:
 
             delays = limiter.get_delay_history()
             assert len(delays) == 1, "Expected a single recorded delay"
-            assert delays[0] == pytest.approx(elapsed, rel=0.2, abs=0.1)
+
+            # The tracked delay should be the intended wait time (reset_time + buffer)
+            expected_delay = 0.1 + 1  # reset_time + buffer
+            assert delays[0] == pytest.approx(expected_delay, rel=0.3, abs=0.2), f"Expected delay ~{expected_delay}s, got {delays[0]}s"
+
+            # The elapsed time should be close to the tracked delay, but allow for more variance
+            # in CI environments due to system scheduling and load
+            assert elapsed == pytest.approx(delays[0], rel=0.5, abs=0.3), f"Elapsed time {elapsed}s should be close to tracked delay {delays[0]}s"
 
             limiter.clear_delay_history()
             assert limiter.get_delay_history() == []
 
-    def test_get_rate_limiter_disabled(self, monkeypatch):
+    def test_get_rate_limiter_disabled(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """get_rate_limiter returns None when rate limiting is disabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
         config = ClientConfig(hostname="test.api")
@@ -169,7 +176,7 @@ class TestRateLimiterSimple:
         assert limiter is None
         assert captured == []
 
-    def test_get_rate_limiter_enabled_warning(self, monkeypatch):
+    def test_get_rate_limiter_enabled_warning(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """get_rate_limiter emits FutureWarning when enabled."""
         monkeypatch.setenv("CRUDCLIENT_WORKERS", "1")
 

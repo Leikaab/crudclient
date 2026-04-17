@@ -5,8 +5,13 @@ This module contains tests for how the ErrorHandler class handles various HTTP e
 including different status codes and malformed responses.
 """
 
+from typing import Any, Callable, cast
+
 import pytest
 import requests
+from pytest_mock import MockerFixture
+from requests import Response
+from requests.compat import Callable as RequestsCallable  # type: ignore[attr-defined]
 
 from crudclient.exceptions import ClientAuthenticationError  # Added specific auth error
 from crudclient.exceptions import (
@@ -20,13 +25,19 @@ from crudclient.exceptions import (  # Reverted to absolute import; DataValidati
     NotFoundError,
     ServiceUnavailableError,
 )
+from crudclient.http.errors import ErrorHandler
 
 
 @pytest.fixture
-def create_response_mock(mocker):
+def create_response_mock(mocker: MockerFixture) -> RequestsCallable[..., Response]:
     """Create a mock response."""
 
-    def _create_mock(status_code, json_data=None, headers=None, text=None):
+    def _create_mock(
+        status_code: int,
+        json_data: Any | None = None,
+        headers: dict | None = None,
+        text: str | None = None,
+    ) -> Response:
         response = mocker.Mock(spec=requests.Response)
         response.status_code = status_code
 
@@ -53,7 +64,7 @@ def create_response_mock(mocker):
         mock_request.url = "http://mock.test/api/resource"
         response.request = mock_request
 
-        return response
+        return cast(Response, response)
 
     return _create_mock
 
@@ -61,7 +72,11 @@ def create_response_mock(mocker):
 class TestErrorHandler:
     """Tests for the ErrorHandler class."""
 
-    def test_handle_error_response_400(self, error_handler, create_response_mock):
+    def test_handle_error_response_400(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 400 Bad Request responses."""
         response = create_response_mock(400, json_data={"error": "Bad Request", "message": "Invalid parameters"})
 
@@ -74,7 +89,11 @@ class TestErrorHandler:
         assert "Bad Request" in str(excinfo.value)
         assert "Invalid parameters" in str(excinfo.value)
 
-    def test_handle_error_response_401(self, error_handler, create_response_mock):
+    def test_handle_error_response_401(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 401 Unauthorized responses."""
         response = create_response_mock(401, json_data={"error": "Unauthorized", "message": "Invalid credentials"})
 
@@ -85,7 +104,11 @@ class TestErrorHandler:
         assert excinfo.value.response.status_code == 401
         # The message content is already checked in the exception string
 
-    def test_handle_error_response_403(self, error_handler, create_response_mock):
+    def test_handle_error_response_403(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 403 Forbidden responses."""
         response = create_response_mock(403, json_data={"error": "Forbidden", "message": "Insufficient permissions"})
 
@@ -98,7 +121,12 @@ class TestErrorHandler:
         assert "Forbidden" in str(excinfo.value)
         assert "Insufficient permissions" in str(excinfo.value)
 
-    def test_handle_error_response_404(self, error_handler, create_response_mock, mocker):
+    def test_handle_error_response_404(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+        mocker: MockerFixture,
+    ) -> None:
         """Test handling of 404 Not Found responses."""
         mock_request = mocker.Mock(spec=requests.Request)
         mock_request.method = "GET"
@@ -115,7 +143,11 @@ class TestErrorHandler:
         assert "Not Found" in str(excinfo.value)
         assert "Resource does not exist" in str(excinfo.value)
 
-    def test_handle_error_response_422(self, error_handler, create_response_mock):
+    def test_handle_error_response_422(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 422 Unprocessable Entity responses."""
         response = create_response_mock(422, json_data={"error": "Validation Error", "fields": {"name": "Required"}})
 
@@ -127,7 +159,11 @@ class TestErrorHandler:
         assert "Validation Error" in str(excinfo.value)
         assert "'fields': {'name': 'Required'}" in str(excinfo.value)  # Check for field details representation
 
-    def test_handle_error_response_500(self, error_handler, create_response_mock):
+    def test_handle_error_response_500(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 500 Internal Server Error responses."""
         response = create_response_mock(500, json_data={"error": "Internal Server Error"})
 
@@ -139,7 +175,11 @@ class TestErrorHandler:
         assert excinfo.value.response.status_code == 500
         assert "Internal Server Error" in str(excinfo.value)
 
-    def test_handle_error_response_502(self, error_handler, create_response_mock):
+    def test_handle_error_response_502(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 502 Bad Gateway responses."""
         response = create_response_mock(502, json_data={"error": "Bad Gateway"})
 
@@ -152,7 +192,11 @@ class TestErrorHandler:
         assert excinfo.value.response.status_code == 502
         assert "Bad Gateway" in str(excinfo.value)
 
-    def test_handle_error_response_503(self, error_handler, create_response_mock):
+    def test_handle_error_response_503(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+    ) -> None:
         """Test handling of 503 Service Unavailable responses."""
         response = create_response_mock(503, json_data={"error": "Service Unavailable"})
 
@@ -164,11 +208,17 @@ class TestErrorHandler:
         assert excinfo.value.response.status_code == 503
         assert "Service Unavailable" in str(excinfo.value)
 
-    def test_handle_error_response_invalid_json(self, error_handler, create_response_mock, mocker):
+    def test_handle_error_response_invalid_json(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+        mocker: MockerFixture,
+    ) -> None:
         """Test handling of responses with invalid JSON."""
         response = create_response_mock(400, text="Not a JSON response")
-        response.json.side_effect = requests.exceptions.JSONDecodeError("Invalid JSON", "", 0)
-        response.raise_for_status.side_effect = requests.HTTPError("400 Client Error")
+        cast_response = cast(Any, response)
+        cast_response.json.side_effect = requests.exceptions.JSONDecodeError("Invalid JSON", "", 0)
+        cast_response.raise_for_status.side_effect = requests.HTTPError("400 Client Error")
 
         # Expect BadRequestError because the status code is 400
         # The ErrorHandler currently prioritizes status code mapping over JSON parsing errors
@@ -182,7 +232,12 @@ class TestErrorHandler:
         # Check that the message includes the raw text since JSON parsing failed
         assert "Not a JSON response" in str(excinfo.value)
 
-    def test_register_status_code_handler(self, error_handler, create_response_mock, mocker):
+    def test_register_status_code_handler(
+        self,
+        error_handler: ErrorHandler,
+        create_response_mock: Callable[..., Response],
+        mocker: MockerFixture,
+    ) -> None:
         """Test registering a custom status code handler."""
 
         class CustomError(APIError):

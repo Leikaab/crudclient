@@ -8,10 +8,16 @@
 			"ppa": true,
 			"version": "os-provided"
 		},
-		"ghcr.io/devcontainers/features/node:1": {
-			"version": "lts"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/aws-cli:1": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "nodeGypDependencies": true,
+			"installYarnUsingApt": false,
+            "version": "18",
+            "nvmVersion": "latest"
+        }
 	},
 	"customizations": {
 		"vscode": {
@@ -27,7 +33,8 @@
 				"tamasfe.even-better-toml",
 				"RooVeterinaryInc.roo-cline",
 				"ms-azuretools.vscode-containers",
-				"bierner.markdown-mermaid"
+				"bierner.markdown-mermaid",
+				"augment.vscode-augment"
 			]
 		}
 	},

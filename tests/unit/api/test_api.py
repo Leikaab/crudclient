@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from crudclient.api import API
@@ -13,7 +15,7 @@ from .conftest import MockAPI, MockCrud
 
 class TestAPI:
 
-    def test_init_with_client(self, default_mock_client_config):
+    def test_init_with_client(self, default_mock_client_config: Any) -> None:
         # Arrange
         client = Client(default_mock_client_config)
 
@@ -24,7 +26,7 @@ class TestAPI:
         assert api.client == client
         assert api.client_config is None
 
-    def test_init_with_client_config(self, default_mock_client_config):
+    def test_init_with_client_config(self, default_mock_client_config: Any) -> None:
         # Arrange
 
         # Act
@@ -34,7 +36,7 @@ class TestAPI:
         assert isinstance(api.client, Client)
         assert api.client_config == default_mock_client_config
 
-    def test_init_with_invalid_client(self):
+    def test_init_with_invalid_client(self) -> None:
         # Arrange
         invalid_client = "invalid_client"
 
@@ -42,7 +44,7 @@ class TestAPI:
         with pytest.raises(ConfigurationError):
             MockAPI(client=invalid_client)  # type: ignore
 
-    def test_init_with_invalid_client_config(self):
+    def test_init_with_invalid_client_config(self) -> None:
         # Arrange
         invalid_config = "invalid_config"
 
@@ -50,7 +52,7 @@ class TestAPI:
         with pytest.raises(ConfigurationError):
             MockAPI(client_config=invalid_config)  # type: ignore
 
-    def test_register_endpoints(self, default_mock_client_config):
+    def test_register_endpoints(self, default_mock_client_config: Any) -> None:
         # Arrange
 
         # Act
@@ -60,7 +62,7 @@ class TestAPI:
         assert hasattr(api, "test_resource")
         assert isinstance(api.test_resource, MockCrud)
 
-    def test_initialize_client_success(self, default_mock_client_config):
+    def test_initialize_client_success(self, default_mock_client_config: Any) -> None:
         # Arrange
 
         # Act
@@ -69,15 +71,15 @@ class TestAPI:
         # Assert
         assert isinstance(api.client, Client)
 
-    def test_initialize_client_failure(self, standard_data):
+    def test_initialize_client_failure(self, standard_data: Any) -> None:
         # Arrange
         class FailingAPI(API):
             client_class = None
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname=standard_data.get("hostname"))
@@ -86,7 +88,7 @@ class TestAPI:
         with pytest.raises(ConfigurationError):
             FailingAPI(client_config=client_config)
 
-    def test_context_manager(self, default_mock_client_config, requests_mocker, standard_data):
+    def test_context_manager(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:
         # Arrange
         requests_mocker.get(standard_data.get("full_url"), json={"data": [1, 2, 3]})
 
@@ -98,7 +100,7 @@ class TestAPI:
         # Assert
         assert response == [1, 2, 3]
 
-    def test_close(self, default_mock_client_config, mocker):
+    def test_close(self, default_mock_client_config: Any, mocker: Any) -> None:
         """Ensure API.close closes the underlying client and resets attributes."""
 
         # Arrange
@@ -122,7 +124,7 @@ class TestAPI:
         assert api.client is None
         assert client.http_client.session_manager.is_closed
 
-    def test_use_custom_resource(self, default_mock_client_config, requests_mocker, standard_data):
+    def test_use_custom_resource(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:
         # Arrange
         api = MockAPI(client_config=default_mock_client_config)
         requests_mocker.get(standard_data.get("full_url"), json={"data": [1, 2, 3]})
@@ -135,7 +137,7 @@ class TestAPI:
         assert isinstance(custom_resource, MockCrud)
         assert response == [1, 2, 3]
 
-    def test_logging(self, default_mock_client_config, mocker):
+    def test_logging(self, default_mock_client_config: Any, mocker: Any) -> None:
         # Arrange
         mock_logger = mocker.patch("crudclient.api.logger")
 
@@ -145,7 +147,7 @@ class TestAPI:
         # Assert
         mock_logger.debug.assert_called_with(f"Initializing API class with client class Client, using client_config: {default_mock_client_config}")
 
-    def test_api_args_kwargs(self, default_mock_client_config):
+    def test_api_args_kwargs(self, default_mock_client_config: Any) -> None:
         # Arrange
         test_kwargs = {"a": "b", "c": "d"}
 
@@ -155,19 +157,19 @@ class TestAPI:
         # Assert
         assert api.api_kwargs == test_kwargs
 
-    def test_client_initialization_error_handling(self):
+    def test_client_initialization_error_handling(self) -> None:
         # Arrange
         class ErrorClient(Client):
-            def __init__(self, config):
+            def __init__(self, config: ClientConfig) -> None:
                 raise Exception("Test error")
 
         class ErrorAPI(API):
             client_class = ErrorClient
 
-            def _register_endpoints(self):
+            def _register_endpoints(self) -> None:
                 pass
 
-            def _register_groups(self):
+            def _register_groups(self) -> None:
                 pass
 
         client_config = ClientConfig(hostname="https://api.example.com")
@@ -176,20 +178,20 @@ class TestAPI:
         with pytest.raises(ConfigurationError):
             ErrorAPI(client_config=client_config)
 
-    def test_exit_with_exception(self, default_mock_client_config, requests_mocker, standard_data):
+    def test_exit_with_exception(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:
         # Arrange
         requests_mocker.get(standard_data.get("full_url"), json={"status": "success"})
 
-        def raise_exception():
+        def raise_exception() -> None:
             with MockAPI(client_config=default_mock_client_config) as api:
-                api.test_resource.list()  # type: ignore
+                api.test_resource.list()  # type: ignore[attr-defined]
                 raise ValueError("Test exception")
 
         # Act & Assert
         with pytest.raises(ValueError):
             raise_exception()
 
-    def test_crud_operations(self, default_mock_client_config, requests_mocker, standard_data):
+    def test_crud_operations(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:
         # Arrange
         api = MockAPI(client_config=default_mock_client_config)
         hostname = standard_data.get("full_url")
@@ -218,10 +220,10 @@ class TestAPI:
         assert update_response == {"id": 4, "name": "updated"}
 
         # Act & Assert - Delete operation
-        delete_response = api.test_resource.destroy("4")
+        delete_response: None = api.test_resource.destroy("4")  # type: ignore[func-returns-value]
         assert delete_response is None
 
-    def test_custom_action(self, default_mock_client_config, requests_mocker, standard_data):
+    def test_custom_action(self, default_mock_client_config: Any, requests_mocker: Any, standard_data: Any) -> None:
         # Arrange
         api = MockAPI(client_config=default_mock_client_config)
         requests_mocker.post(f"{standard_data.get('full_url')}/4/activate", json={"status": "activated"})

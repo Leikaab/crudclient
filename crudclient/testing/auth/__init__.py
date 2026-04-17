@@ -18,7 +18,6 @@ from .factory import (
     create_custom_auth_mock,
     create_oauth_mock,
 )
-from .verification import AuthVerificationHelpers
 
 __all__ = [
     # Base class
@@ -35,6 +34,4 @@ __all__ = [
     "create_api_key_auth_mock",
     "create_custom_auth_mock",
     "create_oauth_mock",
-    # Verification helpers
-    "AuthVerificationHelpers",
 ]

@@ -1,6 +1,7 @@
 """Unit tests for HttpLifecycleLogger request completion logging."""
 
 import json as json_lib
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -35,7 +36,7 @@ def mock_response(mock_prepared_request: MagicMock) -> MagicMock:
     response.elapsed.total_seconds.return_value = 0.555
     response.text = response._content.decode("utf-8")
 
-    def mock_json():
+    def mock_json() -> Any:
         return json_lib.loads(response.text)  # noqa: E704
 
     response.json = mock_json
@@ -53,7 +54,7 @@ def test_log_request_completion_success(
     mock_logger: MagicMock,
     mock_response: MagicMock,
     patch_time: MagicMock,  # Explicitly request fixture
-):
+) -> None:
     """Verify successful request completion logging."""
     # patch_time provides start_time=100.0, end_time=100.555
     start_time = 100.0  # Matches patch_time.side_effect[0]
@@ -75,7 +76,7 @@ def test_log_request_completion_failure_response(
     mock_logger: MagicMock,
     mock_response: MagicMock,
     patch_time: MagicMock,  # Explicitly request fixture
-):
+) -> None:
     """Verify failed request completion logging (with error response)."""
     # patch_time provides start_time=100.0, end_time=100.555
     start_time = 100.0  # Matches patch_time.side_effect[0]
@@ -106,7 +107,7 @@ def test_log_request_completion_failure_exception(
     mock_logger: MagicMock,
     mock_prepared_request: MagicMock,  # Need request info for the log
     patch_time: MagicMock,  # Explicitly request fixture
-):
+) -> None:
     """Verify failed request completion logging (with exception)."""
     # patch_time provides start_time=100.0, end_time=100.555
     start_time = 100.0  # Matches patch_time.side_effect[0]
@@ -128,7 +129,7 @@ def test_log_request_completion_no_outcome(
     mock_logger: MagicMock,
     mock_prepared_request: MagicMock,
     patch_time: MagicMock,  # Explicitly request fixture
-):
+) -> None:
     """Verify request completion logging when outcome is None."""
     # patch_time provides start_time=100.0, end_time=100.555
     start_time = 100.0  # Matches patch_time.side_effect[0]

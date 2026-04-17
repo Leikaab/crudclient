@@ -25,7 +25,7 @@ class DeleteMock(BaseCrudMock):
         self._cascade_enabled: bool = False
         self._soft_delete_enabled: bool = False
 
-    def delete(self, url: str, **kwargs: Any) -> Any:
+    def delete(self, url: str, **kwargs: Any) -> MockResponse | Dict[str, Any] | str | bytes | None:
         """Handle a DELETE request to the mock API."""
         # Process parent_id if present in kwargs
         parent_id = kwargs.pop("parent_id", None)

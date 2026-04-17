@@ -2,20 +2,29 @@
 Tests for general authentication setup failure handling in the crudclient library.
 """
 
+from typing import Callable, Dict
+
 import pytest
+import requests_mock
 from apiconfig.exceptions.auth import AuthStrategyError
+from pytest_mock import MockerFixture
 
 from crudclient.auth import CustomAuth
 from crudclient.client import Client
+from crudclient.config import ClientConfig
 
 # Import fixtures from conftest.py - Fixtures are typically auto-discovered by pytest
-from .conftest import MockBearerAuthConfig  # Needed for test_auth_setup_failure
 
 
 class TestAuthFailures:
     """Tests for general authentication failure handling."""
 
-    def test_auth_setup_failure(self, mock_request, mocker):
+    def test_auth_setup_failure(
+        self,
+        mock_request: requests_mock.Mocker,
+        mocker: MockerFixture,
+        bearer_auth_config: ClientConfig,
+    ) -> None:
         """Test handling of authentication setup failures."""
         # Arrange
         # Create a bearer auth mock with a failing callback
@@ -25,7 +34,7 @@ class TestAuthFailures:
         mock_prepare_headers.side_effect = Exception("Auth setup failed")
 
         # Create a client with the failing auth
-        config = MockBearerAuthConfig()
+        config = bearer_auth_config
 
         # Act & Assert
         # Creating the client or making a request should raise the exception
@@ -37,7 +46,11 @@ class TestAuthFailures:
         # Check that the exception contains the error details
         assert "Auth setup failed" in str(excinfo.value)
 
-    def test_auth_param_setup_failure(self, mock_request, create_mock_client_config):
+    def test_auth_param_setup_failure(
+        self,
+        mock_request: requests_mock.Mocker,
+        create_mock_client_config: Callable[..., ClientConfig],
+    ) -> None:
         """
         Test that exceptions during auth parameter setup are propagated.
 
@@ -48,11 +61,11 @@ class TestAuthFailures:
         # Arrange
         exception_message = "Failed during auth param setup"
 
-        def failing_param_callback():
+        def failing_param_callback() -> Dict[str, str]:
             """Simulates a failure during parameter preparation."""
             raise ValueError(exception_message)
 
-        def dummy_header_callback():
+        def dummy_header_callback() -> Dict[str, str]:
             """A placeholder header callback, not expected to be called."""
             return {"X-Dummy-Header": "dummy_value"}
 

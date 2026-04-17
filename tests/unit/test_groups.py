@@ -132,7 +132,7 @@ class TestResourceGroupAsCrud:
         # Assert
         # Check that the client was called with the correct path
         mock_client.get.assert_called_once()
-        args, kwargs = mock_client.get.call_args
+        args, _ = mock_client.get.call_args
         assert args[0] == "test-group"
         assert isinstance(result, list)
         assert len(result) == 2
@@ -150,7 +150,7 @@ class TestResourceGroupAsCrud:
         # Assert
         # Check that the client was called with the correct path
         mock_client.get.assert_called_once()
-        args, kwargs = mock_client.get.call_args
+        args, _ = mock_client.get.call_args
         assert args[0] == "test-group/123"
         assert isinstance(result, ResourceTestModel)
         assert result.id == 123
@@ -189,7 +189,7 @@ class TestResourceGroupAsCrud:
         # Assert
         # Check that the client was called with the correct path
         mock_client.put.assert_called_once()
-        args, kwargs = mock_client.put.call_args
+        args, _ = mock_client.put.call_args
         assert args[0] == "test-group/123"
         assert isinstance(result, ResourceTestModel)
         assert result.id == 123
@@ -202,12 +202,12 @@ class TestResourceGroupAsCrud:
         resource_id = "123"
 
         # Act
-        result = group.destroy(resource_id=resource_id)
+        result = group.destroy(resource_id=resource_id)  # type: ignore[func-returns-value]
 
         # Assert
         # Check that the client was called with the correct path
         mock_client.delete.assert_called_once()
-        args, kwargs = mock_client.delete.call_args
+        args, _ = mock_client.delete.call_args
         assert args[0] == "test-group/123"
         assert result is None
 
@@ -281,5 +281,5 @@ class TestResourceGroupChildRegistration:
         assert result.name == "Nested Resource Item"
 
         mock_client.get.assert_called_once()
-        args, kwargs = mock_client.get.call_args
+        args, _ = mock_client.get.call_args
         assert args[0] == "parent-group/child-group/child-resources/456"

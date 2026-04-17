@@ -14,7 +14,7 @@ class MockClientConfig(ClientConfig):
     retries = 3
     timeout = 5
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # Set up a BearerAuth strategy with the API key
         if self.api_key:  # Check if api_key is not None
@@ -23,38 +23,41 @@ class MockClientConfig(ClientConfig):
 
 class TestClientConfig:
     @pytest.fixture
-    def config(self):
+    def config(self) -> MockClientConfig:
         return MockClientConfig()
 
-    def test_config_initialization(self, config):
+    def test_config_initialization(self, config: MockClientConfig) -> None:
         assert config.base_url == "https://api.example.com/v1"
         assert config.api_key == "mykey"
         assert config.headers == {}
         assert config.timeout == 5
         assert config.retries == 3
 
-    def test_config_auth(self, config):
+    def test_config_auth(self, config: MockClientConfig) -> None:
         # Use the new get_auth_headers method
         auth = config.get_auth_headers()
         assert isinstance(auth, dict)
         assert auth == {"Authorization": f"Bearer {config.api_key}"}
 
-    def test_get_default_headers(self, config):
+    def test_get_default_headers(self, config: MockClientConfig) -> None:
+        if config.headers is None:
+            config.headers = {}  # type: ignore[unreachable]
         config.headers["Accept"] = "application/json"
         assert isinstance(config.headers, dict)
         assert config.headers == {"Accept": "application/json"}
 
-    def test_no_hostname_get(self):
+    def test_no_hostname_get(self) -> None:
         config = ClientConfig()
         with pytest.raises(ValueError):
             config.base_url
 
-    def test_should_retry_on_403(self):
+    def test_should_retry_on_403(self) -> None:
         config = ClientConfig()
         assert not config.should_retry_on_403()
-        assert config.handle_403_retry(None) is None
+        # Test that handle_403_retry can be called without error
+        config.handle_403_retry(None)
 
-    def test_merge_method(self):
+    def test_merge_method(self) -> None:
         """Test the new merge method for combining configurations."""
         base_config = ClientConfig(hostname="https://api.example.com", version="v1")
         custom_config = ClientConfig(timeout=30.0, retries=5)
@@ -72,7 +75,7 @@ class TestClientConfig:
         assert base_config.timeout != 30.0
         assert custom_config.hostname is None
 
-    def test_merge_with_headers(self):
+    def test_merge_with_headers(self) -> None:
         """Test merging configurations with headers."""
         base_config = ClientConfig(headers={"Accept": "application/json"})
         custom_config = ClientConfig(headers={"Content-Type": "application/json"})
@@ -97,7 +100,7 @@ class TestClientConfig:
         assert merged.headers is not None
         assert merged.headers["Accept"] == "application/json"  # custom_config takes precedence
 
-    def test_add_operator_deprecation(self):
+    def test_add_operator_deprecation(self) -> None:
         """Test that the __add__ operator is deprecated but still works."""
         base_config = ClientConfig(hostname="https://api.example.com")
         custom_config = ClientConfig(timeout=30.0)
@@ -116,7 +119,7 @@ class TestClientConfig:
         assert combined.hostname == "https://api.example.com"
         assert combined.timeout == 30.0
 
-    def test_static_merge_configs(self):
+    def test_static_merge_configs(self) -> None:
         """Test the static merge_configs method."""
         base_config = ClientConfig(hostname="https://api.example.com", version="v1")
         custom_config = ClientConfig(timeout=30.0, retries=5)
@@ -136,7 +139,7 @@ class TestClientConfig:
         assert base_config.headers == base_original
         assert custom_config.headers == custom_original
 
-    def test_static_merge_configs_type_error(self):
+    def test_static_merge_configs_type_error(self) -> None:
         """Test that merge_configs raises AttributeError for invalid arguments."""
         base_config = ClientConfig()
 

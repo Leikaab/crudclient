@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 
@@ -29,7 +29,7 @@ class OneflowConfig(ClientConfig):
     api_key = os.getenv("ONEFLOW_API_KEY")
     headers: Optional[Dict[str, str]] = {"x-oneflow-user-email": os.getenv("ONEFLOW_USER_EMAIL", "")}
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if self.api_key:
             self.auth_strategy = ApiKeyAuth(api_key=self.api_key, header_name="x-oneflow-api-token")
@@ -59,7 +59,20 @@ class OneflowDataFields(Crud[DataField]):
     _methods: List[str] = ["update", "destroy"]
     _parent_resource = OneflowTemplateTypes
 
-    def update(self, resource_id: str, data: Dict[str, Any] | DataField, parent_id: str | None = None) -> DataField | JSONDict:
+    def update(
+        self,
+        resource_id: Optional[str] = None,
+        data: Optional[Dict[str, Any] | DataField] = None,
+        parent_id: Optional[str] = None,
+        update_mode: Optional[str] = None,
+        params: Optional[JSONDict] = None,
+        **kwargs: Any,
+    ) -> Union[DataField, JSONDict]:
+        # OneFlow API requires these parameters, so validate them
+        if resource_id is None:
+            raise ValueError("Resource id is required for updating data fields")
+        if data is None:
+            raise ValueError("Data is required for updating data fields")
         if parent_id is None:
             raise ValueError("Parent id is required for updating data fields")
 
@@ -80,7 +93,7 @@ class OneflowDataFields(Crud[DataField]):
 class OneflowAPI(API):
     client_class = Client
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         assert self.client is not None, "Client is not initialized"
 
         self.users = UsersCrud(self.client)

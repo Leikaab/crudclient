@@ -7,7 +7,7 @@ from crudclient.auth import BearerAuth
 from crudclient.testing.auth.bearer import BearerAuthMock
 
 
-def test_bearer_auth_mock_init_defaults():
+def test_bearer_auth_mock_init_defaults() -> None:
     """Test default initialization."""
     with freeze_time("2023-01-01 12:00:00"):
         mock = BearerAuthMock()
@@ -29,7 +29,7 @@ def test_bearer_auth_mock_init_defaults():
         assert meta["client_id"] == "default_client"
 
 
-def test_bearer_auth_mock_init_custom_token():
+def test_bearer_auth_mock_init_custom_token() -> None:
     """Test initialization with a custom token."""
     with freeze_time("2023-01-01 12:00:00"):
         mock = BearerAuthMock(token="custom_token_123")
@@ -39,7 +39,7 @@ def test_bearer_auth_mock_init_custom_token():
         assert mock.auth_strategy.access_token == "custom_token_123"
 
 
-def test_with_token():
+def test_with_token() -> None:
     """Test setting a new token."""
     with freeze_time("2023-01-01 12:00:00"):
         mock = BearerAuthMock(token="initial_token")
@@ -51,7 +51,7 @@ def test_with_token():
         assert mock.auth_strategy.access_token == "new_token_abc"
 
 
-def test_with_token_metadata():
+def test_with_token_metadata() -> None:
     """Test updating token metadata."""
     mock = BearerAuthMock(token="my_token")
     mock.with_token_metadata(user_id="user1", client_id="client_xyz", scopes=["profile", "email"])
@@ -61,7 +61,7 @@ def test_with_token_metadata():
     assert meta["scopes"] == ["profile", "email"]
 
 
-def test_with_token_expiration():
+def test_with_token_expiration() -> None:
     """Test setting token expiration."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         mock = BearerAuthMock(token="expiring_token")
@@ -77,7 +77,7 @@ def test_with_token_expiration():
         assert mock.validate_token("expiring_token") is False
 
 
-def test_with_token_expiration_for_specific_token():
+def test_with_token_expiration_for_specific_token() -> None:
     """Test setting expiration for a token other than the current one."""
     with freeze_time("2023-01-01 12:00:00") as frozen_time:
         mock = BearerAuthMock(token="current_token")
@@ -98,7 +98,7 @@ def test_with_token_expiration_for_specific_token():
         assert mock.validate_token("current_token") is True
 
 
-def test_with_token_format_validation():
+def test_with_token_format_validation() -> None:
     """Test token format validation."""
     # Ensure the token being tested is considered issued
     mock = BearerAuthMock().with_token("abcde-123").with_token_format_validation(r"^[a-z]{5}-\d{3}$")
@@ -108,7 +108,7 @@ def test_with_token_format_validation():
     assert mock.validate_token("invalid-format") is False
 
 
-def test_with_valid_token_prefix():
+def test_with_valid_token_prefix() -> None:
     """Test valid token prefix validation."""
     mock = BearerAuthMock().with_valid_token_prefix("prod_").with_valid_token_prefix("test_")
     mock.with_token("prod_abc123")  # Set a token matching a prefix
@@ -121,7 +121,7 @@ def test_with_valid_token_prefix():
     assert mock.validate_token("valid_token") is False  # Default token doesn't match prefix
 
 
-def test_with_required_scopes():
+def test_with_required_scopes() -> None:
     """Test required scopes validation."""
     mock = BearerAuthMock(token="scoped_token")
     mock.with_token_metadata(scopes=["read", "admin"])
@@ -138,7 +138,7 @@ def test_with_required_scopes():
     assert mock.validate_token("scoped_token") is False  # Missing 'profile'
 
 
-def test_with_jwt_validation():
+def test_with_jwt_validation() -> None:
     """Test basic JWT structure validation."""
     mock = BearerAuthMock().with_jwt_validation()
     # Default token is not JWT format
@@ -156,7 +156,7 @@ def test_with_jwt_validation():
     assert mock.validate_token(invalid_jwt) is False
 
 
-def test_revoke_token():
+def test_revoke_token() -> None:
     """Test revoking a token."""
     mock = BearerAuthMock(token="token_to_revoke")
     assert mock.validate_token("token_to_revoke") is True
@@ -165,7 +165,7 @@ def test_revoke_token():
     assert mock.validate_token("token_to_revoke") is False
 
 
-def test_revoke_non_issued_token():
+def test_revoke_non_issued_token() -> None:
     """Test revoking a token that was never issued."""
     mock = BearerAuthMock()
     mock.revoke_token("non_existent_token")
@@ -173,7 +173,7 @@ def test_revoke_non_issued_token():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_refresh_token_success():
+def test_refresh_token_success() -> None:
     """Test successful token refresh."""
     mock = BearerAuthMock(token="initial_token")
     mock.with_token_expiration(expires_in_seconds=-1)  # Expired
@@ -195,7 +195,7 @@ def test_refresh_token_success():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_refresh_token_not_possible():
+def test_refresh_token_not_possible() -> None:
     """Test refresh when not enabled."""
     mock = BearerAuthMock(token="initial_token")
     mock.with_token_expiration(expires_in_seconds=-1)  # Expired
@@ -210,7 +210,7 @@ def test_refresh_token_not_possible():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_refresh_token_max_attempts():
+def test_refresh_token_max_attempts() -> None:
     """Test refresh hitting max attempts."""
     mock = BearerAuthMock(token="initial_token")
     mock.with_token_expiration(expires_in_seconds=-1)  # Expired
@@ -234,31 +234,31 @@ def test_refresh_token_max_attempts():
     assert mock.token == "initial_token_refreshed_1"  # Token doesn't change
 
 
-def test_verify_auth_header_valid():
+def test_verify_auth_header_valid() -> None:
     """Test verifying a valid Bearer auth header."""
     mock = BearerAuthMock(token="abc")
     assert mock.verify_auth_header("Bearer abc") is True
 
 
-def test_verify_auth_header_invalid_prefix():
+def test_verify_auth_header_invalid_prefix() -> None:
     """Test verifying header with wrong prefix."""
     mock = BearerAuthMock(token="abc")
     assert mock.verify_auth_header("Basic abc") is False
 
 
-def test_verify_auth_header_missing_space():
+def test_verify_auth_header_missing_space() -> None:
     """Test verifying header missing space after Bearer."""
     mock = BearerAuthMock(token="abc")
     assert mock.verify_auth_header("Bearerabc") is False
 
 
-def test_verify_auth_header_invalid_token():
+def test_verify_auth_header_invalid_token() -> None:
     """Test verifying header with an invalid token."""
     mock = BearerAuthMock(token="abc")
     assert mock.verify_auth_header("Bearer xyz") is False
 
 
-def test_verify_token_usage():
+def test_verify_token_usage() -> None:
     """Test verify_token_usage checks issued and not revoked."""
     mock = BearerAuthMock(token="t1")
     mock.issued_tokens.append("t2")
@@ -269,7 +269,7 @@ def test_verify_token_usage():
     assert mock.verify_token_usage("t3") is False  # Not issued
 
 
-def test_get_token_metadata():
+def test_get_token_metadata() -> None:
     """Test retrieving token metadata."""
     mock = BearerAuthMock(token="meta_token")
     mock.with_token_metadata(user_id="meta_user")
@@ -279,14 +279,14 @@ def test_get_token_metadata():
     assert mock.get_token_metadata("non_existent") is None
 
 
-def test_get_auth_headers():
+def test_get_auth_headers() -> None:
     """Test generating the Authorization header."""
     mock = BearerAuthMock("my_bearer_token")
     assert mock.get_auth_headers() == ("Authorization", "Bearer my_bearer_token")
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_handle_auth_error_expired_refreshable():
+def test_handle_auth_error_expired_refreshable() -> None:
     """Test handle_auth_error attempts refresh for expired token."""
     mock = BearerAuthMock(token="initial")
     mock.with_token_expiration(expires_in_seconds=-1)  # Expired
@@ -300,7 +300,7 @@ def test_handle_auth_error_expired_refreshable():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_handle_auth_error_expired_not_refreshable():
+def test_handle_auth_error_expired_not_refreshable() -> None:
     """Test handle_auth_error does not refresh if not configured."""
     mock = BearerAuthMock(token="initial")
     mock.with_token_expiration(expires_in_seconds=-1)  # Expired
@@ -312,7 +312,7 @@ def test_handle_auth_error_expired_not_refreshable():
 
 
 @freeze_time("2023-01-01 12:00:00")
-def test_handle_auth_error_not_expired():
+def test_handle_auth_error_not_expired() -> None:
     """Test handle_auth_error does not refresh if token not expired."""
     mock = BearerAuthMock(token="initial")
     mock.with_token_expiration(expires_in_seconds=3600)  # Not expired
@@ -323,7 +323,7 @@ def test_handle_auth_error_not_expired():
     assert mock.token == "initial"
 
 
-def test_get_auth_strategy():
+def test_get_auth_strategy() -> None:
     """Test getting the underlying auth strategy."""
     mock = BearerAuthMock("strategy_token")
     strategy = mock.get_auth_strategy()

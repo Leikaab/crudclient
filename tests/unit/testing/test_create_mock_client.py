@@ -26,7 +26,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_basic_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_basic_auth(self, mock_configure_auth, mock_create_basic):
+    def test_create_mock_client_with_basic_auth(self, mock_configure_auth: MagicMock, mock_create_basic: MagicMock) -> None:
         """Test create_mock_client with basic auth type."""
         # Arrange
         # mock_auth_strategy = BasicAuth("user", "pass") # No longer needed
@@ -51,7 +51,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_bearer_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_bearer_auth(self, mock_configure_auth, mock_create_bearer):
+    def test_create_mock_client_with_bearer_auth(self, mock_configure_auth: MagicMock, mock_create_bearer: MagicMock) -> None:
         """Test create_mock_client with bearer auth type."""
         # Arrange
         # mock_auth_strategy = BearerAuth("token") # No longer needed
@@ -75,7 +75,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_api_key_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth, mock_create_apikey):
+    def test_create_mock_client_with_apikey_auth_header(self, mock_configure_auth: MagicMock, mock_create_apikey: MagicMock) -> None:
         """Test create_mock_client with apikey auth type (header)."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -99,7 +99,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_api_key_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth, mock_create_apikey):
+    def test_create_mock_client_with_apikey_auth_param(self, mock_configure_auth: MagicMock, mock_create_apikey: MagicMock) -> None:
         """Test create_mock_client with apikey auth type (param)."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -125,7 +125,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_custom_auth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_custom_auth(self, mock_configure_auth, mock_create_custom):
+    def test_create_mock_client_with_custom_auth(self, mock_configure_auth: MagicMock, mock_create_custom: MagicMock) -> None:
         """Test create_mock_client with custom auth type."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -133,10 +133,10 @@ class TestCreateMockClient:
         # mock_custom_auth_instance.get_auth_strategy.return_value = mock_auth_strategy # No longer needed
         mock_create_custom.return_value = mock_custom_auth_instance
 
-        def header_cb():
+        def header_cb() -> dict[str, str]:
             return {"X-Custom": "header"}
 
-        def param_cb():
+        def param_cb() -> dict[str, str]:
             return {"custom_param": "value"}
 
         auth_config = {"header_callback": header_cb, "param_callback": param_cb}
@@ -155,7 +155,7 @@ class TestCreateMockClient:
 
     @patch("crudclient.testing.auth.create_oauth_mock")
     @patch("crudclient.testing.factory_helpers._configure_auth_mock")
-    def test_create_mock_client_with_oauth_auth(self, mock_configure_auth, mock_create_oauth):
+    def test_create_mock_client_with_oauth_auth(self, mock_configure_auth: MagicMock, mock_create_oauth: MagicMock) -> None:
         """Test create_mock_client with oauth auth type."""
         # Arrange
         # mock_auth_strategy = MagicMock() # No longer needed
@@ -204,7 +204,7 @@ class TestCreateMockClient:
         Verifier.verify_called_once_with(mock_configure_auth, "__call__", ANY, auth_config)  # Use ANY
         assert isinstance(mock_client.get_auth_strategy(), CustomAuth)  # Check type (OAuthMock uses CustomAuth internally)
 
-    def test_create_mock_client_with_direct_auth_strategy(self):
+    def test_create_mock_client_with_direct_auth_strategy(self) -> None:
         """Test create_mock_client with a direct auth_strategy instance."""
         # Arrange
         auth_strategy = BearerAuth(access_token="direct_token")
@@ -216,7 +216,7 @@ class TestCreateMockClient:
         assert mock_client.get_auth_strategy() is auth_strategy
 
     @patch("crudclient.testing.factory_helpers._create_api_patterns")
-    def test_create_mock_client_with_api_type(self, mock_create_patterns):
+    def test_create_mock_client_with_api_type(self, mock_create_patterns: MagicMock) -> None:
         """Test create_mock_client with api_type."""
         # Arrange
         mock_patterns = [{"method": "GET", "path": "/test", "status_code": 200}]
@@ -244,7 +244,7 @@ class TestCreateMockClient:
             pass  # Placeholder
 
     @patch("crudclient.testing.factory_helpers._add_error_responses")
-    def test_create_mock_client_with_error_responses(self, mock_add_errors):
+    def test_create_mock_client_with_error_responses(self, mock_add_errors: MagicMock) -> None:
         """Test create_mock_client with error_responses."""
         # Arrange
         error_config = {"validation": {"status_code": 422}}
@@ -258,7 +258,7 @@ class TestCreateMockClient:
         # Use Verifier instead of unittest.mock assertions
         Verifier.verify_called_once_with(mock_add_errors, "__call__", mock_client, error_config)
 
-    def test_create_mock_client_with_response_patterns(self):
+    def test_create_mock_client_with_response_patterns(self) -> None:
         """Test create_mock_client with response_patterns."""
         # Arrange
         patterns = [{"method": "GET", "path": "/ping", "status_code": 200, "data": "pong"}, {"method": "POST", "path": "/echo", "status_code": 201}]
@@ -286,7 +286,7 @@ class TestCreateMockClient:
             Verifier.verify_any_call(mock_client.http_client.configure_response, "__call__", **patterns[0])
             Verifier.verify_any_call(mock_client.http_client.configure_response, "__call__", **patterns[1])
 
-    def test_create_mock_client_with_enable_spy(self):
+    def test_create_mock_client_with_enable_spy(self) -> None:
         """Test create_mock_client with enable_spy=True."""
         # Act
         mock_client = MockClientFactory.create_mock_client(enable_spy=True)
@@ -294,7 +294,7 @@ class TestCreateMockClient:
         # Assert
         assert mock_client.enable_spy is True
 
-    def test_create_mock_client_with_config_dict(self):
+    def test_create_mock_client_with_config_dict(self) -> None:
         """Test create_mock_client using a dictionary for config."""
         # Arrange
         config_dict = {"hostname": "https://dict-config.com", "version": "v2"}
@@ -309,7 +309,7 @@ class TestCreateMockClient:
         assert mock_client.config.hostname == "https://dict-config.com"
         assert mock_client.config.version == "v2"
 
-    def test_create_mock_client_with_config_object(self):
+    def test_create_mock_client_with_config_object(self) -> None:
         """Test create_mock_client using a ClientConfig object for config."""
         # Arrange
         config_obj = ClientConfig(hostname="https://obj-config.com", version="v3")
@@ -321,7 +321,7 @@ class TestCreateMockClient:
         assert mock_client.base_url == "https://obj-config.com"
         assert mock_client.config is config_obj  # Should use the provided object directly
 
-    def test_create_mock_client_no_config(self):
+    def test_create_mock_client_no_config(self) -> None:
         """Test create_mock_client with no config provided."""
         # Act
         mock_client = MockClientFactory.create_mock_client()

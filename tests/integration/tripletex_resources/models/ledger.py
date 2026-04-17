@@ -3,7 +3,7 @@ Models for Tripletex ledger resources.
 """
 
 from datetime import date as date_type
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -44,9 +44,9 @@ class Ledger(BaseModel):
     is_applicable_for_customer_invoice: Optional[bool] = Field(None, alias="isApplicableForCustomerInvoice")
     vat_type: Optional[IdUrl] = Field(None, alias="vatType")
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
-    def __init__(self, **data):
+    def __init__(self, **data: Any) -> None:
         super().__init__(**data)
         # Set id from account.id if account is present and id is not provided
         if self.id is None and hasattr(self, "account") and self.account is not None and hasattr(self.account, "id"):
@@ -59,7 +59,7 @@ class LedgerResponse(TripletexResponse[Ledger]):
     """
 
     # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class Voucher(BaseModel):
@@ -92,7 +92,7 @@ class Voucher(BaseModel):
     created: Optional[Change] = None
     updated: Optional[Change] = None
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class VoucherResponse(TripletexResponse[Voucher]):
@@ -101,7 +101,7 @@ class VoucherResponse(TripletexResponse[Voucher]):
     """
 
     # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")
 
 
 class HistoricalVoucher(BaseModel):
@@ -119,13 +119,4 @@ class HistoricalVoucher(BaseModel):
     year: Optional[int] = None
     postings: Optional[List[dict]] = None
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
-
-
-class HistoricalVoucherResponse(TripletexResponse[HistoricalVoucher]):
-    """
-    Response model for historical voucher endpoints.
-    """
-
-    # The data field is already defined in the parent class with proper aliases
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, extra="ignore")

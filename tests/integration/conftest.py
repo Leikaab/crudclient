@@ -5,7 +5,7 @@ Pytest configuration and fixtures for integration tests.
 import datetime
 import logging
 import uuid
-from typing import List, Optional
+from typing import Callable, Iterator, List, Optional
 
 import pytest
 from dotenv import load_dotenv
@@ -22,7 +22,7 @@ TEST_SUPPLIER_PREFIX = "TEST_CRUDCLIENT_"
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -31,7 +31,7 @@ def api():
 
 
 @pytest.fixture
-def supplier_tracker(api):
+def supplier_tracker(api) -> Iterator[list[int]]:
     """
     Track suppliers created during tests for cleanup.
     Returns a list that tests can append supplier IDs to.
@@ -43,14 +43,14 @@ def supplier_tracker(api):
     # Cleanup: Delete all tracked suppliers
     for supplier_id in created_suppliers:
         try:
-            api.suppliers.destroy(supplier_id)
+            api.suppliers.destroy(str(supplier_id))
             logger.info(f"Cleaned up test supplier with ID: {supplier_id}")
         except Exception as e:
             logger.warning(f"Failed to clean up supplier {supplier_id}: {e}")
 
 
 @pytest.fixture
-def unique_supplier_name():
+def unique_supplier_name() -> str:
     """
     Generate a unique supplier name with test prefix and timestamp.
     """
@@ -60,7 +60,7 @@ def unique_supplier_name():
 
 
 @pytest.fixture
-def find_unused_supplier_number(api):
+def find_unused_supplier_number(api) -> Callable[[int, int], Optional[str]]:
     """
     Factory fixture to find an unused supplier number.
     """
@@ -91,7 +91,7 @@ def find_unused_supplier_number(api):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def cleanup_orphaned_test_suppliers(request):
+def cleanup_orphaned_test_suppliers(request: pytest.FixtureRequest) -> None:
     """
     Session-level fixture that runs after all tests to clean up any orphaned test suppliers.
     This catches suppliers that weren't cleaned up due to test failures.
@@ -117,7 +117,7 @@ def cleanup_orphaned_test_suppliers(request):
                 for supplier in suppliers.values:
                     if supplier.name and supplier.name.startswith(TEST_SUPPLIER_PREFIX):
                         try:
-                            api.suppliers.destroy(supplier.id)
+                            api.suppliers.destroy(str(supplier.id))
                             cleaned_count += 1
                             logger.info(f"Cleaned up orphaned test supplier: {supplier.name} (ID: {supplier.id})")
                         except Exception as e:

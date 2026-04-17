@@ -23,6 +23,7 @@ from pydantic import (
 )
 
 T = TypeVar("T")
+T_co = TypeVar("T_co", covariant=True)
 
 
 class RoleBasedModel(BaseModel):
@@ -131,7 +132,7 @@ class IdRef(BaseModel):
 
     id: int
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
 
 class IdUrl(BaseModel):
@@ -150,7 +151,7 @@ class IdUrl(BaseModel):
     url: Optional[HttpUrl] = None
 
 
-class ListResponseWrapper(BaseModel, Generic[T]):
+class ListResponseWrapper(BaseModel, Generic[T_co]):
     """
     A generic model for API list responses with pagination.
 
@@ -164,7 +165,7 @@ class ListResponseWrapper(BaseModel, Generic[T]):
         Pagination links.
     count : int
         Total number of items.
-    data : List[T]
+    data : List[T_co]
         The actual data items (can be populated from 'values' alias).
     """
 
@@ -172,7 +173,7 @@ class ListResponseWrapper(BaseModel, Generic[T]):
 
     links: Optional[PaginationLinks] = Field(default=None, alias="_links", description="Pagination links")
     count: int = Field(..., ge=0, description="Total number of items")
-    data: List[T] = Field(..., validation_alias=AliasChoices("data", "values"), description="The actual data items")
+    data: List[T_co] = Field(..., validation_alias=AliasChoices("data", "values"), description="The actual data items")
 
     @field_validator("count")
     @classmethod

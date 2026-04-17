@@ -19,7 +19,7 @@ Example
 class MyAPI(API):
     client_class = MyClient
 
-    def _register_endpoints(self):
+    def _register_endpoints(self) -> None:
         self.contacts = Contacts(self.client)
 
 api = MyAPI(client_config=ClientConfig(**{'api_key': 'your_api_key'}))
@@ -48,7 +48,7 @@ from .exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T", bound=Crud)
+T = TypeVar("T", bound=Crud[Any])
 
 
 class API(ABC):

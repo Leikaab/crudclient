@@ -6,9 +6,9 @@ in real-world testing scenarios.
 """
 
 import pytest
+from apiconfig.testing.auth_verification import AuthHeaderVerification
 
 from crudclient.exceptions import AuthenticationError
-from crudclient.testing.auth import AuthVerificationHelpers
 
 from .common import create_mock_client
 
@@ -16,7 +16,7 @@ from .common import create_mock_client
 class TestBasicAuthExamples:
     """Examples of using Basic Authentication mocks."""
 
-    def test_basic_auth_success_scenario(self):
+    def test_basic_auth_success_scenario(self) -> None:
         """Example of testing a successful Basic Auth scenario."""
         # Create a mock client with Basic Auth
         client = create_mock_client(auth_type="basic", auth_config={"username": "testuser", "password": "testpass"})
@@ -39,12 +39,13 @@ class TestBasicAuthExamples:
         assert request.kwargs["headers"]["Authorization"].startswith("Basic ")
 
         # Use verification helpers
-        assert AuthVerificationHelpers.verify_basic_auth_header(request.kwargs["headers"]["Authorization"])
-        username, password = AuthVerificationHelpers.extract_basic_auth_credentials(request.kwargs["headers"]["Authorization"])
-        assert username == "testuser"
-        assert password == "testpass"
+        assert AuthHeaderVerification.verify_basic_auth_header(
+            request.kwargs["headers"]["Authorization"],
+            expected_username="testuser",
+            expected_password="testpass",
+        )
 
-    def test_basic_auth_failure_scenario(self):
+    def test_basic_auth_failure_scenario(self) -> None:
         """Example of testing a Basic Auth failure scenario."""
         # Create a mock client with Basic Auth configured to fail
         client = create_mock_client(

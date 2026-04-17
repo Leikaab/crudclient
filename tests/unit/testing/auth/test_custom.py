@@ -4,7 +4,7 @@ from crudclient.testing.auth.custom_auth_mock import CustomAuthMock
 # --- Test Initialization ---
 
 
-def test_custom_auth_mock_init_defaults():
+def test_custom_auth_mock_init_defaults() -> None:
     """Test default initialization (default header callback)."""
     mock = CustomAuthMock()
     assert mock.header_callback_spy is not None
@@ -24,10 +24,10 @@ def test_custom_auth_mock_init_defaults():
     assert mock.param_callback_spy is None
 
 
-def test_custom_auth_mock_init_with_header_callback():
+def test_custom_auth_mock_init_with_header_callback() -> None:
     """Test initialization with a custom header callback."""
 
-    def my_header_cb():
+    def my_header_cb() -> dict[str, str]:
         return {"Authorization": "Bearer test_token"}
 
     mock = CustomAuthMock(header_callback=my_header_cb)
@@ -40,10 +40,10 @@ def test_custom_auth_mock_init_with_header_callback():
     assert mock.header_callback_spy.target_function == my_header_cb
 
 
-def test_custom_auth_mock_init_with_param_callback():
+def test_custom_auth_mock_init_with_param_callback() -> None:
     """Test initialization with a custom param callback."""
 
-    def my_param_cb():
+    def my_param_cb() -> dict[str, str]:
         return {"api_key": "test_key"}
 
     mock = CustomAuthMock(param_callback=my_param_cb)
@@ -59,13 +59,13 @@ def test_custom_auth_mock_init_with_param_callback():
     assert mock.param_callback_spy.target_function == my_param_cb
 
 
-def test_custom_auth_mock_init_with_both_callbacks():
+def test_custom_auth_mock_init_with_both_callbacks() -> None:
     """Test initialization with both header and param callbacks."""
 
-    def my_header_cb():
+    def my_header_cb() -> dict[str, str]:
         return {"X-H": "hval"}
 
-    def my_param_cb():
+    def my_param_cb() -> dict[str, str]:
         return {"X-P": "pval"}
 
     mock = CustomAuthMock(header_callback=my_header_cb, param_callback=my_param_cb)
@@ -84,18 +84,20 @@ def test_custom_auth_mock_init_with_both_callbacks():
 # --- Test Configuration Methods ---
 
 
-def test_with_header_callback():
+def test_with_header_callback() -> None:
     """Test updating the header callback."""
     mock = CustomAuthMock()  # Starts with default
     headers1 = mock.auth_strategy.prepare_request_headers()
     assert headers1 == {"X-Custom-Auth": "custom_value"}
+    assert mock.header_callback_spy is not None
     assert mock.header_callback_spy.get_call_count() == 1
     old_spy = mock.header_callback_spy
 
-    def new_header_cb():
+    def new_header_cb() -> dict[str, str]:
         return {"X-New": "new_val"}
 
     mock.with_header_callback(new_header_cb)
+    assert mock.header_callback_spy is not None
     assert mock.header_callback_spy is not old_spy  # Spy object should be new
     assert mock.header_callback_spy.target_function == new_header_cb
 
@@ -104,49 +106,49 @@ def test_with_header_callback():
     assert mock.header_callback_spy.get_call_count() == 1  # New spy call count
 
 
-def test_with_param_callback():
+def test_with_param_callback() -> None:
     """Test updating the param callback."""
     mock = CustomAuthMock()  # Starts with no param callback
     params1 = mock.auth_strategy.prepare_request_params()
     assert params1 == {}
     assert mock.param_callback_spy is None
 
-    def new_param_cb():
+    def new_param_cb() -> dict[str, str]:
         return {"p_new": "val"}
 
     mock.with_param_callback(new_param_cb)
     assert mock.param_callback_spy is not None
-    assert mock.param_callback_spy.target_function == new_param_cb
+    assert mock.param_callback_spy.target_function == new_param_cb  # type: ignore[unreachable]
 
     params2 = mock.auth_strategy.prepare_request_params()
     assert params2 == {"p_new": "val"}
     assert mock.param_callback_spy.get_call_count() == 1
 
 
-def test_with_expected_header():
+def test_with_expected_header() -> None:
     mock = CustomAuthMock().with_expected_header("X-Req", "value1")
     assert mock.expected_headers == {"X-Req": "value1"}
 
 
-def test_with_expected_param():
+def test_with_expected_param() -> None:
     mock = CustomAuthMock().with_expected_param("p_req", "value2")
     assert mock.expected_params == {"p_req": "value2"}
 
 
-def test_with_required_header():
+def test_with_required_header() -> None:
     mock = CustomAuthMock().with_required_header("X-Mandatory")
     assert mock.required_headers == ["X-Mandatory"]
     mock.with_required_header("X-Another").with_required_header("X-Mandatory")  # Duplicates ignored
     assert mock.required_headers == ["X-Mandatory", "X-Another"]
 
 
-def test_with_required_param():
+def test_with_required_param() -> None:
     mock = CustomAuthMock().with_required_param("p_mandatory")
     assert mock.required_params == ["p_mandatory"]
 
 
-def test_with_header_validator():
-    def is_valid_token(val):
+def test_with_header_validator() -> None:
+    def is_valid_token(val: str) -> bool:
         return val.startswith("Bearer ")
 
     mock = CustomAuthMock().with_header_validator("Authorization", is_valid_token)
@@ -154,8 +156,8 @@ def test_with_header_validator():
     assert mock.header_validators["Authorization"] == is_valid_token
 
 
-def test_with_param_validator():
-    def is_numeric(val):
+def test_with_param_validator() -> None:
+    def is_numeric(val: str) -> bool:
         return val.isdigit()
 
     mock = CustomAuthMock().with_param_validator("user_id", is_numeric)
@@ -166,36 +168,36 @@ def test_with_param_validator():
 # --- Test Verification Methods ---
 
 
-def test_verify_headers_success_no_rules():
+def test_verify_headers_success_no_rules() -> None:
     mock = CustomAuthMock()
     assert mock.verify_headers({"Some-Header": "any_value"}) is True
     assert mock.get_call_count() == 1
     assert mock.get_calls()[0].method_name == "verify_headers"
 
 
-def test_verify_headers_fail_required_missing():
+def test_verify_headers_fail_required_missing() -> None:
     mock = CustomAuthMock().with_required_header("X-Mandatory")
     assert mock.verify_headers({"Other-Header": "value"}) is False
     assert mock.get_call_count() == 1
     assert mock.get_calls()[0].result is False
 
 
-def test_verify_headers_fail_expected_missing():
+def test_verify_headers_fail_expected_missing() -> None:
     mock = CustomAuthMock().with_expected_header("X-Expected", "val1")
     assert mock.verify_headers({"Other-Header": "value"}) is False
 
 
-def test_verify_headers_fail_expected_wrong_value():
+def test_verify_headers_fail_expected_wrong_value() -> None:
     mock = CustomAuthMock().with_expected_header("X-Expected", "val1")
     assert mock.verify_headers({"X-Expected": "wrong_val"}) is False
 
 
-def test_verify_headers_fail_validator():
+def test_verify_headers_fail_validator() -> None:
     mock = CustomAuthMock().with_header_validator("Authorization", lambda v: v == "correct")
     assert mock.verify_headers({"Authorization": "incorrect"}) is False
 
 
-def test_verify_headers_success_all_rules():
+def test_verify_headers_success_all_rules() -> None:
     mock = CustomAuthMock()
     mock.with_required_header("X-Mandatory")
     mock.with_expected_header("X-Expected", "val1")
@@ -207,34 +209,34 @@ def test_verify_headers_success_all_rules():
     assert mock.get_calls()[0].result is True
 
 
-def test_verify_params_success_no_rules():
+def test_verify_params_success_no_rules() -> None:
     mock = CustomAuthMock()
     assert mock.verify_params({"p": "v"}) is True
     assert mock.get_call_count() == 1
     assert mock.get_calls()[0].method_name == "verify_params"
 
 
-def test_verify_params_fail_required_missing():
+def test_verify_params_fail_required_missing() -> None:
     mock = CustomAuthMock().with_required_param("p_mandatory")
     assert mock.verify_params({"other": "v"}) is False
 
 
-def test_verify_params_fail_expected_missing():
+def test_verify_params_fail_expected_missing() -> None:
     mock = CustomAuthMock().with_expected_param("p_expected", "v1")
     assert mock.verify_params({"other": "v"}) is False
 
 
-def test_verify_params_fail_expected_wrong_value():
+def test_verify_params_fail_expected_wrong_value() -> None:
     mock = CustomAuthMock().with_expected_param("p_expected", "v1")
     assert mock.verify_params({"p_expected": "wrong"}) is False
 
 
-def test_verify_params_fail_validator():
+def test_verify_params_fail_validator() -> None:
     mock = CustomAuthMock().with_param_validator("count", lambda v: v.isdigit())
     assert mock.verify_params({"count": "not_a_digit"}) is False
 
 
-def test_verify_params_success_all_rules():
+def test_verify_params_success_all_rules() -> None:
     mock = CustomAuthMock()
     mock.with_required_param("p_mandatory")
     mock.with_expected_param("p_expected", "v1")
@@ -249,19 +251,19 @@ def test_verify_params_success_all_rules():
 # --- Test Base Class Method Implementations ---
 
 
-def test_get_auth_headers():
+def test_get_auth_headers() -> None:
     """CustomAuthMock get_auth_headers should return None."""
     mock = CustomAuthMock()
     assert mock.get_auth_headers() is None
 
 
-def test_handle_auth_error():
+def test_handle_auth_error() -> None:
     """CustomAuthMock handle_auth_error should return False."""
     mock = CustomAuthMock()
     assert mock.handle_auth_error(None) is False  # type: ignore
 
 
-def test_get_auth_strategy():
+def test_get_auth_strategy() -> None:
     """Test getting the underlying auth strategy."""
     mock = CustomAuthMock()
     strategy = mock.get_auth_strategy()

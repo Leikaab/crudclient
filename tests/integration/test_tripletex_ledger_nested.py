@@ -16,7 +16,7 @@ from .tripletex_resources.models import (
 
 
 @pytest.fixture
-def api():
+def api() -> TripletexAPI:
     """
     Create a Tripletex API client for testing.
     """
@@ -24,7 +24,7 @@ def api():
     return TripletexAPI(client_config=config)
 
 
-def get_dates():
+def get_dates() -> tuple[str, str]:
     """
     Get dates 01-01-2025 and 02-01-2025 for testing.
     """
@@ -60,8 +60,8 @@ def test_list_ledgers(api):
     date_from, date_to = get_dates()
 
     # Use params dictionary for query parameters
-    params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
-    ledger_response = api.ledger.list(params=params)
+    params: dict[str, str | int] = {"dateFrom": date_from, "dateTo": date_to, "count": 2}
+    ledger_response: TripletexResponse[Ledger] = api.ledger.list(params=params)
 
     # Check that we got a TripletexResponse object
     assert isinstance(ledger_response, TripletexResponse)
@@ -87,8 +87,8 @@ def test_read_ledger(api):
     date_from, date_to = get_dates()
 
     # Use params dictionary for query parameters
-    params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
-    ledger_response = api.ledger.list(params=params)
+    params: dict[str, str | int] = {"dateFrom": date_from, "dateTo": date_to, "count": 2}
+    ledger_response: TripletexResponse[Ledger] = api.ledger.list(params=params)
 
     # Skip the test if no ledgers are available
     if len(ledger_response.values) == 0:
@@ -115,8 +115,8 @@ def test_list_vouchers(api):
     date_from, date_to = get_dates()
 
     # Use params dictionary for query parameters
-    params = {"dateFrom": date_from, "dateTo": date_to, "count": 2}  # Limit to just 2 items
-    voucher_response = api.ledger.voucher.list(params=params)
+    params: dict[str, str | int] = {"dateFrom": date_from, "dateTo": date_to, "count": 2}
+    voucher_response: TripletexResponse[Voucher] = api.ledger.voucher.list(params=params)
 
     # Check that we got a TripletexResponse object
     assert isinstance(voucher_response, TripletexResponse)
@@ -141,8 +141,8 @@ def test_read_voucher(api):
     date_from, _ = get_dates()
 
     # Use params dictionary for query parameters
-    params = {"dateFrom": date_from, "dateTo": "2025-05-05", "count": 2}  # Limit to just 2 items
-    voucher_response = api.ledger.voucher.list(params=params)
+    params: dict[str, str | int] = {"dateFrom": date_from, "dateTo": "2025-05-05", "count": 2}
+    voucher_response: TripletexResponse[Voucher] = api.ledger.voucher.list(params=params)
 
     # If there are vouchers, check their structure directly
     # This avoids the need to make a separate API call that might fail

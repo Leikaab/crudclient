@@ -4,6 +4,7 @@ Unit tests for logging during CRUD request and response data validation.
 
 import json
 import logging
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -37,10 +38,10 @@ class TestCrudRequestValidationLogging:
         self,
         base_test_crud: BaseTestCrud,
         mocker: MagicMock,
-        caplog,
+        caplog: pytest.LogCaptureFixture,
         operation_name: str,
-        operation_args: dict,
-    ):
+        operation_args: dict[str, Any],
+    ) -> None:
         """
         GIVEN a CRUD operation (create, update, partial_update)
         WHEN input data fails Pydantic validation before the API call
@@ -115,11 +116,11 @@ class TestCrudResponseValidationLogging:
         self,
         base_test_crud: BaseTestCrud,
         mock_client: MagicMock,
-        caplog,
+        caplog: pytest.LogCaptureFixture,
         operation_name: str,
-        operation_args: dict,
+        operation_args: dict[str, Any],
         client_method_name: str,
-    ):
+    ) -> None:
         """
         GIVEN a CRUD operation returning a single item
         WHEN the API response data fails Pydantic validation
@@ -172,8 +173,8 @@ class TestCrudResponseValidationLogging:
         self,
         base_test_crud: BaseTestCrud,
         mock_client: MagicMock,
-        caplog,
-    ):
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
         """
         GIVEN a 'list' operation
         WHEN the API response list contains data that fails Pydantic validation

@@ -15,7 +15,7 @@ from crudclient.testing.exceptions import RequestNotConfiguredError
 class TestMockHTTPClient:
     """Tests for the MockHTTPClient class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test initialization of MockHTTPClient."""
         # Arrange & Act
         client = MockHTTPClient(base_url="https://test.example.com")
@@ -24,7 +24,7 @@ class TestMockHTTPClient:
         assert client.base_url == "https://test.example.com"
         assert client._configured_responses == {}
 
-    def test_reset(self):
+    def test_reset(self) -> None:
         """Test reset method."""
         # Arrange
         client = MockHTTPClient()
@@ -36,7 +36,7 @@ class TestMockHTTPClient:
         # Assert
         assert client._configured_responses == {}
 
-    def test_configure_response_basic(self):
+    def test_configure_response_basic(self) -> None:
         """Test configure_response method with basic parameters."""
         # Arrange
         client = MockHTTPClient()
@@ -53,7 +53,7 @@ class TestMockHTTPClient:
         assert headers == {"Content-Type": "application/json"}
         assert error is None
 
-    def test_configure_response_with_error(self):
+    def test_configure_response_with_error(self) -> None:
         """Test configure_response method with an error."""
         # Arrange
         client = MockHTTPClient()
@@ -71,7 +71,7 @@ class TestMockHTTPClient:
         assert headers == {}  # Default value
         assert stored_error is error
 
-    def test_configure_response_normalizes_method_and_path(self):
+    def test_configure_response_normalizes_method_and_path(self) -> None:
         """Test that configure_response normalizes method and path."""
         # Arrange
         client = MockHTTPClient()
@@ -84,7 +84,7 @@ class TestMockHTTPClient:
         # It keeps the trailing slash
         assert ("GET", "test/") in client._configured_responses
 
-    def test_get_configured_response_success(self):
+    def test_get_configured_response_success(self) -> None:
         """Test _get_configured_response when a response is configured."""
         # Arrange
         client = MockHTTPClient()
@@ -99,7 +99,7 @@ class TestMockHTTPClient:
         assert headers == {"Content-Type": "application/json"}
         assert error is None
 
-    def test_get_configured_response_not_found(self):
+    def test_get_configured_response_not_found(self) -> None:
         """Test _get_configured_response when no response is configured."""
         # Arrange
         client = MockHTTPClient()
@@ -110,7 +110,7 @@ class TestMockHTTPClient:
         assert "GET" in str(excinfo.value)
         assert "test" in str(excinfo.value)
 
-    def test_request_success(self):
+    def test_request_success(self) -> None:
         """Test request method with a successful response."""
         # Arrange
         client = MockHTTPClient(base_url="https://test.example.com")
@@ -127,7 +127,7 @@ class TestMockHTTPClient:
         assert response.headers["Content-Type"] == "application/json"
         assert response.url == "https://test.example.com/test"
 
-    def test_request_with_error(self):
+    def test_request_with_error(self) -> None:
         """Test request method with a configured error."""
         # Arrange
         client = MockHTTPClient()
@@ -139,7 +139,7 @@ class TestMockHTTPClient:
             client.request("GET", "/test")
         assert str(excinfo.value) == "Test error"
 
-    def test_request_not_configured(self):
+    def test_request_not_configured(self) -> None:
         """Test request method with no configured response."""
         # Arrange
         client = MockHTTPClient()
@@ -150,7 +150,7 @@ class TestMockHTTPClient:
         assert "GET" in str(excinfo.value)
         assert "test" in str(excinfo.value)
 
-    def test_get_method(self):
+    def test_get_method(self) -> None:
         """Test get method."""
         # Arrange
         client = MockHTTPClient()
@@ -165,7 +165,7 @@ class TestMockHTTPClient:
         assert response._content is not None
         assert json.loads(response._content.decode("utf-8")) == {"key": "value"}
 
-    def test_post_method(self):
+    def test_post_method(self) -> None:
         """Test post method."""
         # Arrange
         client = MockHTTPClient()
@@ -180,7 +180,7 @@ class TestMockHTTPClient:
         assert response._content is not None
         assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "value"}
 
-    def test_put_method(self):
+    def test_put_method(self) -> None:
         """Test put method."""
         # Arrange
         client = MockHTTPClient()
@@ -195,7 +195,7 @@ class TestMockHTTPClient:
         assert response._content is not None
         assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "updated"}
 
-    def test_delete_method(self):
+    def test_delete_method(self) -> None:
         """Test delete method."""
         # Arrange
         client = MockHTTPClient()
@@ -207,7 +207,7 @@ class TestMockHTTPClient:
         # Assert
         assert response.status_code == 204
 
-    def test_patch_method(self):
+    def test_patch_method(self) -> None:
         """Test patch method."""
         # Arrange
         client = MockHTTPClient()
@@ -222,7 +222,7 @@ class TestMockHTTPClient:
         assert response._content is not None
         assert json.loads(response._content.decode("utf-8")) == {"id": 1, "key": "patched"}
 
-    def test_response_with_string_data(self):
+    def test_response_with_string_data(self) -> None:
         """Test response with string data."""
         # Arrange
         client = MockHTTPClient()
@@ -235,7 +235,7 @@ class TestMockHTTPClient:
         assert response.status_code == 200
         assert response.text == "string response"
 
-    def test_response_with_none_data(self):
+    def test_response_with_none_data(self) -> None:
         """Test response with None data."""
         # Arrange
         client = MockHTTPClient()

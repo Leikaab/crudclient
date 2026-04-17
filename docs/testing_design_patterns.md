@@ -8,13 +8,13 @@ The testing utilities now contain inline type hints in the implementation files,
 
 *   **What:** Provides an interface for creating objects, allowing subclasses or factory implementations to determine the exact type of object created.
 *   **Why:** Used to centralize and simplify the creation of test doubles (like `MockClient` or specific auth mocks) with various configurations needed for different test scenarios. It decouples the test setup from the specific implementation details of the doubles.
-*   **Where:** Implemented in dedicated factory classes such as `crudclient.testing.mock_client_factory.MockClientFactory`, `crudclient.testing.simple_mock_factory.SimpleMockFactory`, and `crudclient.testing.auth.factory` for creating authentication-related mocks.
+*   **Where:** Implemented in dedicated factory classes such as `crudclient.testing.mock_client_factory.MockClientFactory` and `crudclient.testing.auth.factory` for creating authentication-related mocks.
 
 ## 2. Verifier Pattern
 
 *   **What:** Encapsulates the logic for verifying interactions with test doubles (mocks, spies, fakes). It provides dedicated functions or methods for making assertions about method calls, arguments, call counts, or state changes.
 *   **Why:** Decouples assertion logic from the test double itself and the main test flow, leading to cleaner tests and reusable verification logic. This is particularly useful for complex checks, such as call sequences, specific header contents, or authentication details.
-*   **Where:** General verification logic resides in `crudclient.testing.verification.Verifier` (often raising `VerificationError`). More specialized verification helpers exist for specific concerns, such as those in `crudclient.testing.auth` modules (e.g., `AuthVerificationHelpers`, `auth_token_verification`), which typically raise standard `AssertionError` exceptions for integration with testing frameworks like `pytest`.
+*   **Where:** General verification logic resides in `crudclient.testing.verification.Verifier` (often raising `VerificationError`). More specialized verification helpers exist for specific concerns, such as those in `apiconfig.testing.auth_verification` (e.g., `AuthHeaderVerification`, `AuthTestHelpers`, `auth_token_verification`), which typically raise standard `AssertionError` exceptions for integration with testing frameworks like `pytest`.
 
 ## 3. Test Spy Pattern
 

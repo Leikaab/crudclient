@@ -48,7 +48,7 @@ class Supplier(BaseModel):
     locale: str
     website: str
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
 
 # Input models for create/update operations

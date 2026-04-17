@@ -2,7 +2,7 @@
 Tests for the create_auth_strategy factory function in the crudclient library.
 """
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Self, Tuple, Union
 
 import pytest
 
@@ -28,12 +28,12 @@ class TestCreateAuthStrategy:
         ],
     )
     def test_create_auth_strategy(
-        self,
+        self: Self,
         auth_type: str,
         token: Optional[Union[str, Tuple[str, str]]],
         expected_class: type,
         expected_attrs: Dict[str, str],
-    ):
+    ) -> None:
         """
         GIVEN an auth type string and a token/credential
         WHEN create_auth_strategy is called
@@ -52,7 +52,7 @@ class TestCreateAuthStrategy:
             for attr, value in expected_attrs.items():
                 assert getattr(auth, attr) == value
 
-    def test_create_basic_auth_invalid_token_type(self):
+    def test_create_basic_auth_invalid_token_type(self: Self) -> None:
         """
         GIVEN the auth type 'basic' and an invalid token type (int)
         WHEN create_auth_strategy is called
@@ -60,9 +60,9 @@ class TestCreateAuthStrategy:
         """
         # GIVEN / WHEN / THEN
         with pytest.raises(TypeError, match="Basic auth token must be a string or tuple"):
-            create_auth_strategy("basic", 123)  # type: ignore
+            create_auth_strategy("basic", 123)  # type: ignore[arg-type,call-overload]
 
-    def test_create_basic_auth_string_token_raises_error(self):
+    def test_create_basic_auth_string_token_raises_error(self: Self) -> None:
         """
         GIVEN the auth type 'basic' and a string token (username only)
         WHEN create_auth_strategy is called
@@ -78,7 +78,7 @@ class TestCreateAuthStrategy:
     # as they require more complex configuration (header/param names or callbacks).
     # This is expected behavior. We test that they fall back to BearerAuth if a token is given.
 
-    def test_create_apikey_falls_back_to_bearer(self):
+    def test_create_apikey_falls_back_to_bearer(self: Self) -> None:
         """
         GIVEN the auth type 'apikey' and a token string
         WHEN create_auth_strategy is called
@@ -95,7 +95,7 @@ class TestCreateAuthStrategy:
         assert isinstance(auth, BearerAuth)
         assert auth.access_token == token
 
-    def test_create_custom_falls_back_to_bearer(self):
+    def test_create_custom_falls_back_to_bearer(self: Self) -> None:
         """
         GIVEN the auth type 'custom' and a token string
         WHEN create_auth_strategy is called

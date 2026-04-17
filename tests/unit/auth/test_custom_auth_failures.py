@@ -3,23 +3,23 @@ Tests for Custom Authentication failure handling in the crudclient library.
 """
 
 import pytest
+import requests_mock
 from apiconfig.exceptions.auth import AuthStrategyError
 
 from crudclient.auth import CustomAuth
 from crudclient.client import Client
+from crudclient.config import ClientConfig
 from crudclient.exceptions import AuthenticationError
 
-from .conftest import MockBasicAuthConfig
 
-
-def test_custom_auth_failure(mock_request):
+def test_custom_auth_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test handling of custom authentication failures during setup."""
 
-    def header_callback():
+    def header_callback() -> dict[str, str]:
         """Simulate a failure during header generation."""
         raise ValueError("Failed to generate custom header")
 
-    config = MockBasicAuthConfig()
+    config = basic_auth_config
     config.auth_strategy = CustomAuth(header_callback=header_callback)
 
     with pytest.raises(AuthStrategyError) as excinfo:
@@ -30,13 +30,13 @@ def test_custom_auth_failure(mock_request):
     assert "Failed to generate custom header" in str(excinfo.value.__cause__)
 
 
-def test_custom_auth_param_callback_failure(mock_request):
+def test_custom_auth_param_callback_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test that exceptions from param_callback are propagated."""
 
-    def failing_param_callback() -> dict:
+    def failing_param_callback() -> dict[str, str]:
         raise ValueError("Failed during param generation")
 
-    config = MockBasicAuthConfig()
+    config = basic_auth_config
     config.auth_strategy = CustomAuth(header_callback=lambda: {}, param_callback=failing_param_callback)
     client = Client(config)
 
@@ -44,13 +44,13 @@ def test_custom_auth_param_callback_failure(mock_request):
         client.get("/some/path")
 
 
-def test_custom_auth_api_failure(mock_request):
+def test_custom_auth_api_failure(mock_request: requests_mock.Mocker, basic_auth_config: ClientConfig) -> None:
     """Test handling of API returning 401/403 with CustomAuth."""
 
-    def get_headers():
+    def get_headers() -> dict[str, str]:
         return {"X-Custom": "valid"}
 
-    config = MockBasicAuthConfig()
+    config = basic_auth_config
     config.auth_strategy = CustomAuth(header_callback=get_headers)
     client = Client(config)
 

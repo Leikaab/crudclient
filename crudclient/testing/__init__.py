@@ -8,7 +8,6 @@ for the crudclient library components (Client, API, CRUD, Auth, HTTPClient).
 from .auth import (
     ApiKeyAuthMock,
     AuthMockBase,
-    AuthVerificationHelpers,
     BasicAuthMock,
     BearerAuthMock,
     CustomAuthMock,
@@ -42,21 +41,8 @@ from .response_builder.api_patterns import APIPatternBuilder  # Import APIPatter
 from .response_builder.response import (
     MockResponse,  # Import MockResponse from response_builder
 )
-from .simple_mock import SimpleMockClient  # Import SimpleMockClient
 from .spy import MethodCall, SpyBase
 from .verification import Verifier
-
-# These classes are referenced in tests but don't seem to exist in the codebase
-# Defining placeholder classes to avoid import errors
-
-
-class RequestVerifier:
-    """Placeholder for RequestVerifier class referenced in tests."""
-
-
-class ResponseVerifier:
-    """Placeholder for ResponseVerifier class referenced in tests."""
-
 
 __all__ = [
     # Main classes
@@ -69,15 +55,11 @@ __all__ = [
     "MethodCall",
     "SpyBase",
     "MockResponse",
-    "SimpleMockClient",
     "APIPatternBuilder",
     "ResponseBuilder",
-    "RequestVerifier",
-    "ResponseVerifier",
     # Auth mocks
     "ApiKeyAuthMock",
     "AuthMockBase",
-    "AuthVerificationHelpers",
     "BasicAuthMock",
     "BearerAuthMock",
     "CustomAuthMock",

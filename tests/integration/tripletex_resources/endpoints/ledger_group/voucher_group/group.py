@@ -14,6 +14,7 @@ from .historical import (
 
 
 class VoucherGroup(ResourceGroup[Voucher]):
+    historical: TripletexHistoricalVoucherCrud
     """
     ResourceGroup for Tripletex voucher operations.
 

@@ -8,14 +8,20 @@ content types.
 
 import pytest
 import requests
+import requests_mock
 
 from crudclient.exceptions import ResponseParsingError
+from crudclient.http.client import HttpClient
 
 
 class TestHttpClientMalformedResponses:
     """Tests for handling malformed responses in the HTTP client."""
 
-    def test_malformed_json_response(self, http_client, mock_request):
+    def test_malformed_json_response(
+        self,
+        http_client: HttpClient,
+        mock_request: requests_mock.Mocker,
+    ) -> None:
         """
         Test handling of malformed JSON responses.
 
@@ -34,7 +40,11 @@ class TestHttpClientMalformedResponses:
         assert isinstance(excinfo.value.original_exception, requests.exceptions.JSONDecodeError)
         assert "Expecting value" in str(excinfo.value.original_exception)
 
-    def test_empty_response(self, http_client, mock_request):
+    def test_empty_response(
+        self,
+        http_client: HttpClient,
+        mock_request: requests_mock.Mocker,
+    ) -> None:
         """
         Test handling of empty responses.
 
@@ -49,7 +59,11 @@ class TestHttpClientMalformedResponses:
         response = http_client.get("/users")
         assert response is None or response == ""
 
-    def test_non_json_content_type(self, http_client, mock_request):
+    def test_non_json_content_type(
+        self,
+        http_client: HttpClient,
+        mock_request: requests_mock.Mocker,
+    ) -> None:
         """
         Test handling of non-JSON content types.
 
@@ -64,7 +78,11 @@ class TestHttpClientMalformedResponses:
         response = http_client.get("/users")
         assert response == "<html>Not JSON</html>"
 
-    def test_unexpected_content_type(self, http_client, mock_request):
+    def test_unexpected_content_type(
+        self,
+        http_client: HttpClient,
+        mock_request: requests_mock.Mocker,
+    ) -> None:
         """
         Test handling of unexpected content types.
 

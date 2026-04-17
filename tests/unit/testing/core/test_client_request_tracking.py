@@ -9,7 +9,7 @@ from crudclient.testing.core.client import MockClient
 class TestMockClientRequestTracking:
     """Tests for request tracking and verification in MockClient."""
 
-    def test_record_request(self):
+    def test_record_request(self) -> None:
         """Test request recording."""
         # Arrange
         http_client = MagicMock()
@@ -35,7 +35,7 @@ class TestMockClientRequestTracking:
         assert "data" in call.kwargs
         assert call.kwargs["extra_arg"] == "extra_value"
 
-    def test_get_request_count_no_filters(self):
+    def test_get_request_count_no_filters(self) -> None:
         """Test get_call_count with no filters."""
         # Arrange
         http_client = MagicMock()
@@ -50,7 +50,7 @@ class TestMockClientRequestTracking:
         # Assert
         assert count == 3
 
-    def test_get_request_count_with_method_filter(self):
+    def test_get_request_count_with_method_filter(self) -> None:
         """Test get_call_count with method filter."""
         # Arrange
         http_client = MagicMock()
@@ -65,7 +65,7 @@ class TestMockClientRequestTracking:
         # Assert
         assert count == 2
 
-    def test_get_request_count_with_path_pattern_filter(self):
+    def test_get_request_count_with_path_pattern_filter(self) -> None:
         """Test get_call_count with path pattern filter."""
         # Arrange
         http_client = MagicMock()
@@ -82,7 +82,7 @@ class TestMockClientRequestTracking:
         # Assert
         assert count == 2
 
-    def test_get_request_count_with_both_filters(self):
+    def test_get_request_count_with_both_filters(self) -> None:
         """Test get_call_count with both method and path pattern filters."""
         # Arrange
         http_client = MagicMock()
@@ -99,7 +99,7 @@ class TestMockClientRequestTracking:
         # Assert
         assert count == 1
 
-    def test_assert_request_count_success(self):
+    def test_assert_request_count_success(self) -> None:
         """Test assert_called_times when the count matches."""
         # Arrange
         http_client = MagicMock()
@@ -112,7 +112,7 @@ class TestMockClientRequestTracking:
         # Verify total call count across all methods
         assert client.get_call_count() == 3  # Should not raise an exception
 
-    def test_assert_request_count_failure(self):
+    def test_assert_request_count_failure(self) -> None:
         """Test assert_called_times when the count doesn't match."""
         # Arrange
         http_client = MagicMock()
@@ -125,7 +125,7 @@ class TestMockClientRequestTracking:
             assert client.get_call_count() == 3, f"Expected 3 calls, but found {client.get_call_count()}"
         assert "Expected 3 calls, but found 2" in str(excinfo.value)
 
-    def test_assert_request_made_success(self):
+    def test_assert_request_made_success(self) -> None:
         """Test assert_called when at least one matching request was made."""
         # Arrange
         http_client = MagicMock()
@@ -138,7 +138,7 @@ class TestMockClientRequestTracking:
         calls = client.get_calls("GET")
         assert any(re.match(r"/test1", call.args[0]) for call in calls)
 
-    def test_assert_request_made_failure(self):
+    def test_assert_request_made_failure(self) -> None:
         """Test assert_called when no matching requests were made."""
         # Arrange
         http_client = MagicMock()
@@ -150,7 +150,7 @@ class TestMockClientRequestTracking:
             client.assert_called("POST")
         assert "Expected method 'POST' to have been called, but it was not." in str(excinfo.value)
 
-    def test_assert_request_not_made_success(self):
+    def test_assert_request_not_made_success(self) -> None:
         """Test assert_not_called when no matching requests were made."""
         # Arrange
         http_client = MagicMock()
@@ -160,7 +160,7 @@ class TestMockClientRequestTracking:
         # Act & Assert
         client.assert_not_called("POST")  # Should not raise an exception
 
-    def test_assert_request_not_made_failure(self):
+    def test_assert_request_not_made_failure(self) -> None:
         """Test assert_not_called when at least one matching request was made."""
         # Arrange
         http_client = MagicMock()
@@ -172,7 +172,7 @@ class TestMockClientRequestTracking:
             client.assert_not_called("GET")
         assert "Expected method 'GET' not to have been called, but it was." in str(excinfo.value)
 
-    def test_filter_requests(self):
+    def test_filter_requests(self) -> None:
         """Test filtering requests by method and path pattern."""
         # Arrange
         http_client = MagicMock()
@@ -191,7 +191,7 @@ class TestMockClientRequestTracking:
         assert filtered_calls[0].args[0] == "/test1"
         assert filtered_calls[1].args[0] == "/test3"
 
-    def test_reset(self):
+    def test_reset(self) -> None:
         """Test reset method."""
         # Arrange
         http_client = MagicMock()
