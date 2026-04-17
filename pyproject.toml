@@ -28,7 +28,7 @@ include = [
 python = "^3.11"
 requests = "^2.32.3"
 pydantic = {version = "^2.8.2", extras = ["email"]}
-apiconfig = {version = "^0.3.2.dev0", allow-prereleases = true}
+apiconfig = {version = "^0.3.3", allow-prereleases = true}
 portalocker = ">=2.8,<4.0"
 appdirs = "^1.4"
 
