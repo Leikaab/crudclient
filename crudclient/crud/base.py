@@ -8,6 +8,7 @@ extended for specific API endpoints.
 """
 
 import logging
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -22,6 +23,7 @@ from typing import (
     Union,
 )
 
+from apiconfig.utils.endpoint_builder import EndpointBuilder
 from typing_extensions import TypeAlias
 
 from ..client import Client
@@ -35,7 +37,6 @@ from ..response_strategies import (
     ResponseModelStrategy,
 )
 from ..types import JSONDict, JSONList
-from ..utils.endpoint_builder import EndpointBuilder
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -147,7 +148,41 @@ class Crud(Generic[T]):
         class DynamicEndpointBuilder(builder_class):  # type: ignore[misc,valid-type]
             resource_path = self._resource_path
 
-        self._endpoint_builder = DynamicEndpointBuilder(parent_builder=parent_builder)
+        if self._overrides_crud_method("_endpoint_prefix"):
+            # Subclasses written before EndpointBuilder existed override _endpoint_prefix().
+            # Keep honouring it until they move to a custom endpoint_builder_class.
+            warnings.warn(
+                f"{type(self).__name__} overrides _endpoint_prefix, which is deprecated. "
+                "Define an EndpointBuilder subclass with endpoint_prefix and set endpoint_builder_class instead.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            owner = self
+
+            class LegacyPrefixEndpointBuilder(DynamicEndpointBuilder):
+                def get_prefix_segments(self, crud_instance: Optional[Any] = None) -> List[str]:
+                    return [str(segment) for segment in owner._endpoint_prefix() if segment is not None and str(segment)]
+
+            self._endpoint_builder = LegacyPrefixEndpointBuilder(parent_builder=parent_builder)
+        else:
+            self._endpoint_builder = DynamicEndpointBuilder(parent_builder=parent_builder)
+
+    def _overrides_crud_method(self: "Crud[Any]", name: str) -> bool:
+        """Return True if this instance replaces the named Crud method, on its class or on the instance."""
+        method = getattr(self, name)
+        return getattr(method, "__func__", None) is not getattr(Crud, name)
+
+    def _build_endpoint(self: "Crud[Any]", *args: Optional[Union[str, int]], parent_args: Optional[Tuple[Any, ...]] = None) -> str:
+        """
+        Build the endpoint path for this resource.
+
+        Used by the CRUD operations. A subclass or instance that still overrides the
+        deprecated ``_get_endpoint`` keeps being called; otherwise the endpoint builder
+        is used directly, without deprecation warnings.
+        """
+        if self._overrides_crud_method("_get_endpoint"):
+            return self._get_endpoint(*args, parent_args=parent_args)
+        return str(self._endpoint_builder.build_endpoint(*args, parent_args=list(parent_args) if parent_args else None, crud_instance=self))
 
     def _init_response_strategy(self: "Crud[Any]") -> None:
         """
@@ -186,8 +221,6 @@ class Crud(Generic[T]):
         .. deprecated::
             This method is deprecated. Use `self._endpoint_builder.build_endpoint()` directly instead.
         """
-        import warnings
-
         warnings.warn("_get_endpoint is deprecated. Use self._endpoint_builder.build_endpoint() directly instead.", DeprecationWarning, stacklevel=2)
         return str(self._endpoint_builder.build_endpoint(*args, parent_args=parent_args, crud_instance=self))
 
@@ -195,16 +228,14 @@ class Crud(Generic[T]):
         """Adapter method for backward compatibility.
 
         .. deprecated::
-            This method is deprecated. Import and use `validate_path_segments` from `crudclient.utils.endpoint_builder` directly instead.
+            This method is deprecated. Import and use `validate_path_segments` from `apiconfig.utils.endpoint_builder` directly instead.
         """
-        import warnings
-
         warnings.warn(
-            "_validate_path_segments is deprecated. Import and use validate_path_segments from crudclient.utils.endpoint_builder directly instead.",
+            "_validate_path_segments is deprecated. Import and use validate_path_segments from apiconfig.utils.endpoint_builder directly instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from ..utils.endpoint_builder import validate_path_segments
+        from apiconfig.utils.endpoint_builder import validate_path_segments
 
         validate_path_segments(*args)
 
@@ -214,8 +245,6 @@ class Crud(Generic[T]):
         .. deprecated::
             This method is deprecated. Use `self._endpoint_builder.get_parent_path()` directly instead.
         """
-        import warnings
-
         warnings.warn(
             "_get_parent_path is deprecated. Use self._endpoint_builder.get_parent_path() directly instead.", DeprecationWarning, stacklevel=2
         )
@@ -226,16 +255,14 @@ class Crud(Generic[T]):
         """Adapter method for backward compatibility.
 
         .. deprecated::
-            This method is deprecated. Import and use `build_resource_segments` from `crudclient.utils.endpoint_builder` directly instead.
+            This method is deprecated. Import and use `build_resource_segments` from `apiconfig.utils.endpoint_builder` directly instead.
         """
-        import warnings
-
         warnings.warn(
-            "_build_resource_path is deprecated. Import and use build_resource_segments from crudclient.utils.endpoint_builder directly instead.",
+            "_build_resource_path is deprecated. Import and use build_resource_segments from apiconfig.utils.endpoint_builder directly instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from ..utils.endpoint_builder import build_resource_segments
+        from apiconfig.utils.endpoint_builder import build_resource_segments
 
         segments = build_resource_segments(self._resource_path, *args)
         return "/".join(segments)
@@ -246,8 +273,6 @@ class Crud(Generic[T]):
         .. deprecated::
             This method is deprecated. Use `self._endpoint_builder.get_prefix_segments()` directly instead.
         """
-        import warnings
-
         warnings.warn(
             "_get_prefix_segments is deprecated. Use self._endpoint_builder.get_prefix_segments() directly instead.", DeprecationWarning, stacklevel=2
         )
@@ -257,16 +282,14 @@ class Crud(Generic[T]):
         """Adapter method for backward compatibility.
 
         .. deprecated::
-            This method is deprecated. Import and use `join_path_segments` from `crudclient.utils.endpoint_builder` directly instead.
+            This method is deprecated. Import and use `join_path_segments` from `apiconfig.utils.endpoint_builder` directly instead.
         """
-        import warnings
-
         warnings.warn(
-            "_join_path_segments is deprecated. Import and use join_path_segments from crudclient.utils.endpoint_builder directly instead.",
+            "_join_path_segments is deprecated. Import and use join_path_segments from apiconfig.utils.endpoint_builder directly instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from ..utils.endpoint_builder import join_path_segments
+        from apiconfig.utils.endpoint_builder import join_path_segments
 
         return join_path_segments(*args)
 
@@ -276,8 +299,6 @@ class Crud(Generic[T]):
         .. deprecated::
             This method is deprecated. Define a custom EndpointBuilder subclass with appropriate `endpoint_prefix` class attribute instead.
         """
-        import warnings
-
         warnings.warn(
             "_endpoint_prefix is deprecated. Define a custom EndpointBuilder subclass with appropriate endpoint_prefix class attribute instead.",
             DeprecationWarning,

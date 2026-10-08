@@ -54,7 +54,7 @@ Main class that orchestrates endpoint construction:
 - [x] Add integration tests for complex scenarios
 - [x] Modularize test suite into separate files per module
 
-### Phase 4: Fix Integration Test Failures 🚧 IN PROGRESS
+### Phase 4: Fix Integration Test Failures ✅ COMPLETE
 See detailed fix plan in [`endpoint_builder_fixes_plan.md`](./endpoint_builder_fixes_plan.md)
 
 Key issues to address:
@@ -63,10 +63,10 @@ Key issues to address:
 3. Architectural improvements needed
 4. Deprecation warnings for adapter methods
 
-### Phase 5: Future Migration to `apiconfig`
-- [ ] Move the `endpoint_builder` package to `apiconfig`
-- [ ] Update imports throughout the codebase
-- [ ] Deprecate old methods in `Crud` class
+### Phase 5: Migration to `apiconfig` ✅ COMPLETE
+- [x] Move the `endpoint_builder` package to `apiconfig` (`apiconfig.utils.endpoint_builder`, apiconfig 0.3.4)
+- [x] Update imports throughout the codebase (`crudclient.utils.endpoint_builder` is now a re-export)
+- [x] Deprecate old methods in `Crud` class
 
 ## Technical Decisions
 
@@ -96,7 +96,16 @@ Key issues to address:
 - Empty path segments are filtered out during joining
 - Parent paths take precedence over prefix segments
 
-## Current Status: Phase 3 COMPLETE, Phase 4 IN PROGRESS ✅
+## Current Status: All phases COMPLETE ✅
+
+Resolved in crudclient 0.9.1 / apiconfig 0.3.4:
+- `None` and empty path segments are accepted again and skipped when joining.
+- Overrides of the deprecated `_endpoint_prefix()` are honoured again, with a `DeprecationWarning` at init.
+- A nested resource gets its parent's prefix once (it was duplicated in 0.9.0).
+- The CRUD operations build endpoints through the builder directly, so they no longer emit
+  `DeprecationWarning`; a subclass that still overrides `_get_endpoint` keeps being called.
+
+### Earlier status (Phase 3)
 
 All unit tests passing (122/122):
 - 72 CRUD tests - Full backward compatibility maintained
