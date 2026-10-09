@@ -84,7 +84,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 400
         assert "Bad Request" in str(excinfo.value)
         assert "Invalid parameters" in str(excinfo.value)
@@ -116,7 +116,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 403
         assert "Forbidden" in str(excinfo.value)
         assert "Insufficient permissions" in str(excinfo.value)
@@ -138,7 +138,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 404
         assert "Not Found" in str(excinfo.value)
         assert "Resource does not exist" in str(excinfo.value)
@@ -171,7 +171,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 500
         assert "Internal Server Error" in str(excinfo.value)
 
@@ -188,7 +188,7 @@ class TestErrorHandler:
 
         # 502 is mapped to generic APIError
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 502
         assert "Bad Gateway" in str(excinfo.value)
 
@@ -204,7 +204,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 503
         assert "Service Unavailable" in str(excinfo.value)
 
@@ -227,7 +227,7 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 400
         # Check that the message includes the raw text since JSON parsing failed
         assert "Not a JSON response" in str(excinfo.value)
@@ -255,6 +255,6 @@ class TestErrorHandler:
             error_handler.handle_error_response(response)
 
         assert excinfo.value.response is not None
-        assert excinfo.value.response is response
+        assert cast(object, excinfo.value.response) is response
         assert excinfo.value.response.status_code == 418
         assert "I'm a teapot" in str(excinfo.value)

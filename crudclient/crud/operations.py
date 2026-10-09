@@ -82,7 +82,7 @@ def list_operation(
     if "list" not in self.allowed_actions:
         raise ValueError(f"List action not allowed for {self.__class__.__name__}")
 
-    endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
+    endpoint = self._build_endpoint(parent_args=(parent_id,) if parent_id else None)
     response = self.client.get(endpoint, params=params)
     return self._validate_list_return(response)  # type: ignore[no-any-return]
 
@@ -128,7 +128,7 @@ def create_operation(
 
         converted_data = self._dump_data(data, validation_model=model_for_create)
 
-        endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
+        endpoint = self._build_endpoint(parent_args=(parent_id,) if parent_id else None)
         response = self.client.post(endpoint, json=converted_data, params=params)
 
         return self._convert_to_model(response)  # type: ignore[no-any-return]
@@ -180,7 +180,7 @@ def read_operation(self: "Crud[T]", resource_id: str, parent_id: Optional[str] =
     if "read" not in self.allowed_actions:
         raise ValueError(f"Read action not allowed for {self.__class__.__name__}")
 
-    endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
+    endpoint = self._build_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
     response = self.client.get(endpoint)
     return self._convert_to_model(response)  # type: ignore[no-any-return]
 
@@ -241,7 +241,7 @@ def update_operation(
         converted_data = self._dump_data(data, validation_model=model_for_update)
 
         if effective_mode == "no_resource_id":
-            endpoint = self._get_endpoint(parent_args=(parent_id,) if parent_id else None)
+            endpoint = self._build_endpoint(parent_args=(parent_id,) if parent_id else None)
             if isinstance(data, dict):
                 json_data = data
             else:
@@ -250,7 +250,7 @@ def update_operation(
         else:
             if resource_id is None:
                 raise ValueError("resource_id is required for standard update mode")
-            endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
+            endpoint = self._build_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
             response = self.client.put(endpoint, json=converted_data, params=params)
 
         return self._convert_to_model(response)  # type: ignore[no-any-return]
@@ -315,7 +315,7 @@ def partial_update_operation(
 
         converted_data = self._dump_data(data, validation_model=model_for_partial_update, partial=True)
 
-        endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
+        endpoint = self._build_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
         response = self.client.patch(endpoint, json=converted_data, params=params)
 
         return self._convert_to_model(response)  # type: ignore[no-any-return]
@@ -364,7 +364,7 @@ def destroy_operation(self: "Crud[T]", resource_id: str, parent_id: Optional[str
     if "destroy" not in self.allowed_actions:
         raise ValueError(f"Destroy action not allowed for {self.__class__.__name__}")
 
-    endpoint = self._get_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
+    endpoint = self._build_endpoint(resource_id, parent_args=(parent_id,) if parent_id else None)
     self.client.delete(endpoint, params=params)
 
 
@@ -505,7 +505,7 @@ def custom_action_operation(
         raise TypeError(f"Parent ID must be a string or None, got {type(parent_id).__name__}")
 
     endpoint_args = [arg for arg in [resource_id, action] if arg is not None and arg != ""]
-    endpoint = self._get_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
+    endpoint = self._build_endpoint(*endpoint_args, parent_args=(parent_id,) if parent_id else None)
 
     final_kwargs: Dict[str, Any] = {}
     if params:
