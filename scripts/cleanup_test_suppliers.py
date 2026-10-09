@@ -8,6 +8,7 @@ been left behind due to test failures or interruptions.
 Usage:
     python scripts/cleanup_test_suppliers.py [--dry-run] [--prefix PREFIX]
 """
+
 import argparse
 import logging
 import sys
